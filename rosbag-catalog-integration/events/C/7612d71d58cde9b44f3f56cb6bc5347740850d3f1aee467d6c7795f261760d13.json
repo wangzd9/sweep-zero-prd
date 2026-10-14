@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-063353-nochange",
+  "occurred_at": "2026-10-12T06:35:40+08:00",
+  "recorded_at": "2026-10-12T06:35:40+08:00",
+  "role": "C",
+  "task": "-",
+  "attempt": "-",
+  "status": "NO_CHANGE",
+  "summary": "v2 cron 巡检 nochange：C 范围零新增，main 453da0c 双核一致，wt-03b 干净，无在途进程；保持空闲待派单",
+  "evidence": "find inbox/3号 inbox/coordinator -newermt 05:58:53 为空",
+  "next": "等待协调者派单"
+}

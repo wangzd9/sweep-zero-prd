@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs72-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T09:35:30+08:00",
+  "recorded_at": "2026-10-14T09:40:50+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第72轮只读观察（处理机 09:35 实测）：与 obs71 零状态变化，scene-4acf689f（16_02_03 正式链）仍 SCENE_RUNNING attempt=1 lease 续租活跃至 09:37:09、checkpoint.json mtime 00:23:10 未翻、find 30min 零新写、VLM 通道 1 ESTAB :8002、llm-server 远端 Running 2-4/Waiting 0/prefix 92.5%/POST 累计 184760、proxy pid 3495931 连续未重启 TIME 01:21:14、NAS 71% 不变、incoming/spray 仅 16_33_10 空包（D6 A 面）。无升级条件命中；本批 8 包无新终态；大包跨夜续跑不 kill/不 retry。",
+  "evidence": "ssh curl 8180/8767、stat/find/ps、docker exec 只读 net/tcp、df/ls、llm-server 读 vllm log；canonical sessions/C.md 621→622 行 obs72=1 追加断言通过；全程只读未改任何生产路径",
+  "next": "接续只读观察：模型段完成信号（checkpoint 翻面/八步 DB 推进/SCENE_DONE）或升级条件（heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且无 ESTAB）命中即取证申报协调者；串行释放后 flat 三提交绑定新 run 按 run 核账；16_33_10 D6 落 upload-ledger 后同步核；11:00 定时总结照常"
+}

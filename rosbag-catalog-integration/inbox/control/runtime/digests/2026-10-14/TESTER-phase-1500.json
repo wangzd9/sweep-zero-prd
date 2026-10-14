@@ -1,0 +1,439 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-14T15:00:53.570003+08:00",
+  "role": "TESTER",
+  "kind": "phase",
+  "start": "2026-10-14T11:00:00+08:00",
+  "end": "2026-10-14T15:00:00+08:00",
+  "artifact": "inbox/control/runtime/digests/2026-10-14/TESTER-phase-1500.json",
+  "roles": [
+    {
+      "role": "TESTER",
+      "start": "2026-10-14T11:00:00+08:00",
+      "end": "2026-10-14T15:00:00+08:00",
+      "totals_seconds": {
+        "working": 1520.0,
+        "waiting": 0,
+        "blocked": 0,
+        "idle": 0,
+        "unknown": 12880.0
+      },
+      "segments": [
+        {
+          "start": "2026-10-14T11:00:00+08:00",
+          "end": "2026-10-14T11:25:20+08:00",
+          "category": "working",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "10:1x 巡检轮（prerun 指纹 ed030147，变更源 inbox/PROTOCOL.md=20:58:48 恢复决定历史行 mtime 刷新，已核读，非新 TESTER 派单/新 decision）：按本角色范围增量只读巡检，scene-4acf689f SCENE_RUNNING heartbeat 10 … 094 8dirs 全绿；scene run 全集 7=6DONE+1RUNNING 无新 run；health ok active_runs=[4acf689f ACCEPTED pid:1]；PASS 基线不变。单脚本 claim→巡检→renew→release 闭环 exit 0，lease 已释放。全部",
+          "sources": [
+            "inbox/events/TESTER/tester-t11s-batch-1012-1017-infer-continue-20261014.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T11:25:20+08:00",
+          "end": "2026-10-14T11:46:30+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "10:1x 巡检轮（prerun 指纹 ed030147，变更源 inbox/PROTOCOL.md=20:58:48 恢复决定历史行 mtime 刷新，已核读，非新 TESTER 派单/新 decision）：按本角色范围增量只读巡检，scene-4acf689f SCENE_RUNNING heartbeat 10 … 094 8dirs 全绿；scene run 全集 7=6DONE+1RUNNING 无新 run；health ok active_runs=[4acf689f ACCEPTED pid:1]；PASS 基线不变。单脚本 claim→巡检→renew→release 闭环 exit 0，lease 已释放。全部",
+          "sources": [
+            "inbox/events/TESTER/tester-t11s-batch-1012-1017-infer-continue-20261014.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T11:46:30+08:00",
+          "end": "2026-10-14T12:15:11+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "时间未精确记录 巡检轮（prerun 指纹 ed030147，变更源 inbox/PROTOCOL.md=20:58:48 恢复决定历史行 mtime 刷新，已核读，非新 TESTER 派单/新 decision）：按本角色范围增量只读巡检，scene-4acf689f SCENE_RUNNING heartbeat 10 … 094 8dirs 全绿；scene run 全集 7=6DONE+1RUNNING 无新 run；health ok active_runs=[4acf689f ACCEPTED pid:1]；PASS 基线不变。单脚本 claim→巡检→renew→release 闭环 exit 0，lease 已释放。",
+          "sources": [
+            "events/TESTER/tester-t11s-batch-1012-1017-infer-continue-20261014.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T12:15:11+08:00",
+          "end": "2026-10-14T12:29:28+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "时间未精确记录 轮（prerun 指纹 1942a42a）消费实质新输入 codex-repair-receipt-20261014.md（10:23 协调者/Codex 面：flat 三提交经正式 API 恢复源登记+用途事件消费，复用既有终态 run created_runs=0/reused_runs=3；4acf6 … CESS 权限被拒），建议归因是否属在途 4acf689f 心跳/租约写者同池锁竞争（可并入 10:17 缺陷候选面，不新开任务）。批次 8 包 7 包终态独立验收齐，TEST_REPORT_PENDING 待 4acf689f SCENE_DONE 全链核（八步/跨DB3 真实边界/两次 reconcile",
+          "sources": [
+            "events/TESTER/tester-t11s-batch-1012-1023-reuse-run-verify-20261014.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T12:29:28+08:00",
+          "end": "2026-10-14T12:35:11+08:00",
+          "category": "unknown",
+          "task": "TEST-TASK16D",
+          "attempt": "1",
+          "summary": "ACK TASK-16D（v0.4 UI 界面闭环独立验证恢复）：固定 seed bd0db1d2（未接受/含已知缺陷）、main 63bfcf8、生产 3c9c496 只读参照；范围=fixture 三类+严格 MySQL 隔离库+真实浏览器，复现 C5/C7/C8+cursor 风险，叶冻结做对应面独立验证，最终集成 SHA 联合验收；不改业务/不跑 OCR/不批准合入。下一步=建专属 worktree wt-tester-16d-20261014+环境预检+准备检查点。",
+          "sources": [
+            "events/TESTER/754f3446c229461b5947f15e7f2159f2321f786476169c352c1cb788ee8091ec.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T12:35:11+08:00",
+          "end": "2026-10-14T13:10:13+08:00",
+          "category": "unknown",
+          "task": "TEST-TASK16D",
+          "attempt": "1",
+          "summary": "TASK-16D 准备检查点：专属 worktree wt-tester-16d-20261014 detached @ seed bd0db1d（干净、未动 seed/旧 B 冻结树/主仓脏文件）；真实浏览器就绪；seed 缺陷口径定位 C5 双标 vs 单值 CASE / C7 日期直入 DateTime / C8 CANCELLED null.querySelector / cursor 16C-c03-02/03/04；隔离 MySQL 与 Compose 栈配方就绪未起。准备阶段无正式联合验收结论。",
+          "sources": [
+            "events/TESTER/f36c4cffc1814e091ecd4df47c5c44015943940e5145abe7f90c3694e54bb5f2.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T13:10:13+08:00",
+          "end": "2026-10-14T13:10:14+08:00",
+          "category": "unknown",
+          "task": "TASK-16D",
+          "attempt": "attempt-1",
+          "summary": "B 叶 e399daf 与 C 叶 522bb3f 增量面独立验证完成（各专属 detached worktree）：C 叶 pytest 16 passed + C8 CANCELLED 场景真实浏览器 Console 零异常/无 retry-form/停刷新（自造 CANCELLED 夹具测后删除归零）；B 叶 pytest 11 passed + 三视图 tab/数据分类徽章分布/scene_slice 筛选交集+条件保留+分页摘要真实浏览器取证。A 叶 a1e416a 待其 re-freeze 续 commit（shared-test-assert-transfer 转派）后再验查询面。均为对应面增量验证，非联合验收、不覆盖",
+          "sources": [
+            "events/TESTER/83d02f5854be2e2e16edb751b5b8582c71febba4c15425899a8e663bc2c69f1f.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T13:10:14+08:00",
+          "end": "2026-10-14T13:25:10+08:00",
+          "category": "unknown",
+          "task": "TASK-16D",
+          "attempt": "attempt-1",
+          "summary": "B 叶 e399daf 与 C 叶 522bb3f 增量面独立验证完成（各专属 detached worktree）：C 叶 pytest 16 passed + C8 CANCELLED 场景真实浏览器 Console 零异常/无 retry-form/停刷新（自造 CANCELLED 夹具测后删除归零）；B 叶 p … assed + 三视图 tab/数据分类徽章分布/scene_slice 筛选交集+条件保留+分页摘要真实浏览器取证。A 叶 a1e416a 待其 re-freeze 续 commit（shared-test-assert-transfer 转派）后再验查询面。均为对应面增量验证，非联合验收、不覆盖 seed 缺",
+          "sources": [
+            "events/TESTER/83d02f5854be2e2e16edb751b5b8582c71febba4c15425899a8e663bc2c69f1f.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T13:25:10+08:00",
+          "end": "2026-10-14T14:25:46+08:00",
+          "category": "unknown",
+          "task": "TASK-16D",
+          "attempt": "attempt-1",
+          "summary": "消费两条新待验输入并开工增量验证：C 叶 CC-R1 返修 ce5921d（13:10 交付 REVIEW_PENDING，模板血缘兜底补 ol 开始标签+断言同步）与 A 叶勘误续 commit 563a91a（12:46，test_web 断言 1 行+MySQL 关键行为明确交 TESTER）。计划：专属 wt-tester-16d-A@563a91a；wt-tester-16d-C 从 522bb3f 前移 detached 到 ce5921d 做 C 返修面独立复跑与浏览器面；A 面查询/API+严格 MySQL 关键行为随后。",
+          "sources": [
+            "events/TESTER/0590efed59980ca1cab81ea2cc6fd04f2bb04a6b6c359760d01b102d7606c61b.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T14:25:46+08:00",
+          "end": "2026-10-14T14:29:53+08:00",
+          "category": "unknown",
+          "task": "TASK-16D",
+          "attempt": "attempt-1",
+          "summary": "C 叶 CC-R1 返修 ce5921d 与 A 叶 563a91a 对应面独立验证完成（PASS）：C 返修面 pytest 16+15 passed rc=0、RED-GREEN 独立复核（旧模板还原目标用例 1 failed/恢复 1 passed 证断言非空转）、浏览器无血缘 SCENE_SLICE run 兜底 ol.lineage 开始标签在位+Console 零异常(hookAlive)+终态停刷新（T16DCC 夹具自清 0/0）；A 面严格 MySQL 8.4.11 隔离库探针 21/21 PASS（C7 非法日期 raise/422、全天截止 DATETIME(0) 边界 SQL 佐证、aware 换算、C5 双",
+          "sources": [
+            "events/TESTER/7cc83fa6da6f95a2030e6625a6bd66a3b2e9530af896b3519c5d037e183f2c68.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T14:29:53+08:00",
+          "end": "2026-10-14T15:00:00+08:00",
+          "category": "unknown",
+          "task": "TASK-16D",
+          "attempt": "attempt-1",
+          "summary": "C 叶 CC-R1 返修 ce5921d 与 A 叶 563a91a 对应面独立验证完成（PASS）：C 返修面 pytest 16+15 passed rc=0、RED-GREEN 独立复核（旧模板还原目标用例 1 failed/恢复 1 passed 证断言非空转）、浏览器无血缘 SCENE_SLICE run 兜 …  双用途两筛选命中 UID 唯一、C6 分类真相、幂等；T16DMYSQL 自清）+Web/API 浏览器面（A 树重建栈，三 data_kind 筛选命中与 DB 一致、API 非法日期 422、双用途行内 data_kind 首值口径；T16DCA 自清）。均为对应面增量验证，非联合验收、不覆盖 seed 缺",
+          "sources": [
+            "events/TESTER/7cc83fa6da6f95a2030e6625a6bd66a3b2e9530af896b3519c5d037e183f2c68.json"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "event_id": "TESTER:t16d-cc-r1-and-a-corr-verify-start-20261014-1315",
+          "kind": "business",
+          "task": "TASK-16D",
+          "attempt": "attempt-1",
+          "status": "PREP",
+          "summary": "消费两条新待验输入并开工增量验证：C 叶 CC-R1 返修 ce5921d（13:10 交付 REVIEW_PENDING，模板血缘兜底补 ol 开始标签+断言同步）与 A 叶勘误续 commit 563a91a（12:46，test_web 断言 1 行+MySQL 关键行为明确交 TESTER）。计划：专属 wt-tester-16d-A@563a91a；wt-tester-16d-C 从 522bb3f 前移 detached 到 ce5921d 做 C 返修面独立复跑与浏览器面；A 面查询/API+严格 MySQL 关键行为随后。",
+          "evidence": "receipts/TASK-16C-C/attempt-1.md CC-R1 段；receipts/TASK-16C-A/attempt-1.md 续单段；git log a/task-16c-a-query-api=563a91a c/task-16cc-pipeline-detail=ce5921d",
+          "next": "C 返修面 pytest+模板核→A 面查询/API+MySQL→Compose 栈逐叶重建浏览器取证→回执追加→event→release",
+          "occurrence": {
+            "kind": "now"
+          },
+          "schema_version": 1,
+          "role": "TESTER",
+          "recorded_at": "2026-10-14T13:25:10+08:00",
+          "occurred_at": "2026-10-14T13:25:10+08:00",
+          "time_source": {
+            "kind": "script_now"
+          },
+          "source": "events/TESTER/0590efed59980ca1cab81ea2cc6fd04f2bb04a6b6c359760d01b102d7606c61b.json",
+          "source_mtime": "2026-10-14T13:25:10+08:00"
+        },
+        {
+          "event_id": "tester-t16d-ack-seed-bd0db1d2-20261014",
+          "occurred_at": "2026-10-14T12:29:28+08:00",
+          "recorded_at": "2026-10-14T12:29:56+08:00",
+          "role": "TESTER",
+          "task": "TEST-TASK16D",
+          "attempt": "1",
+          "status": "PREP_STARTED",
+          "summary": "ACK TASK-16D（v0.4 UI 界面闭环独立验证恢复）：固定 seed bd0db1d2（未接受/含已知缺陷）、main 63bfcf8、生产 3c9c496 只读参照；范围=fixture 三类+严格 MySQL 隔离库+真实浏览器，复现 C5/C7/C8+cursor 风险，叶冻结做对应面独立验证，最终集成 SHA 联合验收；不改业务/不跑 OCR/不批准合入。下一步=建专属 worktree wt-tester-16d-20261014+环境预检+准备检查点。",
+          "evidence": "inbox/TESTER/TASK-16D/attempt-1-ack.md",
+          "next": "建独立测试树与环境预检后落准备检查点；叶冻结到达即做对应面增量验证",
+          "source": "events/TESTER/754f3446c229461b5947f15e7f2159f2321f786476169c352c1cb788ee8091ec.json",
+          "source_mtime": "2026-10-14T12:29:56+08:00"
+        },
+        {
+          "event_id": "tester-t16d-prep-checkpoint-mysql-browser-20261014",
+          "occurred_at": "2026-10-14T12:42:00+08:00",
+          "recorded_at": "2026-10-14T12:33:22+08:00",
+          "role": "TESTER",
+          "task": "TEST-TASK16D",
+          "attempt": "1",
+          "status": "PREP_IN_PROGRESS",
+          "summary": "TASK-16D 准备检查点：专属 worktree wt-tester-16d-20261014 detached @ seed bd0db1d（干净、未动 seed/旧 B 冻结树/主仓脏文件）；真实浏览器就绪；seed 缺陷口径定位 C5 双标 vs 单值 CASE / C7 日期直入 DateTime / C8 CANCELLED null.querySelector / cursor 16C-c03-02/03/04；隔离 MySQL 与 Compose 栈配方就绪未起。准备阶段无正式联合验收结论。",
+          "evidence": "test-receipts/TEST-TASK16D/attempt-1.md",
+          "next": "起隔离严格 MySQL 库+8 类 fixture，复现 C5/C7/C8+cursor 风险落证据；叶冻结到达做对应面增量验证",
+          "source": "events/TESTER/f36c4cffc1814e091ecd4df47c5c44015943940e5145abe7f90c3694e54bb5f2.json",
+          "source_mtime": "2026-10-14T12:33:22+08:00"
+        },
+        {
+          "event_id": "TESTER:t16d-bc-leaf-incremental-verify-20261014-1307",
+          "kind": "business",
+          "task": "TASK-16D",
+          "attempt": "attempt-1",
+          "status": "PREP",
+          "summary": "B 叶 e399daf 与 C 叶 522bb3f 增量面独立验证完成（各专属 detached worktree）：C 叶 pytest 16 passed + C8 CANCELLED 场景真实浏览器 Console 零异常/无 retry-form/停刷新（自造 CANCELLED 夹具测后删除归零）；B 叶 pytest 11 passed + 三视图 tab/数据分类徽章分布/scene_slice 筛选交集+条件保留+分页摘要真实浏览器取证。A 叶 a1e416a 待其 re-freeze 续 commit（shared-test-assert-transfer 转派）后再验查询面。均为对应面增量验证，非联合验收、不覆盖 seed 缺陷面。",
+          "evidence": "test-receipts/TEST-TASK16D/attempt-1.md §C叶/§B叶增量独立验证；C 叶 wt-tester-16d-C@522bb3f pytest rc=0 16passed；B 叶 wt-tester-16d-B@e399daf pytest rc=0 11passed；浏览器 headless Chrome CDP 取证（C8 errors=[] hookAlive=true；B 全部视图徽章 英伟达×7/自建×11/场景原始×1/场景切片×1，筛选 scene_slice 仅1行 分页 第1/1页共1条）",
+          "next": "等 A 叶 re-freeze 新 head 后验查询/API 面（两查询入口分类/组合/分页/cursor）；隔离严格 MySQL 库(rosbag-t16d-mysql 8.4.11 head=20261013_01_scene_intake)已就绪，C7 日期 422/边界与 cursor 分类风险面后续在该真 MySQL 环境复现取证；最终含 seed 三叶接受集成 SHA 由协调者提供后联合验收。原 11S 批次 4acf689f 终态并行线 TEST_REPORT_PENDING 不变。",
+          "occurrence": {
+            "kind": "now"
+          },
+          "schema_version": 1,
+          "role": "TESTER",
+          "recorded_at": "2026-10-14T13:10:13+08:00",
+          "occurred_at": "2026-10-14T13:10:13+08:00",
+          "time_source": {
+            "kind": "script_now"
+          },
+          "source": "events/TESTER/83d02f5854be2e2e16edb751b5b8582c71febba4c15425899a8e663bc2c69f1f.json",
+          "source_mtime": "2026-10-14T13:10:13+08:00"
+        },
+        {
+          "event_id": "TESTER:t16d-ccr1-and-a-corr-leaf-verify-delivered-20261014-1410",
+          "kind": "business",
+          "task": "TASK-16D",
+          "attempt": "attempt-1",
+          "status": "PREP",
+          "summary": "C 叶 CC-R1 返修 ce5921d 与 A 叶 563a91a 对应面独立验证完成（PASS）：C 返修面 pytest 16+15 passed rc=0、RED-GREEN 独立复核（旧模板还原目标用例 1 failed/恢复 1 passed 证断言非空转）、浏览器无血缘 SCENE_SLICE run 兜底 ol.lineage 开始标签在位+Console 零异常(hookAlive)+终态停刷新（T16DCC 夹具自清 0/0）；A 面严格 MySQL 8.4.11 隔离库探针 21/21 PASS（C7 非法日期 raise/422、全天截止 DATETIME(0) 边界 SQL 佐证、aware 换算、C5 双用途两筛选命中 UID 唯一、C6 分类真相、幂等；T16DMYSQL 自清）+Web/API 浏览器面（A 树重建栈，三 data_kind 筛选命中与 DB 一致、API 非法日期 422、双用途行内 data_kind 首值口径；T16DCA 自清）。均为对应面增量验证，非联合验收、不覆盖 seed 缺陷面。",
+          "evidence": "test-receipts/TEST-TASK16D/attempt-1.md A叶增量独立验证 与 C叶CC-R1返修面独立验证 段；scratch 探针与日志 t16d_ccr1_pytest.log/t16d_a_mysql.log/t16d_c2_stack.log/t16d_a2_stack.log",
+          "next": "等三叶（A 563a91a / B e399daf / C ce5921d）全部接受后协调者生成含 seed 固定集成 SHA 再联合验收；16D 准备面（8 类 fixture/seed 缺陷复现）在集成 SHA 后收口。原 11S 批次 4acf689f 终态并行线 TEST_REPORT_PENDING 不变。",
+          "occurrence": {
+            "kind": "now"
+          },
+          "schema_version": 1,
+          "role": "TESTER",
+          "recorded_at": "2026-10-14T14:25:46+08:00",
+          "occurred_at": "2026-10-14T14:25:46+08:00",
+          "time_source": {
+            "kind": "script_now"
+          },
+          "source": "events/TESTER/7cc83fa6da6f95a2030e6625a6bd66a3b2e9530af896b3519c5d037e183f2c68.json",
+          "source_mtime": "2026-10-14T14:25:46+08:00"
+        }
+      ],
+      "delivery_records": [],
+      "unverified_sources": [
+        "events/TESTER/20261010-2302-attempt4-delivered.md: 时间或内容待核对",
+        "events/TESTER/20261011-1513-poll-strongmodel-inflight.md: 时间或内容待核对",
+        "events/TESTER/tester-poll-20261012-033453-nochange.json: 时间或内容待核对",
+        "events/TESTER/tester-poll-20261012-093453-nochange.json: 时间或内容待核对",
+        "events/TESTER/tester-poll-20261012-102453-nochange.json: 时间或内容待核对",
+        "events/TESTER/tester-poll-20261012-132953-nochange.json: 时间或内容待核对",
+        "events/TESTER/tester-poll-20261012-214953-nochange.json: 时间或内容待核对",
+        "events/TESTER/tester-poll-20261012-233953-nochange.md: 时间或内容待核对",
+        "events/TESTER/tester-poll-20261013-070453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-001453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-005453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-072953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-091453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-091953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-092453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-092953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-095453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-100053-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-102953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-120953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-135953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-145453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-145953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-151453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-171953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-172953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-175453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-180453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-181453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-191453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-191953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-193453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-195953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-203953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-205453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261012-211453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261013-001453-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261013-003953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261013-042453-nochange.json: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261013-071953-nochange.md: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261013-085953-nochange.json: 时间或内容待核对",
+        "inbox/events/TESTER/tester-poll-20261013-20261013-021507-nochange.json: 时间或内容待核对"
+      ]
+    }
+  ],
+  "current": {
+    "TESTER": {
+      "schema_version": 1,
+      "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+      "role": "TESTER",
+      "observed_at": "2026-10-14T15:00:53+08:00",
+      "control": "ACTIVE",
+      "confirmed_idle": false,
+      "classification_reasons": [
+        "assigned nonterminal task: TASK-16D",
+        "unresolved or unclassified dispatch: inbox/TESTER/TASK-12S-B-s9b/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/TESTER/TASK-16C/t16c-independent-verify-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/TESTER/TASK-16B-r2/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/TESTER/TASK-12S-AB/attempt-1-correction-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/TESTER/TASK-12S-AB/attempt-1-dispatch.md"
+      ],
+      "tasks": [
+        {
+          "task": "TASK-16D",
+          "state": "**ACKED / TESTER（2026-10-14 12:3x，`inbox … 增补卡已核销闭合，TEST_REPORT 仍待 4acf689f 终态并行不冲突",
+          "progress": "真实浏览器/API/MySQL、已验收真产物父子获取；不重烧模型",
+          "owner": "**ACKED / TESTER（2026-10-14 12:3x，`inbox/TESTER/TA … 原 11S 批次收尾增补卡已核销闭合，TEST_REPORT 仍待 4acf689f 终态并行不冲突"
+        }
+      ],
+      "events": {
+        "TESTER": {
+          "event_id": "tester-t16d-cursor-prep-closed-c-leaf-accepted-20261014-1457",
+          "occurred_at": "2026-10-14T15:00:38+08:00",
+          "recorded_at": "2026-10-14T15:00:38+08:00",
+          "role": "TESTER",
+          "task": "TEST-TASK16D",
+          "attempt": "1",
+          "status": "PREP",
+          "summary": "16D 准备面收尾：C 叶 ce5921d 协调者 14:24 落盘开发叶收口决策（未合入主分支，父 16C 聚合仍需三叶齐+固定集成候选联合验收），TESTER 面证据与本回执 C 叶/返修面一致无分歧；cursor 三项（c03-02/03/04）核对=已由 A 叶段独立 pytest 复跑（74 passed 同 … C6 面交叉覆盖，准备阶段无新增探针需求，cursor 矩阵与严格 MySQL 方言保留到固定集成 SHA 联合验收段；A OCR run 7a72eed8 在途（14:44 session 仍活动）、B 叶 OCR 排 A 后；大包 4acf689f INFER 持续在途无新 notice。本回合零生产/零隔离库写。",
+          "evidence": "test-receipts/TEST-TASK16D/attempt-1.md 准备面收尾核对段 + C 叶接受事件行；inbox/coordinator/TASK-16C-C/leaf-acceptance-decision-20261014.md",
+          "next": "观察 A OCR 收口与 B 起跑（裁决归协调者）；等三叶接受+固定集成 SHA 联合验收；15:00 时段总结 no_agent 快照",
+          "source": "events/TESTER/7f40edf377f4effff446cfd18645c50575972fd6e12449b65ed9398086bc3055.json",
+          "source_mtime": "2026-10-14T15:00:38+08:00",
+          "event_time_basis": "occurred_at",
+          "event_time_status": "known",
+          "sources": [
+            "events/TESTER/7f40edf377f4effff446cfd18645c50575972fd6e12449b65ed9398086bc3055.json"
+          ]
+        }
+      },
+      "event_conflicts": [
+        {
+          "role": "TESTER",
+          "event_id": "tester-t11s-batch-1012-041x-infer-continue-quiet-20261014",
+          "sources": [
+            "events/TESTER/c414e70b73555b5b166891ab3497ef3e0263b32c16c01d16f4e73aaa0f4d0b50.json",
+            "inbox/events/TESTER/tester-t11s-batch-1012-041x-infer-continue-quiet-20261014.json"
+          ]
+        },
+        {
+          "role": "TESTER",
+          "event_id": "tester-t11s-batch-1012-045x-infer-continue-quiet-20261014",
+          "sources": [
+            "events/TESTER/934dd800a239fa4565819544c615dc497b605398544cb979161ae5517a91a635.json",
+            "inbox/events/TESTER/tester-t11s-batch-1012-045x-infer-continue-quiet-20261014.json"
+          ]
+        },
+        {
+          "role": "TESTER",
+          "event_id": "tester-t11s-batch-1012-055x-infer-continue-quiet-20261014",
+          "sources": [
+            "events/TESTER/6f0ce73df8c3753898c45b53a52b18b57b03280bd55201edda9cc5d66ec2d43f.json",
+            "inbox/events/TESTER/tester-t11s-batch-1012-055x-infer-continue-quiet-20261014.json"
+          ]
+        },
+        {
+          "role": "TESTER",
+          "event_id": "tester-t11s-batch-1012-040x-infer-continue-quiet-20261014",
+          "sources": [
+            "events/TESTER/df9867de1ac9cd814de256536cc53cec2521d8d47c70fc5303dce1e4f713c8ae.json",
+            "inbox/events/TESTER/tester-t11s-batch-1012-040x-infer-continue-quiet-20261014.json"
+          ]
+        },
+        {
+          "role": "TESTER",
+          "event_id": "tester-t11s-batch-1012-0715-infer-continue-quiet-20261014",
+          "sources": [
+            "events/TESTER/c66aafc03a8ffa32bbe5b6e7fbe7d8e1b3a1270669123163de146da8301c05a6.json",
+            "events/TESTER/tester-t11s-batch-1012-0715-infer-continue-quiet-20261014.json",
+            "inbox/events/TESTER/tester-t11s-batch-1012-0715-infer-continue-quiet-20261014.json"
+          ]
+        },
+        {
+          "role": "TESTER",
+          "event_id": "tester-poll-20261012-205453-nochange",
+          "sources": [
+            "events/TESTER/73973a19940d704f59551ef920345b0441d86e0ccea548b38961ec7a5e22a93a.json",
+            "inbox/events/TESTER/tester-poll-20261012-205453-nochange.md"
+          ]
+        },
+        {
+          "role": "TESTER",
+          "event_id": "tester-t11s-batch-1012-0429-infer-continue-quiet-20261014",
+          "sources": [
+            "events/TESTER/396f4daec696487ea1d0936c2259ab5285307031ccef6552fbfbb2e80ae88836.json",
+            "inbox/events/TESTER/tester-t11s-batch-1012-0429-infer-continue-quiet-20261014.json"
+          ]
+        },
+        {
+          "role": "TESTER",
+          "event_id": "tester-t11s-batch-1012-042x-infer-continue-quiet-20261014",
+          "sources": [
+            "events/TESTER/0bfb9358c4cb3436a762f0b2f56b744585d05d1cc2b041dacc2c3ccf4c06d1af.json",
+            "inbox/events/TESTER/tester-t11s-batch-1012-042x-infer-continue-quiet-20261014.json"
+          ]
+        },
+        {
+          "role": "TESTER",
+          "event_id": "tester-t11s-batch-1012-043x-infer-continue-quiet-20261014",
+          "sources": [
+            "events/TESTER/55cc411b64c95b6b6fc10be83b341c3f71f24fb657a6989b77f4c646089dc921.json",
+            "inbox/events/TESTER/tester-t11s-batch-1012-043x-infer-continue-quiet-20261014.json"
+          ]
+        },
+        {
+          "role": "TESTER",
+          "event_id": "tester-t11s-batch-1012-044x-infer-continue-quiet-20261014",
+          "sources": [
+            "events/TESTER/94af3a04fe8fb5b1bb4cb753293428815430e8774f14b29ce5489747191d8700.json",
+            "inbox/events/TESTER/tester-t11s-batch-1012-044x-infer-continue-quiet-20261014.json"
+          ]
+        }
+      ],
+      "dispatches": {
+        "TESTER": {
+          "role": "TESTER",
+          "source": "inbox/TESTER/TASK-16D/attempt-1-dispatch.md",
+          "status": "待核对",
+          "mtime": 1791948319.6592216,
+          "summary": "# TASK-16D：界面闭环独立验证恢复 派单 2026-10-14T11:25:19+08:00；REQ/AC-16、05及旧功能必要回归。先读 [当前入口](../../control/V04-UI-RESUME- … ts/TEST-TASK16D/attempt-1.md：固定SHA/环境、AC逐项证据、命令/退出码/浏览器证据路径、源UID和获取校验、失败/未测，缺陷回原owner。独立测试不改业务实现、不运行OCR、不批准合入。"
+        }
+      },
+      "processes": {
+        "TESTER": {
+          "state": "none"
+        }
+      },
+      "sources": {
+        "TODO.md": "2026-10-14T14:27:28+08:00"
+      },
+      "strong_review": null,
+      "fingerprint": "fe889ff06abb4184695e42c4d07757787e32143a8ad2bc4e4302a544a24d7f2b",
+      "coordinator_requests": [],
+      "operations": [],
+      "task_observations": []
+    }
+  }
+}

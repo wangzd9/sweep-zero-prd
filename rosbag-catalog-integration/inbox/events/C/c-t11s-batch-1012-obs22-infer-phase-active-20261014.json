@@ -1,0 +1,14 @@
+{
+  "event_id": "c-t11s-batch-1012-obs22-infer-phase-active-20261014",
+  "occurred_at": "2026-10-14T02:01:00+08:00",
+  "recorded_at": "2026-10-14T02:01:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs21（01:42）后新一轮：pending 触发源=obs21 自产事件文件+sessions/C.md 自身（first_seen 01:45:10）；ACK 21:07:41 在案不重复领取",
+  "summary": "C 第22轮只读观察（处理机 01:50-02:01 实测：ssh curl 8180/8767、docker exec 只读（work 树计数×2 间隔 90s、checkpoint、/proc/net/tcp）、docker top、ss、ps、df/uptime，未 kill/未删/未重启/未 retry/未改任何生产路径）：run 级不变但**进程级新证据判定 scene-4acf689f 在算未卡死**：① lease 活跃续租 01:55:39→01:57:39（~2min 周期）、SCENE_RUNNING attempt=1 不变、checkpoint 八步仍全 QUEUED（仅 PRECHECK DONE，阶段边界写口径与 obs21 一致）；② work 树 EXTRACT 产物冻结：jpg 1781/pcd 5373 两次采样（01:52、01:54）零新增、末件 jpg frame_001787 mtime 17:30:53 UTC——EXTRACT 完成口径成立；③ **新证据（非卡死判定依据）**：pid 3495931（proxy 主进程）docker top 瞬时 %CPU 22.7→22.8 持续非零、RSS 18.2GB（obs19 时 15.8GB，内存持续增长=计算在推进）、CPU TIME 2min 仅 +2s（低 5min 均值系前期 CPU 密集段结束，非停止）；容器 /proc/net/tcp 实测 1 条 ESTAB 192.168.2.134:52552→192.168.2.45:8002（VLM 8002 通道活跃连接在途）；容器日志 4min 零新行（非 FEngine 噪音）=当前阶段无 verbose 输出；④ 口径结论：**EXTRACT 已完成、run 大概率处于 INFER/后续段计算，lease 续租+VLM ESTAB+瞬时 CPU 非零三证据在算未冻结**，按派单大包跨夜继续不 kill/不 retry/不判卡死；⑤ incoming/spray 仍仅 16_33_10 空包目录（D6 拒绝待 A 落 ledger）、flat 三提交 a65a25a7/87dfebaa/518089ed 仍无新绑定 run（串行占用属预期）、NAS 98T/70T/29T 71% 不变、load 0.23 回落；⑥ 端点口径修正入案：8180 run 详情真实路径=`/api/v1/scene-analysis-runs/{pipeline_run_id}`（本轮 openapi.json 核全表确认），obs21『截断 id 致 404』之外补充完整路径备查。",
+  "evidence": "处理机 01:50-02:01 只读实测：8180 scene-analysis-runs/scene-4acf689f9a6a473da1fa2f2efc70 rc=200（SCENE_RUNNING attempt=1 auto_retry_count=0 lease_owner=platform-local lease_expires_at 01:55:39→01:57:39 续租活跃；PRECHECK DONE 余八步 QUEUED）；work 树 docker exec：jpg 1781/pcd 5373 两次采样（01:52:2x 与 01:54:2x 间隔 90s）零新增、find -newermt 17:50 UTC 零命中、末件 frame_001787.jpg mtime 2026-10-13T17:30:53Z；docker top pid 3495931 etime 05:33 TIME 01:15:40→01:15:42 %CPU 22.7→22.8 RSS 18213932KB≈18.2GB；容器 /proc/net/tcp ESTAB：0032A802:52552→45 192.168.2.45:8002（01 状态）1 条；docker logs --since 4m 非 FEngine 过滤 0 行；ss 宿主 192.168.2.134:52552→192.168.2.45:8002 ESTAB 同连接；8767/health active_runs=[4acf689f ACCEPTED]；ls incoming/spray 仅 rosbag2_2026_10_12-16_33_10；df /mnt/nas_backup 98T 70T 29T 71%；uptime load 0.23/0.28/1.00；openapi.json 路径表含 /api/v1/scene-analysis-runs/{pipeline_run_id} 及 /status//retry//cancel",
+  "next": "接续只读观察：① EXTRACT 翻 DONE+八步推进（checkpoint 阶段边界写）或 lease 停更/FAILED 出现即取证申报协调者（C 不处置）；② VLM 8002 ESTAB 是否持续/转 SEGMENT-WRITE 产物出现（work 树新目录）按进程级口径续证；③ 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账（含 ruling-dup-slices-0038 观察面）；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

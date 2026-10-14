@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-083853-ocr16b-retry-inflight",
+  "occurred_at": "2026-10-13T08:44:08+08:00",
+  "recorded_at": "2026-10-13T08:44:08+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "16B 交付冻结不变 0208a73；窗口内协调者 r136 proxy OCR 第4次低负载重试 08:40 起跑在途（rc=0→一次最小返修单派C / rc=1→NEEDS_REVIEW 升级用户裁决）；无 C 新派单",
+  "evidence": "sessions/C.md#531",
+  "next": "等 16B proxy OCR 收口与返修单"
+}

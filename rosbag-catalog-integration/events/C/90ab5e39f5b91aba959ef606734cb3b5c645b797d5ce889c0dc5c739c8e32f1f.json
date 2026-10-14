@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261012-215353-nochange",
+  "occurred_at": "2026-10-12T21:57:01+08:00",
+  "recorded_at": "2026-10-12T21:57:01+08:00",
+  "role": "C",
+  "task": "none",
+  "attempt": "none",
+  "status": "NO_CHANGE",
+  "summary": "nochange",
+  "evidence": "sessions/C.md",
+  "next": "idle"
+}

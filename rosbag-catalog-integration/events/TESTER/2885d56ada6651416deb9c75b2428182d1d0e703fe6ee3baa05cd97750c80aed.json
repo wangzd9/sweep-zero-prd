@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-203953-nochange",
+  "occurred_at": "2026-10-12T20:50:33+08:00",
+  "recorded_at": "2026-10-12T20:50:33+08:00",
+  "role": "TESTER",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "5min poll 20:39:53: zero new TESTER dispatch/receipts since 20:34:53; origin/main still 502bf8e; 07B OCR b5 final resume pending + b7-b10 in-flight (coord scope); TESTER IDLE",
+  "evidence": "events/TESTER/tester-poll-20261012-203953-nochange.md",
+  "next": "continue 5min poll; ACK new TESTER dispatch on arrival"
+}

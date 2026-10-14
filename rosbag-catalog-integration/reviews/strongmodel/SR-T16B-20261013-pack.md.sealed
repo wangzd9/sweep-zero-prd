@@ -1,0 +1,72 @@
+# SR-T16B-20261013 强模型审查包（TASK-16B 处理机执行面，合入前功能审查）
+
+## 1. 身份与门禁
+
+| 字段 | 值 |
+|---|---|
+| review_id | SR-T16B-20261013 |
+| review_type | PRE_MERGE（功能批次：16B 完整交付=首轮+返修 r1 收口后的合入核验） |
+| scope | TASK-16B 处理机常驻本机场景执行代理：`scripts/scene_host_proxy.py`（1001 行）+ `scripts/scene_host_orchestrator.py`（583 行）+ `tests/fake_vlm_server.py`（179 行）+ 两测试文件（989 行）；提交 `9437308`（编排+假VLM）→ `0208a73`（代理）→ `40ab818`（r1 六处修复） |
+| gate | 冻结 TASK-16B 合入 main 与 TASK-12S-C 接线核验启动（12S-C 硬依赖 16B 接受合入，契约明文"不能复制未审代理另开旁路"）；不冻结 12S-A/B 审查链与 TESTER 并行验证 |
+| base / target | base `c2018dd`（16B 开发基线=规则文档 commit）→ target `40ab818`（wt-03b-t16b HEAD，冻结不移动） |
+| integration_candidate | 单分支 worktree，不适用；16B 合入形态= `git merge --no-ff` 三提交入 main（main 现 `0e9a2df`，16A 已合 `6fb42c4` 在基线内） |
+| contract_version / semantic_hash | DESIGN §7.3/§7.3.2 冻结契约（v0.4 修订，坡道+处理机执行面）；完整交付 diff sha256 `72111decbafee392`（113,901 字符，`/home/wang/.hermes/cache/scratch/t16b_strong_pack.diff`） |
+| requirements_baseline | REQ-15、06、07 / AC-15、06、07（TODO.md §8 TASK-16 卡）；派单 `inbox/3号/TASK-16B/attempt-1-dispatch.md` + `attempt-2-r1-dispatch.md` |
+| delivery_status | 开发自测全绿 + 协调者机械核验（定向 32 passed 独立复跑/ruff/逐行核）+ 串行弱 OCR 五批全覆盖收口（见 §5） |
+| trigger_decision | REVIEW_NOW。风险事实：① r1 六处修复全在**并发/崩溃恢复/状态机终态**语义上（TOCTOU 单写者、终态写跳过、except 收窄静默死、config_hash fail-fast、fsync 真相源、attempt 过滤）——多步推理型缺陷是弱模型 OCR 的已知弱项，r1 增量 OCR 零 findings **不等于**修复逻辑正确；② 代理与编排的跨进程契约（八步 claim→analyze→publish→register、POST /run 幂等、kill -9 恢复对账）是 12S-C 正式接线的唯一上游，合入后 C 将直接消费 |
+| invocation | AUTHORIZED_CODEX；授权 `6b2d83fb`（2026-10-13 13:27 用户 24h 授权，证据 `reviews/strongmodel/auth-24h-20261013.md`），调用时核对期限 2026-10-14 13:27 + 限额 60min/5、在途串行 |
+| package_status | READY_FOR_REVIEW |
+| suggested_result_path | `reviews/strongmodel/runs/<call_id>/result.md` |
+
+## 2. 必须成立（本批范围，冻结契约）
+
+1. **单写者/幂等**：同 (run_id, attempt) 并发 `POST /run` 只有一个 winner spawn 工作线程，输家得到既有接收语义（already_running/409），**任何路径不得双 spawn**（r1 H1 修的就是 `try_reserve` 返回值丢弃的 TOCTOU）
+2. **状态机**：PRECHECK→CLAIM→ANALYZE→OFFSET→SLICE→PUBLISH→REGISTER→COMPLETE 八步只走 `STEP_TRANSITIONS` 合法转换；**终态 DONE/FAILED 的 post 恒可达**（r1 H2 修 post(RUNNING) 后 `cur` 不刷新致 `allowed()` 恒 False）
+3. **崩溃恢复**：recovery 文件是真相源（r1 H6 加 fsync 后 rename）；kill -9 重启后对账收敛到 FAILED 或续跑，不产生 phantom run；**任何执行异常都走失败收尾**（stop threads/SCENE_FAILED/释放资源/清 recovery/移出 ACTIVE，r1 H4 修 except 过窄）
+4. **参数冻结**：REGISTER 用 backend 冻结的提交 `config_hash`；代理无法从快照还原提交参数时 fail fast（r1 H5：frozen_hash 与默认重推不等即 SpecError，**不得烧完模型后 REGISTER 409**）
+5. **VLM 证据面**：请求体只含抽样帧，断言不含整包/NAS 路径；带宽证据落 fake_vlm_server 面
+6. **发布**：切片原子发布到场景 slices 根，/results 登记后才 complete-scene（文件证据核验 200 口径）
+
+## 3. 非范围
+
+- 算法/帧判定/切包（`app.scene` 零改动，T11 已 real 验收）；12S-C 接线本体；坡道/其他场景行为；生产部署与 11S 门禁；16A 接收面（独立审查）；`app/` 任何文件
+- 弱 OCR 已逐条裁定的 findings 不重复审（§5 给结论清单）；本包只核验**修复后的行为正确性 + 跨进程契约**
+
+## 4. 变更地图（c2018dd → 40ab818，+2752/−0，5 文件）
+
+| 提交 | 文件 | 说明 |
+|---|---|---|
+| `9437308` | `scene_host_orchestrator.py`(583) + `fake_vlm_server.py`(179) + `test_scene_host_orchestrator.py`(307) | 八步编排（复用 app.scene claim/analyze/publish/results/complete-scene）+ 假 VLM 带宽证据面 |
+| `0208a73` | `scene_host_proxy.py`(968) + `test_scene_host_proxy.py`(504) | 常驻代理：POST /run 先落 (run_id,attempt) 再异步、GET /health、kill -9 恢复对账、ACTIVE 租约 |
+| `40ab818` | `scene_host_proxy.py`(+53/−11) + `test_scene_host_proxy.py`(+178) | r1 六处修复（只动代理，编排零动）：H1 try_reserve 原子返回值 / H2 终态 post cur 刷新 / H4 except Exception 失败收尾 / H5 config_hash fail-fast / H6 atomic_write fsync / L1 steps 按 attempt 过滤 |
+
+关键调用链：`POST /run → try_reserve(run_id,attempt) [recovery 文件真相源] → spawn worker → orchestrator.eight_steps(backend_client, vlm_client) → REGISTER(冻结 config_hash) → 文件证据核验 → complete-scene`；`GET /health → ACTIVE 租约+recovery 对账`。
+
+## 5. 弱 OCR 结论清单（核验用，不重复审）
+
+| 批 | 对象 | 结果 |
+|---|---|---|
+| b1 | orchestrator + fake_vlm（首轮） | 3 findings **全 CONFIRMED**（崩溃恢复重复计费/死代码/审计缺口）→ r1 已修（H 系列对应项） |
+| b3 | 两测试文件（首轮） | 2 findings（测试基建类）→ r1 已按最小口径处理 |
+| r9 | `scene_host_proxy.py` 968 行整文件（首轮，43min 覆盖完整） | 7 findings **全 CONFIRMED 误报 0**（H1/H2/H4/H5/H6/L1+1）→ r1 六处全修 |
+| **r1 增量** | `0208a73..40ab818` 代理 diff（16min，session `59b7741a`，coverage selected=completed=1 failed=0） | **0 findings**（rc=0，coverage_complete=true） |
+
+r1 修复逐处协调者独立核代码已坐实（`receipts`+本包 §4 提交序列）；**本强审的问题=修复是否语义正确且未引入新缺陷**，重点：H1 输家语义（already_running vs 409 分类是否正确、recovery 路径既有检查是否被破坏）、H2 各终态分支（DONE/FAILED/NO_MATCH）post 可达性是否全补齐、H4 `except Exception` 是否吞掉 `SystemExit`/`KeyboardInterrupt`（BaseException 语义）、H5 fail-fast 是否误伤默认参数 run（frozen_hash 相等/缺失时行为不变）、H6 fsync 在恢复语义上是否充分（进程 kill -9 vs 掉电两档口径）。
+
+## 6. 验证证据（命令/退出码/环境）
+
+- 定向：`PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest tests/test_scene_host_proxy.py tests/test_scene_host_orchestrator.py -q` → **32 passed**（11.66s+24.28s 独立复跑，wt-03b-t16b，本地 .venv 3.10）
+- `ruff check scripts/scene_host_proxy.py` → All checks passed；`ruff format --check` 面同
+- `python3 -m compileall -q scripts/scene_host_proxy.py` → rc=0
+- r1 定向 20 passed（C 自测）+ 协调者复跑一致
+- **未执行项**：真处理机 systemd 常驻/真 NAS 发布/真 VLM 全链（属 12S-C 接线+12S-D 真实验收门禁，不在本包）；SQLite 测试库口径下的并发语义=进程内模拟，真 MySQL 8.4 幂等语义已由 16A/T11 链在管理面验证，本批不改管理面 SQL
+- 环境：本地 Compose real 栈 8 容器 healthy（run8 全链 T11E_RC=0 在 `6fb42c4` 基线已兑现）
+
+## 7. 待强模型回答的问题（收敛，不发散）
+
+1. r1 六处修复语义是否全部正确？逐处给 CORRECTION / VERIFICATION_GAP / OK 判定（引用行号+触发条件）
+2. H4 `except Exception` 的失败收尾链是否存在吞异常或双写（recovery 已清又写）路径？
+3. H5 fail-fast 对"backend 冻结 hash 缺失"（历史 run/首包）与"hash 不等"（非默认参数）的分支处理是否都正确且不误伤？
+4. 单写者保证在 **recovery 对账 + try_reserve + ACTIVE 租约** 三者组合下是否闭环（构造一个你认为能双 spawn 或漏终态的序列，证明或证伪）
+5. 代理与编排的跨进程契约（§2 六条）有没有未闭合缺口会直接卡 12S-C 接线？
+<!-- SEALED 2026-10-13 15:2x：启动失败 REPOSITORY_OUTSIDE_AUTHORIZATION（授权绑主仓路径拒 worktree）；用户裁决封存不重烧，16B 强审以 SR-16B-R1 增量 pack 为准。 -->

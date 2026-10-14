@@ -1,0 +1,274 @@
+---
+name: complex-task-reviewer
+description: 复杂任务强模型纠错审查：用户手动提交或协调者在有效授权内通过Codex提交已完成功能/增量返修包时使用。按既定需求审真实代码和证据；不自动扩充任务、开发、合并或部署。
+metadata:
+  version: "1.2.0"
+---
+
+# 复杂任务独立审查者
+
+
+你是按需工作的独立审查者，优先发现业务逻辑、跨模块契约、状态机、幂等、并发、恢复、错误发布和错误成功判定的问题。不是全程监督者，也不替代运行验证或弱 OCR。
+
+## 功能纠错边界
+
+- 默认审查已完成开发与常规测试的功能批次，按包内冻结的需求/AC、环境和阶段判断正确性。实现前契约审查仅在用户明确要求时进行。
+- 每项发现标为 `CORRECTION`（原功能缺陷）、`VERIFICATION_GAP`（已有AC缺必要证据）或 `OUT_OF_SCOPE`（范围外建议）。前两类必须指出对应需求/AC或它直接蕴含的不变量；疑点标待验证。
+- 阻塞项必须给预期/实际行为、触发、证据、错误后果、最小修复边界和解除条件；不能靠泛化风险或严重度标签增加任务。
+- 只补保证原功能正确所需的修复与验证。新功能、未来规模、偏好式重构和额外质量标准不成为本轮要求；范围外建议单列且默认不派单、不阻塞，不因它们降级PASS。
+- 必要上下游可以查，但须说明与当前错误的因果关系。模块不承担后续真实样本/生产阶段的验收；原有阶段门禁继续保留。
+- 已有问题关闭且原AC满足就结束，不持续寻找无关改进。
+
+## 审查流程
+
+1. 读取审查包的 review_id、冻结需求/AC基线、已交付行为、具体待裁决问题、非范围、作用门禁、实际 base/target、契约版本及证据 commit。材料不足或快照不一致先明确与原AC相关的缺口，不只根据协调者摘要下结论。
+2. 核对完整变更文件清单与可定位 diff，阅读关键实际代码、必要上下游和测试/成功条件修改；大材料按调用链取用，不机械截断文件或重读全部历史。
+3. 核实成功前提、异常分类、状态/事务/释放顺序、并发唯一身份与当前版本、重试、文件与数据库一致性、时间精度/边界和 mock 掩盖的问题。疑点与确认缺陷分开；未执行测试如实写未执行。
+4. 按 [结果模板](assets/result.md) 输出可执行问题：问题 ID/分类/严重度、对应需求/AC、预期与实际行为、代码位置及证据、触发、后果、最小修复边界、必要验证、阻塞与解除条件。避免风格清单、泛化架构扩张和整段重写。
+5. 结论使用 PASS / PASS_WITH_FOLLOWUPS / REWORK_REQUIRED / INSUFFICIENT_EVIDENCE。声明通过的是契约、模块合入、集成、工程闭环或生产门禁；不能用模块通过替代缺真实时间映射/样本/故障证据的闭环。
+6. 默认把结果写到约定路径；没有文件访问能力输出完整结果供保存并说明未写文件。不能编辑业务代码、合并或部署。
+
+## 增量与费用
+
+- 返修审查只看前轮问题 ID、修复 diff、对应测试及受影响上下文，复用有效的已接受材料。新发现只有证明破坏本批既定行为时才成为纠错项；无关建议不扩入复审范围。
+- 结果绑定实际 commit 与契约版本；新逻辑不继承旧 PASS。非阻塞跟进要有 owner/阶段/解除条件。
+- token/费用不可获取写未知，不猜测准确率或费用；记录确认缺陷、核实误报、遗漏、返修轮数及重复阅读情况。
+- 审查由用户手动触发，或由协调者在用户明确授权的自定义时段/当前任务范围内通过限额脚本触发。自动起跑绑定grant_id/call_id，每次复审占额度；本审查者不续授权、不调用其他模型、不调起下一轮。
+- Codex只读入口不能写约定文件时，返回完整最终结果，由调用脚本保存；不得声称自己已落盘。调用成功不代替协调者核验问题或批准。
+
+
+You are a read-only reviewer authorized by the user. No code edits, model delegation, merges, deployments or extra review calls.
+
+{"review_id": "SR-07B-R4-20261013", "grant_id": "31dcbabe5720469c9fae7614188d625e", "call_id": "a8febf1a19444ef9bd456c508c94b397", "base": "4baf79f6e1c42247a55c8554ff1e33ec8e0d2054", "target": "62620a3ddc5cfa614c5e72681c852c96d60507b3", "task": "TASK-07B", "gate": "07B 合入门禁（暂停至本复审+TESTER 07B-post-r 收口）", "risk": "R4 修改 R3 已审迁移 downgrade 守卫结构（提升覆盖整个表依赖块）且 B 申报越界（守卫范围大于派单字面最小修复），需确认不破坏升级/降级语义与冻结 AC", "question": "R4-Q1 守卫提升是否在任何库形态改变 upgrade/downgrade 可观测行为；R4-Q2 越界申报（按 §三 探针口径而非 §一 字面）是否成立且不引入新缺陷；R4-Q3 正常态 index 判定顺序与 R3 是否逐语句等价", "AC": "§2 不变量 1-5：upgrade 面与 R3 逐语句一致；正常态 downgrade 与 R3 逐语句一致；表缺失态 downgrade 全 no-op 不抛异常；docstring 往返风险段与 20261009_02 先例同型且不改列结构；alembic 单头不变"}
+
+Return the complete independent result as your final message; the wrapper writes it. Do not try to write a result file in the read-only sandbox. Freeze existing requirements; OUT_OF_SCOPE suggestions do not block.
+
+The following is the frozen review package. Read actual code in this detached snapshot and the cited verification evidence; do not merely trust the summary.
+
+# SR-07B-R4-20261013 强模型审查包（增量复审）
+
+## 1. 身份与门禁
+
+| 字段 | 值 |
+|---|---|
+| review_id | SR-07B-R4-20261013 |
+| review_type | PRE_MERGE（增量复审，retry-of `50c665e48cb3465c95d29da7bf1446ce` = SR-07B-A2R2-20261013，结论 REWORK_REQUIRED） |
+| scope | TASK-07B 强审查返修链：R3-1~R3-4（`4baf79f`，已交付+OCR 0 CORRECTION）之上的 R4 增量（`62620a3`，仅迁移单文件）。复审只看 R4 问题 ID 与修复 diff + 必要上下文，不逐行重审历史 |
+| gate | 07B 合入门禁（暂停至本复审 + TESTER 07B-post-r 收口）；16A/16B/16C/07C 不冻结 |
+| base / target | 增量 base `4baf79f`（R3 交付冻结 HEAD）/ target **`62620a3`**（`scene/task-07b-manual-revision-withdraw` @ `wt-04a-t07b`）；整链 origin base `502bf8e` 未变 |
+| integration_candidate | 单分支不适用；16A（`3aee4d1`）/16B（`0208a73`）并行分支与本包 target 文件面零交集，合并顺序=07B 先 |
+| contract_version / semantic_hash | DESIGN §7.2（07B 冻结口径）+ §4.1；R4 迁移文件 SHA256=`a13e30731a30611512ba75ce66986cfdf4b952ba9573a79a4ecb0e8119645e63`（`git show 62620a3:alembic/versions/20261012_01_scene_manual.py`） |
+| requirements_baseline | AC-04 不变量 1-6 冻结=`reviews/TASK-07B/attempt-2-r2/strong-review/SR-07B-A2R2-20261013-pack.md` §2；R4 派单=`inbox/2号/TASK-07B/attempt-4-r4-dispatch.md`（问题 ID R4-1/R4-2） |
+| delivery_status | R4 已交付冻结 REVIEW_PENDING；自测见 §5（定向 12 passed / 真 MySQL 8.4.11 fresh 往返 RC=0 / 表缺失态双库探针 NO_EXCEPTION / ruff 绿 / heads 单头） |
+| trigger_decision | REVIEW_NOW——R4 修改了 R3 已审迁移的 downgrade 守卫结构（守卫提升覆盖整个表依赖块），属影响受审行为（部分应用重入安全）的新逻辑；且 B 申报越界（派单 §一「原始口径 no-op 安全」断言被双库实证推翻，守卫范围大于字面最小修复），需强模型确认该结构变化不破坏 upgrade/downgrade 语义与 AC |
+| invocation | AUTHORIZED_CODEX——grant `31dcbabe5720469c9fae7614188d625e`（用户 2026-10-12 11:36 群内 24h 授权），绝对期限 **2026-10-13 11:33:12 +08:00**，滚动 60min 限 5、在途串行；调用时由 strong_review.py 再核 |
+| package_status | READY_FOR_REVIEW |
+| suggested_result_path | `reviews/TASK-07B/attempt-4-r4/strong-review/SR-07B-R4-20261013-result.md` |
+
+## 2. 目标、不变量与非范围
+
+必须成立（冻结 AC，不可借审查新增）：
+1. 迁移 upgrade 面行为与 R3 交付（`4baf79f`）逐语句一致：双表加 `corrected_label varchar(16) nullable`（含 evidence 表）、审计表建表+4 索引，逐对象 gate 保证空库/部分应用重入安全（upgrade 面 R4 零改动）。
+2. downgrade（表存在，正常态）行为与 R3 逐语句一致：drop evidence 列（列存在时）→ drop 4 索引（名存在时）→ drop 审计表列（列存在时）→ drop 审计表。
+3. downgrade（表缺失，部分应用重入态）全 no-op 不抛异常（R4-1 修复目标；R3 及原始口径 `68b5188` 在 `_indexes_of` 处抛 NoSuchTableError 已被双库实证）。
+4. docstring 往返风险段（R4-2）如实描述 downgrade drop 列再 upgrade 的数据丢失语义，与 `20261009_02` 已文档化先例同型口径，不改列结构。
+5. alembic 单头 `20261012_01_scene_manual` 不变；无新表/新迁移/依赖变化。
+
+触发风险（待强模型回答，聚焦）：
+- R4-Q1：守卫提升（整个表依赖块移入 `TABLE in get_table_names()` 内）是否在任何形态（空库 fresh / 部分应用 / 正常态）改变 upgrade 或 downgrade 的可观测行为？evidence 表 `corrected_label` drop 留在守卫外（独立 has_table 守卫）是否与 docstring 宣称的重入安全一致？
+- R4-Q2：越界申报（守卫范围大于派单 §一字面）是否引入新缺陷或仅收窄异常面？B 申报「§一 与 §三 验证口径冲突，按 §三 实现」——判断该申报是否成立（协调者独立探针结论=成立，原始与 R3 形态表缺失态均 RAISED，见 §5 证据 4）。
+- R4-Q3：`_indexes_of` 在守卫内调用后，正常态 index 判定顺序与 R3 是否逐语句等价（diff 显示仅缩进变化+drop_column 位置，请确认无顺序语义差异）。
+
+非范围：app 代码面（R2/R3 已审）、页面、07A/16A/16B 分支、真实生产/真实 VLM、SR-05 真并发取证（留 TESTER 07B-post-r 单，口径不变）。
+
+## 3. 变更地图与调用链
+
+完整文件清单（`git diff --stat 4baf79f..62620a3` 实测）：仅 1 文件 +31/-11——`alembic/versions/20261012_01_scene_manual.py`。零 app/tests/新迁移文件。
+调用链（迁移面）：alembic `upgrade head` → `20261012_01_scene_manual.upgrade()`（evidence 列 gate → 审计表 create_all 语义 → 索引 gate）→ head；`downgrade -1` → `downgrade()`（evidence 列 drop 守卫 → **表依赖块整体守卫（R4-1）** → drop_table）。
+重点位置：`downgrade()` 全文（R4 diff 范围）+ 模块 docstring 新增段（R4-2）。完整 diff 可定位：`git -C /home/wang/.local/state/rosbag-scene/wt-04a-t07b diff 4baf79f..62620a3`；target 全文 120 行见 §4。
+
+## 4. 真实代码材料（target `62620a3` 迁移全文，120 行）
+
+```python
+"""人工纠错/下架审计表（专项 TASK-07B，REQ-04 / AC-04 P1，DESIGN §7.2）
+
+scene_manual_revision：记录人工修正场景标签（REVISE）与人工下架（WITHDRAW）
+的操作者/原因/操作前状态，原始模型结果（bag_scene_label_evidence MODEL 行、
+scene_segment）绝不覆盖或删除——本表是 AC-04"证据可追溯"的审计层。
+不新增 bag_record.status 枚举；下架只转切片 availability（模型既有列）。
+
+⚠️ 逐对象 gate（与 20261009_02 同模式）：迁移链起点 20260911_01 从空库
+upgrade 时按**当前** model `Base.metadata.create_all(checkfirst=True)` 建表，
+新表在空库上已存在 → 无 gate 的 create_table 重放报错。每个对象先
+inspect 再操作，部分应用重入安全。
+
+revision ID 长度 ≤ 25 字符（T03/T04 教训：alembic_version VARCHAR(32) 上限，
+MySQL 1406）。
+
+downgrade：drop 审计表（本表仅承载 P1 审计记录，drop 前不阻断——与
+20261008_01 的 bag_derivation/current 指针阻断口径不同：审计记录不承载
+数据一致性不变量，误 drop 由操作者重新执行纠错/下架补记）。
+
+⚠️ downgrade→upgrade 往返风险（20261013 R4-2，r3-1 low documentation，
+与 20261009_02 同型口径，仅文档化不改列结构）：upgrade 给既有
+bag_scene_label_evidence 增 corrected_label 列（无 backfill，MODEL 行恒
+NULL）；downgrade 单独 drop 该列再重新 upgrade 时，列全 NULL 重加、
+原 MANUAL 行已持久的 corrected_label 值被静默清除且不可恢复——与
+20261009_02 的 frozen_capability_hashes_json 往返覆写先例同型（drop
+列丢数据是 downgrade 固有的、gate 挡不住）。处置边界：07B 该迁移未合
+入，生产链起点 20260911_01 空库 upgrade 按当前 model 建表建列不经过
+往返路径；若已应用的库执行 downgrade→upgrade，处置=操作者对受影响
+MANUAL 记录重新执行纠错补记 corrected_label（与上段 drop 审计表补记
+口径一致）。
+"""
+
+import sqlalchemy as sa
+
+from alembic import op
+
+revision = "20261012_01_scene_manual"
+down_revision = "20261009_02_ingest_frozen"
+branch_labels = None
+depends_on = None
+
+BIGINT = sa.BigInteger().with_variant(sa.Integer(), "sqlite")
+
+TABLE = "scene_manual_revision"
+# R3-1（07B-SR-01）：纠错值持久化——审计表与既有证据表同增 nullable 列
+# （07B 未合入，改本未合入迁移，不另开新迁移文件）。
+EVIDENCE_TABLE = "bag_scene_label_evidence"
+
+
+def _indexes_of(table: str) -> set[str]:
+    return {ix["name"] for ix in sa.inspect(op.get_bind()).get_indexes(table)}
+
+
+def upgrade() -> None:
+    bind = op.get_bind()
+    if TABLE not in sa.inspect(bind).get_table_names():
+        op.create_table(
+            TABLE,
+            sa.Column("id", BIGINT, primary_key=True, autoincrement=True),
+            sa.Column("bag_uid", sa.String(length=26), nullable=False),
+            sa.Column("scene_code", sa.String(length=32), nullable=False),
+            sa.Column("action", sa.String(length=16), nullable=False),
+            sa.Column("operator", sa.String(length=128), nullable=False),
+            sa.Column("reason", sa.String(length=512), nullable=False),
+            sa.Column("bag_row_version", sa.Integer(), nullable=False),
+            sa.Column("idempotency_key", sa.String(length=255), nullable=True),
+            sa.Column("original_label_ref", sa.String(length=255), nullable=True),
+            sa.Column("corrected_label", sa.String(length=16), nullable=True),
+            sa.Column("created_at", sa.DateTime(), nullable=False),
+        )
+    else:
+        # 部分应用重入：表已建但缺 corrected_label 列 → 补列
+        # （Inspector 2.0 无 has_column，用 get_columns 口径）
+        if "corrected_label" not in {c["name"] for c in sa.inspect(bind).get_columns(TABLE)}:
+            op.add_column(TABLE, sa.Column("corrected_label", sa.String(length=16), nullable=True))
+    idx_names = _indexes_of(TABLE)
+    if "ix_scene_manual_revision_bag_uid" not in idx_names:
+        op.create_index("ix_scene_manual_revision_bag_uid", TABLE, ["bag_uid"])
+    if "ix_scene_manual_revision_scene_code" not in idx_names:
+        op.create_index("ix_scene_manual_revision_scene_code", TABLE, ["scene_code"])
+    if "ix_scene_manual_revision_action" not in idx_names:
+        op.create_index("ix_scene_manual_revision_action", TABLE, ["action"])
+    if "ix_scene_manual_revision_idempotency_key" not in idx_names:
+        op.create_index("ix_scene_manual_revision_idempotency_key", TABLE, ["idempotency_key"])
+    # 既有证据表加 corrected_label（nullable，MODEL 行恒 None；空库链起点
+    # create_all(checkfirst=True) 已按当前 model 建列 → gate 跳过）
+    if sa.inspect(bind).has_table(EVIDENCE_TABLE) and "corrected_label" not in {
+        c["name"] for c in sa.inspect(bind).get_columns(EVIDENCE_TABLE)
+    }:
+        op.add_column(
+            EVIDENCE_TABLE, sa.Column("corrected_label", sa.String(length=16), nullable=True)
+        )
+
+
+def downgrade() -> None:
+    bind = op.get_bind()
+    if sa.inspect(bind).has_table(EVIDENCE_TABLE) and "corrected_label" in {
+        c["name"] for c in sa.inspect(bind).get_columns(EVIDENCE_TABLE)
+    }:
+        op.drop_column(EVIDENCE_TABLE, "corrected_label")
+    if TABLE in sa.inspect(bind).get_table_names():
+        idx_names = _indexes_of(TABLE)
+        for name in (
+            "ix_scene_manual_revision_idempotency_key",
+            "ix_scene_manual_revision_action",
+            "ix_scene_manual_revision_scene_code",
+            "ix_scene_manual_revision_bag_uid",
+        ):
+            if name in idx_names:
+                op.drop_index(name, table_name=TABLE)
+        # R4-1（r3-1 medium CORRECTION）：表缺失态 downgrade 不抛异常。
+        # 取证修正（B 实测双库，证据 scratch/b-r4-evidence2.py）：原始口径
+        # （f4bfcf2/68b5188）对表不存在的库**同样**在 _indexes_of 处抛
+        # NoSuchTableError（SQLite NoReferencedTableError / MySQL 1146），
+        # 并非派单 §一假设的 no-op 安全——仅把 drop_column 移回表存在判定
+        # 内不能满足"表缺失态 downgrade 不抛异常"验证口径，故守卫提升为
+        # 覆盖整个表依赖块（index 循环+列 drop+drop_table）。正常态行为
+        # 与原口径逐语句一致（表存在时 idx_names/列判定同原顺序）。
+        if "corrected_label" in {c["name"] for c in sa.inspect(bind).get_columns(TABLE)}:
+            op.drop_column(TABLE, "corrected_label")
+        op.drop_table(TABLE)
+```
+
+R3 交付（`4baf79f`）同文件 downgrade 对照段（复审上下文）：
+```python
+def downgrade() -> None:
+    if "bag_scene_label_evidence" in sa.inspect(bind).get_table_names():
+        if "corrected_label" in {c["name"] for c in sa.inspect(bind).get_columns(EVIDENCE_TABLE)}:
+            op.drop_column(EVIDENCE_TABLE, "corrected_label")
+    idx_names = _indexes_of(TABLE)
+    for name in (
+        "ix_scene_manual_revision_idempotency_key",
+        "ix_scene_manual_revision_action",
+        "ix_scene_manual_revision_scene_code",
+        "ix_scene_manual_revision_bag_uid",
+    ):
+        if name in idx_names:
+            op.drop_index(name, table_name=TABLE)
+    if "corrected_label" in {c["name"] for c in sa.inspect(bind).get_columns(TABLE)}:
+        op.drop_column(TABLE, "corrected_label")
+    if TABLE in sa.inspect(bind).get_table_names():
+        op.drop_table(TABLE)
+```
+
+## 5. 验证证据（协调者独立核验，非复述回执）
+
+| evidence | 环境 | 命令/结果 | 关键断言 | 证据路径 | 未执行项 |
+|---|---|---|---|---|---|
+| R4-`62620a3` | wt-04a-t07b venv py3.10 | 协调者独立复跑 `pytest tests/test_task07b_r3_revision.py tests/test_task07b_manual_revision.py tests/test_task07b_r2_revision.py -q` → 12 passed RC=0（2026-10-13 07:3x） | R3-1~4 断言全绿 | 终端在案（r133） | 全量（B 申报 840 passed 口径，R4 零 app 面不重跑） |
+| R4-`62620a3` | 协调者独立探针 `scratch/coord_r133_probe.py`（SQLite 内存，create_all 后 DROP 审计表） | 三形态对照：R4 NO_EXCEPTION / R3 RAISED NoSuchTableError / 原始 68b5188 RAISED NoSuchTableError | **证伪派单 §一「原始口径 no-op 安全」断言**（首个失败点=`_indexes_of`→`get_indexes`），B 越界申报成立 | `/home/wang/.hermes/cache/scratch/coord_r133_probe.py` | MySQL 侧探针（B 回执 `scratch/b-r4-evidence3.py` 申报双库同结论，协调者未复跑） |
+| R4-`62620a3` | 真 MySQL 8.4.11 独占容器（B 申报） | fresh `upgrade head`→`downgrade -1`→`upgrade head` 全 RC=0，SHOW COLUMNS 双表列校验，容器 0 残留 | MYSQL_ROUNDTRIP_OK | `scratch/b-r4-roundtrip.py`/`b-r4-colcheck.py`（B worktree） | 协调者未复跑（B 回执口径与 R3 先例一致） |
+| R4-`62620a3` | wt venv | `ruff check` 迁移文件 All checks passed；`alembic heads` 单头 `20261012_01_scene_manual` | 卫生/头不变 | 终端在案（r133） | 无 |
+| 增量 OCR | r132 侧 detached 07:28 收口（协调者 r133 核 results json） | `ocr review --from 4baf79f --to 62620a3` rc=0，session `5b9cc87c-b2aa-417e-9527-0c587ec443dd`，52s，~16974 tokens | **0 findings** | `~/.hermes/cache/scratch/t07b_r4_ocr/r4_incr_results.json` | 无 |
+| R3 面 | r130 OCR 6/6 收口 + r111 机械核验 | R3-1~4 修复 commit `4baf79f`，7 文件 +441/-15，定向 12 passed+ruff 绿+真 MySQL 增列往返 OK（R3 回执） | R3 链全闭环证据在案 | `receipts/TASK-07B/attempt-3-r3.md`、`reviews/TASK-16/16A-16B-ocr-batches.md` r130 段 | SR-05 真并发（留 TESTER post-r） |
+
+## 6. 弱模型 OCR 与待裁决风险
+
+- 已确认并修复：R4-1（r3-1 medium，CORRECTION，`62620a3` 修复，协调者探针独立确认 NO_EXCEPTION）；R4-2（r3-1 low，documentation，`62620a3` docstring 段，引用先例 `20261009_02` 在案同型）。
+- 经证据排除的误报：无。R4 增量 OCR 0 findings；R3 增量 OCR 6/6 余 5 批 0 findings。
+- 未覆盖：app 面（R2/R3 已审已覆盖）、SR-05 真并发取证（TESTER 单，口径不变）。
+- 待强模型裁决：§2 R4-Q1~Q3（聚焦迁移守卫结构与越界申报合理性）。
+
+## 7. 强模型输出要求
+
+逐项输出：问题 ID/分类/严重级别、对应既定需求/AC（引用 §2 不变量编号）、预期与实际行为、代码位置及证据、触发条件、后果、最小修复边界、必要验证、阻塞门禁及解除条件。
+分类为 CORRECTION / VERIFICATION_GAP / OUT_OF_SCOPE；范围外建议单列，默认不派单、不阻塞、不降级 PASS。只纠正原功能；问题关闭且原 AC 满足即收口。
+同根因（R4 再出迁移守卫同位 CORRECTION）两轮未解决将按协议升级用户，不无限返修。
+疑点证据不足时标待验证；不得虚构运行结果、直接修改代码、合并或部署。
+总体结论：PASS / PASS_WITH_FOLLOWUPS / REWORK_REQUIRED / INSUFFICIENT_EVIDENCE，明确作用范围=07B 模块合入门禁。
+
+## 8. 协调者登记（结果返回后填写）
+
+- result_path / received_at：
+- result_snapshot_match：
+- target_or_contract_changed_since_review：
+- verified_findings / false_positives / unresolved：
+- correction_ids / verification_gaps / out_of_scope_not_dispatched：
+- original_AC_satisfied / remaining_blockers / close_condition：
+- token_and_cost：
+- grant_id / call_id / rolling_60m_count / authorization_scope：
+- rework_round / incremental_review_scope：
+- decision / affected_gate / independent_work_continuing：

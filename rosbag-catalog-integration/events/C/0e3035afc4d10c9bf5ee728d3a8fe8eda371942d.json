@@ -1,0 +1,11 @@
+{
+  "event_id": "c-t11s-batch-1012-obs70-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T09:20:00+08:00",
+  "recorded_at": "2026-10-14T09:22:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第70轮只读观察（处理机 09:19-09:20 实测）：与 obs69 零状态变化=模型段完成信号仍未到，INFER 持续活跃，大包跨夜续跑不 kill/retry。scene-4acf689f（16_02_03 正式链 source 91FFEEC1…/submission 24d60fee…）SCENE_RUNNING attempt=1 auto_retry_count=null error 空、lease_expires_at 09:21:38（09:19:44 查点，heartbeat 续租活跃）、lease_owner=platform-local；8767/health ok active_runs=[scene-4acf689f ACCEPTED pid1]；proxy 宿主 pid 3495931 LSTART 10月13 20:22:38 连续未重启、ELAPSED 12:57:05、TIME 01:21:01（obs69 01:20:56，+5s 持续非零）、RSS 18137524 同量级；work 树 attempt-1/checkpoint.json mtime 2026-10-14 00:23:10.474817688 +0800 未翻（模型段完成信号未到）、find -newermt 30min=0 零新写；VLM 通道容器 /proc/1/net/tcp 实测 1 条 ESTAB 8602A8C0:DCA8→2D02A8C0:1F42（192.168.2.45:8002，临时端口循环重建 D28A→DCA8 非通道消失）；VLM 远端直证 llm-server /tmp/vllm_qwen38.log 09:18:59-09:19:49 六点十秒采样 Running 2-3 reqs、Waiting 全程 0、prefix cache 92.5%、MM cache 88.9%、gen 89.3-172.8 tok/s（prompt 峰值 3291.6 tok/s 批量输入段）、POST /v1/chat/completions 200 OK 连发=推理活跃续证；资源/入口面 NAS //192.168.2.77/public 98T/70T/29T 71% 不变、up 5 天 23:38、load 2.25/2.19/2.18 与 obs59-69 同量级（C 未起任何进程）、incoming/spray 仍仅 rosbag2_2026_10_12-16_33_10 空包目录（D6 正式拒绝痕迹 A 面不变）。本批 8 包无新终态；无升级条件命中（heartbeat 续租正常/run 未 FAILED/VLM Waiting 全程 0 且 proxy 有 ESTAB）。C 全程只读（ssh curl 8180/8767、ps/stat/find/ls/df/uptime、docker exec 只读 net/tcp、llm-server 读 vllm log），未 kill/未删/未重启/未 retry/未改任何生产路径。租约 owner C-cron-poll-20261014-091853-t11s-obs70（09:20:04 claim，token 整体 JSON 解析 len=32）。",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件=heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且 proxy 无 ESTAB；③ 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。白天口径：状态变化即时通报，无变化不报进度。"
+}

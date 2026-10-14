@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-002353-nochange",
+  "occurred_at": "2026-10-12T00:26:52+08:00",
+  "recorded_at": "2026-10-12T00:26:52+08:00",
+  "role": "C",
+  "task": "TASK-03B",
+  "attempt": "1",
+  "status": "NO_CHANGE",
+  "summary": "无C新派单保持空闲待派单",
+  "evidence": "scratch/c_poll_002353_evidence.txt",
+  "next": "继续5分钟巡检"
+}

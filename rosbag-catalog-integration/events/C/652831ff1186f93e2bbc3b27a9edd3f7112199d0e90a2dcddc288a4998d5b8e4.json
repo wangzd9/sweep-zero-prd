@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-120853-nochange",
+  "occurred_at": "2026-10-12T12:11:08+08:00",
+  "recorded_at": "2026-10-12T12:11:08+08:00",
+  "role": "C",
+  "task": "none",
+  "attempt": "none",
+  "status": "IDLE_NO_CHANGE",
+  "summary": "12:09 巡检 nochange：C 范围零新增（inbox/3号 与 inbox/coordinator 12:03:53 后 find 均空）、无 C 新派单；main 453da0c=origin 双核、wt-03b 6f1a9ad 干净、无 C 在途进程；协调者 r79 T07A-r1f-g2-resume2 OCR 续批在途非 C；leases A/B 为 1号/2号自身巡检不接管；保持空闲待派单",
+  "evidence": "sessions/C.md 12:09 条目（422->423 行纯前置核验通过）",
+  "next": "空闲待派单"
+}

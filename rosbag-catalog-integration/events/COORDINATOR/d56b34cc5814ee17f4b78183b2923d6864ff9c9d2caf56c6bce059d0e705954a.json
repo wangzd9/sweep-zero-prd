@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r107-t07b-strong-review-rework-r3-dispatched",
+  "occurred_at": "2026-10-13T02:06:42+08:00",
+  "recorded_at": "2026-10-13T02:06:42+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07B",
+  "attempt": "attempt-3-r3",
+  "status": "REWORK_REQUIRED_R3_DISPATCHED",
+  "summary": "强审查SR-07B-A2R2返回REWORK_REQUIRED(4 CORRECTION+1 VERIFICATION_GAP, call 50c665e4, tokens in 656176/out 9229)：SR-01纠错值未持久化/SR-02守卫前关联INSERT并发/SR-03幂等漏操作者/SR-04再纠错覆盖首次模型引用——5项逐条核代码属实→R3最小返修单已派B(base 68b5188续commit,改未合入原迁移)；SR-05真并发409留TESTER post-r3单",
+  "evidence": "reviews/strongmodel/runs/50c665e48cb3465c95d29da7bf1446ce/result.md;inbox/2号/TASK-07B/attempt-3-r3-dispatch.md",
+  "next": "B ACK+R3开发→机械核验→增量OCR→强审增量复审→TESTER→合入(07B先)→07B DONE→派07C/16C"
+}

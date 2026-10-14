@@ -1,0 +1,12 @@
+{
+  "event_id": "coordinator-poll-20261011210053-task09-active",
+  "occurred_at": "2026-10-11T21:02:56+08:00",
+  "recorded_at": "2026-10-11T21:02:56+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "巡检：2号 TASK-09 活跃在途（编码+真实样本验证脚本在跑），无交付回执，main 0a8ca8a 未动",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/events/COORDINATOR/coordinator-poll-20261011210053-task09-active.md",
+  "next": "等 2号交付回执后机械核验+串行 OCR"
+}

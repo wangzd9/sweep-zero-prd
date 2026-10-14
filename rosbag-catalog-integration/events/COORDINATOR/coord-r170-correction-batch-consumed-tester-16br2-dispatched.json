@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r170-correction-batch-consumed-tester-16br2-dispatched",
+  "occurred_at": "2026-10-13T17:46:00+08:00",
+  "recorded_at": "2026-10-13T17:46:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16B/TASK-11S-PREP/TASK-12S-B",
+  "attempt": "n/a",
+  "status": "POLL_HANDLED",
+  "summary": "r170 巡检（消费 pending 180e39f6/7caf557f 批次）：17:45:32 用户纠正批次全量认账——①SPRAY-CORRECTION-20261013 覆盖旧派单错误现状，原 REQ/AC 与文件 owner 不变；②TESTER TASK-16B-r2 独立验证派单在案（固定 base 40ab818/head e152465，与 OCR 4492b7f6 并行，R1-01~05 注入证据口径）；③A r1 优先级 defer 认账（VLM 队列 17:40 满载 running=4+waiting=4，r1 剩余面排 r2 OCR 与 B 收尾后，目标 18:00-18:15 冻结，18:00 未冻结升级通报用户；G4 核心证据已在案，r1 剩余非发布硬依赖，SHA 口径 17:45 最终候选人工核对过渡）；④B s9b-nudge2 17:45 冻结目标维持。本轮实测：wt-04a-t12sb HEAD 仍 0320a8e、wt-01-t11sp HEAD 仍 d8f7206（均在指令目标时间内不催）；OCR 4492b7f6 RUNNING 不变。零新 OCR 起跑、零强审调用、零新派单、零合入；19:00 首包顺延风险已申报。",
+  "evidence": "inbox/control/SPRAY-CORRECTION-20261013.md; inbox/TESTER/TASK-16B-r2/attempt-1-dispatch.md; inbox/1号/TASK-11S-PREP/attempt-1-r1-priority-defer.md; inbox/1号/TASK-11S-PREP/active-correction.md; inbox/2号/TASK-12S-B/attempt-1-rework-s9b-nudge2.md; git log 双 worktree HEAD 未移动",
+  "next": "下轮：核 TESTER 16B-r2 ACK/交付 + B s9_head 冻结（17:45 线）+ A r1 冻结（18:00-18:15 线，超时升级通报用户）；4492b7f6 收口→裁决→强审增量复审（6b2d83fb 剩 4/5）→合入 16B"
+}

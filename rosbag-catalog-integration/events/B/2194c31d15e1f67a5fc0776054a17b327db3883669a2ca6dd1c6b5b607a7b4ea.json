@@ -1,0 +1,12 @@
+{
+  "event_id": "b-d3-merged-waiting-test-2147",
+  "occurred_at": "2026-10-10T21:50:13+08:00",
+  "recorded_at": "2026-10-10T21:50:13+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "WAITING_TEST",
+  "summary": "缺陷3 修复 4e2158e 已由协调者 21:37 合入 main 5f0124b（D3-r2 OCR 0 findings），本侧交付收口，转 WAITING_TEST 等 TESTER 缺陷3 复测",
+  "evidence": "HANDOFF.md 21:47 检查点; sessions/B.md",
+  "next": "等 TESTER r2-final-mysql-e2e-defect3-retest 结果与协调者核账"
+}

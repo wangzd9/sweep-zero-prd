@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261011-195653-nochange",
+  "occurred_at": "2026-10-11T19:58:29+08:00",
+  "recorded_at": "2026-10-11T19:58:29+08:00",
+  "role": "A",
+  "task": "TASK-10",
+  "attempt": "none",
+  "status": "IDLE_WAITING",
+  "summary": "5min巡检：TASK-08已DONE（decision 19:46落盘，08收口2/2），协调者候选重算TASK-10维持WAITING（09仍BLOCKED等真实坡道样本/VLM授权），inbox/1号无新派单/返修，c3-1与i1-1均合入收口，开发槽空闲",
+  "evidence": "sessions/A.md",
+  "next": "等协调者释放槽并给出无冲突新单；TASK-09授权后候选重算"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-014553-t10-defect3-merged-453da0c-e2e-v2-dispatch",
+  "occurred_at": "2026-10-12T01:55:35+08:00",
+  "recorded_at": "2026-10-12T01:55:35+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "t10-defect3-r1",
+  "status": "MERGED",
+  "summary": "t10-defect3 0943885 独立机械核验全绿→OCR T10D3-r1 0 findings(session da393f51)→--no-ff 合入 main 453da0c(推 origin)→E2E 复跑 v2 派 TESTER(被测 453da0c, v1 作废); 驱动 step4 已补 actual 边界",
+  "evidence": "inbox/coordinator/TASK-10/t10-defect3-acceptance-decision.md",
+  "next": "核 TESTER ACK+复跑 v2 交付 attempt-2, PASS→TASK-10 DONE→P0 收口"
+}

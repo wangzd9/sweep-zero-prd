@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t16b-ack-20261012-2246",
+  "occurred_at": "2026-10-12T22:48:15+08:00",
+  "recorded_at": "2026-10-12T22:48:15+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "ACCEPTED",
+  "summary": "C 领取 TASK-16B attempt-1：本机场景代理+八步编排+远端模型/NAS发布接线（§7.3.2），base c2018dd，新分支 c/task-16b-scene-host-proxy；16A 未接受，先做模块与自测",
+  "evidence": "inbox/3号/TASK-16B/attempt-1-ack.md",
+  "next": "开工开发，交付冻结后 REVIEW_PENDING 回执"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-094353-nochange",
+  "occurred_at": "2026-10-12T09:47:47+08:00",
+  "recorded_at": "2026-10-12T09:47:47+08:00",
+  "role": "C",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "09:43 poll: no new C dispatch, main 453da0c=origin dual-core, wt-03b 6f1a9ad clean, no C in-flight process, leases empty, idle waiting",
+  "evidence": "sessions/C.md",
+  "next": "idle-wait"
+}

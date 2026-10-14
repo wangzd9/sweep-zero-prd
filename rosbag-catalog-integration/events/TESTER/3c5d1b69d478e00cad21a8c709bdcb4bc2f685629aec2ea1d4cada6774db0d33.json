@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-233953-nochange",
+  "occurred_at": "2026-10-12T23:44:03+08:00",
+  "recorded_at": "2026-10-12T23:44:03+08:00",
+  "role": "TESTER",
+  "task": "poll",
+  "attempt": "1",
+  "status": "no_change",
+  "summary": "5分钟巡检无 TESTER 新派单，07B R2 在 B 面，origin/main 502bf8e 未合入，租约闭环",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/events/TESTER/tester-poll-20261012-233953-nochange.md",
+  "next": "继续 5 分钟巡检"
+}

@@ -1,0 +1,1 @@
+../rosbag-catalog-spray-pipeline/SPRAY-RELEASE.md

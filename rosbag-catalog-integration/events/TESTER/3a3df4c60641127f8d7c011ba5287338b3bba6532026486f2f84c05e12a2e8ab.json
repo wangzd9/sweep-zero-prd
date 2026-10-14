@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-222953-nochange",
+  "occurred_at": "2026-10-12T22:36:22+08:00",
+  "recorded_at": "2026-10-12T22:36:22+08:00",
+  "role": "TESTER",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "空闲巡检：无TESTER新派单/回执，origin/main 502bf8e未合入，07B OCR resume在途属协调者面，07A/10 DONE维持，11生产门禁BLOCKED维持",
+  "evidence": "sessions/TESTER.md",
+  "next": "继续5分钟巡检待命"
+}

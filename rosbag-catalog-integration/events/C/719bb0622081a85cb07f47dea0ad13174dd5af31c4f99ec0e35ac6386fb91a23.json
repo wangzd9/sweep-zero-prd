@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-090853-nochange",
+  "occurred_at": "2026-10-13T09:16:25+08:00",
+  "recorded_at": "2026-10-13T09:16:25+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "C 巡检无新派单；16B 维持 NEEDS_REVIEW 冻结，升级用户裁决待答（proxy OCR 4/4 连败）",
+  "evidence": "sessions/C.md 09:10 条目",
+  "next": "等用户裁决 16B 选项 a/b/c/d"
+}

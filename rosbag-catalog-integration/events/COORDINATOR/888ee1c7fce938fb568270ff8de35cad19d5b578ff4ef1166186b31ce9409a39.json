@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-233053-t10-run4-vlm404",
+  "occurred_at": "2026-10-11T23:34:48+08:00",
+  "recorded_at": "2026-10-11T23:34:48+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "2号 TASK-10 驱动第 4 跑推进：1d 已解（run scene-a837d694…）；新阻塞=外部 VLM 服务 404 → MODEL_UNAVAILABLE，B 在途排查根因（非 app 代码缺陷）",
+  "evidence": "scratch/t10/t10-run.log:23:31:40",
+  "next": "核 B VLM 404 根因+驱动续跑，交付即核验→OCR→合入→TESTER→P0 收口"
+}

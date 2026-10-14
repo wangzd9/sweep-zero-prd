@@ -1,0 +1,42 @@
+[ocr] Summary: 1 file(s) reviewed, 2 comment(s), ~467880 token(s) used (input: ~432085, output: ~35795), 9m42s elapsed
+[ocr] Session: 03eee6ac-f6a2-4088-a9f6-c9cbc308a3ca
+Review complete: 2 finding(s) across 1 selected item(s).
+
+─── app/services/bag_search_service.py:73-79 ───
+[maintainability · medium] Dead code: `data_kind_labels_for` has no call site anywhere in the
+codebase (only its definition matches; the UI wiring uses `data_kind_context` + the `data_kind_ctx`
+template var in `app/web/bags.py`/`bags.html`). Beyond being unused, its logic contradicts the
+shipped behavior — for a `NOT_APPLICABLE` bag with `dataset_type="self_built"` and no scene purpose
+it returns `["self_built_original"]`, whereas `data_kind_context` intentionally returns `[]` for
+unknown historical rows ("不猜测" policy). If this helper was meant to be used at a call site (detail
+page / template), it needs a `bag_role == "ORIGINAL"` guard for the NOT_APPLICABLE branch; otherwise
+it should be removed to avoid a divergent duplicate of the classification rules.
+
+
+
+─── app/services/bag_search_service.py:312-315 ───
+[bug · medium] Dual-purpose bags (ORIGINAL + `scene_slice` purpose + `dataset_type=self_built`) are
+matched by CASE branch 3 and classified **only** as `scene_original`, so
+`data_kind=self_built_original` will not return them. Yet `data_kind_context()` labels the same row
+with **both** badges (confirmed by `test_four_kinds_and_dual_purpose`), and this comment plus the
+DESIGN §7.3.3 quote ("双用途原包可同时显示两个类型标记并命中两个筛选") promise both filters hit. Result: a row showing the
+"自建原始数据" badge disappears when filtering by 自建原始数据 — display and filter semantics disagree, and this
+comment is factually wrong. Either make the filter per-kind (self_built_original should also OR-in
+dual-purpose originals) or, if single canonical bucketing is truly intended, fix this comment and
+the `data_kind_context`/`data_kind_labels_for` docstrings.
+
+      # 数据分类（TASK-16C / DESIGN §7.3.3）：与 dataset_type 并用取交集（不相容组合→明确空结果，
+-     # 不静默丢条件）；SQL CASE 单值口径，双用途原包在 scene_original/self_built_original 中均可命中。
++     # 不静默丢条件）；双用途原包（ORIGINAL + scene_slice 用途 + self_built）同时命中两个筛选。
+      if state.data_kind:
++         if state.data_kind == "self_built_original":
++             dual_purpose = and_(
++                 BagRecord.bag_role == "ORIGINAL",
++                 BagRecord.dataset_type == "self_built",
++                 BagRecord.purposes.any(BagPurpose.purpose == "scene_slice"),
++             )
++             stmt = stmt.where(or_(data_kind_case() == "self_built_original", dual_purpose))
++         else:
+-         stmt = stmt.where(data_kind_case() == state.data_kind)
++             stmt = stmt.where(data_kind_case() == state.data_kind)
+

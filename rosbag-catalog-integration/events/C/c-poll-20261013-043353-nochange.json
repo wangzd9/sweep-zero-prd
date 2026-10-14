@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-043353-nochange",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "attempt-1",
+  "status": "FROZEN_REVIEW_PENDING",
+  "recorded_at": "2026-10-13T04:35:00+08:00",
+  "summary": "16B b3 fake_vlm INFLIGHT（父进程 980094 存活持 ocr.lock）；b1/b2 resume 裁决归协调者；无 C 新派单；交付冻结不自测",
+  "evidence": "receipts/TASK-16B/attempt-1.md; wt-03b-t16b HEAD 0208a73",
+  "next": "等 b3 收口 + b1/b2 双 resume + 无 CORRECTION 级即合入（07B→16A rebase→16B 顺序）",
+  "owner": "C-cron-poll-20261013-043353"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-ack-20261012-012030-t10d3",
+  "occurred_at": "2026-10-12T01:20:45+08:00",
+  "recorded_at": "2026-10-12T01:20:45+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "t10-defect3-publish-bounds-r1",
+  "status": "ACKED",
+  "summary": "领取 t10-defect3-publish-bounds（06B 区间身份复核存储域边界缺口#3），base a77aa45 双核一致，wt-04a-t10d3 新建开工",
+  "evidence": "inbox/2号/TASK-10/t10-defect3-publish-bounds-ack.md",
+  "next": "最小实现+定向测试后交付 REVIEW_PENDING"
+}

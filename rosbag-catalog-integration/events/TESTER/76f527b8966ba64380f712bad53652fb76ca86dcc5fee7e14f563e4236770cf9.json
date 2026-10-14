@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-115453-nochange",
+  "occurred_at": "2026-10-12T11:56:04+08:00",
+  "recorded_at": "2026-10-12T11:56:04+08:00",
+  "role": "TESTER",
+  "task": "POLL",
+  "attempt": "1",
+  "status": "NO_CHANGE",
+  "summary": "5分钟巡检：main 453da0c=origin/main 双核一致；inbox/TESTER 与 test-receipts 11:39:53 后零新增派单；无 TESTER 租约与业务进程，维持 IDLE；T10 DONE 已收口、TASK-11 生产门禁维持 BLOCKED 待用户授权",
+  "evidence": "preflight checked_at 2026-10-12T11:54:53+08:00 control=ACTIVE",
+  "next": "继续5分钟巡检"
+}

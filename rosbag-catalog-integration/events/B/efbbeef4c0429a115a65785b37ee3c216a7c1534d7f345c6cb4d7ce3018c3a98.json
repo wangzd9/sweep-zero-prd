@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-083253-nochange",
+  "occurred_at": "2026-10-11T08:34:36+08:00",
+  "recorded_at": "2026-10-11T08:34:36+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "08:32 巡检无变化：main 6d30a68 不变、inbox/2号 无新派单无返修、强复审 R2I-20261010-06 仍 READY_FOR_USER_TRIGGER、wt-04a/wt-04a-r5 冻结",
+  "evidence": "sessions/B.md",
+  "next": "继续巡检；等协调者/用户动作"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-225253-t07b-ocr-r101-all-done-idle",
+  "occurred_at": "2026-10-12T23:06:10+08:00",
+  "recorded_at": "2026-10-12T23:06:10+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "r101 resume OCR 全量收口（b7 RC=0/839s 3条style-low；b5 RC=0 但 core 30m 超时待协调者裁决收口态）；无新派单/返修单；07B f4bfcf2 交付冻结等 CONFIRMED CORRECTION 合并返修单",
+  "evidence": "scratch/t07b/ocr/r101_resume_progress.txt done 22:43:38",
+  "next": "等协调者 b5 收口态裁决+返修问题 ID 单，届时按 attempt 续 scene/task-07b-manual-revision-withdraw 最小返修"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "codex-spray-production-first-bag-pass-3c9c496",
+  "occurred_at": "2026-10-13T20:37:10+08:00",
+  "recorded_at": "2026-10-13T20:37:10+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S",
+  "attempt": "2",
+  "status": "DONE",
+  "summary": "受控test生产首包3c9c496已SCENE_DONE且八步DONE，1752消息切片入库获取/两次对账/原包SHA/旧健康与本地收敛PASS；19:00未达，广义矩阵仍PARTIAL",
+  "evidence": "reviews/TASK-11S/production-first-bag-20261013.md",
+  "next": "新UI及旧poll继续暂停；保留真阴性/真实车/多DB3实采/批量矩阵，禁止重跑首包模型"
+}

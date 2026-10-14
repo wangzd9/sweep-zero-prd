@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-1225-r8-merged-65ca0be-20261011",
+  "occurred_at": "2026-10-11T12:35:35+08:00",
+  "recorded_at": "2026-10-11T12:35:35+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "MERGED",
+  "summary": "2号 rework-8 1b0d504 验收合入 main 65ca0be（推 origin）：独立 AST 全量比对核验纯注释零行为变更+定向 35 passed RC=0+ruff 绿独立复跑；OCR R8-r1 纯测试交付预期 0 入选（session b012b488，与 c2dbe91 先例同口径）；合入后 sanity 全绿（alembic 单头/ruff 绿/SQLite 35 passed）；codex 审查链五轮全部收口不再起第六轮；decision inbox/coordinator/TASK-06B/attempt-1-r2-rework-8-acceptance-decision.md",
+  "evidence": "merge 65ca0be; receipts/TASK-06B/attempt-1-r2-rework-8.md; reviews/TASK-06B/attempt-1-r2-rework-8/ocr-batches.md",
+  "next": "巡检核强复审 result 文件 R2I-20261010-06（target 已更新 65ca0be，pack_update_20261011_1231，等用户手动触发）→03/05/06 聚合 DONE→TASK-08"
+}

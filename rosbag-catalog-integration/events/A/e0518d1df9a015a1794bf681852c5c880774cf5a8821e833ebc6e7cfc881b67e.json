@@ -1,0 +1,12 @@
+{
+  "event_id": "a-t16ca-attempt1-transfer-assert-redelivery-20261014T124700",
+  "occurred_at": "2026-10-14T12:48:14+08:00",
+  "recorded_at": "2026-10-14T12:48:14+08:00",
+  "role": "A",
+  "task": "TASK-16C-A",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "转派单执行完毕：tests/test_web.py:366 断言 原始包→原始数据，续 commit 563a91a 冻结交付（同 branch/worktree）；复跑 74 passed+1 failed（seed 固有失败 no such table 同口径，不计本账）；ui_minimal 15 全绿；test_web.py 无其他 tab 改名连带；回执补 attempt-1 续单段",
+  "evidence": "commit 563a91a; receipt receipts/TASK-16C-A/attempt-1.md 续单段; worktree wt-01-t16ca",
+  "next": "等协调者 OCR（以 563a91a 为 A 叶最终冻结 head）与 TESTER 独立验证；门禁不变"
+}

@@ -1,0 +1,41 @@
+[ocr] Summary: 1 file(s) reviewed, 3 comment(s), ~995025 token(s) used (input: ~920830, output: ~74195), 30m0s elapsed
+[ocr] Session: 7d703528-a5c5-471b-9bb1-3d283fa38326
+Review complete: 3 finding(s) across 1 selected item(s).
+
+─── app/services/scene_manual_revision_service.py:204-206 ───
+[bug · medium] Concurrency / lost-update race: this read-check-then-`bag.row_version += 1` (ORM
+flush on commit) is not the authoritative guard used elsewhere in the codebase.
+`ingest_service.update_submission` explicitly documents (the `F2` comment) that under true
+concurrency the loser session can flush its content and then hit a `rowcount`/`StaleDataError`
+(→500) instead of a clean 409, and that the fix is a *single* guarded `UPDATE ... WHERE
+row_version=:expected ... SET row_version=row_version+1`. Here two same-`row_version` writers to the
+same bag can both pass the `if bag.row_version != expected` check before either commits, so one's
+revision can be silently lost (or surface as 500). Consider issuing one guarded UPDATE for the
+availability/row_version change (and writing the MANUAL evidence + audit) so the losing writer
+deterministically gets 409. Same pattern applies in `withdraw_slice` below.
+
+
+
+─── app/services/scene_manual_revision_service.py:215-221 ───
+[bug · medium] Robustness: `db.scalar(select(BagSceneLabelEvidence)...)` has no
+`.order_by()`/`.limit(1)`. If two `MANUAL` rows ever exist for the same (bag_uid, scene_id, MANUAL)
+— e.g. historical data, or the small race window above where two writers both observe no MANUAL row
+before either commits — `scalar()` raises `MultipleResultsFound` (→500) instead of updating a
+deterministic row. Add `.order_by(BagSceneLabelEvidence.id).limit(1)` (or `.desc()` for the latest)
+so the effective projection always resolves to a single, well-defined row.
+
+
+
+─── app/services/scene_manual_revision_service.py:379-383 ───
+[style · low] Missing trailing newline at end of file (POSIX text convention; can cause spurious
+diffs/lint noise). Add a final newline.
+
+
+[ocr] WARNING [review_round_failed] app/services/scene_manual_revision_service.py: round 2: LLM completion error: caller deadline exceeded: context deadline exceeded
+
+LLM retry report summary: 1 of 54 requests affected -- 1 request failed
+
+Core review (1 request):
+- app/services/scene_manual_revision_service.py: timed out -> failed
+
+Per-attempt detail: --format json (retry_report).

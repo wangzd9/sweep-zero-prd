@@ -1,0 +1,18 @@
+{
+  "event_id": "tester-t11s-batch-1012-quiet-wait-a-landing-202610132124000800",
+  "occurred_at": "2026-10-13T21:24:00+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "WAITING_INPUT",
+  "summary": "静默期巡检（指纹87a80b2b，prerun 21:19:53）：消费 b-input-ruling-2117 与 BATCH-STATUS 更新——B 裁决关闭（4包packet/3包NOT_APPLICABLE需完整拷贝+正式提交验路由拒绝可追溯/1空包验拒绝入口；NOT_APPLICABLE 验收口径=无伪切片+零模型请求）；in-flight 实测：A scheduler pid 2491657（21:04:52起，etime 17:51）存活，lease 记 pid 2499583 已不存在（租约pid与实测不一致，保留证据不代改，等A自报）；staging 目录 21:08 建后仍 0 字节、incoming/spray 仍空→无可验收对象，维持等待",
+  "next": "observer 唤醒核 A 短包落位→按 ruling 口径逐包增量验收（NOT_APPLICABLE验路由拒绝可追溯+无伪切片；NEEDS_RUNTIME验SUCCESS/NO_MATCH全链；空包验拒绝可追溯）；全批收口交付 TEST_REPORT_PENDING",
+  "evidence": {
+    "fingerprint": "87a80b2bfc927ce45b7190f1afac0ac095ebc280a79c66c34a62d96b7cd9ff3e",
+    "a_scheduler": "pid 2491657 alive, lstart 21:04:52, etime 17:51",
+    "lease_pid_mismatch": "leases/A.json pid 2499583 NOT found（仅记录，不代改）",
+    "staging": "/mnt/nas_backup/.../.upload-staging/spray-production-1012-20261013/ = 0 bytes, no files",
+    "incoming_spray": "empty (21:24 实测)",
+    "ruling_ingested": "b-input-ruling-2117: B DONE 无返修; NOT_APPLICABLE 三包须完整拷贝+正式提交"
+  }
+}

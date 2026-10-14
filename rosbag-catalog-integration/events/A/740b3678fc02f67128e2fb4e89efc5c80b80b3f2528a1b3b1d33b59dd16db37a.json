@@ -1,0 +1,20 @@
+{
+  "event_id": "A:a-t16ca-ocr-r12-chip-label-1489bc6-delivered-20261014T174026",
+  "kind": "business",
+  "task": "TASK-16C-A",
+  "attempt": "attempt-1-ocr-r1-2-rework",
+  "status": "REVIEW_PENDING",
+  "summary": "A 叶查询/API OCR 清理续单 R1-2 执行完毕：已选筛选 chip 视图名对齐 B 叶 tab(原始包→原始数据、全部/历史→全部，bag_search_service.py build_active_filters line 664 仅 1 行)，消除同页两套叫法(UI 一致性低危，B 叶 OCR run 513ab61d 唯一 finding 协调者 CONFIRMED)；slices 键不加(外层 guard 已使 slices 不渲染 chip，加则死代码)；续 commit 1489bc6 冻结交付(同 branch/worktree wt-01-t16ca，base 续 R1 4838ef8)——协调者口径本 commit 为 A 叶最终冻结 head；自测 ruff 全绿+pytest 三本文件 74 passed 1 failed(seed 固有 bounded-query，零新增失败，不计本账)，仅改 chip 展示字符串不动 SQL。",
+  "evidence": "commit 1489bc6b58a20a57650831969c53e6af39d57f75 (committer 2026-10-14 17:40:26 +08:00); 续单 inbox/1号/TASK-16C-A/ocr-r1-rework-2-dispatch-20261014.md; 裁决 reviews/TASK-16C-B/ocr-run-20261014/ocr-verdict.md; 回执 receipts/TASK-16C-A/attempt-1.md R1-2 段; worktree wt-01-t16ca",
+  "next": "等协调者机械核验 -> 单文件增量 OCR 一次(覆盖 R1+R1-2 同文件小 diff，scene_result_query 未变不重跑) -> 零 CORRECTION 级 + TESTER 增量面 -> A 叶接受。门禁不变，REVIEW_PENDING 不代表通过，未合入。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "A",
+  "recorded_at": "2026-10-14T17:47:46+08:00",
+  "occurred_at": "2026-10-14T17:47:46+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

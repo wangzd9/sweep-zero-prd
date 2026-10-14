@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t16b-r2-20261013-175953-verify-delivered",
+  "occurred_at": "2026-10-13T18:12:00+08:00",
+  "recorded_at": "2026-10-13T18:12:00+08:00",
+  "role": "TESTER",
+  "task": "TASK-16B",
+  "attempt": "16B-r2 attempt-1",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "TESTER 完成 16B r2（固定 head e152465，base 40ab818）独立验证并交付：新建隔离 worktree wt-tester-t16b-r2 独立复跑 scene_host_proxy 27 passed / r1_ 注入 7 passed / proxy+orchestrator 39 passed / 全仓 889 passed（3 devflow failed 在 base 40ab818 独立 worktree 同口径复现=预存在环境性非 r2 回归）/ ruff 全绿 / compileall OK / diff 2 文件 +506/-43 零越界。R1-01~05 逐项独立核断言（非转述执行者 PASS）：R1-01 终态 run 迟到重复 /run 无二次模型步+不重报 SCENE_FAILED+台账清+ACTIVE 释放；R1-02 committed/未提交双分支对账补报有界收敛；R1-03 未确认保留台账/已确认清除/他终态不覆盖三例；R1-04 unlink 异常 ACTIVE 恒释放+台账留痕；R1-05 file_fsync→replace→dir_fsync 顺序断言。未执行项如实申报：真实栈/MySQL/模型全链冒烟（本单口径=模块+注入，禁真实模型/NAS/生产写）、OCR/强审（协调者门禁）、S9 增量复验（s9_head 未冻结）。报告 test-receipts/TEST-TASK16B-r2/attempt-1.md，交协调者裁决；不等同 12S-D 正式全链，旧 SHA 匹配项按快照复用不伪装最终 PASS",
+  "evidence": "test-receipts/TEST-TASK16B-r2/attempt-1.md; inbox/TESTER/TASK-16B-r2/attempt-1-ack.md; wt-tester-t16b-r2@e152465 27/7/39/889 passed; wt-tester-base40ab818 devflow 同 3 failed",
+  "next": "等协调者裁决（合入门禁仍绑 OCR 4492b7f6+强审增量复审收口）；s9_head 冻结后增量复验复用 16:5x 探针 1184/44 计数；12S-C 受影响项待最终固定集成 SHA 另单；18:00 时段总结已覆盖本轮交付"
+}

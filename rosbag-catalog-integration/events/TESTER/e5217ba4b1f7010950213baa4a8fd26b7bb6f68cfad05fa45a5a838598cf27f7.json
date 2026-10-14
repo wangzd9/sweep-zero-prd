@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-v2close-completed-202610132229260800",
+  "occurred_at": "2026-10-13T22:29:26+08:00",
+  "recorded_at": "2026-10-13T22:29:26+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "22:2x检查点：v2 close后台进程proc_df81ec9a4872已rc=0完成——16_58_28 flat sha 3/3 MATCH A台账、16_37_47 flat 3/3 IDENTICAL本地源+源metadata MATCH manifest（台账缺条目按源锚定闭合）、date-grouped双份副本size/mtime已记录；receipt 22:1x段+sessions+event+release已由脚本tail闭环，仅tail的observer ack(c229c6c3)STALE未消费；批次无在途TESTER进程，维持静默停摆待协调者五项裁决",
+  "evidence": "/home/wang/.hermes/logs/process-results/proc_df81ec9a4872.json; test-receipts/TASK-11S-BATCH-1012/attempt-1.md#增量验收-221x",
+  "next": "下轮核协调者对A五项裁决动作+dup source终态推进+16_02_03处置；全批齐后交付TEST_REPORT_PENDING"
+}

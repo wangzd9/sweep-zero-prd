@@ -1,0 +1,12 @@
+{
+  "event_id": "B-20261010-1851-r2-final-fixture-delivered",
+  "occurred_at": "2026-10-10T18:51:26+08:00",
+  "recorded_at": "2026-10-10T18:51:26+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "attempt-1-r2-final-fixture 交付：_parent bag_uid ≤26 修复+assert，6ee858b",
+  "evidence": "receipts/TASK-06B/attempt-1-r2-final-fixture.md",
+  "next": "等协调者审核/OCR/与1号S1合入排程"
+}

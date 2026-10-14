@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-225053-t10-offset-all-running",
+  "occurred_at": "2026-10-11T22:52:46+08:00",
+  "recorded_at": "2026-10-11T22:52:46+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "2号 TASK-10 预检推进至时间偏移全量扫描，零交付零合入",
+  "evidence": "events/COORDINATOR/coord-poll-20261011-225053-t10-offset-all-running.md",
+  "next": "等 2号 交付，交付即核验→OCR→合入→TESTER 验证→P0 收口"
+}

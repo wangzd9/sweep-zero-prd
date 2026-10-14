@@ -1,0 +1,12 @@
+{
+  "event_id": "a-tester-r2-final-delivered-s1-fail-20261010",
+  "occurred_at": "2026-10-10T18:18:47+08:00",
+  "recorded_at": "2026-10-10T18:18:47+08:00",
+  "role": "A",
+  "task": "TASK-03B",
+  "attempt": "5-rework-2",
+  "status": "WAITING_DISPATCH",
+  "summary": "TESTER r2-final-mysql-e2e 已交付：6 PASS/1 FAIL；S1 R2-01 迁移链 MySQL 1406（alembic_version.version_num VARCHAR(32) 容不下 33 字符 revision 20261009_02_ingest_frozen_columns），测试者建议缺陷1（高）回派 1 号幂等加宽 version_num；本角色待协调者正式派单，未自行开工",
+  "evidence": "test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-1.md; reports/TASK-06/r2-final-mysql-e2e.md",
+  "next": "等协调者裁决与派单"
+}

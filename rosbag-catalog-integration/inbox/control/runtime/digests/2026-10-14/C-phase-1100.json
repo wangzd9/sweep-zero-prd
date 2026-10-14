@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-14T11:00:53.574027+08:00",
+  "role": "C",
+  "kind": "phase",
+  "start": "2026-10-14T08:00:00+08:00",
+  "end": "2026-10-14T11:00:00+08:00",
+  "artifact": "inbox/control/runtime/digests/2026-10-14/C-phase-1100.json",
+  "roles": [
+    {
+      "role": "C",
+      "start": "2026-10-14T08:00:00+08:00",
+      "end": "2026-10-14T11:00:00+08:00",
+      "totals_seconds": {
+        "working": 0,
+        "waiting": 0,
+        "blocked": 0,
+        "idle": 0,
+        "unknown": 10800.0
+      },
+      "segments": [
+        {
+          "start": "2026-10-14T08:00:00+08:00",
+          "end": "2026-10-14T10:17:00+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "C 第24轮只读观察（处理机 02:26-02:31 实测）：**消费协调者裁决 ruling-4acf-infer-active-0218（4acf689f=INFER 阶段远端模型推理活跃非卡死、TESTER stall-escalate 撤案、升级条件=heartbeat 4 连败/FAILED/VLM Wait … ；本轮起路径一律 canonical。C 全程只读（ssh curl 8180/8767、host find/stat/ls、docker top/exec cat、a100 跳板读 VLM 日志），未 kill/未删/未重启/未 retry/未改任何生产路径。按派单大包跨夜继续不 kill/不 retry/不判",
+          "sources": [
+            "inbox/events/C/c-t11s-batch-1012-obs24-infer-continue-ruling-consumed-20261014.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T10:17:00+08:00",
+          "end": "2026-10-14T10:20:10+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "C 第74轮只读观察（处理机 10:0x-10:16 实测）：消费 Codex 只读纠正报告 codex-progress-audit-20261014-0954.md（09:54，协调者范围纠正证据）并独立复测=「flat 三提交等 4acf 终态自动推进」的等待口径证实错误：ingest_submission 实测 a65a25a7/87dfebaa/518089ed 仍 PENDING_INPUT、source_id=NULL、bound_ready=NULL、updated_at 停 2026-10-13 23:24:09（~11h 零绑定推进）；而三包 ready flat 路径 source_copy 早已注册（FFDE",
+          "sources": [
+            "events/C/06371977eca4832e594f40d469e33e6769b763950ba597966ed7462a67e474d4.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T10:20:10+08:00",
+          "end": "2026-10-14T10:30:10+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "C 第24轮只读观察（处理机 02:26-02:31 实测）：**消费协调者裁决 ruling-4acf-infer-active-0218（4acf689f=INFER 阶段远端模型推理活跃非卡死、TESTER stall-escalate 撤案、升级条件=heartbeat 4 连败/FAILED/VLM Wait … ；本轮起路径一律 canonical。C 全程只读（ssh curl 8180/8767、host find/stat/ls、docker top/exec cat、a100 跳板读 VLM 日志），未 kill/未删/未重启/未 retry/未改任何生产路径。按派单大包跨夜继续不 kill/不 retry/不判",
+          "sources": [
+            "inbox/events/C/c-t11s-batch-1012-obs24-infer-continue-ruling-consumed-20261014.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T10:30:10+08:00",
+          "end": "2026-10-14T10:52:00+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "C 第74轮只读观察（处理机 10:0x-10:16 实测）：消费 Codex 只读纠正报告 codex-progress-audit-20261014-0954.md（09:54，协调者范围纠正证据）并独立复测=「flat 三提交等 4acf 终态自动推进」的等待口径证实错误：ingest_submission 实测 …  14_42_48 四切片记录 23:54:41 在案（ruling-dup-slices-0038 保留现场）。资源：NAS 98T/70T/29T 71%、load 1.26、incoming/spray 仅 16_33_10 空包（D6 台账 A 面）。C 全程只读未 kill/删/重启/retry/改生产",
+          "sources": [
+            "events/C/06371977eca4832e594f40d469e33e6769b763950ba597966ed7462a67e474d4.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T10:52:00+08:00",
+          "end": "2026-10-14T10:53:48+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "C 第75轮只读观察（处理机 10:43-10:52 实测）：消费 codex-repair-receipt-20261014.md（10:23）独立复测=flat 三提交绑定恢复落地——ingest_submission 实测 a65a25a7→FFDEE943/87dfebaa→9C9456B6/518089ed→205E5054 全 SCHEDULED（updated 10:23:08/09，obs74 搁浅申报闭环）；24d60fee→91FFEEC1 不变；7a71e404（16_33_10 空包）仍 PENDING_INPUT=输入校验拒绝链正常口径（提交层终态隔离修复在隔离树未部署）。scene-4acf689f（16",
+          "sources": [
+            "events/C/538922fa5bc78ffc2d047631a2d69908932021e6731004dee45378431afa66e9.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T10:53:48+08:00",
+          "end": "2026-10-14T10:55:10+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "C 第74轮只读观察（处理机 10:0x-10:16 实测）：消费 Codex 只读纠正报告 codex-progress-audit-20261014-0954.md（09:54，协调者范围纠正证据）并独立复测=「flat 三提交等 4acf 终态自动推进」的等待口径证实错误：ingest_submission 实测 …  14_42_48 四切片记录 23:54:41 在案（ruling-dup-slices-0038 保留现场）。资源：NAS 98T/70T/29T 71%、load 1.26、incoming/spray 仅 16_33_10 空包（D6 台账 A 面）。C 全程只读未 kill/删/重启/retry/改生产",
+          "sources": [
+            "events/C/06371977eca4832e594f40d469e33e6769b763950ba597966ed7462a67e474d4.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T10:55:10+08:00",
+          "end": "2026-10-14T11:00:00+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "C 第75轮只读观察（处理机 10:43-10:52 实测）：消费 codex-repair-receipt-20261014.md（10:23）独立复测=flat 三提交绑定恢复落地——ingest_submission 实测 a65a25a7→FFDEE943/87dfebaa→9C9456B6/518089ed→ … 10:00 零新写；NAS 71% 不变、load 4.46 抬升（C 未起进程，如实归因 INFER+VLM 段）、incoming/spray 仍仅 16_33_10 空包。本批 8 包无新终态、无升级条件命中；绑定恢复属实质状态变化按白天口径即时通报。C 全程只读，未 kill/删/重启/retry/改生产",
+          "sources": [
+            "events/C/538922fa5bc78ffc2d047631a2d69908932021e6731004dee45378431afa66e9.json"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "event_id": "c-t11s-batch-1012-obs75-flat-binding-recovered-4acf-steps-advanced-20261014",
+          "occurred_at": "2026-10-14T10:52:00+08:00",
+          "recorded_at": "2026-10-14T10:53:00+08:00",
+          "role": "C",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "status": "OBSERVING",
+          "summary": "C 第75轮只读观察（处理机 10:43-10:52 实测）：消费 codex-repair-receipt-20261014.md（10:23）独立复测=flat 三提交绑定恢复落地——ingest_submission 实测 a65a25a7→FFDEE943/87dfebaa→9C9456B6/518089ed→205E5054 全 SCHEDULED（updated 10:23:08/09，obs74 搁浅申报闭环）；24d60fee→91FFEEC1 不变；7a71e404（16_33_10 空包）仍 PENDING_INPUT=输入校验拒绝链正常口径（提交层终态隔离修复在隔离树未部署）。scene-4acf689f（16_02_03 正式链）8180 实测 SCENE_RUNNING attempt=1 error 空、步骤 PRECHECK/EXTRACT=DONE、INFER=RUNNING、后续 QUEUED（obs74 全 QUEUED→回执步骤补报落地）、lease 至 10:53:44 heartbeat 续租活跃。proxy pid 3495931 连续未重启 TIME 01:22:05 持续非零；VLM 通道容器 1 条 ESTAB→8002；llm-server 10:51:10-10:52:00 采样 Running 3-4/Waiting 前四点=1 末两点 0（非持续>0 不命中升级条件）/prefix 95.6%/gen 63.7-187.0 tok/s=推理活跃续证；checkpoint.json mtime 00:23:10 未翻（模型段完成信号未到）、find -newermt 10:00 零新写；NAS 71% 不变、load 4.46 抬升（C 未起进程，如实归因 INFER+VLM 段）、incoming/spray 仍仅 16_33_10 空包。本批 8 包无新终态、无升级条件命中；绑定恢复属实质状态变化按白天口径即时通报。C 全程只读，未 kill/删/重启/retry/改生产路径。",
+          "evidence": "mysql ingest_submission 8 行（三 flat SCHEDULED 源绑定 updated 10:23:08/09，24d60fee 不变，7a71e404 PENDING_INPUT）；8180 run4acf SCENE_RUNNING steps PRECHECK/EXTRACT DONE + INFER RUNNING + 5 QUEUED，lease 10:53:44 error 空；8767 ok active_runs=[4acf689f pid1]；ps 3495931 ELAPSED 14:29:10 TIME 01:22:05 RSS 18084068；docker exec 3376cd90f44e /proc/net/tcp 1 ESTAB BB60→2D02A8C0:1F42；llm-server 六点采样 Running 3-4/Waiting 1→0/prefix 95.6%；checkpoint mtime 2026-10-14 00:23:10.474817688 未翻 + find -newermt 10:00 count=0；df 98T/70T/29T 71%、uptime load 4.46、incoming/spray=16_33_10 仅",
+          "next": "接续只读观察：① 4acf 模型段完成信号（checkpoint 翻面/INFER→DONE/后续步骤推进/SCENE_DONE）取证申报，升级条件=heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且无 ESTAB；② 协调者/TESTER 按回执核 flat 三提交复用既有终态 run 的验收面，C 不处置；③ 16_33_10 提交层终态隔离=隔离树修复待部署面跟踪。11:00 时段总结照常，白天状态变化即时通报。",
+          "quiet_hours_note": "白天口径，实质状态变化（绑定恢复）即时通报",
+          "source": "events/C/538922fa5bc78ffc2d047631a2d69908932021e6731004dee45378431afa66e9.json",
+          "source_mtime": "2026-10-14T10:54:46+08:00"
+        },
+        {
+          "event_id": "c-t11s-batch-1012-obs74-codex-audit-flat-submissions-stranded-20261014",
+          "occurred_at": "2026-10-14T10:17:00+08:00",
+          "recorded_at": "2026-10-14T10:19:00+08:00",
+          "role": "C",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "status": "OBSERVING",
+          "summary": "C 第74轮只读观察（处理机 10:0x-10:16 实测）：消费 Codex 只读纠正报告 codex-progress-audit-20261014-0954.md（09:54，协调者范围纠正证据）并独立复测=「flat 三提交等 4acf 终态自动推进」的等待口径证实错误：ingest_submission 实测 a65a25a7/87dfebaa/518089ed 仍 PENDING_INPUT、source_id=NULL、bound_ready=NULL、updated_at 停 2026-10-13 23:24:09（~11h 零绑定推进）；而三包 ready flat 路径 source_copy 早已注册（FFDEE943/205E5054/9C9456B6，deleted_at=NULL）；scanner scan_job 最新 4095（10:16）仅扫 incoming（failed:2=16_33_10 空包拒绝链持续）不扫 ready，无平包登记/绑定新记录→SCENE_EXEC_HOST 释放不触发绑定，需 D4③ 核正式绑定恢复或幂等复用既有源。处置归 A/协调者，C 只申报不处置、不重提交、不改库、不重烧模型。scene-4acf689f（16_02_03 正式链）SCENE_RUNNING attempt=1 heartbeat 10:12:41 续租活跃 lease 至 10:14:41 error 空、八步 QUEUED、proxy 8767 active_runs=[4acf689f ACCEPTED pid1]、llm-server 直证 Running 3-4/Waiting 0=INFER 活跃非中断，与 obs73 零状态变化，大包跨夜继续不 kill/retry 无升级条件命中。bag_record 四包 vehicle_id=1 不变（16_02_03 rv=1/23:05:30，三包 rv=2/22:52:23）+dup 14_42_48 四切片记录 23:54:41 在案（ruling-dup-slices-0038 保留现场）。资源：NAS 98T/70T/29T 71%、load 1.26、incoming/spray 仅 16_33_10 空包（D6 台账 A 面）。C 全程只读未 kill/删/重启/retry/改生产路径。",
+          "evidence": "8180 run4acf SCENE_RUNNING heartbeat 10:12:41/lease 10:14:41 error 空；docker exec mysql ingest_submission 8 行（三 flat PENDING_INPUT source NULL bound NULL updated 23:24:09）；source_copy 11 行（flat 三源 registered deleted_at NULL）；scan_job 4095 10:16 仅 incoming/vla 两 root（failed:2）；scanner logs 仅 16_33_10 missing rosbag2_bagfile_information 循环；bag_record 4+4 行 vehicle_id=1；8767 ok active_runs=[4acf689f pid1]；llm-server tail Running 3-4 Waiting 0；canonical sessions/C.md 623→624 行 obs74 sig=1 追加断言通过",
+          "next": "接续只读观察：① flat 三提交绑定恢复=协调者 D4③ 裁决/A 面动作，C 按 run/submission 核账申报（不处置）；② 4acf 模型段完成信号（checkpoint 翻面/八步推进/SCENE_DONE）取证申报，升级条件=heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且无 ESTAB；③ 16_33_10 D6 痕迹落 ledger 后核。11:00 时段总结照常，白天状态变化即时通报。",
+          "quiet_hours_note": "白天口径，状态变化即时通报已执行",
+          "source": "events/C/06371977eca4832e594f40d469e33e6769b763950ba597966ed7462a67e474d4.json",
+          "source_mtime": "2026-10-14T10:29:49+08:00"
+        }
+      ],
+      "delivery_records": [],
+      "unverified_sources": [
+        "events/C/C-poll-20261011-082853.md: 时间或内容待核对",
+        "events/C/c-poll-20261013-044353-v2done-t16b-await-resume.json: 时间或内容待核对",
+        "events/C/c-poll-20261013-051853-t16b-b1-3confirmed-b2-inflight.md: 时间或内容待核对",
+        "events/C/c-poll-20261013-055353-t16b-b2-split-fail-16a-incr-done.md: 时间或内容待核对",
+        "inbox/events/C/C-sessions-truncation-20261012-064054.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-042923-t16b2-fail-resume-pending.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-064353-r3ocr-6of6-done-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-065353-r130-t07b-r4-dispatch-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-072853-r132-b-r4-ocr-done-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-074353-r132-r4-ocr-done-no-c-order.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-092853-t16b-ocr4rc1-frozen-user-ruling-pending.md: 时间或内容待核对"
+      ]
+    }
+  ],
+  "current": {
+    "C": {
+      "schema_version": 1,
+      "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+      "role": "C",
+      "observed_at": "2026-10-14T11:00:53+08:00",
+      "control": "ACTIVE",
+      "confirmed_idle": false,
+      "classification_reasons": [
+        "unresolved or unclassified dispatch: inbox/3号/TASK-12S-C/active-correction.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-12S-C/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-12S-C/frame-mapping-contract-note.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-16B/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-16B/attempt-2-r1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-16B/attempt-2-r3-dispatch.md"
+      ],
+      "tasks": [],
+      "events": {
+        "C": {
+          "event_id": "c-t11s-batch-1012-obs75-flat-binding-recovered-4acf-steps-advanced-20261014",
+          "occurred_at": "2026-10-14T10:52:00+08:00",
+          "recorded_at": "2026-10-14T10:53:00+08:00",
+          "role": "C",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "status": "OBSERVING",
+          "summary": "C 第75轮只读观察（处理机 10:43-10:52 实测）：消费 codex-repair-receipt-20261014.md（10:23）独立复测=flat 三提交绑定恢复落地——ingest_submission 实测 a65a25a7→FFDEE943/87dfebaa→9C9456B6/518089ed→ … 10:00 零新写；NAS 71% 不变、load 4.46 抬升（C 未起进程，如实归因 INFER+VLM 段）、incoming/spray 仍仅 16_33_10 空包。本批 8 包无新终态、无升级条件命中；绑定恢复属实质状态变化按白天口径即时通报。C 全程只读，未 kill/删/重启/retry/改生产路径。",
+          "evidence": "mysql ingest_submission 8 行（三 flat SCHEDULED 源绑定 updated 10:23:08/09，24d60fee 不变，7a71e404  …  find -newermt 10:00 count=0；df 98T/70T/29T 71%、uptime load 4.46、incoming/spray=16_33_10 仅",
+          "next": "接续只读观察：① 4acf 模型段完成信号（checkpoint 翻面/INFER→DONE/后续步骤推进/SCENE_DONE）取证申报，升级条件=heartbeat 4 连败/ … 按回执核 flat 三提交复用既有终态 run 的验收面，C 不处置；③ 16_33_10 提交层终态隔离=隔离树修复待部署面跟踪。11:00 时段总结照常，白天状态变化即时通报。",
+          "quiet_hours_note": "白天口径，实质状态变化（绑定恢复）即时通报",
+          "source": "events/C/538922fa5bc78ffc2d047631a2d69908932021e6731004dee45378431afa66e9.json",
+          "source_mtime": "2026-10-14T10:54:46+08:00"
+        }
+      },
+      "dispatches": {
+        "C": {
+          "role": "C",
+          "source": "inbox/3号/TASK-12S-C/active-correction.md",
+          "status": "待核对",
+          "mtime": 1791896328.5295815,
+          "summary": "> **当前恢复决定（2026-10-13T20:58:48+08:00）**：用户明确恢复飞书原协调者及A/B/C/TESTER和按需审核。临时Codex接替结束；本批唯一任务TASK-11S-BATCH-1012，先 … empt-2-r3-dispatch.md`。12S-C92dcb52继续冻结等接受依赖，不先接线、不重复全仓。读强审两个反例和真实Backend租约约束后最小返修及完整恢复断言，一次自测冻结r3_head交当前协调者。"
+        }
+      },
+      "processes": {
+        "C": {
+          "state": "none"
+        }
+      },
+      "sources": {
+        "TODO.md": "2026-10-14T10:49:02+08:00"
+      },
+      "strong_review": null,
+      "fingerprint": "e27b95be0b9d760b7f07bae6b6ec6ed4102738aa7b1ff5c629c7d5a5a55dcc53",
+      "coordinator_requests": [],
+      "operations": []
+    }
+  }
+}

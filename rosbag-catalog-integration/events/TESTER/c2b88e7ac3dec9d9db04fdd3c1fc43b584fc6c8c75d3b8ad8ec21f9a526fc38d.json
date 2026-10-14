@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-014453-t10defect3-delivered-observed",
+  "occurred_at": "2026-10-12T01:48:13+08:00",
+  "recorded_at": "2026-10-12T01:48:13+08:00",
+  "role": "TESTER",
+  "task": "TASK-10",
+  "attempt": "t10-defect3/1",
+  "status": "POLL_NO_CHANGE",
+  "summary": "B t10-defect3 delivered 01:46 REVIEW_PENDING head 0943885 (3 files +166/-11, driver 336-339 gap declared); main a77aa45 unchanged; rerun site scratch/t10_e2e_reverify.py + t10/t10-nasroot no longer present since 01:31 (driver rebuild needed for rerun v2); TESTER awaits merge + rerun v2 dispatch",
+  "evidence": "receipts/TASK-10/t10-defect3-publish-bounds.md",
+  "next": "await coord mech verify + OCR + merge + rerun v2 dispatch"
+}

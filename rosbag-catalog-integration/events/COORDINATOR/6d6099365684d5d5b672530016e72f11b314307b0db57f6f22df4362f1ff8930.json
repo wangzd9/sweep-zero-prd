@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-batch1012-d5-attributed-d2-converged-d4-unlock-track-20261014",
+  "occurred_at": "2026-10-14T00:04:00+08:00",
+  "recorded_at": "2026-10-14T00:06:41+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "RULING",
+  "summary": "消费 C obs12（23:59）D5 归因交付 + D2 观察点命中：①D5 结论=22:53:02 三 run RETRY 为开发机 192.168.2.132 外部人工经正式 /retry API 三发（retry3.sh 22:52:54 + bind_vehicle.sh 绑 vehicle_id=1 自称『运营授权』，非四角色留痕），系统自动重试假设排除（auto_retry_count=0/零 AUTO_RETRY_* 事件）；肇事身份核实面=用户，08:00 汇总上报，不新开任务。②D2 分支定：scene-a4824f1c attempt-2 23:54:41 自然收敛 SCENE_DONE SUCCESS（重复烧模型实证），cancel 核查关闭；.staging 第二份切片保留现场 TESTER 取证，SCENE_EXEC_HOST 已释放。③D4 时序推进：dup 1/3 终态，eb4397c3 23:58 SCENE_RUNNING（预期 NOT_APPLICABLE），24ab78bb 排队；A 续跑指针+TESTER 指针已增补（00:0x 节），BATCH-STATUS 三行同步。无新派单（A/C/TESTER 均在既定指针内推进）。夜间静默不群报，08:00 汇总。",
+  "evidence": "inbox/events/C/c-t11s-batch-1012-d5-attribution-obs12-20261013.json; inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md; inbox/1号/TASK-11S-BATCH-1012/resume-ruling-2338.md(00:0x增补); inbox/TESTER/TASK-11S-BATCH-1012/ruling-2338-verify.md(00:0x增补); events/B/b-t11s-batch-1012-batchstatus-2354-consumed-idle-20261013-2359.json(B IDLE 确认)",
+  "next": "5min observer 接续：A 核 dup2/3 终态→D4 备份删 3 date-grouped submission→flat 409 释放→NAS 残留清理；TESTER dup SUCCESS 双写产物取证+eb4397c3 收敛核；scene-4acf689f（16_02_03）跨夜推进 SCENE_DONE 后八步/跨DB3/reconcile；08:00 夜间汇总含 D5 肇事身份上报用户"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "a-batch1012-attempt1-d4flat-poll-0228-20261014",
+  "occurred_at": "2026-10-14T02:28:00+08:00",
+  "recorded_at": "2026-10-14T02:30:16+08:00",
+  "role": "A",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "02:2x 只读巡检（夜间静默不群报）：4acf689f 仍 SCENE_RUNNING heartbeat 02:25:11 30s 正常推进、八步 QUEUED（0218 裁决 INFER 模型段口径，升级条件未命中，跨夜不 kill/retry）；A flat 三提交 a65a25a7/87dfebaa/518089ed 仍 PENDING_INPUT 零绑定（SCENE_EXEC_HOST 串行占用，预期 4acf689f 终态后收敛，非缺陷）；scan_job 4001 常态 failed:2=空包 D6 拒绝路径持续、无 409 循环；VLM 直连复核因 a100-wzd ssh key 权限失败，模型段活跃度以 C 观察+heartbeat 面为准不代判；协调者零新派单。无可执行动作，等 4acf689f 终态后核 flat 绑定并补 D4③ 回执。",
+  "evidence": "sessions/A.md 02:28 条目; DB heartbeat 事件链 79182-79191; ingest_submission spray1012 6 行; scan_job 4001",
+  "next": "下回合核 4acf689f 终态→flat 三提交绑定收敛→D4③ 回执"
+}

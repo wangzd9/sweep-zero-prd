@@ -1,0 +1,14 @@
+{
+ "event_id": "a-t11-cleanup-residual-done-20261012",
+ "role": "A",
+ "task": "TASK-11",
+ "attempt": 0,
+ "status": "CLEANUP_DONE",
+ "ts": "2026-10-12T08:51:00+08:00",
+ "summary": "响应派单 inbox/1号/TASK-11/t11-cleanup-residual-20261012.md（裁决1清理链接续，零 app 代码面）：删 NAS 测试根第 8 跑两袋目录 1165414093_slope_20260818_105105_105120（229M）与 1165414093_flat_20260818_105143_105201（287M），ready/ 其余 6 袋既有数据保留；删本地测试栈 MySQL bag_record id=26（uid 021F73162DAE4E3188B10BE7FE，带 uid 条件保护）及关联 bag_file 1 / bag_topic 22 行。复验：bag_record 18→17、该 uid 查无 0、bag_id=26 关联 0、scene/scene_analysis_version/scene_segment/ingest_submission 派生口径全 0（scene 表 56 行为静态场景目录表非 run 产物）、两袋目录 ls absent、ps 无 t11/launcher/real_e2e 存活、共享根/仓库 scratch 无 t11 新驱动日志。禁止项全部遵守：未重启容器、未再跑驱动、未动 17 行既有 bag_record、未删 NAS 根目录结构。",
+ "evidence": [
+  "inbox/1号/TASK-11/ACK-cleanup-residual-20261012.md",
+  "前核/后验 SQL：/tmp/a_t11q3.sql（前核 id=26 在位、total 18）、/tmp/a_t11verify.sql + /tmp/a_t11verify3.sql（后验 total 17、uid 0、派生 0）"
+ ],
+ "next": "等协调者下轮核；TASK-11 生产门禁维持未放行"
+}

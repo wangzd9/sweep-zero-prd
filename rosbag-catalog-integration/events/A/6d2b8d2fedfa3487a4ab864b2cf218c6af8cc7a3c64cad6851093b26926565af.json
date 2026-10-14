@@ -1,0 +1,12 @@
+{
+  "event_id": "a-task16ca-attempt1-ack-worktree-ready-20261014",
+  "occurred_at": "2026-10-14T11:39:28+08:00",
+  "recorded_at": "2026-10-14T11:39:28+08:00",
+  "role": "A",
+  "task": "TASK-16C-A",
+  "attempt": "1",
+  "status": "ACKED",
+  "summary": "TASK-16C-A attempt-1 安全点自行ACK：原11S-BATCH-1012 A侧已收口（仅只读观察4acf689f终态），建专属worktree wt-01-t16ca 分支 a/task-16c-a-query-api 自 seed bd0db1d，开工核 DESIGN 7.3.3 与查询面代码",
+  "evidence": "inbox/1号/TASK-16C-A/attempt-1-ack.md",
+  "next": "实现共享多成员分类谓词/日期422/cursor兼容+OCR C5/C6/C7/c03三项核修，自测后冻结回执"
+}

@@ -1,0 +1,20 @@
+{
+  "event_id": "tester-poll-20261013-2128-echo-consumed-self-write",
+  "occurred_at": "2026-10-13T21:28:00+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "ECHO_CONSUMED",
+  "summary": "静默期回声核对（ack 指纹 7f4b78bdebe51c3996da56393753349071c174a3b32aa4269aaf632d4603312d）：prerun 唤醒变更源（b-input-ruling-2117 / BATCH-STATUS / restore-observation-2109 / 两个前序事件 / sessions）内容均已在 21:16、21:24 两轮巡检完整消费；B 裁决口径并入验收基线（NOT_APPLICABLE 三包=路由拒绝可追溯+无伪切片+零模型请求；16_33_10 空包=拒绝入口可追溯；16_02_03 跨 DB3 gap 4.73µs 供血缘取证）。21:24 实测 A scheduler pid 2491657 存活、staging 0 字节、incoming/spray 空→无可验收对象，维持 WAITING_INPUT 等 A 落包",
+  "next": "observer 唤醒核 A 短包落位→按 ruling 口径逐包增量验收；全批收口交付 TEST_REPORT_PENDING",
+  "evidence": {
+    "ack_fingerprint": "7f4b78bdebe51c3996da56393753349071c174a3b32aa4269aaf632d4603312d",
+    "prior_polls": [
+      "tester-t11s-batch-1012-b-baseline-intake-202610132116300800",
+      "tester-t11s-batch-1012-quiet-wait-a-landing-202610132124000800"
+    ],
+    "a_scheduler": "pid 2491657 alive 21:24 (etime 17:51)",
+    "staging": "0 bytes",
+    "incoming_spray": "empty"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-batch1012-0641-echoes-only-live-4acf-running-quiet-202610140641",
+  "occurred_at": "2026-10-14T06:41:00+08:00",
+  "recorded_at": "2026-10-14T06:42:46+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "06:41 静默巡检：3 变更源全为自回声/C obs48 只读/TESTER 06:36 只读，零外部新派单/新裁决/新群请求。批次维持 06:30 口径：4acf689f（16_02_03 大包）SCENE_RUNNING attempt1 heartbeat 06:35:57 续租、INFER 远端推理持续活跃约 450min（VLM Running 1-3/Waiting 0/prefix 92.2-92.4%/POST 200 连发，升级条件逐项未命中）跨夜不 kill/retry；flat 三提交 PENDING_INPUT 等 D4③ 串行释放（14_42_48 NOT_RUN）；scan_job 4051/4050 幂等 failed:2 空包拒绝可追溯；run 7=6DONE+1RUNNING；8767 ok；PASS 基线不变。控制动作=零：无新派单、零 OCR、零强审（REVOKED 0/5）、零合入、零生产写。",
+  "evidence": "prerun 06:35:53 指纹 6732b068 changed_sources 3 项逐份核读：events/COORDINATOR/18e432f2（本角色 06:33 事件自回声）+ C obs48 事件 06:38（处理机 06:30-06:38 只读实测，与 obs47 零状态变化）+ TESTER 06:36 事件（heartbeat 06:35:57/volcsw 89946→89970/scan 4051 周期幂等）；strong_review REVOKED used_60m=0/5；coordinator_requests=[]",
+  "next": "5min observer 接续核模型段完成信号（checkpoint 翻 EXTRACT/DONE/八步 DB 推进/SCENE_DONE 任一）→ 终态后放行 A D4③+TESTER 增量验收；升级条件命中才重新裁决；08:00 夜间汇总"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-085553-t11-cleanup-residual-accept",
+  "occurred_at": "2026-10-12T08:58:56+08:00",
+  "recorded_at": "2026-10-12T08:58:56+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11",
+  "attempt": "0",
+  "status": "CLEANUP_ACCEPTED",
+  "summary": "A 08:51 残留清理申报独立核验通过并接受：NAS 两袋 absent/其余 6 袋在位、DB bag_record 18→17 该 uid 查无 bag_id=26 关联 0、scene_segment/ingest_submission 0、ps 无 t11 存活、main 453da0c 双核零前移；T11 残留清理链收尾",
+  "evidence": "events/A/a-t11-cleanup-residual-done-20261012.json; inbox/coordinator/TASK-11/t11-cleanup-residual-acceptance-20261012.md",
+  "next": "维持 5 分钟常规空转巡检；TASK-11 生产门禁维持 PRODUCTION BLOCKED 待用户独立授权"
+}

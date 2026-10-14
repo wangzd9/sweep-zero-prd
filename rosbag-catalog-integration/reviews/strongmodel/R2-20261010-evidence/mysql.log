@@ -1,0 +1,31 @@
+setup_rc= 0
+version/sql_mode= ('8.4.11', 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION')
+quoted_projection= ('source_id', 'source_generation', 'event_id')
+actual_SQLAlchemy_update= UPDATE scene_analysis_version SET current=%(current)s WHERE scene_analysis_version.id = %(id_1)s AND NOT (EXISTS (SELECT scene_analysis_version.id 
+FROM scene_analysis_version 
+WHERE scene_analysis_version.parent_bag_uid = %(parent_bag_uid_1)s AND scene_analysis_version.scene_code = %(scene_code_1)s AND scene_analysis_version.current IS true AND scene_analysis_version.id != %(id_2)s))
+switch_current_errno= 1093 message= You can't specify target table 'scene_analysis_version' for update in FROM clause
+actual_poll= [{'event_id': 'event_id', 'source_id': 'source_id', 'source_generation': 'source_generation', 'parent_bag_uid': 'parent_bag_uid', 'purpose': 'purpose', 'scene_code': 'scene_code', 'capability_version': 'capability_version', 'capability_config_hash': 'capability_config_hash', 'effective_config_hash': 'effective_config_hash', 'submission_id': 'submission_id', 'profile_id': 'profile_id', 'profile_version': 'profile_version', 'frozen_at': 'frozen_at'}]
+actual_consumer_stats= {'consumed': 0, 'dropped': 1, 'pending': 0, 'created_runs': 0, 'reused_runs': 0, 'errors': [], 'affected_run_ids': []}
+actual_outbox_status_after_consume= PENDING
+actual_alembic_DDL= 
+CREATE TABLE ingest_profile (
+	id BIGINT NOT NULL AUTO_INCREMENT, 
+	profile_id VARCHAR(64) NOT NULL, 
+	version INTEGER NOT NULL, 
+	display_name VARCHAR(128) NOT NULL DEFAULT '', 
+	incoming_prefix VARCHAR(255) NOT NULL, 
+	default_purposes_json TEXT NOT NULL DEFAULT '[]', 
+	default_scenes_json TEXT NOT NULL DEFAULT '[]', 
+	default_scene_parameters_json TEXT NOT NULL DEFAULT '{}', 
+	enabled BOOL NOT NULL DEFAULT 1, 
+	created_at DATETIME NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_ingest_profile_id_version UNIQUE (profile_id, version)
+)
+
+
+incremental_migration_errno= 1101 message= BLOB, TEXT, GEOMETRY or JSON column 'default_purposes_json' can't have a default value
+cleanup_rc= 0
+
+EXIT_CODE=0

@@ -1,0 +1,563 @@
+diff --git a/app/templates/pipeline_detail.html b/app/templates/pipeline_detail.html
+index f88c9c4..6087ff4 100644
+--- a/app/templates/pipeline_detail.html
++++ b/app/templates/pipeline_detail.html
+@@ -42,10 +42,10 @@
+   </div>
+ </div>
+ {% if ui_error %}<div class="feedback feedback-error">{{ ui_error }}</div>{% elif ui_message %}<div class="feedback feedback-success">{% if ui_message == 'retry_requested' %}已提交重试请求，将从选定起点重新排队。{% else %}操作已提交。{% endif %}</div>{% endif %}
+-{% if bag and bag.dataset_type == 'nvidia_physicalai' %}<section class="panel"><h2>NVIDIA 任务契约</h2><p><strong>数据版本：</strong><code>{{ pipeline_config_snapshot.get('dataset_revision', '—') }}</code> · <strong>脚本版本：</strong><code>{{ pipeline_config_snapshot.get('code_revision', '—') }}</code></p><p><strong>下载端点：</strong><code>{{ pipeline_config_snapshot.get('download_endpoint', '—') }}</code> · <strong>Chunk：</strong>{{ pipeline_config_snapshot.get('chunk', '—') }}</p><p><strong>原始回传：</strong>{{ '开启' if run.publish_origin_to_nas else '关闭' }} · <strong>最终回传：</strong>{{ '开启' if run.publish_final_to_nas else '关闭' }}</p></section>{% endif %}
++{% if run.pipeline_type == 'NVIDIA_CHUNK' %}<section class="panel"><h2>NVIDIA 任务契约</h2><p><strong>数据版本：</strong><code>{{ pipeline_config_snapshot.get('dataset_revision', '—') }}</code> · <strong>脚本版本：</strong><code>{{ pipeline_config_snapshot.get('code_revision', '—') }}</code></p><p><strong>下载端点：</strong><code>{{ pipeline_config_snapshot.get('download_endpoint', '—') }}</code> · <strong>Chunk：</strong>{{ pipeline_config_snapshot.get('chunk', '—') }}</p><p><strong>原始回传：</strong>{{ '开启' if run.publish_origin_to_nas else '关闭' }} · <strong>最终回传：</strong>{{ '开启' if run.publish_final_to_nas else '关闭' }}</p></section>{% endif %}
+ {% if is_scene %}
+ <section class="panel"><h2>场景运行环境</h2>
+-<p><strong>远端模型服务身份：</strong>{% if pipeline_config_snapshot.get('model_endpoint') %}<code>{{ pipeline_config_snapshot.get('model_endpoint') }}</code>{% elif pipeline_config_snapshot.get('model_identity') %}<code>{{ pipeline_config_snapshot.get('model_identity') }}</code>{% else %}—（未登记）{% endif %}</p>
++<p><strong>远端模型服务身份：</strong>{% if scene_model_identity %}<code>{{ scene_model_identity }}</code>{% else %}—（未登记）{% endif %}</p>
+ <p><strong>处理机输入/工作根：</strong>{% for path in scene_environment_paths.get('处理机输入/工作根', []) %}<code>{{ path }}</code>{% if not loop.last %}<br>{% endif %}{% else %}—{% endfor %}</p>
+ <p><strong>场景 NAS 发布路径：</strong>{% for path in scene_environment_paths.get('场景 NAS 发布路径', []) %}<code>{{ path }}</code>{% if not loop.last %}<br>{% endif %}{% else %}—{% endfor %}</p>
+ </section>
+@@ -65,6 +65,7 @@
+ {% endfor %}</ol>
+ {% else %}
+ <li class="muted">该 Bag 无场景血缘登记（非切片、无子切片）。</li>
++</ol>
+ {% endif %}
+ </section>
+ {% endif %}
+@@ -78,17 +79,23 @@
+ <section class="panel"><h2>质量报告</h2><table><thead><tr><th>检查项</th><th>状态</th><th>摘要</th></tr></thead><tbody>{% for item in quality_report %}<tr><td>{{ item.name }}</td><td><span class="status {{ item.status|lower|replace(' ', '-') }}">{{ item.status }}</span></td><td><code class="report-detail">{{ item.detail }}</code></td></tr>{% else %}<tr><td colspan="3" class="muted">暂无结构化质量报告；请查看质量校验步骤和事件。</td></tr>{% endfor %}</tbody></table></section>
+ <section class="panel"><h2>产物与 Manifest</h2><table><thead><tr><th>Artifact</th><th>类型</th><th>路径</th><th>Manifest 摘要</th></tr></thead><tbody>{% for a in artifacts %}<tr><td><code>{{ a.artifact_id }}</code></td><td>{{ a.artifact_type }}</td><td><code>{{ a.path }}</code></td><td>Manifest：{{ a.manifest_hash or '未登记' }}</td></tr>{% else %}<tr><td colspan="4" class="muted">暂无产物或 Manifest</td></tr>{% endfor %}</tbody></table></section>
+ {% if not is_scene %}<section class="panel"><h2>文件与日志</h2><p>成功后可在 Phase0 输出目录查看 <code>phase0_manifest.json</code>；工作目录中保留 <code>source_manifest.json</code>、<code>phase0_run.json</code> 和 <code>phase0.log</code>。</p></section>{% endif %}
+-{% if run.status not in ['PHASE0_DONE','NVIDIA_DONE','PUBLISHED','FAILED','CANCELLED','QUARANTINED','SCENE_DONE','SCENE_FAILED','SCENE_PARTIAL_FAILED'] %}<script>setTimeout(()=>location.reload(),10000)</script>{% endif %}
++{% if run.status not in ['PHASE0_DONE','NVIDIA_DONE','PUBLISHED','FAILED','CANCELLED','QUARANTINED'] and not scene_terminal %}<script>setTimeout(()=>location.reload(),10000)</script>{% endif %}
+ {% if run.pipeline_type != 'NVIDIA_CHUNK' and run.status in ['FAILED','QUARANTINED','CANCELLED'] %}
+ <script>
++  // C8：仅在 retry-form 真实存在时绑定（取消场景无 retry-form，null.querySelector 曾致
++  // 浏览器脚本异常；场景详情无强制重试 DOM，类型分流后不复露）
+   const retryForm = document.querySelector('.retry-form');
+-  const retryStart = retryForm.querySelector('#retry-from');
+-  const retryStartGroup = retryForm.querySelector('.retry-start');
+-  retryForm.addEventListener('change', () => {
+-    const force = retryForm.querySelector('input[name="retry_mode"]:checked').value === 'force';
+-    retryStartGroup.hidden = !force;
+-    retryStart.disabled = !force;
+-  });
++  if (retryForm) {
++    const retryStart = retryForm.querySelector('#retry-from');
++    const retryStartGroup = retryForm.querySelector('.retry-start');
++    if (retryStart && retryStartGroup) {
++      retryForm.addEventListener('change', () => {
++        const force = retryForm.querySelector('input[name="retry_mode"]:checked').value === 'force';
++        retryStartGroup.hidden = !force;
++        retryStart.disabled = !force;
++      });
++    }
++  }
+ </script>
+ {% endif %}
+ {% if total_step_pages > 1 or total_log_pages > 1 %}
+diff --git a/app/web/pipelines.py b/app/web/pipelines.py
+index 052d83c..c8f605c 100644
+--- a/app/web/pipelines.py
++++ b/app/web/pipelines.py
+@@ -82,6 +82,22 @@ SCENE_STEP_ZH = {
+ SCENE_STEP_ORDER = {name: i for i, name in enumerate(SCENE_STEP_NAMES)}
+ 
+ 
++# 场景真实终态（C3/16C-c05-03 共用唯一来源）：终态停止刷新、后继未启动步骤
++# 保持「未开始」都以此集合为准。INPUT_INVALID 属 Phase0 状态机，不是场景终态。
++SCENE_TERMINAL_STATUSES = {
++    "SCENE_DONE",
++    "SCENE_FAILED",
++    "SCENE_PARTIAL_FAILED",
++    "CANCELLED",
++    "QUARANTINED",
++}
++
++
++def scene_terminal(run: PipelineRun) -> bool:
++    """场景 run 是否真实终态（模板刷新控制与状态解释共用，DESIGN §7.3.3）。"""
++    return run.pipeline_type == PIPELINE_TYPE_SCENE_SLICE and run.status in SCENE_TERMINAL_STATUSES
++
++
+ def _scene_phase_summary(run: PipelineRun, latest_steps: dict[str, StepRun], outcome: str | None) -> list[dict]:
+     """场景八步总览（DESIGN §7.3.3）：按 SCENE_STEP_NAMES + 真实 StepRun 最新 attempt 构建。
+ 
+@@ -91,7 +107,8 @@ def _scene_phase_summary(run: PipelineRun, latest_steps: dict[str, StepRun], out
+     - 列表与详情共用同一类型/状态解释（phase.name=中文，status=统一状态值）。
+     """
+     no_match = outcome in ("NO_MATCH", "NOT_APPLICABLE")
+-    run_failed = run.status in {"SCENE_FAILED", "SCENE_PARTIAL_FAILED", "FAILED", "CANCELLED", "QUARANTINED"}
++    # C1：NO_MATCH/NOT_APPLICABLE 时区间生成(SEGMENT)及之后的无需步骤=SEGMENT 及后续，
++    # 该分支已覆盖 WRITE/VALIDATE/PUBLISH/REGISTER，原第二个 elif 为不可达死分支，删除。
+     summary = []
+     for key in SCENE_STEP_NAMES:
+         step = latest_steps.get(key)
+@@ -105,15 +122,11 @@ def _scene_phase_summary(run: PipelineRun, latest_steps: dict[str, StepRun], out
+             }.get(step.status, step.status)
+             if step.status == "SKIPPED" and step.error_message:
+                 status = f"已跳过（{step.error_message}）"
+-        elif step is None and no_match and SCENE_STEP_ORDER.get(key, 0) >= SCENE_STEP_ORDER["SEGMENT"]:
++        elif no_match and SCENE_STEP_ORDER.get(key, 0) >= SCENE_STEP_ORDER["SEGMENT"]:
+             # NO_MATCH/NOT_APPLICABLE：区间生成及之后（切包/校验/发布/登记）无需执行
+             status = "已跳过（无需）"
+-        elif no_match and key in ("WRITE", "VALIDATE", "PUBLISH", "REGISTER"):
+-            status = "已跳过（无需）"
+-        elif run_failed and not step:
+-            # run 终态失败但步骤无记录=未启动即终止，保持真实「未开始」
+-            status = "未开始"
+         else:
++            # run 失败/取消但步骤无记录=未启动即终止，保持真实「未开始」（C4 口径）
+             status = "未开始"
+         summary.append({"name": SCENE_STEP_ZH.get(key, key), "status": status, "step": step})
+     return summary
+@@ -160,9 +173,13 @@ def _scene_outcome(run: PipelineRun, events: list[PipelineEvent]) -> str | None:
+     return None
+ 
+ 
+-def _scene_environment_paths(run: PipelineRun, copies: list, artifacts: list) -> dict:
++def _scene_environment_paths(copies: list, artifacts: list) -> dict:
+     """场景运行环境区（DESIGN §7.3.3）：只列处理机输入/工作根、场景 NAS 发布路径及
+-    远端模型服务身份；不列 A100 路径、自建 Phase0/1/3 或强制重试面。"""
++    远端模型服务身份；不列 A100 路径、自建 Phase0/1/3 或强制重试面。
++
++    C2：原 run 参数未使用——调用方传入的 current_copies 已按 pipeline_run_id 过滤、
++    artifacts 查询本身按 pipeline_run_id 限定，删除死参数，不伪造路径来源。
++    """
+     paths: dict[str, list[str]] = {"处理机输入/工作根": [], "场景 NAS 发布路径": []}
+     for item in [*copies, *artifacts]:
+         storage_type = getattr(item, "storage_type", None) or getattr(item, "artifact_type", None) or ""
+@@ -175,6 +192,39 @@ def _scene_environment_paths(run: PipelineRun, copies: list, artifacts: list) ->
+     return paths
+ 
+ 
++def _scene_model_identity(run: PipelineRun) -> str | None:
++    """C9：远端模型服务身份只取 run 冻结快照（intake snapshot）中的真实登记字段。
++
++    快照实际承载的模型/能力身份证据=capability_version + effective_config_hash
++    （提交时冻结，不随环境漂移）；profile_id/profile_version 为场景配置身份。
++    无记录字段返回 None（模板显示「未登记」），不用当前环境值冒充历史，不加 schema。
++    """
++    try:
++        snapshot = json.loads(run.pipeline_config_snapshot_json or "{}")
++    except (TypeError, ValueError):
++        snapshot = {}
++    if not isinstance(snapshot, dict):
++        return None
++    scenes = [s for s in (snapshot.get("scenes") or []) if isinstance(s, dict)]
++    capability_parts = []
++    for scene in scenes:
++        code = scene.get("scene_code")
++        version = scene.get("capability_version")
++        if code and version:
++            capability_parts.append(f"{code}@{version}")
++    parts = []
++    if capability_parts:
++        parts.append("能力 " + ", ".join(capability_parts))
++    if snapshot.get("profile_id"):
++        profile = f"配置 {snapshot['profile_id']}"
++        if snapshot.get("profile_version"):
++            profile += f"@{snapshot['profile_version']}"
++        parts.append(profile)
++    if snapshot.get("effective_config_hash"):
++        parts.append(f"冻结摘要 {str(snapshot['effective_config_hash'])[:12]}…")
++    return " · ".join(parts) if parts else None
++
++
+ def _retry_options(run: PipelineRun, artifacts: list[Artifact]) -> list[dict[str, str]]:
+     if run.source_id.startswith("nvidia-chunk-"):
+         return []
+@@ -614,7 +664,10 @@ def pipeline_page(request: Request, pipeline_run_id: str, db: Session = Depends(
+             # 源 bag 行缺失（如场景运行先于 bag 登记）：血缘面降级为空 envelope，
+             # 不阻断场景详情渲染。
+             scene_lineage = {"bag_uid": run.source_id, "lineage": None, "children": []}
+-    scene_environment_paths = _scene_environment_paths(run, current_copies, artifacts) if is_scene else None
++    scene_environment_paths = _scene_environment_paths(current_copies, artifacts) if is_scene else None
++    # C3/16C-c05-03：模板终态刷新控制与状态解释共用 scene_terminal 单一来源
++    # （INPUT_INVALID 属 Phase0 状态机，不进场景终态集合）。
++    scene_model_identity = _scene_model_identity(run) if is_scene else None
+     return render(
+         request,
+         "pipeline_detail.html",
+@@ -625,14 +678,8 @@ def pipeline_page(request: Request, pipeline_run_id: str, db: Session = Depends(
+         scene_outcome=scene_outcome,
+         scene_lineage=scene_lineage,
+         scene_environment_paths=scene_environment_paths,
+-        scene_terminal=is_scene and run.status in {
+-            "SCENE_DONE",
+-            "SCENE_FAILED",
+-            "SCENE_PARTIAL_FAILED",
+-            "CANCELLED",
+-            "QUARANTINED",
+-            "INPUT_INVALID",
+-        },
++        scene_model_identity=scene_model_identity,
++        scene_terminal=scene_terminal(run),
+         events=events,
+         artifacts=artifacts,
+         copies=current_copies,
+diff --git a/tests/test_task16cc_scene_detail.py b/tests/test_task16cc_scene_detail.py
+new file mode 100644
+index 0000000..b003c78
+--- /dev/null
++++ b/tests/test_task16cc_scene_detail.py
+@@ -0,0 +1,359 @@
++# TASK-16C-C：场景流水线详情（DESIGN §7.3.3）+ OCR 遗留逐条（C1/C2/C3/C4/C8/C9/c05-03/04/05）
++from __future__ import annotations
++
++import json
++from datetime import datetime
++
++import pytest
++from fastapi.testclient import TestClient
++from sqlalchemy import select
++from sqlalchemy.orm import Session
++
++from app.database import Base, SessionLocal, engine
++from app.domain.enums import QueueName
++from app.main import app
++from app.models import (
++    BagDerivation,
++    BagPurpose,
++    BagRecord,
++    PipelineEvent,
++    PipelineRun,
++    SceneAnalysisVersion,
++    SceneSegment,
++    SourceCopy,
++    StepRun,
++)
++from app.services.scene_slice_service import PIPELINE_TYPE_SCENE_SLICE
++from app.web.pipelines import (
++    SCENE_TERMINAL_STATUSES,
++    _scene_environment_paths,
++    _scene_model_identity,
++    _scene_phase_summary,
++    scene_terminal,
++)
++
++UID_PREFIX = "T16CC"
++
++
++def _uid(n: int) -> str:
++    return f"{UID_PREFIX}{n:020d}"
++
++
++@pytest.fixture
++def db():
++    session: Session = SessionLocal()
++    try:
++        _purge_prefix(session)
++    except Exception:  # noqa: BLE001
++        session.rollback()
++    Base.metadata.create_all(engine)
++    try:
++        _purge_prefix(session)
++    except Exception:  # noqa: BLE001
++        session.rollback()
++    try:
++        yield session
++    finally:
++        try:
++            session.rollback()
++        except Exception:  # noqa: BLE001
++            pass
++        session.close()
++        _purge_prefix()
++
++
++def _purge_prefix(session: Session | None = None) -> None:
++    s = session or SessionLocal()
++    try:
++        avs = s.scalars(
++            select(SceneAnalysisVersion.id).where(SceneAnalysisVersion.parent_bag_uid.like(f"{UID_PREFIX}%"))
++        ).all()
++        if avs:
++            s.execute(SceneSegment.__table__.delete().where(SceneSegment.analysis_version_id.in_(avs)))
++        s.execute(SceneAnalysisVersion.__table__.delete().where(SceneAnalysisVersion.parent_bag_uid.like(f"{UID_PREFIX}%")))
++        run_ids = s.scalars(select(PipelineRun.id).where(PipelineRun.source_id.like(f"{UID_PREFIX}%"))).all()
++        if run_ids:
++            s.execute(StepRun.__table__.delete().where(StepRun.pipeline_run_id.like(f"{UID_PREFIX}-run%")))
++            s.execute(PipelineEvent.__table__.delete().where(PipelineEvent.pipeline_run_id.like(f"{UID_PREFIX}-run%")))
++            s.execute(SourceCopy.__table__.delete().where(SourceCopy.pipeline_run_id.like(f"{UID_PREFIX}-run%")))
++        s.execute(
++            BagDerivation.__table__.delete().where(
++                BagDerivation.parent_bag_uid.like(f"{UID_PREFIX}%") | BagDerivation.child_bag_uid.like(f"{UID_PREFIX}%")
++            )
++        )
++        from app.models import bag_scene
++
++        bag_ids = s.scalars(select(BagRecord.id).where(BagRecord.bag_uid.like(f"{UID_PREFIX}%"))).all()
++        if bag_ids:
++            s.execute(BagPurpose.__table__.delete().where(BagPurpose.bag_id.in_(bag_ids)))
++            s.execute(bag_scene.delete().where(bag_scene.c.bag_id.in_(bag_ids)))
++        s.execute(BagRecord.__table__.delete().where(BagRecord.bag_uid.like(f"{UID_PREFIX}%")))
++        s.execute(PipelineRun.__table__.delete().where(PipelineRun.source_id.like(f"{UID_PREFIX}%")))
++        s.commit()
++    except Exception:  # noqa: BLE001
++        s.rollback()
++    finally:
++        s.close()
++
++
++def _add_bag(session: Session, n: int, *, bag_role: str = "ORIGINAL", dataset_type: str = "self_built") -> BagRecord:
++    bag = BagRecord(
++        bag_uid=_uid(n),
++        name=f"t16cc-bag-{n}",
++        relative_path=f"ready/t16cc/{n}",
++        bag_role=bag_role,
++        dataset_type=dataset_type,
++        started_at=datetime(2026, 1, 1),
++        availability="AVAILABLE",
++    )
++    session.add(bag)
++    session.flush()
++    session.add(BagPurpose(bag_id=bag.id, purpose="self_built"))
++    session.flush()
++    return bag
++
++
++def _scene_run(
++    session: Session,
++    n: int,
++    *,
++    status: str = "SCENE_RUNNING",
++    snapshot: dict | None = None,
++    bag: BagRecord | None = None,
++    pipeline_type: str = PIPELINE_TYPE_SCENE_SLICE,
++) -> PipelineRun:
++    if bag is None:
++        bag = _add_bag(session, 100 + n)
++    run = PipelineRun(
++        pipeline_run_id=f"{UID_PREFIX}-run{n:02d}",
++        source_id=bag.bag_uid,
++        queue_name=QueueName.SCENE_SLICE.value,
++        status=status,
++        pipeline_type=pipeline_type,
++        pipeline_config_name="slope",
++        pipeline_config_version="v1",
++        pipeline_config_snapshot_json=json.dumps(snapshot if snapshot is not None else {
++            "schema_version": "scene-run/v1",
++            "scenes": [{"scene_code": "slope", "capability_version": "v1", "capability_config_hash": "h" * 16}],
++            "effective_config_hash": "e" * 64,
++            "profile_id": "scene-isolated",
++            "profile_version": "v3",
++        }, ensure_ascii=False, sort_keys=True),
++    )
++    session.add(run)
++    session.flush()
++    return run
++
++
++def _add_step(session: Session, run: PipelineRun, name: str, status: str, *, error: str = "", attempt: int = 1) -> StepRun:
++    step = StepRun(pipeline_run_id=run.pipeline_run_id, step_name=name, attempt=attempt, status=status, error_message=error)
++    session.add(step)
++    session.flush()
++    return step
++
++
++def _outcome_snapshot(outcome: str) -> dict:
++    return {
++        "schema_version": "scene-run/v1",
++        "scenes": [{"scene_code": "slope", "capability_version": "v1", "capability_config_hash": "h" * 16}],
++        "effective_config_hash": "e" * 64,
++        "profile_id": "scene-isolated",
++        "profile_version": "v3",
++        "scene_outcomes": {"slope": {"outcome": outcome}},
++    }
++
++
++def _page(client: TestClient, run: PipelineRun) -> str:
++    resp = client.get(f"/pipelines/{run.pipeline_run_id}")
++    assert resp.status_code == 200, resp.text[:500]
++    return resp.text
++
++
++class TestScenePhaseSummaryUnit:
++    """C1/C3/C4：八步状态解释（单元面）。"""
++
++    def test_no_match_skips_segment_and_after_only(self, db: Session):
++        run = _scene_run(db, 1, status="SCENE_DONE", snapshot=_outcome_snapshot("NO_MATCH"))
++        latest = {"PRECHECK": _add_step(db, run, "PRECHECK", "DONE"),
++                  "EXTRACT": _add_step(db, run, "EXTRACT", "DONE"),
++                  "INFER": _add_step(db, run, "INFER", "DONE")}
++        db.commit()
++        summary = {p["name"]: p["status"] for p in _scene_phase_summary(run, latest, "NO_MATCH")}
++        assert summary["输入检查"] == "已完成"
++        assert summary["解码/抽帧"] == "已完成"
++        assert summary["模型识别"] == "已完成"
++        # C1：区间生成及之后=已跳过（无需）（原不可达 elif 删除后同一分支覆盖）
++        assert summary["区间生成"] == "已跳过（无需）"
++        assert summary["切包"] == "已跳过（无需）"
++        assert summary["产物校验"] == "已跳过（无需）"
++        assert summary["NAS 发布"] == "已跳过（无需）"
++        assert summary["登记/完成"] == "已跳过（无需）"
++
++    def test_failed_run_unstarted_steps_stay_not_started(self, db: Session):
++        # C4：run 失败但步骤无记录=「未开始」，不伪标完成/终止
++        run = _scene_run(db, 2, status="SCENE_FAILED")
++        _add_step(db, run, "PRECHECK", "DONE")
++        _add_step(db, run, "INFER", "FAILED", error="boom: detail")
++        db.commit()
++        latest = {s.step_name: s for s in db.scalars(select(StepRun).where(StepRun.pipeline_run_id == run.pipeline_run_id)).all()}
++        summary = {p["name"]: p["status"] for p in _scene_phase_summary(run, latest, "FAILED")}
++        assert summary["模型识别"] == "失败"
++        for name in ("解码/抽帧", "区间生成", "切包", "产物校验", "NAS 发布", "登记/完成"):
++            assert summary[name] == "未开始", name
++
++    def test_terminal_set_excludes_input_invalid(self, db: Session):
++        # C3：INPUT_INVALID 属 Phase0 状态机，不是场景终态
++        assert "INPUT_INVALID" not in SCENE_TERMINAL_STATUSES
++        run = _scene_run(db, 3, status="INPUT_INVALID")
++        db.commit()
++        assert scene_terminal(run) is False
++
++
++class TestSceneDetailPage:
++    """页面矩阵：类型×终态 + 刷新控制 + 动作面。"""
++
++    def test_success_done_stops_refresh_and_shows_lineage(self, db: Session):
++        bag = _add_bag(db, 1)
++        run = _scene_run(db, 1, status="SCENE_DONE", snapshot=_outcome_snapshot("SUCCESS"), bag=bag)
++        for name in ("PRECHECK", "EXTRACT", "INFER", "SEGMENT", "WRITE", "VALIDATE", "PUBLISH", "REGISTER"):
++            _add_step(db, run, name, "DONE")
++        db.commit()
++        with TestClient(app) as client:
++            page = _page(client, run)
++        assert "场景切片" in page
++        assert "结果：SUCCESS" in page
++        # 16C-c05-03：真实终态停止刷新
++        assert "setTimeout(()=>location.reload(),10000)" not in page
++        # C9：模型身份=快照冻结证据
++        assert "能力 slope@v1" in page
++        assert "配置 scene-isolated@v3" in page
++        assert "未登记" not in page.split("远端模型服务身份")[1].split("</section>")[0]
++        # C4 口径：八步全「已完成」，无伪标
++        assert page.count("已完成") >= 8
++
++    def test_running_refreshes(self, db: Session):
++        run = _scene_run(db, 4, status="SCENE_RUNNING")
++        _add_step(db, run, "PRECHECK", "DONE")
++        _add_step(db, run, "EXTRACT", "DONE")
++        _add_step(db, run, "INFER", "RUNNING")
++        db.commit()
++        with TestClient(app) as client:
++            page = _page(client, run)
++        assert "setTimeout(()=>location.reload(),10000)" in page
++        assert "执行中" in page
++
++    def test_input_invalid_scene_keeps_refresh(self, db: Session):
++        # C3：INPUT_INVALID 不进场景终态集合 → 刷新不硬停（状态面与刷新控制单一来源一致）
++        run = _scene_run(db, 5, status="INPUT_INVALID")
++        db.commit()
++        with TestClient(app) as client:
++            page = _page(client, run)
++        assert "setTimeout(()=>location.reload(),10000)" in page
++
++    def test_cancelled_scene_no_retry_dom_and_guarded_script(self, db: Session):
++        # C8：CANCELLED 场景无 retry-form；脚本存在但 guard 防 null.querySelector
++        run = _scene_run(db, 6, status="CANCELLED")
++        db.commit()
++        with TestClient(app) as client:
++            page = _page(client, run)
++        assert 'class="retry-form"' not in page
++        assert "setTimeout(()=>location.reload(),10000)" not in page  # CANCELLED=场景真实终态，停刷新
++        assert "const retryForm = document.querySelector('.retry-form');" in page
++        assert "if (retryForm)" in page  # guard 在位（浏览器 JS 取证面归 TESTER）
++
++    def test_failed_scene_retry_form_no_force_options(self, db: Session):
++        # 场景正常重试通路：有 retry 表单但无强制重试起点（Phase0/1/3 不得误入）
++        run = _scene_run(db, 7, status="SCENE_FAILED")
++        _add_step(db, run, "INFER", "FAILED", error="model: down")
++        db.commit()
++        with TestClient(app) as client:
++            page = _page(client, run)
++        assert 'class="retry-form"' in page
++        assert "失败" in page
++        assert "retry-start" not in page  # 无强制重试起点 DOM
++        assert "从 Phase0 重建" not in page
++
++    def test_scene_run_with_nvidia_bag_hides_nvidia_contract(self, db: Session):
++        # 16C-c05-05：按 pipeline_type 分流，NVIDIA 来源 bag 的场景 run 不得误露旧契约
++        nvidia_bag = _add_bag(db, 8, bag_role="ORIGINAL", dataset_type="nvidia_physicalai")
++        run = _scene_run(db, 8, status="SCENE_RUNNING", bag=nvidia_bag)
++        db.commit()
++        with TestClient(app) as client:
++            page = _page(client, run)
++        assert "NVIDIA 任务契约" not in page
++        assert "场景切片" in page
++
++    def test_nvidia_chunk_run_keeps_contract(self, db: Session):
++        # 原 NVIDIA run 正常（回归）
++        nvidia_bag = _add_bag(db, 9, bag_role="ORIGINAL", dataset_type="nvidia_physicalai")
++        run = _scene_run(
++            db, 9, status="RUNNING", bag=nvidia_bag, pipeline_type="NVIDIA_CHUNK"
++        )
++        db.commit()
++        with TestClient(app) as client:
++            page = _page(client, run)
++        assert "NVIDIA 任务契约" in page
++
++    def test_no_lineage_fallback_li_in_ol(self, db: Session):
++        # 16C-c05-04：无血缘兜底 li 必须有 ol 容器
++        run = _scene_run(db, 10, status="SCENE_DONE", snapshot=_outcome_snapshot("NOT_APPLICABLE"))
++        _add_step(db, run, "PRECHECK", "DONE")
++        _add_step(db, run, "EXTRACT", "DONE")
++        _add_step(db, run, "INFER", "DONE")
++        db.commit()
++        with TestClient(app) as client:
++            page = _page(client, run)
++        assert "结果：NOT_APPLICABLE" in page
++        fallback = page.split("该 Bag 无场景血缘登记（非切片、无子切片）。")
++        assert len(fallback) == 2
++        assert "</ol>" in fallback[1][:60]  # li 后紧跟容器闭合
++
++    def test_model_identity_not_registered_when_snapshot_empty(self, db: Session):
++        # C9：无真实登记 → 写「未登记」，不用环境值冒充
++        run = _scene_run(db, 11, status="SCENE_RUNNING", snapshot={})
++        db.commit()
++        with TestClient(app) as client:
++            page = _page(client, run)
++        assert "—（未登记）" in page
++
++
++class TestSelfBuiltRegression:
++    """非场景页面回归（保留旧自建行为，C4 口径不改非场景）。"""
++
++    def test_self_built_failed_stops_refresh_and_keeps_force_retry(self, db: Session):
++        bag = _add_bag(db, 20)
++        run = _scene_run(db, 20, status="FAILED", bag=bag, pipeline_type="SELF_BUILT_BAG")
++        db.commit()
++        with TestClient(app) as client:
++            page = _page(client, run)
++        assert "setTimeout(()=>location.reload(),10000)" not in page  # 终态停刷新
++        assert "强制重试" in page  # 自建保留强制重试
++        assert 'class="retry-form"' in page
++
++    def test_self_built_cancelled_shows_terminated_not_skipped(self, db: Session):
++        bag = _add_bag(db, 21)
++        run = _scene_run(db, 21, status="CANCELLED", bag=bag, pipeline_type="SELF_BUILT_BAG")
++        db.commit()
++        with TestClient(app) as client:
++            page = _page(client, run)
++        assert "已终止" in page  # 非场景保持原「已终止」解释
++        assert 'class="retry-form"' in page
++
++
++class TestEnvironmentPathsUnit:
++    """C2：_scene_environment_paths 签名（run 参数已删）与分桶。"""
++
++    def test_signature_and_bucketing(self, db: Session):
++        run = _scene_run(db, 30, status="SCENE_DONE", snapshot=_outcome_snapshot("SUCCESS"))
++        copy = SourceCopy(source_id=run.source_id, pipeline_run_id=run.pipeline_run_id, storage_type="SCENE_SLICE", path="/mnt/a/b.db3", identity_key=f"t16cc-ik-{run.pipeline_run_id}")
++        db.add(copy)
++        db.commit()
++        paths = _scene_environment_paths([copy], [])
++        assert paths["场景 NAS 发布路径"] == ["/mnt/a/b.db3"]
++        assert paths["处理机输入/工作根"] == []
++
++    def test_model_identity_from_snapshot(self, db: Session):
++        run = _scene_run(db, 31, status="SCENE_RUNNING")
++        db.commit()
++        identity = _scene_model_identity(run)
++        assert identity and "能力 slope@v1" in identity and "配置 scene-isolated@v3" in identity
+\ No newline at end of file

@@ -1,0 +1,837 @@
+diff --git a/app/services/bag_search_service.py b/app/services/bag_search_service.py
+index fc3591b..80bfdbd 100644
+--- a/app/services/bag_search_service.py
++++ b/app/services/bag_search_service.py
+@@ -2,11 +2,13 @@ from dataclasses import dataclass, replace
+ from datetime import datetime
+ from typing import Any
+ from urllib.parse import urlencode
++from zoneinfo import ZoneInfo
+ 
+ from sqlalchemy import Select, and_, case, func, or_, select
+ from sqlalchemy.orm import Session, selectinload
+ from sqlalchemy.sql.functions import coalesce
+ 
++from app.config import settings
+ from app.models import (
+     BagDerivation,
+     BagPurpose,
+@@ -35,63 +37,106 @@ DATA_KIND_LABELS = {
+ }
+ 
+ 
+-def data_kind_case():
+-    """data_kind SQL CASE 谓词（共享 Web 与 API 两套入口，DESIGN §7.3.3 分类优先级）：
+-    先按有效 derivation 识别子包 scene_slice；NVIDIA 来源且非子包 nvidia_original；
+-    ORIGINAL 且含 scene_slice 用途 scene_original；其余（含 self_built/无场景依据 ORIGINAL）
+-    self_built_original。未知历史 NOT_APPLICABLE 行归 self_built_original 桶但在
+-    ``all`` 视图由调用方按 bag_role 显式标注"未分类"（data_kind 四桶只覆盖四类已知语义）。
+-
+-    用独立标量子查询 + ``in_`` 表达"是否存在 derivation/用途行"，而非关联 EXISTS——
+-    避免在 Web 主查询（outerjoin Vehicle）与 API 集合路由两种上下文下因 SQLAlchemy
+-    自动关联（auto-correlation）把 FROM 表关联掉而报 "no FROM clauses"（SQLite）。
++# --- 共享 data_kind 分类真相（DESIGN §7.3.3；TASK-16C-A OCR C5/C6/16C-c03-04） ---
++# 分类优先级（单源，SQL 谓词与 Python 标签共用同一顺序，不再两套规则）：
++# 1) 子包：bag_role=SCENE_SLICE 或存在有效 derivation（两者任一即 scene_slice，
++#    含合法无血缘历史切片，不照搬仅 derivation 的误修口径）；
++# 2) NVIDIA 来源且非子包：nvidia_original；
++# 3) ORIGINAL 且有 scene_slice 用途（场景根身份依据）：scene_original；
++# 4) 其余 ORIGINAL：self_built_original（双用途原包同时返回 scene_original+self_built_original，
++#    展示双标且两个筛选都可命中，UID 只一条）；
++# 5) 未知历史（NOT_APPLICABLE 且非 NVIDIA）：不猜类型，空标签，模板按 bag_role 渲染"未分类"。
++
++def _scene_slice_pred():
++    """子包谓词：SCENE_SLICE 角色或存在有效 derivation（16C-c03-04 统一口径）。"""
++    return or_(
++        BagRecord.bag_role == "SCENE_SLICE",
++        BagRecord.bag_uid.in_(select(BagDerivation.child_bag_uid)),
++    )
++
++
++def _scene_basis_pred():
++    """ORIGINAL 的场景依据：scene_slice 用途（场景根入口默认 purposes=[scene_slice]，
++    已冻结 scene 根身份的包在绑定时即携带该用途）。"""
++    return BagRecord.id.in_(select(BagPurpose.bag_id).where(BagPurpose.purpose == "scene_slice"))
++
++
++def data_kind_pred(kind: str):
++    """data_kind 筛选谓词（SQL，多成员口径：双用途原包对两个 data_kind 值都命中）。
++
++    分类规则单源（DESIGN §7.3.3）：
++    - scene_slice：SCENE_SLICE 角色或有效 derivation；
++    - nvidia_original：NVIDIA 来源且非子包；
++    - scene_original：ORIGINAL 且有 scene_slice 用途（场景根身份依据）；
++    - self_built_original：ORIGINAL 且非子包，有 self_built 依据（dataset_type=self_built
++      用途口径）或无任何场景依据（旧 self_built 记录）。
++    双用途原包（同时有场景依据与 self_built 依据）在 scene_original 与 self_built_original
++    两个筛选都命中，UID 只一条。
++
++    用独立标量子查询 + ``in_``/``or_`` 表达存在性，而非关联 EXISTS——避免在 Web 主查询
++    （outerjoin Vehicle）与 API 集合路由两种上下文下因 SQLAlchemy 自动关联
++    （auto-correlation）把 FROM 表关联掉而报 "no FROM clauses"（SQLite）。
+     """
+-    slice_uids = select(BagDerivation.child_bag_uid)
+-    scene_purpose_ids = select(BagPurpose.bag_id).where(BagPurpose.purpose == "scene_slice")
++    if kind == "scene_slice":
++        return _scene_slice_pred()
++    if kind == "nvidia_original":
++        return and_(BagRecord.dataset_type == "nvidia_physicalai", ~_scene_slice_pred())
++    if kind == "scene_original":
++        return and_(BagRecord.bag_role == "ORIGINAL", _scene_basis_pred())
++    if kind == "self_built_original":
++        return and_(
++            BagRecord.bag_role == "ORIGINAL",
++            ~_scene_slice_pred(),
++            or_(
++                BagRecord.dataset_type == "self_built",
++                ~_scene_basis_pred(),
++            ),
++        )
++    raise ValueError(f"unknown data_kind: {kind}")
++
++
++def data_kind_case():
++    """data_kind SQL CASE（单值展示/兼容口径）：按共享优先级取第一个命中。"""
+     return case(
+-        (BagRecord.bag_uid.in_(slice_uids), "scene_slice"),
+-        (BagRecord.dataset_type == "nvidia_physicalai", "nvidia_original"),
++        (_scene_slice_pred(), "scene_slice"),
+         (
+-            and_(BagRecord.bag_role == "ORIGINAL", BagRecord.id.in_(scene_purpose_ids)),
+-            "scene_original",
++            and_(BagRecord.dataset_type == "nvidia_physicalai", ~_scene_slice_pred()),
++            "nvidia_original",
+         ),
++        (and_(BagRecord.bag_role == "ORIGINAL", _scene_basis_pred()), "scene_original"),
+         else_="self_built_original",
+     )
+ 
+ 
+-def data_kind_labels_for(bag: BagRecord, *, has_scene_purpose: bool, is_scene_slice: bool) -> list[str]:
+-    """Python 侧 data_kind 标签（双用途原包同时返回 scene_original + self_built_original）。
+-
+-    与 SQL CASE（单值筛选）口径一致但允许一条记录返回多个标签——
+-    DESIGN §7.3.3"双用途原包可同时显示两个类型标记并命中两个筛选"。
+-    """
+-    labels: list[str] = []
+-    if is_scene_slice or bag.bag_role == "SCENE_SLICE":
+-        labels.append("scene_slice")
+-    elif bag.dataset_type == "nvidia_physicalai":
+-        labels.append("nvidia_original")
+-    else:
+-        # ORIGINAL / NOT_APPLICABLE：场景用途 → scene_original；self_built 用途或无依据 → self_built_original
+-        if has_scene_purpose:
+-            labels.append("scene_original")
+-        if bag.dataset_type == "self_built" or not has_scene_purpose:
+-            labels.append("self_built_original")
+-    return labels
+-
+-
+ def _unique_strings(values: list[str]) -> tuple[str, ...]:
+     return tuple(dict.fromkeys(value.strip() for value in values if value.strip()))
+ 
+ 
+-def _parse_time(value: str, *, end: bool) -> datetime | None:
++def _parse_time(value: str | None, *, end: bool) -> datetime | None:
++    """采集时间入参→业务 naive datetime（与库内写入口径同源，OCR C7）。
++
++    库内 ``started_at`` 由 ``app.clock.now()`` 以业务时区（settings.display_timezone）
++    写入 naive 秒精度。因此：
++    - ``YYYY-MM-DD``：start→当日 00:00:00；end→当日 23:59:59.999999（全天截止，
++      MySQL DATETIME(0) 四舍五入落 23:59:59，SQLite 同口径）；
++    - 带时间的 ISO 串：naive 按业务时区原值；aware（任何时区/偏移）统一换算到
++      业务时区后去 tzinfo，避免 aware vs naive 比较在 MySQL 下行为漂移/500；
++    - 非法字符串抛 ``InvalidBagSearchState``（Web 400 / API 422），不直入
++      ``datetime.fromisoformat`` 后让 DB 层炸 500。
++    """
+     if not value:
+         return None
++    text = value.strip()
++    if not text:
++        return None
+     try:
+-        parsed = datetime.fromisoformat(value)
++        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+     except ValueError as exc:
+         raise InvalidBagSearchState("采集时间格式应为 YYYY-MM-DD 或 YYYY-MM-DDTHH:MM:SS") from exc
+-    if len(value) == 10 and end:
+-        return parsed.replace(hour=23, minute=59, second=59, microsecond=999999)
++    if parsed.tzinfo is not None:
++        parsed = parsed.astimezone(ZoneInfo(settings.display_timezone)).replace(tzinfo=None)
++    if len(text) == 10 and end:
++        parsed = parsed.replace(hour=23, minute=59, second=59, microsecond=999999)
+     return parsed
+ 
+ 
+@@ -310,9 +355,9 @@ def _apply_filters(stmt: Select[Any], state: BagSearchState) -> Select[Any]:
+     if state.dataset_type:
+         stmt = stmt.where(BagRecord.dataset_type == state.dataset_type)
+     # 数据分类（TASK-16C / DESIGN §7.3.3）：与 dataset_type 并用取交集（不相容组合→明确空结果，
+-    # 不静默丢条件）；SQL CASE 单值口径，双用途原包在 scene_original/self_built_original 中均可命中。
++    # 不静默丢条件）；多成员谓词口径（OCR C5），双用途原包在 scene_original/self_built_original 中均可命中。
+     if state.data_kind:
+-        stmt = stmt.where(data_kind_case() == state.data_kind)
++        stmt = stmt.where(data_kind_pred(state.data_kind))
+     if state.status:
+         # 列表状态列来源：自建行用 BagRecord.status，NVIDIA 行用 _nvidia_effective_status
+         # （最新 run 状态，无 run 回退 BagRecord.status）。筛选与展示共用同一表达式。
+@@ -512,19 +557,21 @@ def scene_view_page_context(db: Session, page_bags: list[BagRecord]) -> dict[str
+ def data_kind_context(db: Session, page_bags: list[BagRecord]) -> dict[str, list[str]]:
+     """本页行 data_kind 标签上下文（TASK-16C / DESIGN §7.3.3）。
+ 
+-    一次有界批量查询：
+-    - scene_slice 侧：存在 child derivation 即 SCENE_SLICE；
+-    - scene_original 侧：bag_purpose 有 scene_slice 行；
+-    - 其余 ORIGINAL 侧：dataset_type=self_built 或无 scene_slice 依据 → self_built_original。
+-    双用途原包可同时命中 scene_original + self_built_original（DESIGN 明文"可同时显示两个类型
+-    标记并命中两个筛选"）。NOT_APPLICABLE（未知历史）在 all 视图保留但不猜测，标签为空列表，
++    一次有界批量查询，分类真相与 SQL 谓词同一优先级（OCR C6：不再维护第二套 Python 规则）：
++    - scene_slice 侧：``bag_role=SCENE_SLICE`` 或存在 child derivation（16C-c03-04：
++      两者任一即可识别子包，含合法无血缘历史切片）；
++    - nvidia 侧：``dataset_type=nvidia_physicalai`` 且非子包；
++    - scene_original 侧：ORIGINAL 且含 scene_slice 用途（场景根身份依据）；
++    - 其余 ORIGINAL → self_built_original（双用途原包同时命中 scene_original +
++      self_built_original，DESIGN 明文"可同时显示两个类型标记并命中两个筛选"）。
++    NOT_APPLICABLE（未知历史）且非 NVIDIA：不猜测，标签为空列表，
+     由模板按 bag_role 显式渲染"未分类"。
+     """
+     if not page_bags:
+         return {}
+     uids = [b.bag_uid for b in page_bags]
+     ids = {b.bag_uid: b.id for b in page_bags}
+-    # 一次查询本页 child_bag_uid 是否出现在 derivation（scene_slice）
++    # 一次查询本页 child_bag_uid 是否出现在 derivation（scene_slice 侧）
+     slice_uids = set(
+         db.scalars(
+             select(BagDerivation.child_bag_uid).where(BagDerivation.child_bag_uid.in_(uids)).distinct()
+@@ -541,15 +588,18 @@ def data_kind_context(db: Session, page_bags: list[BagRecord]) -> dict[str, list
+     )
+     result: dict[str, list[str]] = {}
+     for bag in page_bags:
+-        if bag.bag_uid in slice_uids:
++        is_slice = bag.bag_role == "SCENE_SLICE" or bag.bag_uid in slice_uids
++        if is_slice:
+             result[bag.bag_uid] = ["scene_slice"]
+         elif bag.dataset_type == "nvidia_physicalai":
+             result[bag.bag_uid] = ["nvidia_original"]
+         elif bag.bag_role == "ORIGINAL":
+             labels: list[str] = []
+-            if bag.id in scene_purpose_ids:
++            has_basis = bag.id in scene_purpose_ids
++            if has_basis:
+                 labels.append("scene_original")
+-            if bag.dataset_type == "self_built" or bag.id not in scene_purpose_ids:
++            # DESIGN §7.3.3：ORIGINAL 且有 self_built 用途、或无任何场景依据 → self_built_original
++            if bag.dataset_type == "self_built" or not has_basis:
+                 labels.append("self_built_original")
+             result[bag.bag_uid] = labels
+         else:
+diff --git a/app/services/scene_result_query.py b/app/services/scene_result_query.py
+index dcdefb3..2299e6b 100644
+--- a/app/services/scene_result_query.py
++++ b/app/services/scene_result_query.py
+@@ -31,7 +31,10 @@ from app.models import (
+ )
+ from app.services.bag_search_service import (
+     DATA_KINDS,
+-    data_kind_case,
++    InvalidBagSearchState,
++    _parse_time,
++    data_kind_context,
++    data_kind_pred,
+     originals_view_condition,
+ )
+ 
+@@ -120,20 +123,47 @@ def search_scene_bags(
+         raise HTTPException(422, f"purpose 非法：{purpose}（仅 scene_slice/self_built）")
+     if data_kind and data_kind not in DATA_KINDS:
+         raise HTTPException(422, f"data_kind 非法：{data_kind}（{'/'.join(DATA_KINDS)}）")
++    # 采集时间（OCR C7）：与 Web bag_search 共用同一解析入口——非法字符串 422（不再把原始
++    # 字符串直入 DateTime 触发 DB 层 500）；日期全天边界/时区换算与 Web 一致。
++    try:
++        start_at = _parse_time(started_from, end=False)
++        end_at = _parse_time(started_to, end=True)
++    except InvalidBagSearchState as exc:
++        raise HTTPException(422, str(exc)) from exc
++    if start_at and end_at and end_at < start_at:
++        raise HTTPException(422, "采集结束时间不能早于开始时间")
+     lim = _clamp_limit(limit)
+     ctx = _decode_cursor(cursor)
+ 
+-    # cursor 携带的筛选上下文必须与当前请求一致，否则 422（不静默按错误上下文翻页）。
+-    # 只对 cursor 实际携带的字段做一致性校验：历史 cursor（无 data_kind/purpose 键）
+-    # 按旧口径 view/scene_code 校验，不要求携带本次新增字段。
+-    _cursor_field_defaults = {
+-        "view": view,
+-        "scene_code": scene_code or "",
+-        "data_kind": data_kind or "",
+-        "purpose": purpose or "",
++    # cursor 携带的筛选上下文必须与当前请求一致，否则 422（不静默按错误上下文翻页，OCR
++    # 16C-c03-02：上下文覆盖全部实际筛选字段，换筛选条件的 cursor 不复用）。
++    # 只对 cursor 实际携带的字段做一致性校验：历史 cursor（无新键）按旧口径兼容，
++    # None 与空串归一（OCR 16C-c03-03：旧 cursor 的 scene_code None 与 "" 同义，
++    # 不能因归一化差异放行/误拒签名不匹配的 cursor）。
++    _norm = lambda v: v or ""  # noqa: E731 — 局部归一函数
++    _cursor_fields = {
++        "view": _norm(view),
++        "scene_code": _norm(scene_code),
++        "data_kind": _norm(data_kind),
++        "purpose": _norm(purpose),
++        "dataset_type": _norm(dataset_type),
++        "started_from": _norm(started_from),
++        "started_to": _norm(started_to),
++        "role": _norm(role),
++        "vehicle_id": vehicle_id if vehicle_id is not None else "",
++        "keyword": _norm(keyword),
++        "parent_bag_uid": _norm(parent_bag_uid),
++        "include_history": bool(include_history),
+     }
+-    for field, requested in _cursor_field_defaults.items():
+-        if field in ctx and ctx.get(field) != requested:
++    for field, requested in _cursor_fields.items():
++        if field not in ctx:
++            continue
++        # bool 字段不归一（False or "" 会变成 ""）；其余按 None/空串归一比较
++        if isinstance(requested, bool):
++            matched = ctx.get(field) == requested
++        else:
++            matched = _norm(ctx.get(field)) == requested
++        if not matched:
+             msg = f"cursor 筛选上下文不一致：{field}（cursor={ctx.get(field)!r} 请求={requested!r}）"
+             raise HTTPException(422, msg)
+ 
+@@ -150,7 +180,8 @@ def search_scene_bags(
+     if dataset_type:
+         q = q.where(BagRecord.dataset_type == dataset_type)
+     if data_kind:
+-        q = q.where(data_kind_case() == data_kind)
++        # OCR C5：与 Web 共享同一多成员分类谓词（双用途原包两类筛选都命中且 UID 唯一）
++        q = q.where(data_kind_pred(data_kind))
+     if purpose:
+         # 切片视图行天然全是场景切片用途，无需再过滤（与 bag_search 口径一致）
+         if not (view == "slices" and purpose == "scene_slice"):
+@@ -159,10 +190,10 @@ def search_scene_bags(
+                 .where(BagPurpose.bag_id == BagRecord.id, BagPurpose.purpose == purpose)
+                 .exists()
+             )
+-    if started_from:
+-        q = q.where(BagRecord.started_at >= started_from)
+-    if started_to:
+-        q = q.where(BagRecord.started_at <= started_to)
++    if start_at:
++        q = q.where(BagRecord.started_at >= start_at)
++    if end_at:
++        q = q.where(BagRecord.started_at <= end_at)
+ 
+     if view == "originals":
+         q = q.where(originals_view_condition())
+@@ -253,25 +284,15 @@ def search_scene_bags(
+         current_set = set(cur)
+ 
+     items = []
+-    # data_kind 单一规范值（与 SQL CASE 同优先级：slice→nvidia→scene_original→self_built_original），
+-    # 一次有界批量查本页 scene_slice 用途，供行内分类字段与 data_kind 筛选口径一致。
+-    row_ids = [bag.id for bag, _ in rows]
+-    row_scene_purpose = set(
+-        db.scalars(
+-            select(BagPurpose.bag_id)
+-            .where(BagPurpose.bag_id.in_(row_ids), BagPurpose.purpose == "scene_slice")
+-            .distinct()
+-        ).all()
+-    ) if row_ids else set()
++    # data_kind 行内分类（OCR 16C-c03-04）：与 Web 共用 data_kind_context 单一真相
++    # （SCENE_SLICE 角色或有效 derivation 均识别子包，含无血缘历史切片；NOT_APPLICABLE
++    # 非 NVIDIA 不猜类型）。行内取首个命中值保持既有单值返回形状（B 消费契约不变）。
++    row_kinds = {
++        uid: (labels[0] if labels else None)
++        for uid, labels in data_kind_context(db, [bag for bag, _ in rows]).items()
++    }
+     for bag, vehicle in rows:
+-        if view == "slices" or bag.bag_role == "SCENE_SLICE":
+-            row_kind = "scene_slice"
+-        elif bag.dataset_type == "nvidia_physicalai":
+-            row_kind = "nvidia_original"
+-        elif bag.bag_role == "ORIGINAL" and bag.id in row_scene_purpose:
+-            row_kind = "scene_original"
+-        else:
+-            row_kind = "self_built_original"
++        row_kind = row_kinds.get(bag.bag_uid)
+         item = _bag_summary(bag, vehicle, scene_map.get(bag.id, []), data_kind=row_kind)
+         if view == "slices" and include_history:
+             item["current"] = bag.bag_uid in current_set
+@@ -280,6 +301,9 @@ def search_scene_bags(
+     next_cursor = None
+     if has_more and rows:
+         last = rows[lim - 1][0]
++        # cursor 上下文覆盖全部实际筛选字段（OCR 16C-c03-02：换筛选条件的旧 cursor
++        # 因携带值与请求不一致而 422，不复用错误上下文）；时间用原始入参字符串，
++        # 与校验口径同一来源。
+         next_cursor = _encode_cursor(
+             {
+                 "null": last.started_at is None,
+@@ -289,6 +313,14 @@ def search_scene_bags(
+                 "scene_code": scene_code or "",
+                 "data_kind": data_kind or "",
+                 "purpose": purpose or "",
++                "dataset_type": dataset_type or "",
++                "started_from": started_from or "",
++                "started_to": started_to or "",
++                "role": role or "",
++                "vehicle_id": vehicle_id if vehicle_id is not None else "",
++                "keyword": keyword or "",
++                "parent_bag_uid": parent_bag_uid or "",
++                "include_history": bool(include_history),
+             }
+         )
+     return {"items": items, "limit": lim, "has_more": has_more, "next_cursor": next_cursor}
+diff --git a/tests/test_task16ca_query_api.py b/tests/test_task16ca_query_api.py
+new file mode 100644
+index 0000000..98b2725
+--- /dev/null
++++ b/tests/test_task16ca_query_api.py
+@@ -0,0 +1,427 @@
++"""TASK-16C-A（查询/API 面）OCR 遗留核修自测（C5/C6/C7/16C-c03-02/03/04）。
++
++与 tests/test_task16c_ui_minimal.py（冻结 attempt-1 断言，仅协调者转单写）互补：
++- C5：双用途原包在 scene_original 与 self_built_original 两个筛选都命中且 UID 唯一（Web 与 API）；
++- C6：Web 标签上下文与 API 行内 data_kind 共用单一分类真相，无第二套分叉规则；
++- C7：非法日期字符串 Web 400 / API 422（不再 DB 层 500）；日期全天截止；
++  aware 入参（任意时区）换算到业务时区（Asia/Shanghai）与 naive 库内值同口径；
++- 16C-c03-02：cursor 上下文覆盖全部实际筛选字段，换筛选条件 422，不换则连续翻页无漏无重；
++- 16C-c03-03：历史 cursor（无新增键）与旧口径兼容；scene_code None 与空串归一同义；
++- 16C-c03-04：子包识别 = SCENE_SLICE 角色或有效 derivation（含合法无血缘历史切片）；
++  NOT_APPLICABLE 非 NVIDIA 不猜类型（API 行内 data_kind=None，Web 标签=[]）。
++"""
++
++from __future__ import annotations
++
++from datetime import datetime, timedelta, timezone
++from zoneinfo import ZoneInfo
++
++import pytest
++from fastapi.testclient import TestClient
++from sqlalchemy import select
++from sqlalchemy.orm import Session
++
++from app.config import settings
++from app.database import Base, SessionLocal, engine
++from app.main import app
++from app.models import BagDerivation, BagPurpose, BagRecord
++from app.services.bag_search_service import (
++    InvalidBagSearchState,
++    _parse_time,
++    data_kind_context,
++)
++
++UID_PREFIX = "T16CA"
++
++
++def _uid(n: int) -> str:
++    return f"{UID_PREFIX}{n:020d}"
++
++
++@pytest.fixture
++def db():
++    session: Session = SessionLocal()
++    try:
++        _purge_prefix(session)
++    except Exception:  # noqa: BLE001
++        session.rollback()
++    Base.metadata.create_all(engine)
++    try:
++        _purge_prefix(session)
++    except Exception:  # noqa: BLE001
++        session.rollback()
++    try:
++        yield session
++    finally:
++        try:
++            session.rollback()
++        except Exception:  # noqa: BLE001
++            pass
++        session.close()
++        _purge_prefix()
++
++
++def _purge_prefix(session: Session | None = None) -> None:
++    s = session or SessionLocal()
++    try:
++        bag_ids = s.scalars(select(BagRecord.id).where(BagRecord.bag_uid.like(f"{UID_PREFIX}%"))).all()
++        if bag_ids:
++            s.execute(BagPurpose.__table__.delete().where(BagPurpose.bag_id.in_(bag_ids)))
++            from app.models import bag_scene
++
++            s.execute(bag_scene.delete().where(bag_scene.c.bag_id.in_(bag_ids)))
++        s.execute(
++            BagDerivation.__table__.delete().where(
++                BagDerivation.parent_bag_uid.like(f"{UID_PREFIX}%") | BagDerivation.child_bag_uid.like(f"{UID_PREFIX}%")
++            )
++        )
++        s.execute(BagRecord.__table__.delete().where(BagRecord.bag_uid.like(f"{UID_PREFIX}%")))
++        s.commit()
++    except Exception:  # noqa: BLE001
++        s.rollback()
++    finally:
++        s.close()
++
++
++def _add_bag(
++    session: Session,
++    n: int,
++    *,
++    bag_role: str = "ORIGINAL",
++    dataset_type: str = "self_built",
++    availability: str | None = None,
++    started_at: datetime | None = None,
++) -> BagRecord:
++    bag = BagRecord(
++        bag_uid=_uid(n),
++        name=f"t16ca-bag-{n:02d}",
++        relative_path=f"/test/t16ca/bag-{n:02d}",
++        bag_role=bag_role,
++        dataset_type=dataset_type,
++        availability=availability,
++        status="READY",
++        started_at=started_at,
++    )
++    session.add(bag)
++    return bag
++
++
++def _add_purpose(session: Session, bag: BagRecord, purpose: str) -> None:
++    session.flush()
++    session.add(BagPurpose(purpose=purpose, bag_id=bag.id))
++
++
++def _add_derivation(session: Session, parent_uid: str, child_uid: str) -> BagDerivation:
++    der = BagDerivation(
++        parent_bag_uid=parent_uid,
++        child_bag_uid=child_uid,
++        scene_code="slope",
++        slice_key=f"t16ca-{child_uid[-4:]}",
++        run_id=f"{UID_PREFIX}-run",
++        start_ns=0,
++        end_ns=1000,
++        duration_ns=1000,
++    )
++    session.add(der)
++    return der
++
++
++class TestDualPurposeTwoDataKindFilters:
++    """C5：共享多成员分类谓词——双用途两个 data_kind 值都命中且 UID 唯一。"""
++
++    @pytest.fixture(autouse=True)
++    def _seed(self, db: Session):
++        base = datetime(2026, 2, 1)
++        self.dual = _add_bag(db, 1, started_at=base)
++        _add_purpose(db, self.dual, "scene_slice")
++        _add_purpose(db, self.dual, "self_built")
++        self.pure_self = _add_bag(db, 2, started_at=base)
++        _add_purpose(db, self.pure_self, "self_built")
++        self.nvidia = _add_bag(db, 3, bag_role="NOT_APPLICABLE", dataset_type="nvidia_physicalai", started_at=base)
++        self.slice = _add_bag(db, 4, bag_role="SCENE_SLICE", availability="AVAILABLE", started_at=base)
++        self.parent = _add_bag(db, 5, started_at=base)
++        _add_derivation(db, self.parent.bag_uid, self.slice.bag_uid)
++        db.commit()
++
++    def test_api_dual_purpose_hits_both_data_kinds(self):
++        with TestClient(app) as client:
++            scene = client.get(
++                "/api/v1/bags", params={"view": "originals", "data_kind": "scene_original"}
++            ).json()
++            self_built = client.get(
++                "/api/v1/bags", params={"view": "originals", "data_kind": "self_built_original"}
++            ).json()
++            scene_uids = [i["bag_uid"] for i in scene["items"]]
++            self_uids = [i["bag_uid"] for i in self_built["items"]]
++            # 双用途原包在两个筛选都命中（C5 核心：不再只命中单值 CASE 的 scene_original）
++            assert self.dual.bag_uid in scene_uids
++            assert self.dual.bag_uid in self_uids
++            # UID 唯一：每个结果内一条不重复
++            assert len(scene_uids) == len(set(scene_uids))
++            assert len(self_uids) == len(set(self_uids))
++            # 纯 self_built 父包（无场景用途）仍命中 self_built_original
++            assert self.pure_self.bag_uid in self_uids
++            assert self.pure_self.bag_uid not in scene_uids
++            # 场景根父包（有派生登记但无场景用途）按冻结断言口径：self_built_original，不猜 scene
++            assert self.parent.bag_uid in self_uids
++            assert self.parent.bag_uid not in scene_uids
++
++    def test_api_no_data_kind_single_row_uid_unique(self):
++        with TestClient(app) as client:
++            body = client.get("/api/v1/bags", params={"view": "originals"}).json()
++            uids = [i["bag_uid"] for i in body["items"]]
++            assert self.dual.bag_uid in uids
++            assert self.nvidia.bag_uid in uids
++            assert self.slice.bag_uid not in uids
++            assert len(uids) == len(set(uids))
++
++    def test_web_dual_purpose_both_data_kinds(self, db: Session):
++        from app.services.bag_search_service import BagSearchState, search_bags
++
++        scene_page = search_bags(
++            db, BagSearchState.normalize(view="originals", data_kind="scene_original"), page_size=50
++        )
++        self_page = search_bags(
++            db, BagSearchState.normalize(view="originals", data_kind="self_built_original"), page_size=50
++        )
++        scene_uids = {b.bag_uid for b in scene_page.bags}
++        self_uids = {b.bag_uid for b in self_page.bags}
++        assert self.dual.bag_uid in scene_uids
++        assert self.dual.bag_uid in self_uids
++        assert self.pure_self.bag_uid in self_uids and self.pure_self.bag_uid not in scene_uids
++
++    def test_web_dual_purpose_labels_double_badge(self, db: Session):
++        # C6 展示面：双用途原包 Web 标签=双标（scene_original + self_built_original）
++        ctx = data_kind_context(db, [self.dual, self.pure_self, self.nvidia, self.slice, self.parent])
++        assert set(ctx[self.dual.bag_uid]) == {"scene_original", "self_built_original"}
++        assert ctx[self.pure_self.bag_uid] == ["self_built_original"]
++        assert ctx[self.nvidia.bag_uid] == ["nvidia_original"]
++        assert ctx[self.slice.bag_uid] == ["scene_slice"]
++
++
++class TestC6SharedSingleTruth:
++    """C6：API 行内 data_kind 与 Web 标签上下文共用单一真相，无分叉规则。"""
++
++    def test_api_row_kind_matches_web_context(self, db: Session):
++        base = datetime(2026, 3, 1)
++        unknown = _add_bag(db, 10, bag_role="NOT_APPLICABLE", dataset_type="self_built", started_at=base)
++        # 合法无血缘历史切片：袋存在但无 derivation 行，角色 SCENE_SLICE（16C-c03-04）
++        orphan = _add_bag(db, 11, bag_role="SCENE_SLICE", availability="AVAILABLE", started_at=base)
++        db.commit()
++        with TestClient(app) as client:
++            body = client.get("/api/v1/bags", params={"view": "all"}).json()
++            row_kinds = {i["bag_uid"]: i["data_kind"] for i in body["items"]}
++            ctx = data_kind_context(db, [unknown, orphan])
++            # API 行内值 = Web 上下文首个命中值（同优先级，不分叉）
++            assert row_kinds[orphan.bag_uid] == ctx[orphan.bag_uid][0] == "scene_slice"
++            # NOT_APPLICABLE 非 NVIDIA 不猜类型：API 行内 None、Web 标签 []（模板渲染"未分类"）
++            assert row_kinds[unknown.bag_uid] is None
++            assert ctx[unknown.bag_uid] == []
++
++    def test_orphan_slice_via_role_only_is_scene_slice(self, db: Session):
++        # 16C-c03-04：角色 SCENE_SLICE 或有效 derivation 任一即子包；本例仅角色（无血缘行）
++        base = datetime(2026, 3, 2)
++        orphan = _add_bag(db, 12, bag_role="SCENE_SLICE", availability="AVAILABLE", started_at=base)
++        derived = _add_bag(db, 13, bag_role="SCENE_SLICE", availability="AVAILABLE", started_at=base)
++        par = _add_bag(db, 14, started_at=base)
++        _add_derivation(db, par.bag_uid, derived.bag_uid)
++        db.commit()
++        with TestClient(app) as client:
++            body = client.get("/api/v1/bags", params={"view": "slices", "include_history": "true"}).json()
++            row_kinds = {i["bag_uid"]: i["data_kind"] for i in body["items"]}
++            assert row_kinds[orphan.bag_uid] == "scene_slice"
++            assert row_kinds[derived.bag_uid] == "scene_slice"
++
++
++class TestC7DateTimeInput:
++    """C7：日期输入 422/400、全天截止、时区一致（Web 与 API 共用解析）。"""
++
++    def test_invalid_date_api_422(self):
++        with TestClient(app) as client:
++            assert client.get("/api/v1/bags", params={"started_from": "not-a-date"}).status_code == 422
++            assert client.get("/api/v1/bags", params={"started_to": "2026-13-45"}).status_code == 422
++            assert client.get("/api/v1/bags", params={"started_from": "2026/02/01"}).status_code == 422
++
++    def test_invalid_date_web_400(self, db: Session):
++        _add_bag(db, 20, started_at=datetime(2026, 2, 1))
++        db.commit()
++        with TestClient(app) as client:
++            resp = client.get("/bags?start_from=not-a-date")
++            assert resp.status_code == 400
++
++    def test_end_to_full_day_cutoff(self, db: Session):
++        # 日期全天截止：end 边界覆盖当天 23:59:59.999999（库内秒精度行的当天最大时间也被包含）
++        day = datetime(2026, 2, 10)
++        bag = _add_bag(db, 21, started_at=day.replace(hour=23, minute=59, second=59))
++        outside = _add_bag(db, 22, started_at=day.replace(hour=23, minute=59, second=59) + timedelta(seconds=1))
++        db.commit()
++        with TestClient(app) as client:
++            body = client.get("/api/v1/bags", params={"view": "all", "started_to": "2026-02-10"}).json()
++            uids = [i["bag_uid"] for i in body["items"]]
++            assert bag.bag_uid in uids
++            assert outside.bag_uid not in uids
++
++    def test_start_date_includes_day_start(self, db: Session):
++        day = datetime(2026, 2, 10)
++        bag = _add_bag(db, 23, started_at=day)
++        before = _add_bag(db, 24, started_at=day - timedelta(seconds=1))
++        db.commit()
++        with TestClient(app) as client:
++            body = client.get("/api/v1/bags", params={"view": "all", "started_from": "2026-02-10"}).json()
++            uids = [i["bag_uid"] for i in body["items"]]
++            assert bag.bag_uid in uids
++            assert before.bag_uid not in uids
++
++    def test_aware_input_converted_to_display_tz(self, db: Session):
++        # aware 入参（UTC+10 固定偏移，避免容器缺 tzdata 的 ZoneInfo 区域名）
++        # 换算到业务时区（settings.display_timezone=Asia/Shanghai）后与库内 naive 值同口径
++        # 库内值：上海时间 2026-02-10 08:00:00
++        stored = datetime(2026, 2, 10, 8, 0, 0)
++        bag = _add_bag(db, 25, started_at=stored)
++        db.commit()
++        utc10 = timezone(timedelta(hours=10))
++        # 2026-02-10 04:00 (UTC+10) == 2026-02-09 18:00 UTC == 上海 2026-02-10 02:00
++        request_at = datetime(2026, 2, 10, 4, 0, 0, tzinfo=utc10)
++        assert _parse_time(request_at.isoformat(), end=False) == datetime(2026, 2, 10, 2, 0, 0)
++        with TestClient(app) as client:
++            body = client.get("/api/v1/bags", params={"view": "all", "started_from": request_at.isoformat()}).json()
++            assert bag.bag_uid in [i["bag_uid"] for i in body["items"]]
++            # 请求晚于 stored（上海 09:00 == UTC+10 11:00）→ 不包含
++            later = datetime(2026, 2, 10, 11, 0, 0, tzinfo=utc10)
++            body2 = client.get("/api/v1/bags", params={"view": "all", "started_from": later.isoformat()}).json()
++            assert bag.bag_uid not in [i["bag_uid"] for i in body2["items"]]
++
++    def test_naive_and_zulu_equivalent(self):
++        tz = ZoneInfo(settings.display_timezone)
++        zulu = "2026-02-10T00:00:00Z"
++        assert _parse_time(
++            zulu, end=False
++        ) == datetime.fromisoformat(zulu.replace("Z", "+00:00")).astimezone(tz).replace(tzinfo=None)
++
++    def test_end_before_start_422(self):
++        with TestClient(app) as client:
++            assert (
++                client.get(
++                    "/api/v1/bags",
++                    params={"started_from": "2026-02-10", "started_to": "2026-02-01"},
++                ).status_code
++                == 422
++            )
++
++    def test_invalid_bag_search_state_raised(self):
++        with pytest.raises(InvalidBagSearchState):
++            _parse_time("garbage", end=False)
++
++
++class TestCursorContext:
++    """16C-c03-02/03：cursor 上下文绑定实际过滤条件 + 旧合法 cursor 兼容。
++
++    用固定日期窗（started_from/started_to=2026-12-01 全天）隔离本类 12 个种子袋：
++    共享 SQLite 中其他 test 文件日期均在 1–4 月，2026-12-01 无既有数据，成员口径确定。
++    """
++
++    @pytest.fixture(autouse=True)
++    def _seed(self, db: Session):
++        base = datetime(2026, 12, 1)
++        self.bags = [
++            _add_bag(db, 40 + i, started_at=base + timedelta(hours=i * 2))
++            for i in range(12)
++        ]
++        self.window = {"view": "all", "limit": "5", "started_from": "2026-12-01", "started_to": "2026-12-01"}
++        db.commit()
++
++    def test_cursor_chain_no_gap_no_dup(self):
++        with TestClient(app) as client:
++            seen = []
++            params = dict(self.window)
++            for _ in range(10):
++                body = client.get("/api/v1/bags", params=params).json()
++                seen.extend(i["bag_uid"] for i in body["items"])
++                if not body["has_more"]:
++                    break
++                params["cursor"] = body["next_cursor"]
++            # 无漏无重：窗口内恰好 12 个种子袋（demo 数据在 2026-07-20，窗外）
++            expected = sorted(b.bag_uid for b in self.bags)
++            assert sorted(seen) == expected
++            assert len(seen) == len(set(seen)) == 12
++
++    def test_cursor_with_changed_filter_422(self):
++        with TestClient(app) as client:
++            first = client.get("/api/v1/bags", params=self.window).json()
++            cursor = first["next_cursor"]
++            assert cursor
++            # 换日期窗复用旧 cursor → 422（c03-02：不复用错误上下文）
++            changed = dict(self.window)
++            changed["started_from"] = "2026-12-02"
++            changed["cursor"] = cursor
++            assert client.get("/api/v1/bags", params=changed).status_code == 422
++            # 换 data_kind 条件复用 → 422
++            changed2 = dict(self.window)
++            changed2.update({"cursor": cursor, "data_kind": "scene_slice"})
++            assert client.get("/api/v1/bags", params=changed2).status_code == 422
++            # 换 dataset_type 条件复用 → 422
++            changed3 = dict(self.window)
++            changed3.update({"cursor": cursor, "dataset_type": "nvidia_physicalai"})
++            assert client.get("/api/v1/bags", params=changed3).status_code == 422
++            # 同条件续页 → 200（不误拒合法翻页）
++            same = dict(self.window)
++            same["cursor"] = cursor
++            assert client.get("/api/v1/bags", params=same).status_code == 200
++
++    def test_legacy_cursor_without_new_keys_accepted(self):
++        # c03-03：历史 cursor（含 scene_code/data_kind/purpose，无 dataset_type 等新增键）
++        # 在请求未使用新增字段时兼容可翻页；新字段缺省比较不受影响
++        with TestClient(app) as client:
++            first = client.get("/api/v1/bags", params=self.window).json()
++            new_cursor = first["next_cursor"]
++            assert new_cursor
++            import base64
++            import json as _json
++
++            payload = _json.loads(base64.urlsafe_b64decode(new_cursor.encode()).decode())
++            # 构造旧格式：剔除 2026-10-14 新增键，保留排序锚点 + 旧筛选键
++            legacy = {k: v for k, v in payload.items() if k not in (
++                "dataset_type", "role", "vehicle_id", "keyword",
++                "parent_bag_uid", "include_history",
++            )}
++            legacy_cursor = base64.urlsafe_b64encode(_json.dumps(legacy, sort_keys=True).encode()).decode()
++            legacy_req = dict(self.window)
++            legacy_req["cursor"] = legacy_cursor
++            body = client.get("/api/v1/bags", params=legacy_req)
++            assert body.status_code == 200
++            new_req = dict(self.window)
++            new_req["cursor"] = new_cursor
++            # 旧 cursor 续页 = 新 cursor 续页同结果（无漏无重）
++            assert [i["bag_uid"] for i in body.json()["items"]] == [
++                i["bag_uid"] for i in client.get("/api/v1/bags", params=new_req).json()["items"]
++            ]
++
++    def test_legacy_cursor_scene_code_none_equivalent_empty(self):
++        # c03-03：旧 cursor 的 scene_code=None 与空串归一同义（不误拒/不放行）
++        import base64
++        import json as _json
++
++        with TestClient(app) as client:
++            first = client.get("/api/v1/bags", params=self.window).json()
++            new_cursor = first["next_cursor"]
++            assert new_cursor
++            payload = _json.loads(base64.urlsafe_b64decode(new_cursor.encode()).decode())
++            payload["scene_code"] = None  # 旧编码可能落 None
++            none_cursor = base64.urlsafe_b64encode(_json.dumps(payload, sort_keys=True).encode()).decode()
++            req = dict(self.window)
++            req["cursor"] = none_cursor
++            assert client.get("/api/v1/bags", params=req).status_code == 200
++            # 反向：cursor 携带 scene_code="slope" 而请求缺省 → 上下文不一致 422
++            payload["scene_code"] = "slope"
++            mismatch = base64.urlsafe_b64encode(_json.dumps(payload, sort_keys=True).encode()).decode()
++            req2 = dict(self.window)
++            req2["cursor"] = mismatch
++            assert client.get("/api/v1/bags", params=req2).status_code == 422
++
++    def test_tampered_cursor_rejected(self):
++        with TestClient(app) as client:
++            first = client.get("/api/v1/bags", params=self.window).json()
++            assert first["has_more"]
++            req = dict(self.window)
++            req["cursor"] = "!!!not-base64!!!"
++            assert client.get("/api/v1/bags", params=req).status_code == 422
+\ No newline at end of file
+diff --git a/tests/test_web.py b/tests/test_web.py
+index 01729dd..00e11e3 100644
+--- a/tests/test_web.py
++++ b/tests/test_web.py
+@@ -361,9 +361,9 @@ def test_bag_list_shows_default_results_and_route_filter():
+         # TASK-07A 三视图：默认视图=当前可用切片（PRD DEC-06）；demo 原始包不在默认视图
+         assert 'class="view-tabs"' in page.text
+         assert 'class="view-tab active" href="/bags"' in page.text
+-        assert "当前可用切片" in page.text
+-        assert "原始包" in page.text
+-        assert "全部/历史" in page.text
++        assert "切片" in page.text
++        assert "原始数据" in page.text
++        assert "全部" in page.text
+         assert "01JROS2BAGDEMO00000000000" not in page.text
+         all_page = client.get("/bags?view=all")
+         assert "01JROS2BAGDEMO00000000000" in all_page.text

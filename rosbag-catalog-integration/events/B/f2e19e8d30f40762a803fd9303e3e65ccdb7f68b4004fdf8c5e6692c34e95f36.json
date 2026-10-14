@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-2157-nochange",
+  "occurred_at": "2026-10-10T21:59:15+08:00",
+  "recorded_at": "2026-10-10T21:59:15+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "WAITING_REVIEW",
+  "summary": "21:57 巡检无新派单无返修，状态与 21:52 一致（main 5f0124b，wt-04a 冻结）",
+  "evidence": "sessions/B.md",
+  "next": "等协调者验收 attempt-3 回执"
+}

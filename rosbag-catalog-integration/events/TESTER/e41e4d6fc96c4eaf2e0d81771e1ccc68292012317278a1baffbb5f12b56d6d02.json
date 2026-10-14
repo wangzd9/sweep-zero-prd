@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-230x-finalbag-close-dupretry-conflict-20261013",
+  "occurred_at": "2026-10-13T23:12:00+08:00",
+  "recorded_at": "2026-10-13T23:31:15+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "23:0x 增量验收：④16_02_03 重拷 SHA=源独立闭合 PASS（本地源三文件 sha256 3/3 MATCH A finalbag op 日志 e40a8d86/b352cde3/bceda7fe；物理 flat 在 ready/spray/ mtime 22:52-22:53，op 日志 dest=incoming 与实测位置账实偏差申报 A 对账）+scanner 23:05:30 注册 source 91FFEEC1 READY/410669msgs/vehicle=test、24d60fee→SCHEDULED、新合法 run scene-4acf689f 入队。③提交项维持 NOT_RUN 等 A（13dc398c/518089ed 未绑定、16_37_47 flat 正式提交缺失）。新 run 冲突取证：22:53:02 三个 date-grouped dup run 同收 RETRY_REQUESTED(normal)，scene-a4824f1c(dup 14_42_48) SCENE_RUNNING attempt2 持 SCENE_EXEC_HOST + proxy ACCEPTED 渲染在途=实际执行，与 ruling2210「dup 应清理/零模型烧」前提冲突，报协调者裁决（TESTER 不 kill/cancel/retry）。",
+  "evidence": "test-receipts/TASK-11S-BATCH-1012/attempt-1.md#增量验收-230x; ops/A/finalbag-160203-163747verify result.json SUCCEEDED+result.log; 本地源 sha256sum 三文件; 生产 MySQL ingest_submission/scan_job/pipeline_run/step_run/pipeline_event 23:0x 只读实测; 8767 proxy active_runs/health; sources API 单包",
+  "next": "协调者裁决 dup 三 run 处置与 retry 发起方对账；A 续提交后 ③ 逐项增量；scene-4acf689f SCENE_DONE 后核 16_02_03 八步/跨DB3 边界/两次 reconcile；全批 8 包齐交付 TEST_REPORT_PENDING"
+}

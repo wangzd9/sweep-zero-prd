@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261011-172653-nochange",
+  "occurred_at": "2026-10-11T17:28:08+08:00",
+  "recorded_at": "2026-10-11T17:28:08+08:00",
+  "role": "A",
+  "task": "TASK-08",
+  "attempt": "c3-1",
+  "status": "IDLE_WAITING",
+  "summary": "5min巡检：无新派单/返修，c3-1已合入main 98f6c88闭环，开发槽空闲；2号t08c-1停滞告警不涉本角色",
+  "evidence": "sessions/A.md",
+  "next": "等协调者释放槽并给出无冲突新单"
+}

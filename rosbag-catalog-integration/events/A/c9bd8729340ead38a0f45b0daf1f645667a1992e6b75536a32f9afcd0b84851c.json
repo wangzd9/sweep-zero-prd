@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261011-081153-nochange",
+  "occurred_at": "2026-10-11T08:13:45+08:00",
+  "recorded_at": "2026-10-11T08:13:45+08:00",
+  "role": "A",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "5min巡检无变化：main 6d30a68 零前移，无新派单/返修，等强复审用户手动触发",
+  "evidence": "sessions/A.md",
+  "next": "继续5min巡检"
+}

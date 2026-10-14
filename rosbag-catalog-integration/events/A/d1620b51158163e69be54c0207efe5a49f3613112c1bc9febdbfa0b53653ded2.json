@@ -1,0 +1,12 @@
+{
+  "event_id": "a-batch1012-attempt1-double-write-conflict-frozen-20261013",
+  "occurred_at": "2026-10-13T21:52:00+08:00",
+  "recorded_at": "2026-10-13T21:51:48+08:00",
+  "role": "A",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "BLOCKED",
+  "summary": "A 开工 1012 后检出未授权第二写者双写冲突（生产 incoming/ready 根）。A 按契约 flat incoming/spray/<bag>（staging+逐文件SHA+原子rename+移后复验）已落位并提交：16_31_25(e5649055…)/16_00_13(99615748…)/16_58_28(518089ed…) 均 HTTP201 PENDING_INPUT；首包15_58_23 本机 vs ready 副本逐字节SHA一致→复用不重提交；空包16_33_10(0B×2) flat落位+提交7a71e404…(201，实际拒绝在下游 scanner parse_metadata 抛 ValueError:missing rosbag2_bagfile_information，不补造可追溯)；14_42_48 flat 提交被 HTTP409 PATH_CLAIMED（存在 A 未创建的 pending submission 已占该 flat relative_path，无法枚举id）。第二写者=zsh -lic pid2519775(PPID1366=hermes gateway，非A树)21:25-21:35 用 cp -a 把 16_00_13/14_42_48/16_37_47/16_58_28 传 date-grouped incoming/spray/20261012/<bag>（口径与契约flat不符），现其产物已在 ready/spray/20261012/{14_42_48,16_00_13,16_37_47,16_58_28}+incoming/spray/20261012/*，将被 scanner 以 relative_path=20261012/<bag> 登记为重复 source→重复 scene run 烧模型。A 已冻结自身大包op(systemctl stop worker2520120→runtime_tools status UNKNOWN 不重跑)，未kill未知owner进程、未删任何生产数据。16_37_47(A staging复制中未提交)/16_02_03(A未落位)收尾待裁决。",
+  "evidence": "receipts/TASK-11S-BATCH-1012/double-write-conflict-20261013.md; upload-ledger.json; ps 2519775(zsh date-grouped cp -a)/2520120(A worker); incoming/spray/{flat,20261012/*}+ready/spray/20261012/*; op result.json status=UNKNOWN",
+  "next": "BLOCKED 待协调者裁决：①date-grouped 20261012/ 归属与安全移除授权(防重复scene run)；②14_42_48 flat 409 占用方身份；③16_37_47/16_02_03 A续放flat+提交；④更新BATCH-STATUS标注冲突。夜间静默照常工作不群报，A 冻结等待指令，不自行处置生产数据。"
+}

@@ -1,0 +1,36 @@
+{
+  "review_id": "R2-20261010",
+  "reviewed_at": "2026-10-10T11:31:48+08:00",
+  "repository": "/home/wang/work/rosbag-catalog",
+  "commits": {
+    "b3280c9": "b3280c98875750d4dd616a19d1bff4ce22e388b7",
+    "3b78736": "3b78736e20fdfd009a19a3efd224d7fb98238308",
+    "6b21c91": "6b21c91d6c8db292a8f0debbf422299ca3716504",
+    "eaf632a": "eaf632afa11bc89f4dbc8e658fe5615bcac131f4",
+    "640c5a8": "640c5a85f7d3ac328bd9a3838d73e861b7760e16",
+    "HEAD": "eff047921ffbb02c107c1ec6145b30c4a2395de1"
+  },
+  "business_diff_target_to_head": "",
+  "sources": {
+    "app/services/scene_schedule_consumer.py": "5c9cc29f8c76e35e7d2ea8f5d33fc7d1c75469d386c91cbe6998e3224ef397f5",
+    "app/services/scene_result_report_service.py": "faa23d8b031bfb5f6c96f989a223f2fd71c9e2704d11938486662c7e4ac89374",
+    "app/services/scene_publish_service.py": "c8264a9565bc7024b28497f77b266d855516206c2b33235fe865e742e9f252e4",
+    "app/services/scene_result_service.py": "8e2655c3ffab08fa6a0c4a588285284ece856a044bfb5ea4fbbe512f0665f74b",
+    "app/services/scene_slice_service.py": "121afb0deba78247569f44f88de57d3fb9027c2109512a53b96c6ba65bacae30",
+    "app/scene/slope/cdr.py": "7e0d636c71fd6a795ecd9aece808c6d051a377228fc075a5902766c486f49582",
+    "app/domain/security.py": "99ddd28d679c0801bc05e8d9a7a3c4d81023f33aa2d8a57c0cd6369521c12ffe",
+    "alembic/versions/20261008_02_ingest_config.py": "0dfb53e1b0c844a79b135bafc34dc8f74a9b618811f3db3f47017bffc4f0ecb3",
+    "alembic/versions/20261009_01_scene_identity_key.py": "cbdfbcc99020ba5b04f2a1260c063de25ef61cb0d8217f795290af342a4e34d3"
+  },
+  "input_files": {
+    "R2C-cdr-align-full-diff.patch": "c985100249b9000f3870761d41ff4ac3ff71793a8b927aec51ae64248fb2d082",
+    "R2A-receive-schedule-full-diff.patch": "8473dbf7fd4b7a0cc011ed4393d82a7ad69922912b77a1b4f55158ff47bedb1f",
+    "REVIEW-2.md": "582a74b752ad08acc6d899788079968bb36b9ff607a251e4b8fae00eaf711d0d",
+    "R2B-06B-full-diff.patch": "c6b4f271bf3408f29c831bd81fb4821862867c682ad2bddd44af830f1da095ef"
+  },
+  "patch_match": {
+    "R2A-receive-schedule-full-diff.patch": true,
+    "R2B-06B-full-diff.patch": true,
+    "R2C-cdr-align-full-diff.patch": true
+  }
+}

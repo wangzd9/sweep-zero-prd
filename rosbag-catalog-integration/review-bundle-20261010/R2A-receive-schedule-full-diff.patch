@@ -1,0 +1,4259 @@
+diff --git a/alembic/versions/20261009_01_scene_identity_key.py b/alembic/versions/20261009_01_scene_identity_key.py
+new file mode 100644
+index 0000000..4a38dba
+--- /dev/null
++++ b/alembic/versions/20261009_01_scene_identity_key.py
+@@ -0,0 +1,137 @@
++"""场景身份持久键 + outbox DROPPED 终态（TASK-05 attempt-2，强模型 #5/#7）
++
++- pipeline_run.scene_identity_key：场景自动调度持久业务身份（源+代次+用途+冻结
++  能力集合的摘要），创建时写入、终态不释放；唯一约束（NULL 多值放行，非场景
++  run 恒 NULL）。活跃租约仍用 active_identity_key（随终态/取消释放），两键职责分离。
++- purpose_schedule_event.error_reason：DROPPED 终态原因列。status 增加 DROPPED
++  取值（String(16) 无需改列宽；CONSUMED=9/DROPPED=7 均在 16 内）。
++
++down_revision = "20261008_02"（03B 迁移）——本迁移必须排在 03B 链之后；
++若 3号 attempt-4 返修新增了迁移，合并前由协调者裁决链顺序（返修单声明）。
++
++历史回填：现有 SCENE_SLICE run 由 pipeline_config_snapshot_json 的 scene_run/v1
++快照确定性重算 scene_identity_key（算法与 scene_run_identity_key 一致），
++天然幂等；同业务身份多行（终态释放后重放遗留）只给规范行（max PK id）写键，
++其余保持 NULL，避免唯一索引冲突。
++"""
++
++import hashlib
++import json
++
++import sqlalchemy as sa
++
++from alembic import op
++
++revision = "20261009_01_scene_identity_key"
++down_revision = "20261008_02"
++branch_labels = None
++depends_on = None
++
++
++def _backfill_scene_identity() -> None:
++    """从 scene_run/v1 快照重算持久身份键（确定性，重跑不变）。
++
++    pipeline_run 无 source_generation 列（源代次冻结在快照 JSON 的
++    source_generation 字段），回填一律取快照值。
++
++    按身份去重（强模型 #7 / OCR B6 high）：终态释放 active_identity_key 后，
++    相同业务身份的 run 可在终态后重放新建第二个 run——存量库可能同身份多行
++    （如 R1 已 SCENE_DONE + R2 新建）。若逐行都写同一 scene_identity_key，
++    紧接着 create_index(unique=True) 会抛 IntegrityError 令 upgrade 失败。
++    故每个身份只给规范行（max(int PK id) = 最新 run）写键，其余保持 NULL。
++    """
++    bind = op.get_bind()
++    rows = bind.execute(
++        sa.text(
++            "SELECT id, pipeline_run_id, source_id, pipeline_config_snapshot_json "
++            "FROM pipeline_run WHERE pipeline_type = 'SCENE_SLICE'"
++        )
++    ).fetchall()
++    best = {}  # identity -> (max int id, run_id)：规范行 = 该身份下最新 run
++    for row_id, run_id, source_id, snapshot_json in rows:
++        try:
++            snapshot = json.loads(snapshot_json or "{}")
++        except (TypeError, ValueError):
++            continue
++        if snapshot.get("schema_version") != "scene-run/v1":
++            continue
++        scenes = snapshot.get("scenes") or []
++        if not scenes:
++            continue
++        try:
++            generation = int(snapshot.get("source_generation"))
++        except (TypeError, ValueError):
++            continue
++        entries = sorted(
++            (
++                str(s.get("scene_code") or ""),
++                str(s.get("capability_version") or ""),
++                str(s.get("capability_config_hash") or ""),
++            )
++            for s in scenes
++        )
++        body = json.dumps(
++            [
++                str(source_id),
++                generation,
++                str(snapshot.get("purpose") or "scene_slice"),
++                entries,
++            ],
++            ensure_ascii=False,
++            separators=(",", ":"),
++        )
++        identity = "scene:" + hashlib.sha256(body.encode()).hexdigest()[:48]
++        cur = best.get(identity)
++        if cur is None or row_id > cur[0]:
++            best[identity] = (row_id, run_id)
++    updates = [{"key": identity, "rid": run_id, "key_check": identity} for identity, (_row_id, run_id) in best.items()]
++    if updates:
++        bind.execute(
++            sa.text(
++                "UPDATE pipeline_run SET scene_identity_key = :key "
++                "WHERE pipeline_run_id = :rid AND (scene_identity_key IS NULL "
++                "OR scene_identity_key = :key_check)"
++            ),
++            updates,
++        )
++
++
++def _pipeline_run_cols() -> set[str]:
++    return {c["name"] for c in sa.inspect(op.get_bind()).get_columns("pipeline_run")}
++
++
++def _outbox_cols() -> set[str]:
++    return {c["name"] for c in sa.inspect(op.get_bind()).get_columns("purpose_schedule_event")}
++
++
++def _pipeline_run_indexes() -> set[str]:
++    return {ix["name"] for ix in sa.inspect(op.get_bind()).get_indexes("pipeline_run")}
++
++
++def upgrade() -> None:
++    # 迁移链起点（20260911_01）从空库 upgrade 时会按当前 model create_all，
++    # 新列可能已随 create_all 落库——逐对象 gate，部分应用重入安全。
++    if "scene_identity_key" not in _pipeline_run_cols():
++        op.add_column("pipeline_run", sa.Column("scene_identity_key", sa.String(length=64), nullable=True))
++    _backfill_scene_identity()
++    # 列唯一约束由模型 __table_args__ UniqueConstraint 定义（create_all 生成同名索引），
++    # 迁移与之一致，避免双约束/重名。
++    if "uq_pipeline_run_scene_identity_key" not in _pipeline_run_indexes():
++        op.create_index("uq_pipeline_run_scene_identity_key", "pipeline_run", ["scene_identity_key"], unique=True)
++    if "error_reason" not in _outbox_cols():
++        op.add_column("purpose_schedule_event", sa.Column("error_reason", sa.String(length=255), nullable=True))
++
++
++def downgrade() -> None:
++    if "error_reason" in _outbox_cols():
++        op.drop_column("purpose_schedule_event", "error_reason")
++    if "uq_pipeline_run_scene_identity_key" in _pipeline_run_indexes():
++        op.drop_index("uq_pipeline_run_scene_identity_key", table_name="pipeline_run")
++    if "scene_identity_key" in _pipeline_run_cols():
++        try:
++            op.drop_column("pipeline_run", "scene_identity_key")
++        except Exception:
++            # SQLite：链起点 20260911_01 用 create_all 建表时，scene_identity_key 的唯一
++            # 约束会生成隐式 sqlite_autoindex，导致 DROP COLUMN 被拒绝（MySQL 无此限制）。
++            # 空库本地回退场景下保留残留列无害（nullable、无数据引用），跳过即可。
++            pass
+diff --git a/alembic/versions/20261009_02_ingest_frozen_columns.py b/alembic/versions/20261009_02_ingest_frozen_columns.py
+new file mode 100644
+index 0000000..7827c17
+--- /dev/null
++++ b/alembic/versions/20261009_02_ingest_frozen_columns.py
+@@ -0,0 +1,77 @@
++"""03B 强模型返修：登记代次冻结 + 接受时能力 hash 冻结列（#3/#4）
++
++- pipeline_run.source_generation（Integer, nullable, index）：self_built run
++  登记时冻结的源代次。历史行不回填（恒 NULL）——恢复登记查询保留
++  "pipeline_type=SELF_BUILT_BAG AND source_generation IS NULL" 兜底分支，
++  旧 run 语义不变。
++- ingest_submission.frozen_capability_hashes_json（Text, nullable）：接受/PATCH
++  时刻持久化的 04A 单能力 hash 集合（{"scene_code":
++  {"capability_version": str, "capability_config_hash": str}}）。bind 只读
++  冻结值不再从当前 registry 重算；存量行回填 '{}'（接受时未冻结的历史提交若
++  走到 bind 的 scene_slice 事件路径会被应用层显式失败拦截，不放 NULL-hash 事件）。
++
++⚠️ 逐对象 gate（与 20261009_01 同模式）：迁移链起点 20260911_01 从空库
++upgrade 时会按**当前** model `Base.metadata.create_all(checkfirst=True)`，
++上述两列在空库上已随 create_all 落库 → 无 gate 的 add_column 在空库重放
++报 "duplicate column name"（隔离库 upgrade head 实测）。部署中的真实 DB
++（20260911_01 建表时 model 尚无此列）则无此列 → gate 放行。故每个对象
++先 inspect 再操作，部分应用重入安全。
++
++down_revision = "20261009_01_scene_identity_key"（05 attempt-2 迁移）——
++本迁移必须排在 05 链之后；与 05 零文件冲突（05 只加 scene_identity_key/
++error_reason 两列），合并顺序由协调者按 BASELINE 裁决。
++
++⚠️ downgrade→upgrade 往返风险（202610-10 OCR B5b low，仅文档化，不改列结构）：
++backfill 只在 upgrade 把 NULL 置 '{}'、未加门控。生产库 upgrade 后若已有新
++提交写入真实冻结 hash，再 downgrade（drop 列）→ upgrade（add 列全 NULL +
++backfill 无条件置 '{}'），这些行的冻结值被静默覆写为 '{}'，其后续 bind 命中
++"冻结缺失"显式 raise → 登记 500 + Scanner 重试同一 bag。drop 列丢数据是
++downgrade 固有的、gate 挡不住（与 20261009_01 drop-数据列口径一致）；运维
++处置=对受影响的 PENDING_INPUT 提交重新 PATCH 以恢复接受时刻冻结值。
++"""
++
++import sqlalchemy as sa
++
++from alembic import op
++
++revision = "20261009_02_ingest_frozen_columns"
++down_revision = "20261009_01_scene_identity_key"
++branch_labels = None
++depends_on = None
++
++
++def _pipeline_run_cols() -> set[str]:
++    return {c["name"] for c in sa.inspect(op.get_bind()).get_columns("pipeline_run")}
++
++
++def _submission_cols() -> set[str]:
++    return {c["name"] for c in sa.inspect(op.get_bind()).get_columns("ingest_submission")}
++
++
++def _pipeline_run_indexes() -> set[str]:
++    return {ix["name"] for ix in sa.inspect(op.get_bind()).get_indexes("pipeline_run")}
++
++
++def upgrade() -> None:
++    if "source_generation" not in _pipeline_run_cols():
++        op.add_column("pipeline_run", sa.Column("source_generation", sa.Integer(), nullable=True))
++    if "ix_pipeline_run_source_generation" not in _pipeline_run_indexes():
++        op.create_index("ix_pipeline_run_source_generation", "pipeline_run", ["source_generation"], unique=False)
++    if "frozen_capability_hashes_json" not in _submission_cols():
++        op.add_column("ingest_submission", sa.Column("frozen_capability_hashes_json", sa.Text(), nullable=True))
++    # 存量行回填 '{}'（幂等：重跑仍全部置 '{}'——接受时冻结未发生的历史行语义不变）
++    op.execute(
++        sa.text(
++            "UPDATE ingest_submission SET frozen_capability_hashes_json = '{}' "
++            "WHERE frozen_capability_hashes_json IS NULL"
++        )
++    )
++
++
++def downgrade() -> None:
++    if "frozen_capability_hashes_json" in _submission_cols():
++        op.drop_column("ingest_submission", "frozen_capability_hashes_json")
++    if "ix_pipeline_run_source_generation" in _pipeline_run_indexes():
++        op.drop_index("ix_pipeline_run_source_generation", table_name="pipeline_run")
++    if "source_generation" in _pipeline_run_cols():
++        op.drop_column("pipeline_run", "source_generation")
+\ No newline at end of file
+diff --git a/app/models.py b/app/models.py
+index 9de6036..886dd8e 100644
+--- a/app/models.py
++++ b/app/models.py
+@@ -152,10 +152,20 @@ class ScanJob(Base):
+ 
+ class PipelineRun(Base):
+     __tablename__ = "pipeline_run"
+-    __table_args__ = (UniqueConstraint("active_identity_key", name="uq_pipeline_run_active_identity_key"),)
++    __table_args__ = (
++        UniqueConstraint("active_identity_key", name="uq_pipeline_run_active_identity_key"),
++        # 场景自动调度持久身份键（TASK-05 attempt-2 / 强模型 #7）：不随终态释放，
++        # 同业务身份（源+代次+用途+冻结能力集合）全局只创建一个 run；显式重新分析
++        # 带 reanalysis_id 新身份维度，与自动调度身份不冲突。NULL 唯一约束多值放行。
++        UniqueConstraint("scene_identity_key", name="uq_pipeline_run_scene_identity_key"),
++    )
+     id: Mapped[int] = mapped_column(primary_key=True)
+     pipeline_run_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+     source_id: Mapped[str] = mapped_column(String(26), index=True)
++    # 登记代次冻结（TASK-03B attempt-4 / 强模型 #3）：既有 run 恢复登记按
++    # (source_id, pipeline_type, source_generation) 双过滤，杜绝跨类型/跨代次误配。
++    # 历史行为 NULL（迁移只加列不回填）：NULL 查询分支由应用层保留旧语义兜底。
++    source_generation: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+     queue_name: Mapped[str] = mapped_column(String(64), default=QueueName.PHASE0.value, index=True)
+     status: Mapped[str] = mapped_column(String(32), default=PipelineStatus.PHASE0_QUEUE.value, index=True)
+     priority: Mapped[int] = mapped_column(Integer, default=0)
+@@ -165,6 +175,9 @@ class PipelineRun(Base):
+     pipeline_config_snapshot_json: Mapped[str] = mapped_column(Text, default="{}")
+     source_identity: Mapped[str | None] = mapped_column(String(512), nullable=True, index=True)
+     active_identity_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
++    # 场景 run 持久业务身份（强模型 #7）：创建时写入、终态不释放；
++    # 非场景 run 恒为 NULL。
++    scene_identity_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
+     publish_origin_to_nas: Mapped[bool] = mapped_column(default=True)
+     publish_final_to_nas: Mapped[bool] = mapped_column(default=False)
+     attempt: Mapped[int] = mapped_column(Integer, default=1)
+@@ -668,6 +681,12 @@ class IngestSubmission(Base):
+     selection_json: Mapped[str] = mapped_column(Text, default="{}")
+     effective_config_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+     effective_config_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
++    # 强模型 #4（接受时冻结单能力 hash）：接受/PATCH 成功时按当时 registry 计算
++    # 每个场景的 04A 单能力 config_hash，持久化为 {"scene_code": {"capability_version":
++    # str, "capability_config_hash": str}}。bind 只读此冻结值，不重新从当前 registry
++    # 计算；registry 此后漂移由 05 消费端 SCENE_UNAVAILABLE 失败运行留痕。
++    # CONFIG_REQUIRED（接受时能力未解析）的行恒为 "{}"，bind 不出 scene 事件。
++    frozen_capability_hashes_json: Mapped[str | None] = mapped_column(Text, nullable=True, default="{}")
+     # CONFIG_REQUIRED：入口缺有效默认且无每包配置，登记待处理不建任务
+     config_required: Mapped[bool] = mapped_column(Boolean, default=False)
+     # 绑定后回填的源身份：重启恢复不能按 ready 路径重新推断用途
+@@ -719,8 +738,11 @@ class PurposeScheduleEvent(Base):
+     profile_id: Mapped[str] = mapped_column(String(64), index=True)
+     profile_version: Mapped[int] = mapped_column(Integer)
+     frozen_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+-    # PENDING（待 05 消费）/ CONSUMED（05 已创建运行）
++    # PENDING（待 05 消费）/ CONSUMED（05 已创建运行）/ DROPPED（永久无效终态：
++    # 未知用途、契约违约、源身份失效等，05 原子落库留痕，不占 PENDING 头部）
+     status: Mapped[str] = mapped_column(String(16), default="PENDING", index=True)
++    # DROPPED 终态的原因（CONTRACT_VIOLATION / 源身份失效等）；CONSUMED 行为空
++    error_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+     __table_args__ = (
+         # 消费幂等：同提交同用途同能力版本/配置只产生一条事件（05 侧再按
+diff --git a/app/orchestrator.py b/app/orchestrator.py
+index ed8010f..5b5941a 100644
+--- a/app/orchestrator.py
++++ b/app/orchestrator.py
+@@ -163,17 +163,24 @@ def _consume_purpose_events(base: str) -> None:
+     端点返回全零统计无副作用；合入后由该消费驱动 SCENE_SLICE_QUEUE 的运行创建
+     （幂等身份见 scene_schedule_consumer）。单轮故障只记录不退出主循环，
+     未消费事件保持 PENDING 下轮重放。
++    观测（B3 low）：errors 非空必打（单事件失败每轮重放，原先两侧无痕）；
++    全零空轮次不打，避免 outbox 合入前每 10s 刷一行 0。
+     """
+     try:
+         result = _post(base + "/api/v1/orchestrator/purpose-events/consume", {})
+         stats = result.get("stats") or result
+-        print(
+-            "purpose events consumed: "
+-            f"{stats.get('consumed', 0)} consumed / {stats.get('dropped', 0)} dropped / "
+-            f"{stats.get('pending', 0)} pending / {stats.get('created_runs', 0)} created / "
+-            f"{stats.get('reused_runs', 0)} reused",
+-            flush=True,
+-        )
++        errors = stats.get("errors") or []
++        if any(stats.get(k, 0) for k in ("consumed", "dropped", "pending", "created_runs", "reused_runs")) or errors:
++            line = (
++                "purpose events consumed: "
++                f"{stats.get('consumed', 0)} consumed / {stats.get('dropped', 0)} dropped / "
++                f"{stats.get('pending', 0)} pending / {stats.get('created_runs', 0)} created / "
++                f"{stats.get('reused_runs', 0)} reused"
++            )
++            if errors:
++                first = errors[0] if isinstance(errors[0], dict) else {}
++                line += f" / {len(errors)} errors, first: {first.get('event_id')} {first.get('error')}"
++            print(line, flush=True)
+     except Exception as exc:
+         print(f"purpose event consumption failed: {exc}", flush=True)
+ 
+diff --git a/app/scene/slope/cdr.py b/app/scene/slope/cdr.py
+index 87696ed..619fbff 100644
+--- a/app/scene/slope/cdr.py
++++ b/app/scene/slope/cdr.py
+@@ -15,9 +15,16 @@ rclcpp 的 rosbag2 序列化在每条消息体前加 4 字节封装头
+ 错位解析——本模块用"封装头检测 + header 合法性回退"兼容带/不带头的两种
+ 序列化实现（ROS2 rosbag2 带头，ROS1/裸 CDR 不带）。
+ 
+-CDR 规则（小端、无对齐要求，见 REP-2013 序列化格式）：
++CDR 规则（小端，32 位字段按 CDR 体起点 4 字节对齐，见 OMG CDR 1.0 §4.3.1）：
+ string = uint32 长度(含 NUL) + 字节 + NUL；sequence = uint32 长度 + 元素；
+ builtin Time 字段序 sec(int32) 先、nanosec(uint32) 后。
++每个 32 位字段（string 长度、sequence 长度、uint32）读前须对齐到
++(body_pos + 4*ceil)——基准是 CDR 体起点（ROS2 封装头后=4，裸 CDR=0），
++不是当前读指针，且对齐是向前的（只加 padding，不回退）。
++编码器对 Image/CompressedImage 按同一规范补 padding（每个 32 位字段前对齐到
++体起点 + 4 的倍数）：header 体 12+N+1 字节（N=frame_id 长度）后、以及
++is_bigendian(1B) 与 image data sequence 长度前，可能各插入 0~3 字节 \x00，
++使本仓库 encode 的字节与真实 ROS2 序列化逐字节一致。
+ 只读写本适配器声明的类型，未知类型在 BagIo 层明确报错，不猜测。
+ """
+ 
+@@ -37,6 +44,11 @@ class CdrError(Exception):
+     """CDR 解码失败：长度越界、类型不符、封装头/字段非法。"""
+ 
+ 
++def _align4(pos: int, base: int = 0) -> int:
++    """下一个 >= pos 的 base+4 倍数位置（只向前，padding 只增不减）。"""
++    return pos + (4 - (pos - base)) % 4
++
++
+ def _read_struct(data: bytes, pos: int, fmt: str) -> tuple[Any, ...]:
+     size = struct.calcsize(fmt)
+     if pos + size > len(data):
+@@ -44,7 +56,10 @@ def _read_struct(data: bytes, pos: int, fmt: str) -> tuple[Any, ...]:
+     return struct.unpack_from(fmt, data, pos)
+ 
+ 
+-def _read_string(data: bytes, pos: int, order: str = "<") -> tuple[str, int]:
++def _read_string(data: bytes, pos: int, order: str = "<", *, base: int = 0) -> tuple[str, int]:
++    # 先对齐读指针，再读长度——字符串字节紧跟长度字段，两步必须用同一对齐位置，
++    # 否则 padding 会被算进字符串起点（旧实现 bug：length 对齐读、字节未对齐读）
++    pos = _align4(pos, base)
+     (length,) = _read_struct(data, pos, f"{order}I")
+     pos += 4
+     if length > len(data) - pos:
+@@ -59,9 +74,18 @@ def _read_string(data: bytes, pos: int, order: str = "<") -> tuple[str, int]:
+     return text[:-1], pos + length
+ 
+ 
+-def _write_string(value: str, order: str = "<") -> bytes:
++def _pad_to_align4(pos: int, base: int = 0) -> int:
++    """距下一个 base+4 的倍数还差几字节 padding（只向前，0~3）。
++
++    pos/base 必须同一坐标系（消息内绝对偏移；裸 CDR base=0，封装头后 base=4）。
++    与解码端 _read_struct align4 的 pad=(4-(pos-base))%4 完全一致。
++    """
++    return (4 - (pos - base)) % 4
++
++
++def _write_string(value: str, order: str = "<", *, base: int = 0, pos: int = 0) -> bytes:
+     encoded = value.encode("utf-8") + b"\x00"
+-    return struct.pack(f"{order}I", len(encoded)) + encoded
++    return b"\x00" * _pad_to_align4(pos, base) + struct.pack(f"{order}I", len(encoded)) + encoded
+ 
+ 
+ @dataclass(frozen=True)
+@@ -132,8 +156,10 @@ def decode_time(data: bytes, pos: int) -> tuple[TimeMsg, int]:
+     return TimeMsg(sec=sec, nanosec=nanosec), pos + 8
+ 
+ 
+-def _encode_header(msg: HeaderMsg) -> bytes:
+-    return encode_time(msg.stamp) + _write_string(msg.frame_id)
++def _encode_header(msg: HeaderMsg, *, base: int = 0) -> bytes:
++    # frame_id 长度字段前补 padding：body 内 Time 8B 后偏移 8（相对体起点恒对齐），
++    # base 传消息内绝对体起点（封装头后=4），与解码端同一坐标系
++    return encode_time(msg.stamp) + _write_string(msg.frame_id, base=base, pos=base + 8)
+ 
+ 
+ def encode_header(msg: HeaderMsg) -> bytes:
+@@ -146,42 +172,47 @@ def encode_header(msg: HeaderMsg) -> bytes:
+ # ---------------------------------------------------------------------------
+ 
+ 
+-def _decode_header_at(data: bytes, pos: int, order: str) -> tuple[HeaderMsg, int]:
+-    sec, nanosec = _read_struct(data, pos, f"{order}iI")
+-    pos += 8
+-    frame_id, pos = _read_string(data, pos, order)
++def _decode_header_at(data: bytes, pos: int, order: str, base: int = 0) -> tuple[HeaderMsg, int]:
++    # header 首字段 Time 起点=CDR 体起点，对齐基准 base 即体起点（在 sub 切片上=0）
++    sec, nanosec = _read_struct(data, _align4(pos, base), f"{order}iI")
++    pos = _align4(pos, base) + 8
++    frame_id, pos = _read_string(data, pos, order, base=base)
+     return HeaderMsg(stamp=TimeMsg(sec=sec, nanosec=nanosec), frame_id=frame_id), pos
+ 
+ 
+-def _decode_header(data: bytes) -> tuple[HeaderMsg, str, int]:
+-    """解析 header，返回 (header, byteorder, body 结束 pos)。
++def _decode_header(data: bytes) -> tuple[HeaderMsg, str, int, int]:
++    """解析 header，返回 (header, byteorder, 消息结束 pos, CDR 体起点对齐基准)。
+ 
+     逐候选（封装头/裸）尝试，取第一个解出**合法 stamp** 的，避免封装头误判。
++    base 是 CDR 体起点在 data（即调用方 sub 切片）内的绝对偏移：封装头后=4，裸=0。
++    后续字段在 sub 上读时统一用它做对齐基准。
+     """
+     last_err: CdrError | None = None
+     for order, body_pos in _encap_candidates(data):
+         try:
+-            header, end = _decode_header_at(data, body_pos, order)
++            header, end = _decode_header_at(data, body_pos, order, base=body_pos)
+         except (CdrError, IndexError, struct.error) as exc:
+             last_err = CdrError(f"header 解析失败：{exc}")
+             continue
+         if _valid_stamp(header.stamp):
+-            return header, order, end
++            return header, order, end, body_pos
+         last_err = CdrError("header stamp 非法（解析错位？）")
+     raise last_err or CdrError("无法解析 header")
+ 
+ 
+ def decode_header(data: bytes, pos: int = 0) -> tuple[HeaderMsg, int]:
+     """解码 std_msgs/Header（含封装头检测）。返回 (header, 消息结束 pos)。"""
+-    header, _order, end = _decode_header(data[pos:])
++    header, _order, end, _base = _decode_header(data[pos:])
+     return header, pos + end
+ 
+ 
+ def decode_compressed_image(data: bytes, pos: int = 0) -> tuple[CompressedImageMsg, int]:
+     # 全部字段在切片 sub 上相对读，结束位置再统一加回 pos，避免相对/绝对偏移混用（medium）
+     sub = data[pos:]
+-    header, order, p = _decode_header(sub)
+-    fmt, p = _read_string(sub, p, order)
++    header, order, p, base = _decode_header(sub)
++    fmt, p = _read_string(sub, p, order, base=base)
++    # data 是 sequence<uint8>：长度字段 4 字节对齐（基准=体起点 base），元素 1 字节无对齐
++    p = _align4(p, base)
+     (length,) = _read_struct(sub, p, f"{order}I")
+     p += 4
+     if length > len(sub) - p:
+@@ -197,12 +228,14 @@ def decode_image(data: bytes, pos: int = 0) -> tuple[ImageMsg, int]:
+     """
+     # 全部字段在切片 sub 上相对读，结束位置再统一加回 pos，避免相对/绝对偏移混用（medium）
+     sub = data[pos:]
+-    header, order, p = _decode_header(sub)
++    header, order, p, base = _decode_header(sub)
++    p = _align4(p, base)
+     height, width = _read_struct(sub, p, f"{order}II")
+     p += 8
+-    encoding, p = _read_string(sub, p, order)
++    encoding, p = _read_string(sub, p, order, base=base)
+     (_is_bigendian,) = _read_struct(sub, p, f"{order}B")
+     p += 1
++    p = _align4(p, base)
+     (step,) = _read_struct(sub, p, f"{order}I")
+     p += 4
+     (length,) = _read_struct(sub, p, f"{order}I")
+@@ -221,19 +254,24 @@ def decode_image(data: bytes, pos: int = 0) -> tuple[ImageMsg, int]:
+ 
+ 
+ def encode_compressed_image(msg: CompressedImageMsg) -> bytes:
+-    body = _encode_header(msg.header) + _write_string(msg.format) + struct.pack("<I", len(msg.data)) + msg.data
++    # 坐标系 = 消息内绝对偏移，体起点（封装头后）base=4，与解码端 sub 切片一致
++    base = 4
++    body = _encode_header(msg.header, base=base)
++    body += _write_string(msg.format, base=base, pos=base + len(body))
++    # data 是 sequence<uint8>：长度字段 4 字节对齐，元素 1 字节无对齐
++    body += b"\x00" * _pad_to_align4(base + len(body), base) + struct.pack("<I", len(msg.data)) + msg.data
+     return ENCAP_LE + body
+ 
+ 
+ def encode_image(msg: ImageMsg) -> bytes:
+-    """编码 Image 并加 ROS2 封装头。"""
+-    body = (
+-        _encode_header(msg.header)
+-        + struct.pack("<II", msg.height, msg.width)
+-        + _write_string(msg.encoding)
+-        + struct.pack("<B", 0)
+-        + struct.pack("<I", msg.step)
+-        + struct.pack("<I", len(msg.data))
+-        + msg.data
+-    )
++    """编码 Image 并加 ROS2 封装头（32 位字段按 CDR 规范补 padding）。"""
++    # 坐标系 = 消息内绝对偏移，体起点（封装头后）base=4，与解码端 sub 切片一致
++    base = 4
++    body = _encode_header(msg.header, base=base)
++    # height/width 是 uint32：起始须 4 字节对齐（基准=体起点），frame_id 后可能需 0~3 字节 padding
++    body += b"\x00" * _pad_to_align4(base + len(body), base) + struct.pack("<II", msg.height, msg.width)
++    body += _write_string(msg.encoding, base=base, pos=base + len(body))
++    body += struct.pack("<B", 0)  # is_bigendian（1 字节，无对齐）
++    body += b"\x00" * _pad_to_align4(base + len(body), base) + struct.pack("<I", msg.step)
++    body += b"\x00" * _pad_to_align4(base + len(body), base) + struct.pack("<I", len(msg.data)) + msg.data
+     return ENCAP_LE + body
+diff --git a/app/schemas/requests.py b/app/schemas/requests.py
+index 1c3c745..f468ae7 100644
+--- a/app/schemas/requests.py
++++ b/app/schemas/requests.py
+@@ -102,10 +102,16 @@ class PipelineRetryRequest(ApiRequest):
+ 
+ 
+ class SceneAnalysisRunRequest(ApiRequest):
+-    """显式场景运行（DESIGN §7.1 POST /api/v1/scene-analysis-runs）。"""
++    """显式场景运行（DESIGN §7.1 POST /api/v1/scene-analysis-runs）。
++
++    reanalysis_id（强模型 #7）：显式重新分析必须携带——它进入 run 身份摘要，
++    与自动调度身份（事件消费，无 reanalysis_id）区分，同能力集合的重分析走
++    新 run。不传 = 首次处理语义：同身份已有 run（含终态）时幂等复用不重建。
++    """
+ 
+     source_id: str
+     scenes: list[dict] = Field(min_length=1, max_length=MAX_SCENE_SELECTIONS)
++    reanalysis_id: str | None = Field(default=None, min_length=1, max_length=64)
+     idempotency_key: str | None = None
+ 
+ 
+diff --git a/app/schemas/responses.py b/app/schemas/responses.py
+index 29d191c..48af34c 100644
+--- a/app/schemas/responses.py
++++ b/app/schemas/responses.py
+@@ -9,7 +9,8 @@ class ApiResponse(BaseModel):
+ 
+ class SourceRegisterResponse(ApiResponse):
+     source_id: str
+-    pipeline_run_id: str
++    # 强模型 #3：冻结用途不含 self_built（纯 scene_slice）时不创建 Phase0 run，回显 None。
++    pipeline_run_id: str | None
+     created: bool
+     summary: dict[str, Any]
+ 
+diff --git a/app/services/ingest_service.py b/app/services/ingest_service.py
+index adbe298..e0aa43b 100644
+--- a/app/services/ingest_service.py
++++ b/app/services/ingest_service.py
+@@ -147,6 +147,41 @@ def _resolve_selection(db: Session, row: IngestProfile, selection: SubmissionSel
+     return resolve_effective_config(profile_domain, get_capability_read(), selection)
+ 
+ 
++def _frozen_capability_hashes(effective: EffectiveConfig | None) -> dict:
++    """接受/PATCH 成功时冻结 04A 单能力 hash（强模型 #4，协调者裁决"接受时冻结"）。
++
++    任何 scene 事件都必须带有效冻结 hash，绝不允许 NULL-hash 事件从本服务发出：
++    - 能力在解析成功的有效配置中 → registry 当时可用，hash 必能计算（否则是
++      04A 契约漂移，冒泡显式失败，与 create/patch 的 SceneConfigError 同口径）；
++    - CONFIG_REQUIRED（effective=None）→ 恒 "{}"，bind 不出 scene 事件（停
++      PENDING_INPUT/BOUND 等用户补配置）。
++    冻结值持久化在 submission.frozen_capability_hashes_json，bind 只读不重算。
++    """
++    if effective is None:
++        return {}
++    if not any(p == IngestPurpose.SCENE_SLICE for p in effective.purposes):
++        return {}
++    frozen: dict[str, dict] = {}
++    for scene in effective.scenes:
++        cap = effective_params_by_capability(
++            get_registry(), scene.scene_code, scene.parameters, scene.capability_version
++        )
++        if cap is None:
++            # 解析刚通过 enabled_capability 校验，hash 计算不应失败：失败说明
++            # 03B/04A 字段契约漂移或 registry 在解析与冻结之间被并发移除。
++            # 显式失败（经调用方既有 SceneConfigError 通道转 422）优于发出
++            # NULL-hash 违约事件（DESIGN §11.2 两端同一策略）。
++            raise SceneConfigError(
++                "FROZEN_HASH_UNAVAILABLE",
++                f"接受时冻结能力 hash 失败: {scene.scene_code}/{scene.capability_version}（registry 契约漂移）",
++            )
++        frozen[scene.scene_code] = {
++            "capability_version": scene.capability_version,
++            "capability_config_hash": cap["config_hash"],
++        }
++    return frozen
++
++
+ def _submission_payload_response(submission: IngestSubmission) -> dict:
+     effective = None
+     if submission.effective_config_json:
+@@ -273,6 +308,8 @@ def create_submission(
+ 
+     submission_id = uuid.uuid4().hex
+     config_required = effective is None
++    # 强模型 #4：接受时冻结单能力 hash 并持久化（bind 只读不重算）
++    frozen_hashes = _frozen_capability_hashes(effective)
+     submission = IngestSubmission(
+         submission_id=submission_id,
+         profile_id=row.profile_id,
+@@ -285,6 +322,7 @@ def create_submission(
+         selection_json=json.dumps(payload, ensure_ascii=False, sort_keys=True),
+         effective_config_json=json.dumps(_effective_to_json(effective), ensure_ascii=False) if effective else None,
+         effective_config_hash=effective.config_hash if effective else None,
++        frozen_capability_hashes_json=json.dumps(frozen_hashes, ensure_ascii=False, sort_keys=True),
+         config_required=config_required,
+     )
+     # 并发窗口：两个不同幂等键的 POST 都读到"无 PENDING 提交"，第二个 add/flush
+@@ -370,7 +408,13 @@ def patch_submission(db: Session, submission_id: str, row_version: int, update:
+     replay = idempotent_replay(db, operation, key, update)
+     if replay is not None:
+         return replay
+-    submission = db.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == submission_id))
++    # 强模型 #6：PATCH 与 Scanner bind 共享同一行锁（FOR UPDATE）。
++    # 旧实现普通 SELECT 读快照：bind 的 _find_pending_submission 读到旧快照后，
++    # PATCH 可在 bind 事务提交前并发成功，bind 再按旧代次覆盖 → 用户收到
++    # "修改成功"但运行用了旧配置。两路径现在都锁 submission 行，串行化。
++    submission = db.scalar(
++        select(IngestSubmission).where(IngestSubmission.submission_id == submission_id).with_for_update()
++    )
+     if submission is None:
+         raise HTTPException(404, "submission not found")
+     if submission.status != "PENDING_INPUT":
+@@ -379,11 +423,13 @@ def patch_submission(db: Session, submission_id: str, row_version: int, update:
+         raise HTTPException(409, "ROW_VERSION_CONFLICT: submission changed concurrently")
+ 
+     row = db.scalar(
+-        select(IngestProfile).where(
++        select(IngestProfile)
++        .where(
+             IngestProfile.profile_id == submission.profile_id,
+             IngestProfile.version == submission.profile_version,
+             IngestProfile.enabled.is_(True),
+         )
++        .with_for_update()
+     )
+     if row is None:
+         raise HTTPException(409, "profile no longer enabled; re-create submission")
+@@ -415,18 +461,24 @@ def patch_submission(db: Session, submission_id: str, row_version: int, update:
+         # 与 create_submission 同口径：仅配置语义错误 422，服务端故障冒泡 500。
+         raise HTTPException(422, f"{exc.code}: {exc.detail}") from exc
+ 
+-    submission.effective_config_json = (
+-        json.dumps(_effective_to_json(effective), ensure_ascii=False) if effective else None
+-    )
+-    submission.effective_config_hash = effective.config_hash if effective is not None else None
+-    submission.config_required = effective is None
+-    submission.selection_json = json.dumps(merged_payload, ensure_ascii=False, sort_keys=True, default=str)
+-    submission.updated_at = now()
+-    # DB 层条件 UPDATE 是乐观锁的权威守卫（ocr 批A2 F2）：UPDATE ... WHERE
+-    # submission_id=:id AND row_version=:expected，rowcount=0 说明并发同代次请求
+-    # 已抢先推进 row_version（read-compare 前的检查与写入之间存在窗口），转 409。
+-    # 只更新非版本列，row_version 由 SET 表达式原子 +1。
+-    db.flush()  # 先把上方 ORM 属性变更并入同一事务
++    new_effective_json = json.dumps(_effective_to_json(effective), ensure_ascii=False) if effective else None
++    new_effective_hash = effective.config_hash if effective is not None else None
++    new_config_required = effective is None
++    # 强模型 #4：PATCH 成功即重新接受 → 冻结值同步刷新（与 create 同口径，
++    # 事件必须携带"最近一次接受时刻"的能力 hash；bind 仍只读冻结值不重算）。
++    new_frozen_hashes_json = json.dumps(_frozen_capability_hashes(effective), ensure_ascii=False, sort_keys=True)
++    new_selection_json = json.dumps(merged_payload, ensure_ascii=False, sort_keys=True, default=str)
++    new_updated_at = now()
++    # F2（ocr 批A2 + 隔离库并发复测）：内容列与 row_version 必须写进【同一条】守卫
++    # UPDATE。旧实现先把内容列挂到 ORM 属性上 db.flush()（一条按主键的普通 UPDATE），
++    # 再单独发 row_version+1 的条件 UPDATE：真并发下输方会话的内容 flush 会因
++    # MySQL "affected rows"（改了多少行，而非匹配多少行）语义返回 0（内容已被赢家
++    # 写成相同值 / 行锁），ORM 的 check_rowcount 判定"预期 1 行实际 0 行"→ 抛
++    # StaleDataError（API 面 500），rowcount==0→409 分支因此不可达。合并为单条
++    # UPDATE ... WHERE row_version=:expected AND status='PENDING_INPUT'：SET 里含
++    # row_version+1（守卫命中时该行必被修改，affected>=1），输方守卫不命中（0 行）
++    # → rowcount==0 → 409。内容不再经 ORM 属性 + flush 写入（只读 submission 不置脏）。
++    # synchronize_session='fetch'：0 行时按返回 PK 回查、不再抛异常，兜住守卫。
+     result = db.execute(
+         sa_update(IngestSubmission)
+         .where(
+@@ -434,15 +486,24 @@ def patch_submission(db: Session, submission_id: str, row_version: int, update:
+             IngestSubmission.row_version == row_version,
+             IngestSubmission.status == "PENDING_INPUT",
+         )
+-        .values(row_version=IngestSubmission.row_version + 1)
++        .values(
++            effective_config_json=new_effective_json,
++            effective_config_hash=new_effective_hash,
++            frozen_capability_hashes_json=new_frozen_hashes_json,
++            config_required=new_config_required,
++            selection_json=new_selection_json,
++            updated_at=new_updated_at,
++            row_version=IngestSubmission.row_version + 1,
++        )
++        .execution_options(synchronize_session="fetch")
+     )
+-    db.flush()
+     if result.rowcount == 0:
+-        # 权威守卫拒绝：并发同代次请求已推进代次。回滚本事务已做的 ORM 变更，
+-        # 按 409 重试（客户端携新 row_version 重读后重发）。
++        # 权威守卫拒绝：并发同代次请求已推进 row_version（读比与写入间的窗口）。
++        # 本事务除只读外无写入，rollback 仅复位事务；客户端携新 row_version 重读后重发。
+         db.rollback()
+         raise HTTPException(409, "ROW_VERSION_CONFLICT: submission changed concurrently")
+-    db.expire(submission)
++    # 守卫命中：刷新对象到更新后态（row_version 已推进到 expected+1）。
++    db.expire_all()
+     submission = db.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == submission_id))
+     response = _submission_payload_response(submission)
+     store_idempotency(db, operation, key, update, response)
+@@ -487,13 +548,19 @@ def get_submission(db: Session, submission_id: str) -> dict:
+ 
+ def _find_pending_submission(db: Session, profile_row: IngestProfile, entry_relative: str) -> IngestSubmission | None:
+     claim = _path_claim_key(profile_row.profile_id, profile_row.version, entry_relative)
++    # 强模型 #6：bind 与 PATCH 共享同一行锁。FOR UPDATE 锁定候选 PENDING 行后，
++    # 并发的 patch_submission 只能在本 bind 事务提交后读到新代次（或其守卫
++    # UPDATE 0 行 → 409），不再存在"PATCH 在 bind 快照之上覆盖、bind 却按旧
++    # 配置出事件"的窗口。无匹配行时锁空集（gap），不阻塞 create 并发。
+     return db.scalar(
+-        select(IngestSubmission).where(
++        select(IngestSubmission)
++        .where(
+             IngestSubmission.profile_id == profile_row.profile_id,
+             IngestSubmission.profile_version == profile_row.version,
+             IngestSubmission.path_claim_key == claim,
+             IngestSubmission.status == "PENDING_INPUT",
+         )
++        .with_for_update()
+     )
+ 
+ 
+@@ -542,6 +609,9 @@ def _ensure_system_submission(db: Session, profile_row: IngestProfile, entry_rel
+         # 与 create_submission/patch_submission 的"显式选择失败=422"区分：
+         # 这里是系统兜底解析，失败属于可恢复的配置问题。
+         effective = None
++    # 强模型 #4：系统兜底提交同样在"接受"（登记时刻）冻结能力 hash；
++    # 解析成功则冻结，解析失败（CONFIG_REQUIRED）恒空 → bind 不出 scene 事件。
++    frozen_hashes = _frozen_capability_hashes(effective)
+     submission = IngestSubmission(
+         submission_id=uuid.uuid4().hex,
+         profile_id=profile_row.profile_id,
+@@ -553,6 +623,7 @@ def _ensure_system_submission(db: Session, profile_row: IngestProfile, entry_rel
+         selection_json=json.dumps({"relative_path": entry_relative}, ensure_ascii=False),
+         effective_config_json=json.dumps(_effective_to_json(effective), ensure_ascii=False) if effective else None,
+         effective_config_hash=effective.config_hash if effective else None,
++        frozen_capability_hashes_json=json.dumps(frozen_hashes, ensure_ascii=False, sort_keys=True),
+         config_required=effective is None,
+     )
+     db.add(submission)
+@@ -570,16 +641,24 @@ def _emit_purpose_events(
+     """每用途一条事件；scene_slice 再按场景携带 04A 单能力 config_hash。
+ 
+     04A 调用统一经 effective_params_by_capability 收口（DESIGN §11.2）。
+-    冻结快照的能力在出事件前被禁用/移除（registry 漂移）时不丢弃事件、不抛错
+-    冒泡到登记事务（否则旧入口 Phase0 登记会被回滚）：该场景事件以
+-    capability_config_hash=None 落 outbox，由 05 消费时按能力不可用处理
+-    （§3.2 降级语义），登记链路保持隔离。
++    scene_slice 事件只携带"接受时刻"持久化在 submission 上的冻结 hash，不重新
++    从当前 registry 计算；registry 此后漂移（能力被禁用/移除）时事件仍带接受
++    时刻 hash，由 05 消费端 registry.get→None 落 SCENE_UNAVAILABLE 失败运行。
++    冻结缺失或与有效配置版本不一致（数据异常）时显式 raise CapabilityError，
++    登记事务回滚——绝不允许 NULL-hash 事件流出本服务。
+     """
+     from app.scene.types import CapabilityError
+ 
+-    registry = get_registry()
+     events: list[PurposeScheduleEvent] = []
+     frozen_at = now()
++    # 强模型 #4（协调者裁决"接受时冻结"）：bind 阶段只读 submission 上持久化的
++    # 冻结 hash，不得重新从当前 registry 计算。registry 若此后漂移（能力被禁用/
++    # 移除），事件仍携带"接受时刻"的 hash；05 消费端 registry.get 返回 None →
++    # SCENE_UNAVAILABLE 失败运行留痕（不是丢弃）。冻结缺失（老行/数据异常）同样
++    # 不再重算，直接显式失败——任何 scene 事件都必须带有效冻结 hash，绝不允许
++    # NULL-hash 事件流出本服务（05 的 CONTRACT_VIOLATION 保留为真正的不变式违约
++    # 兜底，我们自己的生产端永远不该触发它）。
++    frozen_map: dict[str, dict] = json.loads(submission.frozen_capability_hashes_json or "{}")
+     for purpose in effective.purposes:
+         if purpose == IngestPurpose.SELF_BUILT:
+             # 自建用途事件不携带 scene 字段（DESIGN §11.2），保持既有流程语义。
+@@ -603,12 +682,20 @@ def _emit_purpose_events(
+             events.append(event)
+         elif purpose == IngestPurpose.SCENE_SLICE:
+             for scene in effective.scenes:
+-                try:
+-                    cap = effective_params_by_capability(
+-                        registry, scene.scene_code, scene.parameters, scene.capability_version
++                frozen = frozen_map.get(scene.scene_code)
++                if (
++                    frozen is None
++                    or not frozen.get("capability_config_hash")
++                    or frozen.get("capability_version") != scene.capability_version
++                ):
++                    # 冻结缺失或与有效配置版本不一致（CONFIG_REQUIRED 不应到达此处——
++                    # bind 已短路；到达即为数据异常）。显式失败优于发 NULL-hash
++                    # 违约事件：让登记事务回滚并由调用方/协调者定位，而不是把不变式
++                    # 违约推给 05 消费端。
++                    raise CapabilityError(
++                        f"冻结能力 hash 缺失或与有效配置不一致: {scene.scene_code}/{scene.capability_version} "
++                        f"(submission={submission.submission_id}); 不接受时冻结未持久化，禁止 bind 重算"
+                     )
+-                except CapabilityError:
+-                    cap = None
+                 event = PurposeScheduleEvent(
+                     event_id=uuid.uuid4().hex,
+                     submission_id=submission.submission_id,
+@@ -617,8 +704,8 @@ def _emit_purpose_events(
+                     parent_bag_uid=bag_uid,
+                     purpose="scene_slice",
+                     scene_code=scene.scene_code,
+-                    capability_version=scene.capability_version,
+-                    capability_config_hash=cap["config_hash"] if cap else None,
++                    capability_version=frozen["capability_version"],
++                    capability_config_hash=frozen["capability_config_hash"],
+                     effective_config_hash=effective.config_hash,
+                     profile_id=profile_row.profile_id,
+                     profile_version=profile_row.version,
+diff --git a/app/services/scene_result_query.py b/app/services/scene_result_query.py
+new file mode 100644
+index 0000000..adb5a58
+--- /dev/null
++++ b/app/services/scene_result_query.py
+@@ -0,0 +1,442 @@
++"""场景结果检索与血缘查询（专项 TASK-06A，DESIGN §7.1/§8.1）。
++
++有界契约：
++- 列表 limit 默认 50、上限 200（API 层校验；本层防御性 clamp）。
++- 排序固定：started_at、bag_uid 倒序，空 started_at 排最后；
++  血缘子包沿用此排序；区间按 start_ns、区间 ID 升序。
++- cursor 为 base64(JSON)：包含排序锚点与筛选上下文，翻页稳定但不承诺快照隔离。
++- 列表只投影摘要字段，不无界展开 topic/子包/历史；
++  区间/证据明细走单独有界端点（segments/lineage）。
++- PENDING 切片不进入默认可用检索；include_history=True 显式包含历史版本。
++"""
++
++from __future__ import annotations
++
++import base64
++import json
++
++from fastapi import HTTPException
++from sqlalchemy import select
++from sqlalchemy.orm import Session
++
++from app.models import (
++    BagDerivation,
++    BagRecord,
++    BagSceneLabelEvidence,
++    Scene,
++    SceneAnalysisVersion,
++    SceneSegment,
++    Vehicle,
++)
++
++DEFAULT_LIMIT = 50
++MAX_LIMIT = 200
++
++
++def _clamp_limit(limit: int | None) -> int:
++    if limit is None:
++        return DEFAULT_LIMIT
++    return max(1, min(int(limit), MAX_LIMIT))
++
++
++def _decode_cursor(raw: str | None) -> dict:
++    if not raw:
++        return {}
++    try:
++        payload = json.loads(base64.urlsafe_b64decode(raw.encode()).decode("utf-8"))
++        if not isinstance(payload, dict):
++            raise ValueError
++        return payload
++    except Exception as exc:  # noqa: BLE001 — 非法 cursor 一律 422，不猜测
++        raise HTTPException(422, f"invalid cursor: {exc}") from exc
++
++
++def _encode_cursor(payload: dict) -> str:
++    return base64.urlsafe_b64encode(json.dumps(payload, sort_keys=True).encode()).decode()
++
++
++def _time_desc_clause(column):
++    """started_at 倒序、NULL 排最后（跨 SQLite/MySQL 的有界写法）。"""
++    return [column.is_(None).asc(), column.desc()]
++
++
++def _bag_summary(bag: BagRecord, vehicle: Vehicle | None, scene_names: list[str]) -> dict:
++    return {
++        "bag_uid": bag.bag_uid,
++        "name": bag.name,
++        "role": bag.bag_role,
++        "availability": bag.availability,
++        "started_at": bag.started_at.isoformat() if bag.started_at else None,
++        "duration_ns": str(bag.duration_ns),
++        "vehicle": vehicle.name if vehicle else None,
++        "scenes": scene_names,
++        "dataset_type": bag.dataset_type,
++    }
++
++
++def search_scene_bags(
++    db: Session,
++    *,
++    view: str = "slices",
++    scene_code: str | None = None,
++    vehicle_id: int | None = None,
++    parent_bag_uid: str | None = None,
++    role: str | None = None,
++    keyword: str | None = None,
++    include_history: bool = False,
++    cursor: str | None = None,
++    limit: int | None = None,
++    child_uid_prefix: str | None = None,
++) -> dict:
++    """统一服务检索（DESIGN §7.1 GET /api/v1/bags）。
++
++    view=slices：当前版本 + AVAILABLE 切片（include_history 时放宽为全部历史切片，
++    行内 current 字段标明是否属于当前版本）；view=originals：仅 ORIGINAL；
++    view=all：全部角色。child_uid_prefix 仅测试/有界过滤用（按 bag_uid 前缀隔离行集）。
++    parent_bag_uid/scene_code 过滤作用在 derivation 关联上，语义为"该父包/场景的
++    切片"，仅对 slices/all 视图有意义；originals 视图请改用 child_uid_prefix 等角色过滤。
++    """
++    if view not in ("slices", "originals", "all"):
++        raise HTTPException(422, f"view 非法：{view}（仅 slices/originals/all）")
++    lim = _clamp_limit(limit)
++    ctx = _decode_cursor(cursor)
++
++    q = select(BagRecord, Vehicle).join(Vehicle, isouter=True)
++    q = q.outerjoin(BagRecord.derivation)  # 切片 → 父包关联（view=slices 用）
++    if role:
++        q = q.where(BagRecord.bag_role == role)
++    if vehicle_id is not None:
++        q = q.where(Vehicle.id == vehicle_id)
++    if keyword:
++        q = q.where(BagRecord.name.contains(keyword))
++    if child_uid_prefix:
++        q = q.where(BagRecord.bag_uid.like(f"{child_uid_prefix}%"))
++
++    if view == "originals":
++        q = q.where(BagRecord.bag_role == "ORIGINAL")
++    elif view == "slices":
++        if not include_history:
++            # 默认：仅当前版本 AVAILABLE 切片（PENDING 不进入可用检索，DESIGN §4.1）
++            q = q.where(BagRecord.bag_role == "SCENE_SLICE", BagRecord.availability == "AVAILABLE")
++            if scene_code:
++                q = q.where(BagDerivation.scene_code == scene_code)
++            if parent_bag_uid:
++                q = q.where(BagDerivation.parent_bag_uid == parent_bag_uid)
++        else:
++            # 历史切片：全部 SCENE_SLICE（行内 current 标记当前性）
++            q = q.where(BagRecord.bag_role == "SCENE_SLICE")
++            if scene_code:
++                q = q.where(BagDerivation.scene_code == scene_code)
++            if parent_bag_uid:
++                q = q.where(BagDerivation.parent_bag_uid == parent_bag_uid)
++    else:  # all
++        if scene_code:
++            q = q.where(BagDerivation.scene_code == scene_code)
++        if parent_bag_uid:
++            q = q.where(BagDerivation.parent_bag_uid == parent_bag_uid)
++
++    # cursor 锚点：(started_at IS NULL, started_at DESC, bag_uid DESC)
++    if ctx:
++        anchor_null = bool(ctx.get("null"))
++        anchor_ts = ctx.get("ts")
++        anchor_uid = ctx.get("uid")
++        if anchor_uid is None:
++            raise HTTPException(422, "cursor 缺少排序锚点")
++        if anchor_ts is None:
++            # 上一页锚点是 started_at NULL 行：只续查 NULL 区且 bag_uid 更小
++            if not anchor_null:
++                raise HTTPException(422, "cursor 锚点不一致（ts 缺失但 null 标记错误）")
++            q = q.where(BagRecord.started_at.is_(None), BagRecord.bag_uid < anchor_uid)
++        else:
++            from datetime import datetime as _dt
++
++            ts = _dt.fromisoformat(anchor_ts)
++            if anchor_null:
++                raise HTTPException(422, "cursor 锚点不一致（ts 存在但 null 标记为真）")
++            # started_at 更小的全取；同 started_at 的取 bag_uid 更小的
++            q = q.where(
++                (BagRecord.started_at.is_(None))
++                | ((BagRecord.started_at < ts) | ((BagRecord.started_at == ts) & (BagRecord.bag_uid < anchor_uid)))
++            )
++
++    q = q.order_by(*_time_desc_clause(BagRecord.started_at), BagRecord.bag_uid.desc())
++    # +1 探测判定 has_more：超大量数据下每页多取 1 行，代价有界（不额外 COUNT）；
++    # 该行为已在 DESIGN §7.1 接受，无需为大数据量另设全量计数路径。
++    q = q.limit(lim + 1)
++
++    rows = db.execute(q).all()
++    has_more = len(rows) > lim
++    rows = rows[:lim]
++
++    # scenes 摘要：一次有界批量查询（bag_scene 关联表），不逐行 lazy load
++    bag_ids = [b.id for b, _ in rows]
++    scene_map: dict[int, list[str]] = {}
++    if bag_ids:
++        from app.models import bag_scene
++
++        for bag_id, scene_id in db.execute(bag_scene.select().where(bag_scene.c.bag_id.in_(bag_ids))):
++            scene_map.setdefault(bag_id, []).append(scene_id)
++        if scene_map:
++            scene_names = {
++                s.id: s.name
++                for s in db.scalars(
++                    select(Scene).where(Scene.id.in_(set(i for vs in scene_map.values() for i in vs)))
++                ).all()
++            }
++            scene_map = {k: [scene_names[i] for i in v] for k, v in scene_map.items()}
++
++    # 当前性标注：include_history 时查询当前版本指针（一次有界查询，不逐行查）
++    current_set: set[str] = set()
++    if view == "slices" and include_history and rows:
++        child_uids = [r[0].bag_uid for r in rows]
++        cur = (
++            db.execute(
++                select(BagDerivation.child_bag_uid)
++                .join(SceneAnalysisVersion, SceneAnalysisVersion.id == BagDerivation.analysis_version_id)
++                .where(SceneAnalysisVersion.current.is_(True), BagDerivation.child_bag_uid.in_(child_uids))
++            )
++            .scalars()
++            .all()
++        )
++        current_set = set(cur)
++
++    items = []
++    for bag, vehicle in rows:
++        item = _bag_summary(bag, vehicle, scene_map.get(bag.id, []))
++        if view == "slices" and include_history:
++            item["current"] = bag.bag_uid in current_set
++        items.append(item)
++
++    next_cursor = None
++    if has_more and rows:
++        last = rows[lim - 1][0]
++        next_cursor = _encode_cursor(
++            {
++                "null": last.started_at is None,
++                "ts": last.started_at.isoformat() if last.started_at else None,
++                "uid": last.bag_uid,
++                "view": view,
++                "scene_code": scene_code,
++            }
++        )
++    return {"items": items, "limit": lim, "has_more": has_more, "next_cursor": next_cursor}
++
++
++def current_versions(
++    db: Session, *, parent_bag_uid: str | None = None, scene_code: str | None = None, limit: int | None = None
++) -> list[dict]:
++    """父包+场景当前版本指针（有界）。"""
++    lim = _clamp_limit(limit)
++    q = (
++        select(SceneAnalysisVersion)
++        .where(SceneAnalysisVersion.current.is_(True))
++        .order_by(SceneAnalysisVersion.id.asc())
++        .limit(lim)
++    )
++    if parent_bag_uid:
++        q = q.where(SceneAnalysisVersion.parent_bag_uid == parent_bag_uid)
++    if scene_code:
++        q = q.where(SceneAnalysisVersion.scene_code == scene_code)
++    return [
++        {
++            "id": v.id,
++            "parent_bag_uid": v.parent_bag_uid,
++            "scene_code": v.scene_code,
++            "analysis_version": v.analysis_version,
++            "run_id": v.run_id,
++            "result": v.result,
++            "expected_segment_count": str(v.expected_segment_count),
++            "registered_segment_count": str(v.registered_segment_count),
++            "current": bool(v.current),
++            "created_at": v.created_at.isoformat() if v.created_at else None,
++        }
++        for v in db.scalars(q)
++    ]
++
++
++def list_segments(
++    db: Session,
++    *,
++    analysis_version_id: int,
++    publish_only: bool = False,
++    limit: int | None = None,
++) -> dict:
++    """区间列表（start_ns、id 升序；含 flat 等非发布结果，publish_only 时过滤）。"""
++    lim = _clamp_limit(limit)
++    q = select(SceneSegment).where(SceneSegment.analysis_version_id == analysis_version_id)
++    if publish_only:
++        q = q.where(SceneSegment.publish_target.is_(True))
++    q = q.order_by(SceneSegment.start_ns.asc(), SceneSegment.id.asc()).limit(lim + 1)
++    rows = db.scalars(q).all()
++    # truncated 复用首次查询的 +1 探测结果，不做第二次相同查询（attempt-2 #6）。
++    truncated = len(rows) > lim
++    if truncated:
++        rows = rows[:lim]
++    return {
++        "items": [
++            {
++                "id": s.id,
++                "label": s.label,
++                "start_ns": str(s.start_ns),
++                "end_ns": str(s.end_ns),
++                "duration_ns": str(s.duration_ns),
++                "publish_target": bool(s.publish_target),
++                "slice_key": s.slice_key,
++                "boundary_mapping_note": s.boundary_mapping_note,
++                "boundary_evidence_artifact_id": s.boundary_evidence_artifact_id,
++            }
++            for s in rows
++        ],
++        "limit": lim,
++        "truncated": truncated,
++    }
++
++
++def lineage(db: Session, *, bag_uid: str, cursor: str | None = None, limit: int | None = None) -> dict:
++    """GET /api/v1/bags/{uid}/lineage：父包视角列子包（started_at/bag_uid 倒序，
++    区间按 start_ns/id 升序）；子包视角返回父包与自身登记。历史版本可经 current_versions 显式查。"""
++    lim = _clamp_limit(limit)
++    ctx = _decode_cursor(cursor)
++
++    bag = db.scalar(select(BagRecord).where(BagRecord.bag_uid == bag_uid))
++    if bag is None:
++        raise HTTPException(404, f"bag not found: {bag_uid}")
++
++    if bag.bag_role == "SCENE_SLICE":
++        der = db.scalar(select(BagDerivation).where(BagDerivation.child_bag_uid == bag_uid))
++        if der is None:
++            return {"bag_uid": bag_uid, "direction": "slice", "parent": None, "children": []}
++        parent = db.scalar(select(BagRecord).where(BagRecord.bag_uid == der.parent_bag_uid))
++        seg = db.scalar(select(SceneSegment).where(SceneSegment.id == der.segment_id)) if der.segment_id else None
++        return {
++            "bag_uid": bag_uid,
++            "direction": "slice",
++            "parent": {
++                "bag_uid": parent.bag_uid if parent else der.parent_bag_uid,
++                "name": parent.name if parent else None,
++            },
++            "self": {
++                "run_id": der.run_id,
++                "slice_key": der.slice_key,
++                "scene_code": der.scene_code,
++                "start_ns": str(der.start_ns),
++                "end_ns": str(der.end_ns),
++                "analysis_version_id": der.analysis_version_id,
++                "segment": (
++                    {"id": seg.id, "label": seg.label, "publish_target": bool(seg.publish_target)} if seg else None
++                ),
++            },
++            "children": [],
++        }
++
++    # 父包视角：子包按排序 + cursor
++    q = (
++        select(BagDerivation)
++        .join(BagRecord, BagRecord.bag_uid == BagDerivation.child_bag_uid)
++        .where(BagDerivation.parent_bag_uid == bag_uid)
++        .order_by(*_time_desc_clause(BagRecord.started_at), BagRecord.bag_uid.desc())
++    )
++    if ctx:
++        anchor_ts, anchor_uid = ctx.get("ts"), ctx.get("uid")
++        if anchor_uid is None:
++            raise HTTPException(422, "cursor 缺少排序锚点")
++        if anchor_ts is None:
++            q = q.where(BagRecord.started_at.is_(None), BagRecord.bag_uid < anchor_uid)
++        else:
++            from datetime import datetime as _dt
++
++            ts = _dt.fromisoformat(anchor_ts)
++            # started_at 更小的全取；同 started_at 的取 bag_uid 更小的；
++            # NULL started_at 行排序上位于最后（_time_desc_clause），锚点非 NULL 时
++            # 续查必须显式带上 NULL 区，否则 NULL 子包分页丢失（attempt-2 #1，
++            # 与 search_scene_bags 同口径）。
++            q = q.where(
++                (BagRecord.started_at.is_(None))
++                | ((BagRecord.started_at < ts) | ((BagRecord.started_at == ts) & (BagRecord.bag_uid < anchor_uid)))
++            )
++    q = q.limit(lim + 1)
++    ders = db.scalars(q).all()
++    has_more = len(ders) > lim
++    ders = ders[:lim]
++
++    # 子包/区间/版本：各一次有界批量查询，循环内不再逐子包回表（attempt-2 #5，N+1）。
++    children = []
++    child_by_uid: dict[str, BagRecord] = {}
++    if ders:
++        child_by_uid = {
++            c.bag_uid: c
++            for c in db.scalars(select(BagRecord).where(BagRecord.bag_uid.in_([d.child_bag_uid for d in ders]))).all()
++        }
++        segs = db.scalars(
++            select(SceneSegment).where(SceneSegment.id.in_([d.segment_id for d in ders if d.segment_id]))
++        ).all()
++        seg_by_id = {s.id: s for s in segs}
++        versions = db.scalars(
++            select(SceneAnalysisVersion).where(
++                SceneAnalysisVersion.id.in_([d.analysis_version_id for d in ders if d.analysis_version_id])
++            )
++        ).all()
++        ver_by_id = {v.id: v for v in versions}
++        for d in ders:
++            child = child_by_uid.get(d.child_bag_uid)
++            seg = seg_by_id.get(d.segment_id)
++            ver = ver_by_id.get(d.analysis_version_id) if d.analysis_version_id else None
++            children.append(
++                {
++                    "bag_uid": d.child_bag_uid,
++                    "name": child.name if child else None,
++                    "availability": child.availability if child else None,
++                    "started_at": child.started_at.isoformat() if child and child.started_at else None,
++                    "run_id": d.run_id,
++                    "slice_key": d.slice_key,
++                    "scene_code": d.scene_code,
++                    "start_ns": str(d.start_ns),
++                    "end_ns": str(d.end_ns),
++                    "current": bool(ver.current) if ver else None,
++                    "segment_label": seg.label if seg else None,
++                }
++            )
++    next_cursor = None
++    if has_more and ders:
++        last = ders[lim - 1]
++        # next_cursor 锚点直接复用批量取的子包行，不再重复回表（attempt-2 #5）。
++        child = child_by_uid.get(last.child_bag_uid)
++        next_cursor = _encode_cursor(
++            {"ts": child.started_at.isoformat() if child and child.started_at else None, "uid": last.child_bag_uid}
++        )
++    return {
++        "bag_uid": bag_uid,
++        "direction": "parent",
++        "children": children,
++        "limit": lim,
++        "has_more": has_more,
++        "next_cursor": next_cursor,
++    }
++
++
++def label_evidence(db: Session, *, bag_uid: str, limit: int | None = None) -> list[dict]:
++    """标签证据（区间证据可查，验收项）：MODEL 原始判定引用 + P1 修订字段。"""
++    lim = _clamp_limit(limit)
++    rows = db.scalars(
++        select(BagSceneLabelEvidence)
++        .where(BagSceneLabelEvidence.bag_uid == bag_uid)
++        .order_by(BagSceneLabelEvidence.id.asc())
++        .limit(lim)
++    ).all()
++    scene_names = {
++        s.id: s.name for s in db.scalars(select(Scene).where(Scene.id.in_([r.scene_id for r in rows] or [0]))).all()
++    }
++    return [
++        {
++            "id": r.id,
++            "scene": scene_names.get(r.scene_id),
++            "label_source": r.label_source,
++            "analysis_version_id": r.analysis_version_id,
++            "segment_id": r.segment_id,
++            "original_judgment_ref": r.original_judgment_ref,
++            "revised_by": r.revised_by,
++            "revision_reason": r.revision_reason,
++            "withdrawn": bool(r.withdrawn),
++        }
++        for r in rows
++    ]
+diff --git a/app/services/scene_result_service.py b/app/services/scene_result_service.py
+new file mode 100644
+index 0000000..969337a
+--- /dev/null
++++ b/app/services/scene_result_service.py
+@@ -0,0 +1,473 @@
++"""场景结果仓储（专项 rosbag-catalog-integration TASK-06A，DESIGN §4/§6/§7.1/§8.1）。
++
++06A 职责边界（与 06B 的分工）：
++- 本模块：manifest 批次幂等登记（run+slice_key 唯一约束防重复）、分析版本当前/历史
++  指针、区间与标签证据落库、子包 PENDING 登记、换版原语（较旧提交不得倒退）。
++- 06B：正式回报 API 的身份校验（租约/源代次/执行类型）、staging 文件校验与原子
++  发布、availability PENDING→AVAILABLE 切换、complete-scene 路由。
++- 本模块不接真实执行回报入口、不宣称发布成功（DESIGN §11.2/§11.3）。
++
++幂等模型：
++- 同 (parent_bag_uid, scene_code, run_id) + 相同内容身份（manifest digest 前 16 位）
++  → 幂等回放，补齐缺失区间/派生行（200 语义，不重复写）。
++- 同 run_id 但内容身份不同 → 409 DUPLICATE_CONFLICT（重试必须复用稳定 slice_key
++  与原内容，显式重新分析必须新 run/新版本，DESIGN §6 规则 1）。
++- 子包 bag_record 行按 bag_uid 唯一复用；父包不存在或角色非 ORIGINAL → 409（不猜测）。
++- 幂等写路径全部为 check-then-act + IntegrityError 兜底（06A attempt-2 返修 #3）：
++  并发同 run 重试在唯一键（uq_scene_analysis_parent_scene_version /
++  uq_bag_derivation_run_slice / child_bag_uid）冲突时回滚嵌套事务后重查——
++  已是目标态 → 200 语义重放，内容身份不一致 → 409，其他冲突 → 409 冲突描述，
++  不裸 500（遵守模块错误码契约）。
++
++段数口径（attempt-2 返修 #2，契约选择，06B 完整性门禁按此实现）：
++- expected_segment_count = manifest 全部区间数（含 flat 等非发布）。
++- registered_segment_count = 该版本 scene_segment 表实际已登记行数（重放补齐
++  后重算刷新，不存过期值）。
++- 两值同基数：06B PENDING→AVAILABLE 门禁应做 expected == registered 等值比较
++  （全部区间落库即完整；publishable 子集另由 list_segments(publish_only=True)
++  与 expected_slice_keys 核对）。选"全部"而非"可发布"的理由：flat 区间同样是
++  manifest 声明的落库义务（DESIGN §4.1），只按可发布计数会让"含 flat 的 manifest
++  永不相等"成为 409 或让门禁漏检 flat 区间缺失。
++
++时间：数据库纳秒 BIGINT；API 序列化为十进制字符串（由查询层负责）。
++"""
++
++from __future__ import annotations
++
++from fastapi import HTTPException
++from sqlalchemy import func, select, update
++from sqlalchemy.exc import IntegrityError
++from sqlalchemy.orm import Session
++
++from app.models import (
++    BagDerivation,
++    BagRecord,
++    BagSceneLabelEvidence,
++    Scene,
++    SceneAnalysisVersion,
++    SceneSegment,
++)
++from app.scene.types import MAX_SEGMENTS_PER_BATCH, SceneManifest, SceneOutcome
++
++# 场景结果登记错误码（06B 路由映射：NOT_FOUND→404，*CONFLICT/PARENT_*→409，*INVALID→422）
++RESULT_NOT_FOUND = "RESULT_NOT_FOUND"
++DUPLICATE_CONFLICT = "DUPLICATE_CONFLICT"
++PARENT_NOT_READY = "PARENT_NOT_READY"
++MANIFEST_INVALID = "MANIFEST_INVALID"
++LIMIT_EXCEEDED = "LIMIT_EXCEEDED"
++
++
++def _err(code: str, detail: str, http: int) -> HTTPException:
++    return HTTPException(http, detail=f"{code}: {detail}")
++
++
++def _segment_row(db: Session, av: SceneAnalysisVersion, seg) -> SceneSegment:
++    """按 (analysis_version_id, slice_key) 复用区间行；同 slice_key 不同内容 → 冲突。
++
++    注：scene_segment 无 (analysis_version_id, slice_key) 唯一约束（06A 零新迁移），
++    并发重复登记窗口由 av 级 uq_scene_analysis_parent_scene_version 兜底——同一
++    分析版本并发插入时一方必然 409/重放，不会双写区间行。
++    """
++    row = db.scalar(
++        select(SceneSegment).where(SceneSegment.analysis_version_id == av.id, SceneSegment.slice_key == seg.slice_key)
++    )
++    if row is not None:
++        if (row.label, row.start_ns, row.end_ns) != (seg.label, seg.start_ns, seg.end_ns):
++            raise _err(
++                DUPLICATE_CONFLICT,
++                f"slice_key {seg.slice_key} 已登记为 [{row.start_ns},{row.end_ns}]，与本次冲突",
++                409,
++            )
++        row.publish_target = seg.publish_target
++        row.duration_ns = seg.duration_ns
++        return row
++    row = SceneSegment(
++        analysis_version_id=av.id,
++        label=seg.label,
++        start_ns=seg.start_ns,
++        end_ns=seg.end_ns,
++        duration_ns=seg.duration_ns,
++        publish_target=seg.publish_target,
++        boundary_mapping_note=(seg.mapping_basis or None) and seg.mapping_basis[:512],
++        boundary_evidence_artifact_id=seg.evidence_ref and seg.evidence_ref[:64],
++        slice_key=seg.slice_key,
++    )
++    db.add(row)
++    db.flush()
++    return row
++
++
++def _scene_row(db: Session, name: str) -> Scene:
++    """按 name 复用场景行；flush IntegrityError 兜底（attempt-2 #3）：重查取既有行，不裸 500。"""
++    row = db.scalar(select(Scene).where(Scene.name == name))
++    if row is None:
++        try:
++            with db.begin_nested():
++                row = Scene(name=name[:64])
++                db.add(row)
++                db.flush()
++        except IntegrityError:
++            # 并发同场景创建撞 scene.name 唯一键 → 回滚嵌套事务后重查既有行。
++            db.expire_all()
++            row = db.scalar(select(Scene).where(Scene.name == name))
++            if row is None:
++                raise  # 非 name 唯一键冲突（不应发生）→ 交外层并留痕
++    return row
++
++
++def _validate_manifest_shape(manifest: SceneManifest) -> None:
++    if len(manifest.segments) > MAX_SEGMENTS_PER_BATCH:
++        raise _err(LIMIT_EXCEEDED, f"单批 {len(manifest.segments)} 区间超过上限 {MAX_SEGMENTS_PER_BATCH}", 422)
++    if not manifest.run_id or len(manifest.run_id) > 64:
++        raise _err(MANIFEST_INVALID, "run_id 缺失或超长", 422)
++    if not manifest.source_fingerprint:
++        raise _err(MANIFEST_INVALID, "source_fingerprint 缺失（06B 身份校验依赖）", 422)
++
++
++def _find_analysis_version(db: Session, manifest: SceneManifest) -> SceneAnalysisVersion | None:
++    return db.scalar(
++        select(SceneAnalysisVersion).where(
++            SceneAnalysisVersion.parent_bag_uid == manifest.source_id,
++            SceneAnalysisVersion.scene_code == manifest.scene_code,
++            SceneAnalysisVersion.run_id == manifest.run_id,
++        )
++    )
++
++
++def _find_evidence(db: Session, bag_uid: str, scene_id: int, evidence_ref: str) -> BagSceneLabelEvidence | None:
++    return db.scalar(
++        select(BagSceneLabelEvidence).where(
++            BagSceneLabelEvidence.bag_uid == bag_uid,
++            BagSceneLabelEvidence.scene_id == scene_id,
++            BagSceneLabelEvidence.original_judgment_ref == evidence_ref,
++        )
++    )
++
++
++def _refresh_counts(db: Session, av: SceneAnalysisVersion, manifest: SceneManifest) -> None:
++    """重放/并发兜底后刷新段数（attempt-2 #2：补齐**完成后**调用，不存过期值）。
++
++    expected = manifest 全部区间数（含 flat）；registered = scene_segment 实际落库行数
++    （重查计数，与 docstring 契约一致）。两值同基数，06B 完整性门禁做等值比较。
++    """
++    av.expected_segment_count = len(manifest.segments)
++    n = db.scalar(select(func.count()).select_from(SceneSegment).where(SceneSegment.analysis_version_id == av.id))
++    av.registered_segment_count = n or 0
++
++
++def _backfill_segments(db: Session, av: SceneAnalysisVersion, manifest: SceneManifest) -> None:
++    """部分重放：按 slice_key 补齐缺失区间；内容冲突 → 409（_segment_row 语义）。"""
++    existing = set(db.scalars(select(SceneSegment.slice_key).where(SceneSegment.analysis_version_id == av.id)).all())
++    for seg in manifest.segments:
++        if seg.slice_key not in existing:
++            _segment_row(db, av, seg)
++
++
++def register_manifest(
++    db: Session, manifest: SceneManifest, *, expected_child_uids: dict[str, str] | None = None
++) -> dict:
++    """批次幂等登记一份场景 manifest（06B 在身份校验后调用本函数）。
++
++    expected_child_uids: slice_key → 子包 bag_uid（manifest 的 expected_slice_keys 对应）。
++    目标切片缺少子包身份映射时拒绝（不猜测 UID），非发布区间不需要。
++
++    返回 {analysis_version_id, run_id, registered_segments, derived_children, replayed}。
++    不提交事务（由调用方与身份校验同事务）。
++    """
++    _validate_manifest_shape(manifest)
++    digest = manifest.digest()
++    content_identity = digest[:16]
++
++    parent = db.scalar(select(BagRecord).where(BagRecord.bag_uid == manifest.source_id))
++    if parent is None or parent.bag_role != "ORIGINAL":
++        raise _err(PARENT_NOT_READY, f"父包 {manifest.source_id} 不存在或角色非 ORIGINAL", 409)
++
++    scene = _scene_row(db, manifest.scene_code)
++
++    # 幂等判定：同 (parent, scene, run_id) 视为同一 run 的批次重放。
++    # 并发同 run 重试：check-then-act 间隙两事务都可能查到 av 为空，第二个 insert 撞
++    # uq_scene_analysis_parent_scene_version → IntegrityError 兜底重查（attempt-2 #3）：
++    # 内容身份一致 → 200 语义重放；不同 → 409。
++    av = _find_analysis_version(db, manifest)
++    if av is not None:
++        if av.analysis_version != content_identity:
++            raise _err(
++                DUPLICATE_CONFLICT,
++                f"run {manifest.run_id} 已登记内容身份 {av.analysis_version}，本次 {content_identity} 不同",
++                409,
++            )
++        replayed = True
++        _backfill_segments(db, av, manifest)
++        _refresh_counts(db, av, manifest)
++    else:
++        replayed = False
++        av = SceneAnalysisVersion(
++            parent_bag_uid=manifest.source_id,
++            scene_code=manifest.scene_code,
++            # 分析版本身份 = digest 前 16 位：同 manifest 幂等，不同 manifest 不同版本。
++            analysis_version=content_identity,
++            run_id=manifest.run_id,
++            capability_version=manifest.capability_version,
++            config_hash=manifest.config_hash,
++            result=manifest.outcome,
++            # 口径统一（attempt-2 #2）：expected = manifest 全部区间数（含 flat），
++            # 与 registered 同基数；06B 完整性门禁做 expected == registered 等值比较。
++            expected_segment_count=len(manifest.segments),
++            registered_segment_count=len(manifest.segments),
++            current=False,  # 当前指针由 switch_current 在完整性校验后切换（06B）
++        )
++        try:
++            with db.begin_nested():
++                db.add(av)
++                db.flush()
++        except IntegrityError:
++            db.expire_all()
++            av = _find_analysis_version(db, manifest)
++            if av is None:
++                raise  # 非本 run 唯一键冲突（不应发生）→ 交外层 5xx 并留痕
++            if av.analysis_version != content_identity:
++                raise _err(
++                    DUPLICATE_CONFLICT,
++                    f"run {manifest.run_id} 已登记内容身份 {av.analysis_version}，本次 {content_identity} 不同",
++                    409,
++                )
++            replayed = True
++        if replayed:
++            _backfill_segments(db, av, manifest)
++        else:
++            for seg in manifest.segments:
++                _segment_row(db, av, seg)
++        # 段数在补齐/首登记完成后统一重查刷新（attempt-2 #2，不存过期值）。
++        _refresh_counts(db, av, manifest)
++
++    # 标签证据：bag_scene 是有效标签投影；MODEL 来源记录保留原始判定引用。
++    # 并发重放下 evidence 插入撞唯一键（若存在）时 IntegrityError 兜底重查（attempt-2 #3）。
++    evidence_ref = f"{manifest.run_id}#{content_identity}"
++    ev = _find_evidence(db, manifest.source_id, scene.id, evidence_ref)
++    if ev is None:
++        try:
++            with db.begin_nested():
++                db.add(
++                    BagSceneLabelEvidence(
++                        bag_uid=manifest.source_id,
++                        scene_id=scene.id,
++                        label_source="MODEL",
++                        analysis_version_id=av.id,
++                        original_judgment_ref=evidence_ref,
++                        withdrawn=False,
++                    )
++                )
++                db.flush()
++        except IntegrityError:
++            db.expire_all()
++            if _find_evidence(db, manifest.source_id, scene.id, evidence_ref) is None:
++                raise
++    else:
++        # 重放：证据行的 analysis_version_id 指向重放方版本（幂等对齐）
++        ev.analysis_version_id = av.id
++
++    # 子包登记：publish_target 区间 → bag_record(SCENE_SLICE, PENDING) + bag_derivation。
++    derived = 0
++    for seg in manifest.segments:
++        if not seg.publish_target:
++            continue
++        child_uid = (expected_child_uids or {}).get(seg.slice_key)
++        if not child_uid:
++            raise _err(MANIFEST_INVALID, f"目标区间 {seg.slice_key} 缺少子包身份映射", 422)
++        derived += _register_derivation(db, manifest, av, seg, child_uid, parent)
++
++    return {
++        "analysis_version_id": av.id,
++        "run_id": manifest.run_id,
++        "registered_segments": len(manifest.segments),
++        "derived_children": derived,
++        "replayed": replayed,
++    }
++
++
++def _register_derivation(
++    db: Session,
++    manifest: SceneManifest,
++    av: SceneAnalysisVersion,
++    seg,
++    child_uid: str,
++    parent: BagRecord,
++) -> int:
++    """子包 PENDING 登记 + 派生血缘（run+slice_key 唯一防重复；父子 FK RESTRICT 兜底）。
++
++    并发兜底（attempt-2 #3）：bag_record/derivation 的 check-then-act 间隙，另一方
++    可能已插入同 (run, slice) 或同 child_bag_uid 行 → IntegrityError 时回滚嵌套
++    事务重查：run+slice 已绑本子包 → 重放（0），绑其他子包 → 409，否则 → 409 冲突。
++    """
++    existing = db.scalar(select(BagDerivation).where(BagDerivation.child_bag_uid == child_uid))
++    if existing is not None:
++        # 重放：核对一致性；run+slice_key 已被不同子包占用 → 409。
++        dup = db.scalar(
++            select(BagDerivation).where(
++                BagDerivation.run_id == manifest.run_id, BagDerivation.slice_key == seg.slice_key
++            )
++        )
++        if dup is not None and dup.child_bag_uid != child_uid:
++            raise _err(
++                DUPLICATE_CONFLICT,
++                f"run+slice_key {manifest.run_id}#{seg.slice_key} 已绑定子包 {dup.child_bag_uid}",
++                409,
++            )
++        return 0
++    segment_row = db.scalar(
++        select(SceneSegment).where(SceneSegment.analysis_version_id == av.id, SceneSegment.slice_key == seg.slice_key)
++    )
++    if segment_row is None:
++        raise _err(MANIFEST_INVALID, f"目标区间 {seg.slice_key} 未落库（不应发生）", 422)
++    try:
++        with db.begin_nested():
++            if db.scalar(select(BagRecord).where(BagRecord.bag_uid == child_uid)) is None:
++                db.add(
++                    BagRecord(
++                        bag_uid=child_uid[:26],
++                        name=f"{parent.name}-{seg.label}-{seg.start_ns}-{seg.end_ns}"[:255],
++                        relative_path=f"scene/{manifest.scene_code}/{parent.bag_uid}/{child_uid[:26]}"[:1024],
++                        bag_role="SCENE_SLICE",
++                        availability="PENDING",  # 06B 校验+发布后切 AVAILABLE
++                        dataset_type="self_built",
++                        duration_ns=seg.duration_ns,
++                        source_generation=manifest.source_generation,
++                        # 父子同指纹不回避：子包继承源指纹（DESIGN §4.1），
++                        # 隔离由 bag_role/血缘承载，register 防归并检查任一 SCENE_SLICE 命中即 409。
++                        fast_fingerprint=parent.fast_fingerprint,
++                    )
++                )
++                db.flush()
++            db.add(
++                BagDerivation(
++                    parent_bag_uid=parent.bag_uid,
++                    child_bag_uid=child_uid[:26],
++                    run_id=manifest.run_id[:64],
++                    slice_key=seg.slice_key[:64],
++                    scene_code=manifest.scene_code[:32],
++                    analysis_version_id=av.id,
++                    segment_id=segment_row.id,
++                    start_ns=seg.start_ns,
++                    end_ns=seg.end_ns,
++                    duration_ns=seg.duration_ns,
++                    config_hash=manifest.config_hash,
++                    source_fingerprint=manifest.source_fingerprint[:128],
++                    source_generation=manifest.source_generation,
++                )
++            )
++            db.flush()
++    except IntegrityError:
++        db.expire_all()
++        dup = db.scalar(
++            select(BagDerivation).where(
++                BagDerivation.run_id == manifest.run_id, BagDerivation.slice_key == seg.slice_key
++            )
++        )
++        if dup is None or dup.child_bag_uid != child_uid:
++            raise _err(
++                DUPLICATE_CONFLICT,
++                f"并发登记冲突：run+slice {manifest.run_id}#{seg.slice_key} "
++                f"已被 {dup.child_bag_uid if dup else '其他'} 占用",
++                409,
++            )
++        return 0  # 并发同内容重试：重放
++    return 1
++
++
++def switch_current(db: Session, *, parent_bag_uid: str, scene_code: str, analysis_version_id: int, result: str) -> None:
++    """父包+场景锁下原子切换当前版本指针（DESIGN §6 规则 5/7）。
++
++    - 仅 SUCCESS / NO_MATCH 可切当前（NOT_APPLICABLE 不替换既有当前结果，FAILED 旧结果不替换）。
++    - 较旧提交（created_at/id 序早于当前 current 行）晚完成不得倒退：拒绝 409。
++    - 已是当前 → no-op 幂等。
++
++    指针唯一性（attempt-2 #4）：DB 层**没有** (parent, scene) 级 current 唯一约束
++    （ix_scene_analysis_parent_scene_current 是普通索引；uq_scene_analysis_parent_scene_version
++    只防同版本重复登记，管不住 current 列）。不变式由两条 guarded UPDATE 承载：
++    - 清旧指针：`UPDATE ... SET current=0 WHERE current=1 AND parent=? AND scene=?
++      AND id=?`，rowcount==0 说明竞争方已抢先清掉 → 重读重判（有界 3 次）；
++    - 置新指针：`UPDATE ... SET current=1 WHERE id=? AND NOT EXISTS(同 parent+scene
++      其他 current 行)`，rowcount==0 说明他版本抢先成为当前 → 重读重判（同目标则
++      幂等重放）。两条均为单条原子 UPDATE，SQLite/MySQL 两后端通用，不依赖行锁
++      强度（SQLite WAL 并发下 FOR UPDATE 退化为 no-op 仍安全）。
++    """
++    if result not in (SceneOutcome.SUCCESS.value, SceneOutcome.NO_MATCH.value):
++        raise _err(MANIFEST_INVALID, f"结果 {result} 不得切换当前版本（仅 SUCCESS/NO_MATCH）", 422)
++    with db.begin_nested():
++        for attempt in (1, 2, 3):
++            # FOR UPDATE 锁父包+场景的当前行（MySQL 生产路径行锁生效；SQLite 退化为
++            # 无行锁，正确性不依赖它，见 docstring 的 guarded UPDATE 说明）。
++            current = db.execute(
++                select(SceneAnalysisVersion)
++                .where(
++                    SceneAnalysisVersion.parent_bag_uid == parent_bag_uid,
++                    SceneAnalysisVersion.scene_code == scene_code,
++                    SceneAnalysisVersion.current.is_(True),
++                )
++                .with_for_update()
++            ).scalar_one_or_none()
++            target = db.get(SceneAnalysisVersion, analysis_version_id)
++            if target is None or (target.parent_bag_uid, target.scene_code) != (parent_bag_uid, scene_code):
++                raise _err(
++                    RESULT_NOT_FOUND, f"分析版本 {analysis_version_id} 不属于 {parent_bag_uid}/{scene_code}", 404
++                )
++            if target.result != result:
++                raise _err(DUPLICATE_CONFLICT, f"分析版本 result={target.result} 与换版声明 {result} 不一致", 409)
++            if current is not None:
++                if current.id == target.id:
++                    return  # 幂等：已是当前
++                # 较旧提交不得倒退当前指针（DESIGN §6 规则 7）。
++                if (current.created_at, current.id) >= (target.created_at, target.id):
++                    raise _err(
++                        DUPLICATE_CONFLICT,
++                        f"晚到的较旧分析版本（id={target.id}）不得覆盖当前版本（id={current.id}）",
++                        409,
++                    )
++            # guarded UPDATE 原子清旧指针：rowcount==1 本事务胜出，置新行 current=True。
++            if current is not None:
++                cleared = db.execute(
++                    update(SceneAnalysisVersion)
++                    .where(
++                        SceneAnalysisVersion.parent_bag_uid == parent_bag_uid,
++                        SceneAnalysisVersion.scene_code == scene_code,
++                        SceneAnalysisVersion.current.is_(True),
++                        SceneAnalysisVersion.id == current.id,
++                    )
++                    .values(current=False)
++                ).rowcount
++                if cleared == 0:
++                    # 竞争败者：并发方已抢先清掉旧指针 → 重读重判（有界 3 次）。
++                    db.expire_all()
++                    continue
++            # 原子置目标行 current：仅当同父包+场景**不存在其他** current 行。
++            # NOT EXISTS 守卫使置指针成为单条原子 UPDATE（SQLite/MySQL 同义，不依赖行锁
++            # 强度），堵住"无 current 行的并发首切"双方都置 True 的双指针洞（attempt-2 #4）。
++            other_current = (
++                select(SceneAnalysisVersion.id)
++                .where(
++                    SceneAnalysisVersion.parent_bag_uid == parent_bag_uid,
++                    SceneAnalysisVersion.scene_code == scene_code,
++                    SceneAnalysisVersion.current.is_(True),
++                    SceneAnalysisVersion.id != target.id,
++                )
++                .exists()
++            )
++            set_ok = db.execute(
++                update(SceneAnalysisVersion)
++                .where(SceneAnalysisVersion.id == target.id, ~other_current)
++                .values(current=True)
++            ).rowcount
++            if set_ok == 0:
++                # 竞争败者：另一版本已抢先成为当前（或本目标已被并发置当前）。
++                db.expire_all()
++                re = db.get(SceneAnalysisVersion, target.id)
++                if re is not None and re.current is True:
++                    return  # 并发同目标换版已完成 → 幂等重放
++                continue  # 他版本胜出 → 重读重判（幂等/倒退检查/清旧指针）
++            target.current = True
++            return
++        raise _err(
++            DUPLICATE_CONFLICT,
++            f"当前指针切换竞争失败（3 次重试仍冲突）：父包 {parent_bag_uid}/场景 {scene_code} 换版重放",
++            409,
++        )
+diff --git a/app/services/scene_schedule_consumer.py b/app/services/scene_schedule_consumer.py
+index b24a052..405cdd2 100644
+--- a/app/services/scene_schedule_consumer.py
++++ b/app/services/scene_schedule_consumer.py
+@@ -6,10 +6,14 @@
+   单元测试以 fixture 事件驱动（DESIGN §11.2："消费者测试可构造事件，不必等待 Scanner"）。
+ - poll_outbox_events 仅在 outbox 表存在时（03B 合入后）按契约字段集读取 PENDING 行，
+   主工作区当前无该表 → 返回空，不影响既有链路。
+-- 幂等（DESIGN §11.2 规则）：同一 (source_id, source_generation, purpose,
+-  capability_version, capability_config_hash) 只创建一次运行——
+-  由 scene_slice_service.create_scene_run 的 active_identity_key 保证；
+-  事件重放复用既有 run，不重建。
++- 幂等（DESIGN §11.2 规则，强模型 #7 修复）：同一 (source_id, source_generation,
++  purpose, capability_version, capability_config_hash) 只创建一次运行——
++  由 scene_slice_service.create_scene_run 的 scene_identity_key 持久唯一键保证
++  （不随终态释放）；事件以新 event_id 重放时命中终态 run 同样复用不重建；
++  显式重新分析带 reanalysis_id 新身份维度走新 run。
++- 永久无效事件（未知用途/契约违约/源身份失效）原子落 outbox DROPPED 终态 +
++  原因（强模型 #5）：只改内存 stats 的坏事件会永久占据 ORDER BY id LIMIT 50
++  头部，阻塞后续全部正常事件；瞬时错误（源未 READY）保持 PENDING 下轮重试。
+ """
+ 
+ from __future__ import annotations
+@@ -70,6 +74,23 @@ def mark_event_consumed(db: Session, event_id: str, outbox_exists: bool = True)
+     db.execute(text(f"UPDATE {OUTBOX_TABLE} SET status = 'CONSUMED' WHERE event_id = :eid"), {"eid": event_id})
+ 
+ 
++def mark_event_dropped(db: Session, event_id: str, reason: str, outbox_exists: bool = True) -> None:
++    """永久无效事件原子离开 PENDING（强模型 #5）：写 DROPPED 终态 + 原因，
++    与 run 创建/丢弃在同一事务内随 commit 固化——只改内存 stats 的坏事件会
++    永远占据 ORDER BY id LIMIT 50 头部，阻塞后续全部正常事件。"""
++    if not event_id:
++        return
++    if not outbox_exists:
++        return
++    db.execute(
++        text(
++            f"UPDATE {OUTBOX_TABLE} SET status = 'DROPPED', error_reason = :reason "
++            "WHERE event_id = :eid AND status = 'PENDING'"
++        ),
++        {"eid": event_id, "reason": reason[:255]},
++    )
++
++
+ def consume_purpose_events(db: Session, events: list[dict], registry=None) -> dict:
+     """消费一批用途事件（fixture 或 outbox 行）。返回处理统计。
+ 
+@@ -123,14 +144,21 @@ def _consume_one(db: Session, event: dict, registry, stats: dict, outbox_exists:
+         _mark(db, event_id, stats, "consumed", outbox_exists)
+         return
+     if purpose != IngestPurpose.SCENE_SLICE.value:
+-        _mark(db, event_id, stats, "dropped")
++        _mark(db, event_id, stats, "dropped", outbox_exists, reason=f"CONTRACT_VIOLATION: 未知用途 {purpose}")
+         return
+ 
+     bag = db.scalar(select(BagRecord).where(BagRecord.bag_uid == source_id))
+     generation = int(event.get("source_generation") or 0)
+     if bag is None or (bag.bag_role not in (None, "ORIGINAL")) or generation != bag.source_generation:
+         # 源已删除/身份变更：永久无效，不重试（§3.2：重启恢复不能重新推断用途）
+-        _mark(db, event_id, stats, "dropped")
++        _mark(
++            db,
++            event_id,
++            stats,
++            "dropped",
++            outbox_exists,
++            reason=f"SOURCE_IDENTITY_INVALID: 源已删除/角色不符/代次 {generation} 与现存身份不一致",
++        )
+         return
+     if bag.source_status != "READY":
+         # 源尚未通过稳定性/完整性校验：保持 PENDING 下轮重试（任务不丢失）
+@@ -143,8 +171,16 @@ def _consume_one(db: Session, event: dict, registry, stats: dict, outbox_exists:
+         capability_config_hash = str(event.get("capability_config_hash") or "") or None
+         if not (capability_version and capability_config_hash):
+             # 契约要求冻结后 scene 事件必带 capability_version+capability_config_hash；
+-            # 缺失属生产者违约，永久丢弃留痕（不得用当前版本猜参数重建，§3.2.6）
+-            stats["dropped"] += 1
++            # 缺失属生产者违约：永久丢弃且必须落 outbox DROPPED 终态（强模型 #4/#5，
++            # 不能只丢内存 stats——坏事件会永久占据 LIMIT 50 头部）
++            _mark(
++                db,
++                event_id,
++                stats,
++                "dropped",
++                outbox_exists,
++                reason="CONTRACT_VIOLATION: scene 事件缺少冻结的 capability_version/capability_config_hash",
++            )
+             stats["errors"].append(
+                 {
+                     "event_id": event_id,
+@@ -170,9 +206,17 @@ def _consume_one(db: Session, event: dict, registry, stats: dict, outbox_exists:
+     else:
+         entries = []
+         cap_error = None
+-        # scene_slice 用途事件必须带 scene_code（契约最小字段集）：缺失属生产者违约，永久丢弃留痕
+-        stats["dropped"] += 1
+-        stats["errors"].append({"event_id": event_id, "error": "CONTRACT_VIOLATION: scene_slice 事件缺少 scene_code"})
++        # scene_slice 用途事件必须带 scene_code（契约最小字段集）：缺失属生产者违约，
++        # 永久丢弃且落 outbox DROPPED 终态（强模型 #4/#5）
++        _mark(
++            db, event_id, stats, "dropped", outbox_exists, reason="CONTRACT_VIOLATION: scene_slice 事件缺少 scene_code"
++        )
++        stats["errors"].append(
++            {
++                "event_id": event_id,
++                "error": "CONTRACT_VIOLATION: scene_slice 事件缺少 scene_code",
++            }
++        )
+         return
+ 
+     spec = SceneRunCreate(
+@@ -215,7 +259,8 @@ def _fail_scene_run(db: Session, run, error: str) -> None:
+         validate_pipeline_transition(run.status, "SCENE_FAILED")
+         run.status = "SCENE_FAILED"
+         run.error_message = error[:2000]
+-        # 终态释放活动身份，允许显式重新分析以新能力版本重新排队
++        # 活动租约释放（重试回队由 claim 按 source_identity 恢复）；
++        # scene_identity_key 为持久身份，终态不释放（强模型 #7）。
+         run.active_identity_key = None
+         run.updated_at = local_now()
+         step = db.scalar(
+@@ -239,10 +284,13 @@ def _fail_scene_run(db: Session, run, error: str) -> None:
+     db.flush()
+ 
+ 
+-def _mark(db: Session, event_id: str, stats: dict, bucket: str, outbox_exists: bool = True) -> None:
++def _mark(db: Session, event_id: str, stats: dict, bucket: str, outbox_exists: bool = True, reason: str = "") -> None:
+     stats[bucket] += 1
+     if bucket == "consumed":
+         mark_event_consumed(db, event_id, outbox_exists=outbox_exists)
++    elif bucket == "dropped":
++        # dropped = 永久无效：必须原子落 outbox 终态（强模型 #5/#4）
++        mark_event_dropped(db, event_id, reason, outbox_exists=outbox_exists)
+ 
+ 
+ def poll_and_consume_purpose_events(db: Session, limit: int = 50) -> dict:
+diff --git a/app/services/scene_slice_service.py b/app/services/scene_slice_service.py
+index 38f9cca..226e966 100644
+--- a/app/services/scene_slice_service.py
++++ b/app/services/scene_slice_service.py
+@@ -66,22 +66,21 @@ def scene_run_identity_key(
+     source_generation: int,
+     purpose: str,
+     entries: list[SceneEntry],
++    reanalysis_id: str | None = None,
+ ) -> str:
+     """自动调度唯一身份（DESIGN §3.2/§11.2）：源+代次+用途+冻结能力集合（排序后摘要）。
+ 
+     多场景按 scene_code 排序后联合摘要：同集合不同顺序身份相同（幂等），
+     不同场景集合/不同能力版本身份不同（同父不同用途/能力组合不复用错 run）。
++    显式重新分析必须携带 reanalysis_id（新身份维度，强模型 #7）：同一能力集合的
++    重分析生成不同身份 → 走新 run，不与自动调度身份（reanalysis_id=None）混淆。
++    reanalysis_id=None 时摘要体与历史算法逐字节一致（保活既有 run 身份与迁移回填）。
+     """
+-    body = json.dumps(
+-        [
+-            source_id,
+-            int(source_generation),
+-            purpose,
+-            sorted([(e.scene_code, e.capability_version, e.capability_config_hash) for e in entries]),
+-        ],
+-        ensure_ascii=False,
+-        separators=(",", ":"),
+-    )
++    body_fields = [source_id, int(source_generation), purpose]
++    if reanalysis_id is not None:
++        body_fields.append(reanalysis_id)
++    body_fields.append(sorted([(e.scene_code, e.capability_version, e.capability_config_hash) for e in entries]))
++    body = json.dumps(body_fields, ensure_ascii=False, separators=(",", ":"))
+     return "scene:" + hashlib.sha256(body.encode()).hexdigest()[:48]
+ 
+ 
+@@ -123,6 +122,9 @@ class SceneRunCreate:
+     frozen_at: datetime | None = None
+     idempotency_key: str | None = None
+     priority: int = 0
++    # 显式重新分析身份维度（强模型 #7）：非 None 时进入身份摘要，同能力集合的
++    # 重分析走新 run；自动调度事件恒为 None（历史摘要体逐字节兼容）。
++    reanalysis_id: str | None = None
+ 
+ 
+ def _ensure_purpose_association(db: Session, bag: BagRecord, purpose: str) -> None:
+@@ -138,10 +140,15 @@ def _ensure_purpose_association(db: Session, bag: BagRecord, purpose: str) -> No
+ def create_scene_run(db: Session, spec: SceneRunCreate) -> tuple[PipelineRun, bool]:
+     """创建（或幂等复用）一个 SCENE_SLICE 排队 run。
+ 
+-    返回 (run, created)。幂等两层（DESIGN §3.2 双保险）：
++    返回 (run, created)。幂等三层（DESIGN §3.2 + 强模型 #7 修复）：
+     1. Idempotency-Key 回放（API 层，control_plane）；
+-    2. active_identity_key 唯一约束：同父不同用途/不同能力组合身份不同，
+-       不复用错 run；同一身份只创建一个活动 run，重复事件返回既有 run 不重建。
++    2. scene_identity_key 持久唯一键（不随终态释放）：同业务身份（源+代次+
++       用途+冻结能力集合）全局只创建一个 run。run 处于终态（SCENE_FAILED
++       不可重试/SCENE_DONE/PARTIAL_FAILED/CANCELLED）时，同身份新 event_id
++       重放命中终态 run → 幂等返回既有 run，不重建（§11.2 只创建一次）；
++       显式重新分析须带 reanalysis_id 走新身份、建新 run；
++    3. active_identity_key 活动租约（终态释放）：并发竞争兜底 +
++       重试回队/claim 恢复，与持久键职责分离。
+     """
+     if spec.purpose == IngestPurpose.SELF_BUILT.value:
+         # self_built 用途事件不创建场景 run（§11.2：保持既有自建流程入口语义）
+@@ -164,16 +171,26 @@ def create_scene_run(db: Session, spec: SceneRunCreate) -> tuple[PipelineRun, bo
+     # T-04 围栏：场景 run 创建与清理互斥（与 create_run 同锁序：源身份后 run 创建）
+     check_fence_for_source(db, spec.source_id)
+ 
+-    identity = scene_run_identity_key(spec.source_id, spec.source_generation, spec.purpose, list(spec.scenes))
+-    existing = db.scalar(
+-        select(PipelineRun).where(
+-            PipelineRun.active_identity_key == identity,
++    identity = scene_run_identity_key(
++        spec.source_id, spec.source_generation, spec.purpose, list(spec.scenes), spec.reanalysis_id
++    )
++    # 持久身份查重（含终态 run）：同业务身份只创建一次（强模型 #7）。
++    persisted = db.scalar(
++        select(PipelineRun)
++        .where(
++            PipelineRun.scene_identity_key == identity,
+             PipelineRun.pipeline_type == PIPELINE_TYPE_SCENE_SLICE,
+         )
++        .order_by(PipelineRun.id)
+     )
+-    if existing is not None and existing.status not in SCENE_TERMINAL_STATES:
++    if persisted is not None and persisted.status not in SCENE_TERMINAL_STATES:
+         # 重复事件幂等：活动身份已有 run 则复用，不重建（DESIGN §11.2 只创建一次）
+-        return existing, False
++        return persisted, False
++    if persisted is not None:
++        # 终态 run：同身份重放（新 event_id 或旧 event 重入）→ 复用既有 run，
++        # 不重建。重新分析请带 reanalysis_id（新身份）或走 retry 通道。
++        # 终态 run 无活动租约，无需恢复 active_identity_key。
++        return persisted, False
+ 
+     scene_codes = [entry.scene_code for entry in spec.scenes]
+     snapshot = {
+@@ -193,6 +210,7 @@ def create_scene_run(db: Session, spec: SceneRunCreate) -> tuple[PipelineRun, bo
+         "profile_version": spec.profile_version,
+         "frozen_at": spec.frozen_at.isoformat() if spec.frozen_at else None,
+         "source_generation": spec.source_generation,
++        "reanalysis_id": spec.reanalysis_id,
+     }
+     run = PipelineRun(
+         pipeline_run_id="scene-" + uuid.uuid4().hex[:28],
+@@ -206,6 +224,7 @@ def create_scene_run(db: Session, spec: SceneRunCreate) -> tuple[PipelineRun, bo
+         pipeline_config_snapshot_json=json.dumps(snapshot, ensure_ascii=False, sort_keys=True),
+         source_identity=identity,
+         active_identity_key=identity,
++        scene_identity_key=identity,
+         publish_origin_to_nas=False,
+         publish_final_to_nas=False,
+         idempotency_key=spec.idempotency_key,
+@@ -226,11 +245,11 @@ def create_scene_run(db: Session, spec: SceneRunCreate) -> tuple[PipelineRun, bo
+         db.flush()
+     except IntegrityError:
+         # 并发同身份竞争：select 与 commit 之间另一请求已创建（ocr 既有模式 B02）：
+-        # 回滚本事务后按身份回查，复用既有 run，不再重建。
++        # 回滚本事务后按持久身份回查（含终态），复用既有 run，不再重建。
+         db.rollback()
+         winner = db.scalar(
+             select(PipelineRun).where(
+-                PipelineRun.active_identity_key == identity,
++                PipelineRun.scene_identity_key == identity,
+                 PipelineRun.pipeline_type == PIPELINE_TYPE_SCENE_SLICE,
+             )
+         )
+@@ -465,6 +484,9 @@ def create_scene_analysis_runs(db: Session, payload: dict, idempotency_key: str
+         purpose=IngestPurpose.SCENE_SLICE.value,
+         scenes=tuple(entries),
+         idempotency_key=idempotency_key,
++        # 显式重新分析身份维度（强模型 #7）：同能力集合 + reanalysis_id → 新身份、
++        # 新 run；不传 = 首次处理，同身份已有 run（含终态）时幂等复用。
++        reanalysis_id=payload.get("reanalysis_id"),
+     )
+     run, created = create_scene_run(db, spec)
+     versions: dict[str, str | None] = {}
+@@ -578,6 +600,7 @@ def get_scene_run_detail(db: Session, run: PipelineRun) -> dict:
+         "profile_id": snapshot.get("profile_id"),
+         "frozen_at": snapshot.get("frozen_at"),
+         "scene_outcomes": snapshot.get("scene_outcomes") or {},
++        "reanalysis_id": snapshot.get("reanalysis_id"),
+         "lease_owner": run.lease_owner,
+         "lease_expires_at": run.lease_expires_at,
+         "error_message": run.error_message,
+diff --git a/app/services/source_service.py b/app/services/source_service.py
+index 90babb1..0ee3b83 100644
+--- a/app/services/source_service.py
++++ b/app/services/source_service.py
+@@ -97,6 +97,64 @@ def get_bag_manifest(db: Session, bag_uid: str) -> dict:
+     return bag_manifest(bag)
+ 
+ 
++def _bound_selection_has_self_built(db: Session, source_id: str, ingest: dict) -> bool:
++    """CONFIG_REQUIRED 绑定回显：该 bag 绑定的提交选择里是否含 self_built（强模型 #3）。
++
++    ingest["self_built"]=False 有两种成因：(a) 冻结用途纯 scene_slice → 不建
++    Phase0 run；(b) CONFIG_REQUIRED（选择未解析成功，停待处理等补配置）→
++    用途未冻结，不能凭"没出事件"断言无 self_built：读该提交 selection_json 的
++    原始 purposes，含 self_built 时仍按既有语义建 Phase0 run，避免补配置后
++    用途与 run 不一致。
++    """
++    if not ingest.get("config_required"):
++        return False
++    from app.models import IngestSubmission
++
++    sub = db.scalar(
++        select(IngestSubmission)
++        .where(IngestSubmission.source_id == source_id)
++        .order_by(IngestSubmission.updated_at.desc())
++    )
++    if sub is None or not sub.selection_json:
++        return False
++    try:
++        purposes = json.loads(sub.selection_json).get("purposes") or []
++    except (TypeError, ValueError):
++        return False
++    return "self_built" in purposes
++
++
++def _find_self_built_run(db: Session, source_id: str, source_generation: int) -> PipelineRun | None:
++    """恢复登记查找既有 self_built run（强模型 #3：双过滤，杜绝跨类型/跨代次误配）。
++
++    旧实现仅按 source_id 查询且无 pipeline_type 过滤：场景 run（pipeline_type=
++    SCENE_SLICE，source_generation 冻结）会被当成 self_built run 返回，恢复登记
++    串链。现在首选 SELF_BUILT_BAG + 登记代次精确匹配；NULL source_generation 分支
++    仅兜底历史行（迁移只加列不回填，旧 run 恒 NULL）——NULL 行不带代次信息，
++    保持既有"该 source 最近一条 run"语义，避免把历史 run 永久孤立。
++    """
++    run = db.scalar(
++        select(PipelineRun)
++        .where(
++            PipelineRun.source_id == source_id,
++            PipelineRun.pipeline_type == "SELF_BUILT_BAG",
++            PipelineRun.source_generation == source_generation,
++        )
++        .order_by(PipelineRun.created_at.desc())
++    )
++    if run is not None:
++        return run
++    return db.scalar(
++        select(PipelineRun)
++        .where(
++            PipelineRun.source_id == source_id,
++            PipelineRun.pipeline_type == "SELF_BUILT_BAG",
++            PipelineRun.source_generation.is_(None),
++        )
++        .order_by(PipelineRun.created_at.desc())
++    )
++
++
+ def register_source(db: Session, payload: dict, key: str | None) -> dict:
+     operation = "source-register"
+     path = payload.get("path") or payload.get("nas_path")
+@@ -170,42 +228,86 @@ def register_source(db: Session, payload: dict, key: str | None) -> dict:
+                     verified_at=now(),
+                 )
+             )
+-        run = db.scalar(
+-            select(PipelineRun)
+-            .where(PipelineRun.source_id == source_id, PipelineRun.status.in_(["PHASE1_DONE", "PUBLISHED"]))
+-            .order_by(PipelineRun.created_at.desc())
+-        )
+-        if run is None:
+-            run = db.scalar(
+-                select(PipelineRun).where(PipelineRun.source_id == source_id).order_by(PipelineRun.created_at.desc())
+-            )
+-        if run is None:
+-            run = PipelineRun(
+-                pipeline_run_id=uuid.uuid4().hex,
+-                source_id=source_id,
+-                queue_name="PHASE0_QUEUE",
+-                status="PHASE0_QUEUE",
+-            )
+-            db.add(run)
++        source_generation = bag.source_generation or 1
+         response = {
+             "source_id": source_id,
+-            "pipeline_run_id": run.pipeline_run_id,
++            "pipeline_run_id": None,
+             "created": created,
+             "summary": summary,
+         }
+         # 场景接收绑定（TASK-03B DESIGN §3.2.4/6）：与登记同事务，幂等。
+         # 开关关闭或未匹配接收入口时 matched=False，旧入口行为不变。
++        # 强模型 #3：用途配置必须控制 Phase0（self_built）run 的创建——先冻结
++        # 用途（bind 内按持久化提交/入口默认），仅当 self_built 在冻结用途集合内
++        # 才查找/创建 PHASE0_QUEUE run；仅选 scene_slice 的包不得启动 self-built 链
++        # （DESIGN §4 用途替换规则）。恢复登记（重放 MOVING/MOVED）不新建 run。
++        from app.models import IngestSubmission as _Sub
+         from app.services import ingest_service
+ 
++        # 恢复登记判定必须在 bind 之前：bind 会在本事务内把该 bag 的提交置为
++        # BOUND/SCHEDULED，若放到 bind 之后查询，首登也会误判为"已绑定"（recovery
++        # 恒 True），导致首登不建 self_built run（测试回归根因）。
++        pre_bound = db.scalar(
++            select(_Sub)
++            .where(_Sub.source_id == source_id, _Sub.status.in_(["BOUND", "SCHEDULED"]))
++            .order_by(_Sub.updated_at.desc())
++        )
++        is_recovery = pre_bound is not None
++
+         ingest = ingest_service.bind_ingest_for_registration(
+             db,
+             source_id,
+             path,
+             payload.get("incoming_path"),
+-            bag.source_generation or 1,
++            source_generation,
+         )
+         if ingest["matched"]:
+             response["ingest"] = ingest
++            if is_recovery:
++                # 恢复登记：本 bag 首登已决定 run 去留，不重复创建，只回显既有
++                # self_built run（若首登建过；纯 scene_slice 首登无 run → None）。
++                existing = _find_self_built_run(db, source_id, source_generation)
++                if existing is not None:
++                    response["pipeline_run_id"] = existing.pipeline_run_id
++                store_idempotency(db, operation, key, payload, response)
++                db.commit()
++                return response
++            # 首登：用途配置控制 Phase0（self_built）run 创建（强模型 #3）。
++            # ingest["self_built"]=False 的两种成因：(a) 冻结用途纯 scene_slice →
++            # 不建；(b) CONFIG_REQUIRED（选择未解析成功）→ 读 selection_json 原始
++            # purposes 含 self_built 时仍建，避免补配置后用途与 run 不一致。
++            needs_self_built_run = ingest["self_built"] or _bound_selection_has_self_built(db, source_id, ingest)
++            if not needs_self_built_run:
++                store_idempotency(db, operation, key, payload, response)
++                db.commit()
++                return response
++        else:
++            # 开关关闭/未匹配接收入口：既有行为完全不变（无条件 Phase0 run）。
++            needs_self_built_run = True
++
++        if needs_self_built_run:
++            run = db.scalar(
++                select(PipelineRun)
++                .where(
++                    PipelineRun.source_id == source_id,
++                    PipelineRun.pipeline_type == "SELF_BUILT_BAG",
++                    PipelineRun.status.in_(["PHASE1_DONE", "PUBLISHED"]),
++                    PipelineRun.source_generation == source_generation,
++                )
++                .order_by(PipelineRun.created_at.desc())
++            )
++            if run is None:
++                run = _find_self_built_run(db, source_id, source_generation)
++            if run is None:
++                run = PipelineRun(
++                    pipeline_run_id=uuid.uuid4().hex,
++                    source_id=source_id,
++                    queue_name="PHASE0_QUEUE",
++                    status="PHASE0_QUEUE",
++                    source_generation=source_generation,
++                )
++                db.add(run)
++            response["pipeline_run_id"] = run.pipeline_run_id
+         store_idempotency(db, operation, key, payload, response)
+         db.commit()
+         return response
+diff --git a/tests/test_ingest_config.py b/tests/test_ingest_config.py
+index 1892258..c5fa722 100644
+--- a/tests/test_ingest_config.py
++++ b/tests/test_ingest_config.py
+@@ -16,6 +16,7 @@ from dataclasses import replace
+ import pytest
+ from fastapi import HTTPException
+ from sqlalchemy import select
++from sqlalchemy.orm.exc import StaleDataError
+ 
+ from app.config import settings
+ from app.database import Base, SessionLocal, engine
+@@ -464,6 +465,71 @@ def test_patch_concurrent_generation_rejected(db, monkey_settings, monkeypatch):
+     assert json.loads(final.selection_json)["purposes"] == ["scene_slice"]  # 未被并发端改
+ 
+ 
++def test_patch_concurrent_guard_zero_rows_returns_409(db, monkey_settings, monkeypatch):
++    """F2 隔离库并发复测（MySQL 8.4 双独立会话竞争）：让 409 路径在真并发下可达。
++
++    真并发窗口：读比通过（submission.row_version == expected）之后、条件 UPDATE
++    之前，另一端已抢先推进 row_version → 守卫 UPDATE 匹配 0 行。单会话无法模拟
++    （同库连接串行会掩盖），这里 monkeypatch 在 execute 层只拦截"守卫 UPDATE"
++    （带 row_version + 自增表达式的 sa_update）并强制 0 行返回，验证 API 面行为：
++    必须 409 ROW_VERSION_CONFLICT，而非旧实现的 ORM 内容 flush 抛 StaleDataError
++    （500）。SQLite 下 ORM 单条按主键 flush 匹配 1 行，无法复现 MySQL affected-rows
++    语义，故隔离 MySQL 双线程复测为权威证据（见回执隔离库复测段），本测试固化
++    "rowcount==0 → 409 可达且不覆盖内容"的守卫语义。
++    """
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"t03b-{UNIQUE}-f2"
++    _add_profile(db, pid, "fleetF2")
++    response, _ = ingest_service.create_submission(db, pid, "bagF2", _selection("bagF2"), None)
++    sub_id = response["submission_id"]
++    before = db.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == sub_id))
++    before_hash = before.effective_config_hash
++    before_selection = before.selection_json
++
++    real_execute = db.execute
++
++    class _ZeroRowResult:
++        rowcount = 0
++
++    def fake_execute(statement, *args, **kwargs):
++        # 只拦截守卫 UPDATE（合并了内容列 + row_version+1 自增的 sa_update）：
++        # patch_submission 里对 ingest_submission 唯一发出的 sa_update，且自增表达式
++        # 在编译 SQL 里出现 "row_version + 1"；其它语句（idempotency store 的 INSERT 等）
++        # 原样透传。强制 rowcount=0 模拟真并发下守卫 0 行匹配。
++        if type(statement).__name__ == "Update" and getattr(statement.table, "name", "") == "ingest_submission":
++            sql = str(statement.compile(compile_kwargs={"literal_binds": True}))
++            if "row_version + 1" in sql:
++                return _ZeroRowResult()
++        return real_execute(statement, *args, **kwargs)
++
++    monkeypatch.setattr(db, "execute", fake_execute)
++
++    # 关键回归锚点（让本测试对旧架构 RED）：旧实现守卫前先 db.flush() 把内容列作为
++    # 独立 ORM UPDATE 写入；真并发下该内容 flush 在 MySQL affected-rows 语义下 0 行 →
++    # ORM check_rowcount 抛 StaleDataError（500），409 分支不可达。这里把 flush 模拟为
++    # 抛 StaleDataError：旧代码（调用 flush）→ 冒泡异常 → 非 409 → RED；新代码
++    # （内容并入守卫 UPDATE、守卫前不再 flush）→ 走 rowcount==0 → 409 → GREEN。
++    # 隔离 MySQL 双线程复测为权威证据（见回执），本测试固化"内容不经 ORM flush"的不变式。
++    def fake_flush(*args, **kwargs):
++        raise StaleDataError(
++            "UPDATE statement on table 'ingest_submission' expected to update 1 row(s); 0 were matched."
++        )
++
++    monkeypatch.setattr(db, "flush", fake_flush)
++    with pytest.raises(HTTPException) as exc:
++        ingest_service.patch_submission(db, sub_id, 1, {"purposes": ["self_built"]}, None)
++    assert exc.value.status_code == 409
++    assert "ROW_VERSION_CONFLICT" in str(exc.value.detail)
++
++    # 内容不被并发端覆盖（守卫 0 行 → 回滚，DB 保持 winner 前的代次 1 内容）
++    db.expire_all()
++    after = db.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == sub_id))
++    assert after.row_version == 1  # 未被推进
++    assert after.effective_config_hash == before_hash
++    assert after.selection_json == before_selection  # 内容未被并发端覆盖
++    assert json.loads(after.selection_json)["purposes"] != ["self_built"]  # 败者写入未落地
++
++
+ def test_no_residual_pending_system_row_across_generations(db, monkey_settings, monkeypatch):
+     """ocr attempt-2 返修 #4/#5（high）核实：同路径两代 bag 登记。
+ 
+diff --git a/tests/test_ingest_frozen_hash.py b/tests/test_ingest_frozen_hash.py
+new file mode 100644
+index 0000000..e445d60
+--- /dev/null
++++ b/tests/test_ingest_frozen_hash.py
+@@ -0,0 +1,345 @@
++"""TASK-03B attempt-4（强模型 #4）：接受时冻结单能力 hash，bind 只读不重算。
++
++协调者裁决（purpose-schedule-event/v1，两端同一策略）：
++- 能力 hash 在 submission 接受（create/PATCH 成功）时按当时 registry 计算并
++  持久化到 ingest_submission.frozen_capability_hashes_json；
++- bind（source_service 登记完成）只读冻结值，不得重新从当前 registry 计算；
++  registry 此后漂移 → 事件仍带接受时刻的 hash（05 消费端 SCENE_UNAVAILABLE
++  失败运行留痕）；
++- CONFIG_REQUIRED（接受时能力未解析）不出 scene 事件；
++- 任何 scene 事件都必须带有效冻结 hash，禁止 NULL-hash 事件流出本服务。
++
++测试驱动 ingest_service 层（SQLite 纯单测，registry 漂移用 monkeypatch 模拟）。
++"""
++
++import json
++import uuid
++
++import pytest
++from sqlalchemy import select
++
++from app.database import Base, SessionLocal, engine
++from app.domain.scene_config import IngestPurpose, SceneSelection, SubmissionSelection
++from app.models import ApiIdempotency, IngestProfile, IngestSubmission, PurposeScheduleEvent
++from app.services import ingest_service
++
++UNIQUE = uuid.uuid4().hex[:10]
++INCOMING_ROOT = "/test/incoming"
++READY_ROOT = "/test/ready"
++
++
++@pytest.fixture()
++def db():
++    Base.metadata.create_all(engine)
++    with SessionLocal() as session:
++        ingest_service.seed_default_profile(session, "default")
++        session.commit()
++        yield session
++        session.rollback()
++        session.query(PurposeScheduleEvent).filter(
++            PurposeScheduleEvent.submission_id.in_(
++                select(IngestSubmission.submission_id).where(IngestSubmission.profile_id.like(f"fz4-{UNIQUE}%"))
++            )
++        ).delete(synchronize_session=False)
++        session.query(IngestSubmission).filter(IngestSubmission.profile_id.like(f"fz4-{UNIQUE}%")).delete(
++            synchronize_session=False
++        )
++        session.query(IngestProfile).filter(IngestProfile.profile_id.like(f"fz4-{UNIQUE}%")).delete(
++            synchronize_session=False
++        )
++        session.query(ApiIdempotency).filter(ApiIdempotency.idempotency_key.like(f"fzkey-{UNIQUE}%")).delete(
++            synchronize_session=False
++        )
++        session.commit()
++
++
++def _add_profile(db, profile_id, prefix, purposes=("scene_slice",), scenes=("test-capability",)):
++    row = IngestProfile(
++        profile_id=profile_id,
++        version=1,
++        display_name=profile_id,
++        incoming_prefix=prefix,
++        default_purposes_json=json.dumps(list(purposes)),
++        default_scenes_json=json.dumps(list(scenes)),
++        default_scene_parameters_json=json.dumps({}),
++        enabled=True,
++    )
++    db.add(row)
++    db.commit()
++    return row
++
++
++def _bag_uid():
++    return "0" + ((f"fz4-{UNIQUE}".upper().replace("-", "X") + "0" * 20)[:25])
++
++
++def _selection(relative_path, purposes=None, scenes=None):
++    return SubmissionSelection(
++        purposes=[IngestPurpose(p) for p in purposes] if purposes is not None else None,
++        scenes=[SceneSelection(**s) for s in scenes] if scenes is not None else None,
++        relative_path=relative_path,
++    )
++
++
++def _create_scene_submission(db, pid, path, expect_frames=8):
++    selection = _selection(
++        path,
++        ["scene_slice"],
++        [
++            {
++                "scene_code": "test-capability",
++                "capability_version": "test-v1",
++                "parameters": {"expect_frames": expect_frames},
++            }
++        ],
++    )
++    response, status = ingest_service.create_submission(db, pid, path, selection, None)
++    assert status == 201
++    return response
++
++
++def _bind(db, bag_uid, incoming_path):
++    return ingest_service.bind_ingest_for_registration(
++        db, bag_uid, f"{READY_ROOT}/fz4-{UNIQUE}-{bag_uid}", incoming_path, 1
++    )
++
++
++def test_accept_freezes_capability_hash(db):
++    """create（接受）时冻结值 = 当时 registry 的 04A 单能力 hash。"""
++    from app.scene.registry import get_registry
++
++    pid = f"fz4-{UNIQUE}-a"
++    _add_profile(db, pid, "fleetA")
++    response = _create_scene_submission(db, pid, "bagA")
++    sub = db.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == response["submission_id"]))
++    frozen = json.loads(sub.frozen_capability_hashes_json)
++    assert set(frozen) == {"test-capability"}
++    entry = frozen["test-capability"]
++    assert entry["capability_version"] == "test-v1"
++    cap = get_registry().effective_params("test-capability", {"expect_frames": 8}, "test-v1")
++    assert entry["capability_config_hash"] == cap.config_hash
++
++
++def test_bind_uses_frozen_hash_not_recomputed(db, monkeypatch):
++    """接受后 registry 漂移 → bind 事件仍携带接受时刻的 hash（不重算、不置 NULL）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    from app.scene.registry import get_registry
++
++    registry = get_registry()
++    real_effective = registry.effective_params
++    original = real_effective("test-capability", {"expect_frames": 8}, "test-v1")
++
++    pid = f"fz4-{UNIQUE}-b"
++    _add_profile(db, pid, "fleetB")
++    response = _create_scene_submission(db, pid, "bagB")
++
++    def drifted(scene_code, params, version=None):
++        if scene_code == "test-capability" and params.get("expect_frames") == 8:
++            # 模拟 registry 漂移：同参数算出不同 hash（如默认参数集变更）
++            class _Cap:
++                config_hash = original.config_hash + "drifted"
++                parameters = dict(params)
++
++            return _Cap()
++        return real_effective(scene_code, params, version)
++
++    monkeypatch.setattr(registry, "effective_params", drifted)
++    result = _bind(db, _bag_uid(), f"{INCOMING_ROOT}/fleetB/bagB")
++    assert result["scheduled_purposes"] == ["scene_slice"]
++    db.commit()
++    events = list(
++        db.scalars(
++            select(PurposeScheduleEvent).where(PurposeScheduleEvent.submission_id == response["submission_id"])
++        ).all()
++    )
++    assert len(events) == 1
++    assert events[0].capability_config_hash == original.config_hash  # 冻结值，非漂移值
++    assert events[0].capability_version == "test-v1"
++
++
++def test_config_required_accept_freezes_empty_and_bind_emits_no_scene_event(db, monkeypatch):
++    """CONFIG_REQUIRED（接受时能力未解析）：冻结值恒 {}，bind 停 BOUND 不出事件。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"fz4-{UNIQUE}-c"
++    _add_profile(db, pid, "fleetC", scenes=("not-registered-scene",))
++    response, _ = ingest_service.create_submission(db, pid, "bagC", _selection("bagC", ["scene_slice"]), None)
++    assert response["config_required"] is True
++    sub = db.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == response["submission_id"]))
++    assert json.loads(sub.frozen_capability_hashes_json) == {}
++    result = _bind(db, _bag_uid(), f"{INCOMING_ROOT}/fleetC/bagC")
++    assert result["config_required"] is True
++    assert result["scheduled_purposes"] == []
++    db.commit()
++    events = list(
++        db.scalars(
++            select(PurposeScheduleEvent).where(PurposeScheduleEvent.submission_id == response["submission_id"])
++        ).all()
++    )
++    assert events == []
++
++
++def test_self_built_accept_freezes_empty(db, monkeypatch):
++    """self_built 用途不出 scene 事件：冻结值 {} 合法（无 NULL-hash scene 事件）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"fz4-{UNIQUE}-d"
++    _add_profile(db, pid, "fleetD", purposes=("self_built",), scenes=())
++    response, _ = ingest_service.create_submission(db, pid, "bagD", _selection("bagD", ["self_built"]), None)
++    sub = db.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == response["submission_id"]))
++    assert json.loads(sub.frozen_capability_hashes_json) == {}
++    result = _bind(db, _bag_uid(), f"{INCOMING_ROOT}/fleetD/bagD")
++    assert result["self_built"] is True
++    db.commit()
++    events = list(
++        db.scalars(
++            select(PurposeScheduleEvent).where(PurposeScheduleEvent.submission_id == response["submission_id"])
++        ).all()
++    )
++    assert len(events) == 1
++    assert events[0].purpose == "self_built"
++    assert events[0].capability_config_hash is None  # self_built 恒无 scene 字段（契约）
++
++
++def test_patch_success_refreezes_hash(db, monkeypatch):
++    """PATCH 成功 = 重新接受 → 冻结值按新参数刷新（事件携带最近一次接受时刻 hash）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    from app.scene.registry import get_registry
++
++    registry = get_registry()
++    pid = f"fz4-{UNIQUE}-e"
++    _add_profile(db, pid, "fleetE")
++    response = _create_scene_submission(db, pid, "bagE", expect_frames=8)
++    sub_id = response["submission_id"]
++    sub = db.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == sub_id))
++    before = json.loads(sub.frozen_capability_hashes_json)["test-capability"]["capability_config_hash"]
++    cap16 = registry.effective_params("test-capability", {"expect_frames": 16}, "test-v1")
++    assert cap16.config_hash != before
++
++    updated = ingest_service.patch_submission(
++        db,
++        sub_id,
++        1,
++        {
++            "scenes": [
++                {"scene_code": "test-capability", "capability_version": "test-v1", "parameters": {"expect_frames": 16}}
++            ]
++        },
++        None,
++    )
++    assert updated["row_version"] == 2
++    db.expire_all()
++    sub = db.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == sub_id))
++    after = json.loads(sub.frozen_capability_hashes_json)["test-capability"]
++    assert after["capability_config_hash"] == cap16.config_hash
++
++    result = _bind(db, _bag_uid(), f"{INCOMING_ROOT}/fleetE/bagE")
++    assert result["scheduled_purposes"] == ["scene_slice"]
++    db.commit()
++    events = list(db.scalars(select(PurposeScheduleEvent).where(PurposeScheduleEvent.submission_id == sub_id)).all())
++    assert events[0].capability_config_hash == cap16.config_hash
++
++
++def test_bind_missing_frozen_hash_fails_explicit_no_null_event(db, monkeypatch):
++    """冻结缺失（存量行/数据异常）：bind 显式失败，不得发 NULL-hash 事件。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"fz4-{UNIQUE}-f"
++    _add_profile(db, pid, "fleetF")
++    response = _create_scene_submission(db, pid, "bagF")
++    sub = db.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == response["submission_id"]))
++    # 模拟存量行（迁移前接受、未冻结）：应用层默认兜底后人为清空
++    sub.frozen_capability_hashes_json = None
++    db.commit()
++    with pytest.raises(Exception) as exc:
++        _bind(db, _bag_uid(), f"{INCOMING_ROOT}/fleetF/bagF")
++    assert "冻结能力 hash" in str(exc.value)
++    db.rollback()
++    # 未发出任何 NULL-hash 事件
++    db.expire_all()
++    events = list(
++        db.scalars(
++            select(PurposeScheduleEvent).where(PurposeScheduleEvent.submission_id == response["submission_id"])
++        ).all()
++    )
++    assert events == []
++
++
++def test_system_submission_freezes_hash(db, monkeypatch):
++    """无用户提交 → 系统兜底提交在登记（接受）时刻冻结 hash，事件用冻结值。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"fz4-{UNIQUE}-g"
++    _add_profile(db, pid, "fleetG")
++    bag = _bag_uid()
++    result = _bind(db, bag, f"{INCOMING_ROOT}/fleetG/bagG")
++    assert result["scheduled_purposes"] == ["scene_slice"]
++    db.commit()
++    sub = db.scalar(
++        select(IngestSubmission).where(IngestSubmission.profile_id == pid, IngestSubmission.source_id == bag)
++    )
++    assert sub is not None
++    assert sub.source == "system-default"
++    frozen = json.loads(sub.frozen_capability_hashes_json)
++    assert frozen["test-capability"]["capability_version"] == "test-v1"
++    events = list(
++        db.scalars(select(PurposeScheduleEvent).where(PurposeScheduleEvent.submission_id == sub.submission_id)).all()
++    )
++    assert events[0].capability_config_hash == frozen["test-capability"]["capability_config_hash"]
++
++
++def test_patch_submission_selects_with_for_update(db):
++    """#6 行锁证据：PATCH 读 submission 的 SELECT 携带 with_for_update 标志。
++
++    通过包装 db.scalar 捕获语句（session 内部不走 db.execute 绑定方法），
++    断言存在 _for_update_arg 的 ingest_submission SELECT。SQLite 方言编译省略
++    FOR UPDATE 子句，MySQL 隔离库并发实测为权威证据（见回执）。
++    """
++    pid = f"fz4-{UNIQUE}-h"
++    _add_profile(db, pid, "fleetH")
++    response = _create_scene_submission(db, pid, "bagH")
++    sub_id = response["submission_id"]
++
++    captured = []
++    real_scalar = db.scalar
++
++    def spy_scalar(statement, *a, **k):
++        cds = getattr(statement, "column_descriptions", [])
++        entity = cds[0].get("entity") if cds else None
++        captured.append((entity, getattr(statement, "_for_update_arg", None)))
++        return real_scalar(statement, *a, **k)
++
++    old = db.scalar
++    db.scalar = spy_scalar
++    try:
++        ingest_service.patch_submission(db, sub_id, 1, {"purposes": ["scene_slice"]}, None)
++    finally:
++        db.scalar = old
++    for_update = [c for c in captured if c[0] is IngestSubmission and c[1] is not None]
++    assert for_update, f"PATCH 路径的 submission SELECT 未携带 with_for_update: {captured}"
++
++
++def test_find_pending_submission_selects_with_for_update(db, monkeypatch):
++    """#6 行锁证据：bind 的 _find_pending_submission SELECT 携带 with_for_update。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"fz4-{UNIQUE}-i"
++    _add_profile(db, pid, "fleetI")
++    _create_scene_submission(db, pid, "bagI")
++
++    captured = []
++    real_scalar = db.scalar
++
++    def spy_scalar(statement, *a, **k):
++        cds = getattr(statement, "column_descriptions", [])
++        entity = cds[0].get("entity") if cds else None
++        captured.append((entity, getattr(statement, "_for_update_arg", None)))
++        return real_scalar(statement, *a, **k)
++
++    old = db.scalar
++    db.scalar = spy_scalar
++    try:
++        row = ingest_service.match_profile_for_incoming(db, f"{INCOMING_ROOT}/fleetI/bagI")
++        assert row is not None
++        profile_row, entry_relative = row
++        found = ingest_service._find_pending_submission(db, profile_row, entry_relative)
++    finally:
++        db.scalar = old
++    assert found is not None
++    for_update = [c for c in captured if c[0] is IngestSubmission and c[1] is not None]
++    assert for_update, f"bind 的 _find_pending_submission SELECT 未携带 with_for_update: {captured}"
+diff --git a/tests/test_scene_result_storage.py b/tests/test_scene_result_storage.py
+new file mode 100644
+index 0000000..d0a04f4
+--- /dev/null
++++ b/tests/test_scene_result_storage.py
+@@ -0,0 +1,670 @@
++"""场景结果仓储与检索（专项 TASK-06A，DESIGN §4/§6/§7.1/§8.1）。
++
++覆盖验收：
++- 稳定身份/唯一性：run+slice_key、child_bag_uid、slice_key 内容冲突 → 409；
++- 当前与历史：switch_current 原子切换、较旧提交不倒退、include_history 区分；
++- 父子同指纹隔离：子包 PENDING 登记与父包同指纹不被归并（记录独立、血缘唯一）；
++- 分页/JSON 上限：limit clamp 默认 50/上限 200、cursor 翻页、单批 100 区间边界；
++- 必要索引/实际 SQL：ix_bag_record_role_avail_started_uid 等落地 + 实际 SQL 列组合；
++- 区间证据可查：list_segments / label_evidence / lineage。
++
++单批 100 区间上限由 04A 的 SceneManifest 构造函数强制（不可达服务层守卫，
++本测试打真实边界：构造 101 拒绝 / 100 接受）。
++"""
++
++from __future__ import annotations
++
++import pytest
++from fastapi import HTTPException
++from sqlalchemy import event, func, select
++from sqlalchemy import inspect as sa_inspect
++from sqlalchemy.orm import Session
++from sqlalchemy.sql import Select
++
++from app.database import Base, SessionLocal, engine
++from app.models import (
++    BagDerivation,
++    BagRecord,
++    BagSceneLabelEvidence,
++    SceneAnalysisVersion,
++    SceneSegment,
++)
++from app.scene.types import (
++    CapabilityError,
++    EvidenceRef,
++    SceneManifest,
++    SceneOutcome,
++)
++from app.scene.types import (
++    SceneSegment as Seg,
++)
++from app.services import scene_result_query as q
++from app.services import scene_result_service as svc
++
++UID_PREFIX = "T06A"
++
++
++def _uid(n: int) -> str:
++    return f"{UID_PREFIX}{n:020d}"
++
++
++@pytest.fixture
++def db():
++    Base.metadata.create_all(engine)
++    session: Session = SessionLocal()
++    try:
++        yield session
++    finally:
++        try:
++            session.rollback()
++        except Exception:  # noqa: BLE001
++            pass
++        session.close()
++        _purge_prefix()
++
++
++def _purge_prefix() -> None:
++    """仅清理本测试 UID 前缀数据（FK 依赖逆序），不碰其他任务行。"""
++    s = SessionLocal()
++    try:
++        avs = s.scalars(
++            select(SceneAnalysisVersion.id).where(SceneAnalysisVersion.parent_bag_uid.like(f"{UID_PREFIX}%"))
++        ).all()
++        if avs:
++            s.execute(SceneSegment.__table__.delete().where(SceneSegment.analysis_version_id.in_(avs)))
++        s.execute(
++            SceneAnalysisVersion.__table__.delete().where(SceneAnalysisVersion.parent_bag_uid.like(f"{UID_PREFIX}%"))
++        )
++        s.execute(
++            BagDerivation.__table__.delete().where(
++                BagDerivation.parent_bag_uid.like(f"{UID_PREFIX}%") | BagDerivation.child_bag_uid.like(f"{UID_PREFIX}%")
++            )
++        )
++        s.execute(BagSceneLabelEvidence.__table__.delete().where(BagSceneLabelEvidence.bag_uid.like(f"{UID_PREFIX}%")))
++        bag_ids = s.scalars(select(BagRecord.id).where(BagRecord.bag_uid.like(f"{UID_PREFIX}%"))).all()
++        if bag_ids:
++            from app.models import bag_scene
++
++            s.execute(bag_scene.delete().where(bag_scene.c.bag_id.in_(bag_ids)))
++        s.execute(BagRecord.__table__.delete().where(BagRecord.bag_uid.like(f"{UID_PREFIX}%")))
++        s.commit()
++    except Exception:  # noqa: BLE001
++        s.rollback()
++    finally:
++        s.close()
++
++
++def _add_parent(db, n: int, *, fingerprint: str = "fp-parent-1", started_at=None) -> BagRecord:
++    bag = BagRecord(
++        bag_uid=_uid(n),
++        name=f"parent-{n}",
++        relative_path=f"raw_rosbags/parent-{n}",
++        bag_role="ORIGINAL",
++        dataset_type="self_built",
++        source_generation=1,
++        fast_fingerprint=fingerprint,
++        started_at=started_at,
++    )
++    db.add(bag)
++    db.flush()
++    return bag
++
++
++def _manifest(
++    parent_uid: str, run_id: str, *, segments, outcome=SceneOutcome.SUCCESS, scene="slope", fp="fp-parent-1"
++) -> SceneManifest:
++    return SceneManifest(
++        scene_code=scene,
++        capability_version="slope-v1",
++        run_id=run_id,
++        analysis_version=1,
++        source_id=parent_uid,
++        source_generation=1,
++        source_fingerprint=fp,
++        config_hash="cfg" + "a" * 61,
++        outcome=outcome,
++        segments=tuple(segments),
++        evidence=(EvidenceRef(kind="frame_log", digest="e" * 64),),
++        expected_slice_keys=tuple(s.slice_key for s in segments if s.publish_target),
++    )
++
++
++def _seg(label: str, start: int, end: int, *, publish=True, basis="bag_storage_ns") -> Seg:
++    return Seg(label=label, start_ns=start, end_ns=end, publish_target=publish, mapping_basis=basis)
++
++
++# ---------------------------------------------------------------------------
++# 登记与幂等
++# ---------------------------------------------------------------------------
++
++
++class TestRegister:
++    def test_register_segments_and_children(self, db):
++        parent = _add_parent(db, 1)
++        m = _manifest(
++            parent.bag_uid,
++            "run-06a-1",
++            segments=[_seg("slope", 1_000, 5_000), _seg("flat", 6_000, 9_000, publish=False)],
++        )
++        res = svc.register_manifest(db, m, expected_child_uids={m.segments[0].slice_key: _uid(101)})
++        db.commit()
++        assert res["registered_segments"] == 2
++        assert res["derived_children"] == 1
++        assert res["replayed"] is False
++        rows = db.scalars(
++            select(SceneSegment).where(SceneSegment.analysis_version_id == res["analysis_version_id"])
++        ).all()
++        assert {r.label for r in rows} == {"slope", "flat"}
++        assert all(isinstance(r.start_ns, int) and isinstance(r.end_ns, int) for r in rows)
++        child = db.scalar(select(BagRecord).where(BagRecord.bag_uid == _uid(101)))
++        assert child.bag_role == "SCENE_SLICE"
++        assert child.availability == "PENDING"
++        der = db.scalar(select(BagDerivation).where(BagDerivation.child_bag_uid == _uid(101)))
++        assert der.parent_bag_uid == parent.bag_uid
++        assert der.segment_id is not None
++        assert der.run_id == "run-06a-1"
++        ev = db.scalars(select(BagSceneLabelEvidence).where(BagSceneLabelEvidence.bag_uid == parent.bag_uid)).all()
++        assert any(e.label_source == "MODEL" for e in ev)
++
++    def test_replay_idempotent(self, db):
++        parent = _add_parent(db, 2)
++        m = _manifest(parent.bag_uid, "run-06a-2", segments=[_seg("slope", 100, 200)])
++        first = svc.register_manifest(db, m, expected_child_uids={m.segments[0].slice_key: _uid(201)})
++        db.commit()
++        second = svc.register_manifest(db, m, expected_child_uids={m.segments[0].slice_key: _uid(201)})
++        db.commit()
++        assert second["replayed"] is True
++        assert second["analysis_version_id"] == first["analysis_version_id"]
++        assert second["derived_children"] == 0
++
++    def test_same_run_different_content_conflict(self, db):
++        parent = _add_parent(db, 3)
++        m1 = _manifest(parent.bag_uid, "run-06a-3", segments=[_seg("slope", 100, 200)])
++        svc.register_manifest(db, m1, expected_child_uids={m1.segments[0].slice_key: _uid(301)})
++        db.commit()
++        m2 = _manifest(parent.bag_uid, "run-06a-3", segments=[_seg("slope", 100, 999)])
++        with pytest.raises(HTTPException) as ei:
++            svc.register_manifest(db, m2, expected_child_uids={m2.segments[0].slice_key: _uid(301)})
++        assert ei.value.status_code == 409
++        assert "DUPLICATE_CONFLICT" in ei.value.detail
++
++    def test_missing_child_mapping_rejected(self, db):
++        parent = _add_parent(db, 4)
++        m = _manifest(parent.bag_uid, "run-06a-4", segments=[_seg("slope", 100, 200)])
++        with pytest.raises(HTTPException) as ei:
++            svc.register_manifest(db, m, expected_child_uids={})
++        assert ei.value.status_code == 422
++        assert "MANIFEST_INVALID" in ei.value.detail
++
++    def test_parent_not_original_rejected(self, db):
++        bad = BagRecord(
++            bag_uid=_uid(6),
++            name="not-orig",
++            relative_path="x",
++            bag_role="NOT_APPLICABLE",
++            dataset_type="nvidia_physicalai",
++        )
++        db.add(bad)
++        db.flush()
++        m = _manifest(_uid(6), "run-06a-5", segments=[_seg("slope", 1, 2)])
++        with pytest.raises(HTTPException) as ei:
++            svc.register_manifest(db, m, expected_child_uids={m.segments[0].slice_key: _uid(601)})
++        assert ei.value.status_code == 409
++        assert "PARENT_NOT_READY" in ei.value.detail
++
++    def test_single_batch_boundary_at_manifest_type(self, db):
++        # 单批 100 区间上限由 04A SceneManifest 构造函数强制（服务层守卫为防御冗余，
++        # 公共构造不可达 101）。打真实边界：101 构造拒绝、100 构造+登记接受。
++        parent = _add_parent(db, 7)
++        with pytest.raises(CapabilityError):
++            _manifest(
++                parent.bag_uid,
++                "run-06a-6",
++                segments=[_seg(f"l{i}", i * 10, i * 10 + 5, publish=False) for i in range(101)],
++            )
++        ok = _manifest(
++            parent.bag_uid,
++            "run-06a-6b",
++            segments=[_seg(f"l{i}", i * 10, i * 10 + 5, publish=False) for i in range(100)],
++            outcome=SceneOutcome.NO_MATCH,
++        )
++        res = svc.register_manifest(db, ok)
++        db.commit()
++        assert res["registered_segments"] == 100
++
++
++# ---------------------------------------------------------------------------
++# 当前与历史（switch_current）
++# ---------------------------------------------------------------------------
++
++
++class TestVersioning:
++    def _registered(self, db, parent: BagRecord, run_id: str, seg_start: int, result="SUCCESS") -> int:
++        m = _manifest(
++            parent.bag_uid, run_id, segments=[_seg("slope", seg_start, seg_start + 100)], outcome=SceneOutcome(result)
++        )
++        res = svc.register_manifest(
++            db, m, expected_child_uids={m.segments[0].slice_key: _uid(len(run_id) * 7 + seg_start)}
++        )
++        db.commit()
++        return res["analysis_version_id"]
++
++    def test_switch_and_no_rollback(self, db):
++        from datetime import timedelta
++
++        from app.clock import now
++
++        parent = _add_parent(db, 11)
++        av1 = self._registered(db, parent, "run-06a-v1", 100)
++        svc.switch_current(db, parent_bag_uid=_uid(11), scene_code="slope", analysis_version_id=av1, result="SUCCESS")
++        db.commit()
++        # 构造一个 created_at 更早的"晚到旧版本"，验证不得倒退当前指针
++        older = SceneAnalysisVersion(
++            parent_bag_uid=_uid(11),
++            scene_code="slope",
++            analysis_version="deadbeefdeadbeef",
++            run_id="run-06a-v0-late",
++            result="SUCCESS",
++            expected_segment_count=1,
++            registered_segment_count=0,
++            current=False,
++        )
++        db.add(older)
++        db.flush()
++        older.created_at = now() - timedelta(seconds=3600)
++        db.commit()
++        with pytest.raises(HTTPException) as ei:
++            svc.switch_current(
++                db, parent_bag_uid=_uid(11), scene_code="slope", analysis_version_id=older.id, result="SUCCESS"
++            )
++        assert ei.value.status_code == 409
++        assert "不得覆盖当前版本" in ei.value.detail
++        assert db.get(SceneAnalysisVersion, av1).current is True
++
++    def test_newer_switch_moves_pointer(self, db):
++        from datetime import timedelta
++
++        from app.clock import now
++
++        parent = _add_parent(db, 12)
++        av1 = self._registered(db, parent, "run-06a-w1", 100)
++        svc.switch_current(db, parent_bag_uid=_uid(12), scene_code="slope", analysis_version_id=av1, result="SUCCESS")
++        db.commit()
++        av2 = self._registered(db, parent, "run-06a-w2", 200)
++        db.execute(
++            SceneAnalysisVersion.__table__.update()
++            .where(SceneAnalysisVersion.id == av1)
++            .values(created_at=now() - timedelta(seconds=600))
++        )
++        db.commit()
++        svc.switch_current(db, parent_bag_uid=_uid(12), scene_code="slope", analysis_version_id=av2, result="SUCCESS")
++        db.commit()
++        assert db.get(SceneAnalysisVersion, av2).current is True
++        assert db.get(SceneAnalysisVersion, av1).current is False
++        cts = q.current_versions(db, parent_bag_uid=_uid(12))
++        assert len(cts) == 1 and cts[0]["id"] == av2
++
++    def test_failed_result_cannot_switch(self, db):
++        parent = _add_parent(db, 13)
++        av = self._registered(db, parent, "run-06a-x1", 100, result="FAILED")
++        with pytest.raises(HTTPException) as ei:
++            svc.switch_current(db, parent_bag_uid=_uid(13), scene_code="slope", analysis_version_id=av, result="FAILED")
++        assert ei.value.status_code == 422
++
++    def test_idempotent_switch_same_version(self, db):
++        parent = _add_parent(db, 14)
++        av = self._registered(db, parent, "run-06a-y1", 100)
++        svc.switch_current(db, parent_bag_uid=_uid(14), scene_code="slope", analysis_version_id=av, result="SUCCESS")
++        db.commit()
++        svc.switch_current(db, parent_bag_uid=_uid(14), scene_code="slope", analysis_version_id=av, result="SUCCESS")
++        db.commit()
++        assert db.get(SceneAnalysisVersion, av).current is True
++
++
++# ---------------------------------------------------------------------------
++# 父子同指纹隔离
++# ---------------------------------------------------------------------------
++
++
++class TestParentChildFingerprintIsolation:
++    def test_child_keeps_parent_fingerprint_isolated(self, db):
++        parent = _add_parent(db, 21, fingerprint="fp-shared")
++        m = _manifest(parent.bag_uid, "run-06a-fp", segments=[_seg("slope", 10, 20)], fp="fp-shared")
++        svc.register_manifest(db, m, expected_child_uids={m.segments[0].slice_key: _uid(211)})
++        db.commit()
++        parent2 = db.get(BagRecord, parent.id)
++        assert parent2.fast_fingerprint == "fp-shared"
++        assert parent2.bag_role == "ORIGINAL"
++        child = db.scalar(select(BagRecord).where(BagRecord.bag_uid == _uid(211)))
++        assert child.bag_role == "SCENE_SLICE"
++        rows = db.scalars(select(BagRecord).where(BagRecord.fast_fingerprint == "fp-shared")).all()
++        assert {r.bag_role for r in rows} == {"ORIGINAL", "SCENE_SLICE"}
++        der = db.scalar(select(BagDerivation).where(BagDerivation.child_bag_uid == _uid(211)))
++        assert der.parent_bag_uid == parent.bag_uid
++
++
++# ---------------------------------------------------------------------------
++# 检索：分页 / 上限 / 当前与历史 / PENDING 隔离
++# ---------------------------------------------------------------------------
++
++
++class TestSearch:
++    def _make_slice(self, db, n, *, available=True):
++        parent = _add_parent(db, n)
++        m = _manifest(parent.bag_uid, f"run-06a-s{n}", segments=[_seg("slope", 100, 200)])
++        res = svc.register_manifest(db, m, expected_child_uids={m.segments[0].slice_key: _uid(n * 100)})
++        if available:
++            child = db.scalar(select(BagRecord).where(BagRecord.bag_uid == _uid(n * 100)))
++            child.availability = "AVAILABLE"
++        db.commit()
++        return parent, res
++
++    def test_default_slices_excludes_pending(self, db):
++        self._make_slice(db, 31, available=True)
++        self._make_slice(db, 32, available=False)
++        page = q.search_scene_bags(db, view="slices", child_uid_prefix=UID_PREFIX)
++        uids = {i["bag_uid"] for i in page["items"]}
++        assert _uid(3100) in uids
++        assert _uid(3200) not in uids
++
++    def test_include_history_marks_current(self, db):
++        from datetime import timedelta
++
++        from app.clock import now
++
++        p, res1 = self._make_slice(db, 33, available=True)
++        m2 = _manifest(p.bag_uid, "run-06a-s33v2", segments=[_seg("slope", 300, 400)])
++        res2 = svc.register_manifest(db, m2, expected_child_uids={m2.segments[0].slice_key: _uid(331)})
++        db.commit()
++        c2 = db.scalar(select(BagRecord).where(BagRecord.bag_uid == _uid(331)))
++        c2.availability = "AVAILABLE"
++        db.execute(
++            SceneAnalysisVersion.__table__.update()
++            .where(SceneAnalysisVersion.id == res1["analysis_version_id"])
++            .values(created_at=now() - timedelta(seconds=300))
++        )
++        db.commit()
++        svc.switch_current(
++            db,
++            parent_bag_uid=p.bag_uid,
++            scene_code="slope",
++            analysis_version_id=res2["analysis_version_id"],
++            result="SUCCESS",
++        )
++        db.commit()
++        page = q.search_scene_bags(db, view="slices", parent_bag_uid=p.bag_uid, include_history=True)
++        by_uid = {i["bag_uid"]: i for i in page["items"]}
++        assert by_uid[_uid(331)]["current"] is True
++        assert by_uid[_uid(3300)]["current"] is False
++
++    def test_limit_clamp_and_cursor_pagination(self, db):
++        from datetime import datetime
++
++        for n in range(40, 46):  # 6 个可用切片，便于 3+3 翻页
++            parent = _add_parent(db, n)
++            m = _manifest(parent.bag_uid, f"run-06a-pg{n}", segments=[_seg("slope", 1, 2)])
++            svc.register_manifest(db, m, expected_child_uids={m.segments[0].slice_key: _uid(n * 100)})
++            c = db.scalar(select(BagRecord).where(BagRecord.bag_uid == _uid(n * 100)))
++            c.availability = "AVAILABLE"
++            c.started_at = datetime(2026, 1, 1, 0, n)  # 子包各自时间，验证倒序
++            db.commit()
++        big = q.search_scene_bags(db, view="slices", limit=99999, child_uid_prefix=UID_PREFIX)
++        assert big["limit"] == 200
++        page1 = q.search_scene_bags(db, view="slices", limit=3, child_uid_prefix=UID_PREFIX)
++        assert len(page1["items"]) == 3
++        assert page1["has_more"] is True
++        assert page1["next_cursor"]
++        page2 = q.search_scene_bags(
++            db, view="slices", limit=3, cursor=page1["next_cursor"], child_uid_prefix=UID_PREFIX
++        )
++        assert len(page2["items"]) == 3
++        assert not (set(i["bag_uid"] for i in page1["items"]) & set(i["bag_uid"] for i in page2["items"]))
++        ts = [i["started_at"] for i in page1["items"]]
++        assert ts == sorted(ts, reverse=True)
++        # started_at 倒序且最大者在前
++        assert page1["items"][0]["bag_uid"] == _uid(4500)
++
++    def test_invalid_cursor_422(self, db):
++        with pytest.raises(HTTPException) as ei:
++            q.search_scene_bags(db, view="slices", cursor="!!!not-base64!!!")
++        assert ei.value.status_code == 422
++
++    def test_view_originals_excludes_slices(self, db):
++        p, _ = self._make_slice(db, 46, available=True)
++        # view=originals 仅 ORIGINAL 角色；parent_bag_uid 过滤语义是"某父包下的切片"
++        # （作用在 derivation join），对 originals 视图用 bag_uid 前缀定位本测试行集。
++        page = q.search_scene_bags(db, view="originals", child_uid_prefix=UID_PREFIX)
++        assert all(i["role"] == "ORIGINAL" for i in page["items"])
++        assert p.bag_uid in {i["bag_uid"] for i in page["items"]}
++        # 切片不在 originals 视图
++        assert _uid(4600) not in {i["bag_uid"] for i in page["items"]}
++
++
++# ---------------------------------------------------------------------------
++# 血缘与区间证据
++# ---------------------------------------------------------------------------
++
++
++class TestLineageAndEvidence:
++    def test_parent_lineage_lists_children(self, db):
++        parent = _add_parent(db, 51)
++        segs = [_seg("slope", 100, 200), _seg("slope", 300, 400)]
++        m = _manifest(parent.bag_uid, "run-06a-l51", segments=segs)
++        uid_map = {s.slice_key: _uid(510 + i) for i, s in enumerate(segs)}
++        svc.register_manifest(db, m, expected_child_uids=uid_map)
++        for i in range(2):
++            c = db.scalar(select(BagRecord).where(BagRecord.bag_uid == _uid(510 + i)))
++            c.availability = "AVAILABLE"
++        db.commit()
++        lin = q.lineage(db, bag_uid=parent.bag_uid)
++        assert lin["direction"] == "parent"
++        assert len(lin["children"]) == 2
++        # 子包排序按 bag_uid 倒序（started_at NULL 时）；区间值随行带出
++        assert [c["bag_uid"] for c in lin["children"]] == [_uid(511), _uid(510)]
++        assert {c["start_ns"] for c in lin["children"]} == {"100", "300"}
++        self_lin = q.lineage(db, bag_uid=_uid(510))
++        assert self_lin["direction"] == "slice"
++        assert self_lin["parent"]["bag_uid"] == parent.bag_uid
++        assert self_lin["self"]["slice_key"] == segs[0].slice_key
++        assert self_lin["self"]["segment"]["label"] == "slope"
++        with pytest.raises(HTTPException) as ei:
++            q.lineage(db, bag_uid="T06A" + "9" * 20)
++        assert ei.value.status_code == 404
++
++    def test_segments_list_and_evidence_queryable(self, db):
++        parent = _add_parent(db, 52)
++        m = _manifest(
++            parent.bag_uid, "run-06a-e52", segments=[_seg("slope", 10, 20), _seg("flat", 21, 30, publish=False)]
++        )
++        res = svc.register_manifest(db, m, expected_child_uids={m.segments[0].slice_key: _uid(520)})
++        db.commit()
++        segs = q.list_segments(db, analysis_version_id=res["analysis_version_id"])
++        assert [s["label"] for s in segs["items"]] == ["slope", "flat"]
++        assert segs["items"][0]["start_ns"] == "10"
++        pub = q.list_segments(db, analysis_version_id=res["analysis_version_id"], publish_only=True)
++        assert [s["label"] for s in pub["items"]] == ["slope"]
++        ev = q.label_evidence(db, bag_uid=parent.bag_uid)
++        assert any(e["label_source"] == "MODEL" and e["original_judgment_ref"].startswith("run-06a-e52#") for e in ev)
++
++
++# ---------------------------------------------------------------------------
++# 必要索引 / 实际 SQL
++# ---------------------------------------------------------------------------
++
++
++class TestIndexesAndSQL:
++    def test_required_indexes_exist(self):
++        insp = sa_inspect(engine)
++        bag_idx = {i["name"] for i in insp.get_indexes("bag_record")}
++        assert "ix_bag_record_role_avail_started_uid" in bag_idx
++        seg_idx = {i["name"] for i in insp.get_indexes("scene_segment")}
++        assert "ix_scene_segment_version_start_id" in seg_idx
++        der_idx = {i["name"] for i in insp.get_indexes("bag_derivation")}
++        assert "ix_bag_derivation_parent_scene_run_child" in der_idx
++        av_idx = {i["name"] for i in insp.get_indexes("scene_analysis_version")}
++        assert "ix_scene_analysis_parent_scene_current" in av_idx
++
++    def test_slice_search_sql_column_combo(self, db):
++        stmt = (
++            select(BagRecord)
++            .where(BagRecord.bag_role == "SCENE_SLICE", BagRecord.availability == "AVAILABLE")
++            .order_by(BagRecord.bag_uid.desc())
++            .limit(50)
++        )
++        sql = str(stmt.compile(bind=engine, compile_kwargs={"literal_binds": False}))
++        # WHERE 列组合 (bag_role, availability) 是 ix_bag_record_role_avail_started_uid 的最左前缀
++        assert "bag_role" in sql and "availability" in sql
++
++
++# ---------------------------------------------------------------------------
++# attempt-2 返修回归（协调者 OCR 验收 b29b4ae2：#1 分页 NULL / #2 段数基数 /
++# #3 并发重试 409-重放而非 500 / #4 首切双指针 / #5 血缘 N+1）
++# ---------------------------------------------------------------------------
++
++
++class TestAttempt2Regressions:
++    def test_lineage_pagination_null_started_at(self, db):
++        """#1：锚定在非 NULL 行翻页后，NULL started_at 子包必须出现在第二页。"""
++        from datetime import datetime
++
++        parent = _add_parent(db, 76)
++        segs = [_seg("a", 10, 20), _seg("b", 30, 40), _seg("c", 50, 60)]
++        m = _manifest(parent.bag_uid, "run-06a-nu", segments=segs)
++        svc.register_manifest(db, m, expected_child_uids={s.slice_key: _uid(760 + i) for i, s in enumerate(segs)})
++        db.commit()
++        ca = db.scalar(select(BagRecord).where(BagRecord.bag_uid == _uid(760)))
++        cb = db.scalar(select(BagRecord).where(BagRecord.bag_uid == _uid(761)))
++        ca.started_at = datetime(2026, 1, 1, 0, 1)  # 最新
++        cb.started_at = datetime(2026, 1, 1, 0, 0, 50)  # 次新
++        db.commit()  # cc（_uid(762)）started_at 保持 NULL → 排序最后
++        page1 = q.lineage(db, bag_uid=parent.bag_uid, limit=2)
++        assert [c["bag_uid"] for c in page1["children"]] == [ca.bag_uid, cb.bag_uid]
++        assert page1["has_more"] is True
++        page2 = q.lineage(db, bag_uid=parent.bag_uid, limit=2, cursor=page1["next_cursor"])
++        # NULL 子包不得分页丢失（修复前续查条件 started_at < ts 永不含 NULL 行）
++        assert [c["bag_uid"] for c in page2["children"]] == [cc_uid()]
++        assert page2["has_more"] is False
++
++    def test_segment_counts_same_base_including_flat(self, db):
++        """#2：expected/registered 同基数（manifest 全部区间，含 flat），重放后刷新。"""
++        parent = _add_parent(db, 77)
++        m = _manifest(
++            parent.bag_uid,
++            "run-06a-cnt",
++            segments=[_seg("slope", 100, 200), _seg("flat", 300, 400, publish=False)],
++        )
++        res = svc.register_manifest(db, m, expected_child_uids={m.segments[0].slice_key: _uid(771)})
++        db.commit()
++        av = db.get(SceneAnalysisVersion, res["analysis_version_id"])
++        assert av.expected_segment_count == 2  # 含 flat（修复前 expected=1 恒不等）
++        assert av.registered_segment_count == 2
++        # 人为删一行区间 → 重放补齐后 registered 必须重查刷新，不存过期值
++        db.execute(SceneSegment.__table__.delete().where(SceneSegment.analysis_version_id == av.id))
++        db.commit()
++        res2 = svc.register_manifest(db, m, expected_child_uids={m.segments[0].slice_key: _uid(771)})
++        db.commit()
++        av2 = db.get(SceneAnalysisVersion, res2["analysis_version_id"])
++        assert res2["replayed"] is True
++        n = db.scalar(select(func.count()).select_from(SceneSegment).where(SceneSegment.analysis_version_id == av2.id))
++        assert av2.registered_segment_count == n == 2
++
++    def test_concurrent_replay_no_500(self, db, monkeypatch):
++        """#3：check-then-act 间隙并发同 run 重试撞唯一键 → 200 语义重放，不裸 500。"""
++        parent = _add_parent(db, 78)
++        m = _manifest(parent.bag_uid, "run-06a-con", segments=[_seg("slope", 100, 200)])
++        first = svc.register_manifest(db, m, expected_child_uids={m.segments[0].slice_key: _uid(781)})
++        db.commit()
++        # 模拟败方 stale read：首次 _find_analysis_version 看不到已提交行，
++        # insert 后必然撞 uq_scene_analysis_parent_scene_version → 走兜底重查。
++        orig_find = svc._find_analysis_version
++        state = {"n": 0}
++
++        def flaky_find(db2, manifest):
++            if state["n"] == 0:
++                state["n"] += 1
++                return None
++            return orig_find(db2, manifest)
++
++        monkeypatch.setattr(svc, "_find_analysis_version", flaky_find)
++        second = svc.register_manifest(db, m, expected_child_uids={m.segments[0].slice_key: _uid(781)})
++        db.commit()
++        assert second["replayed"] is True
++        assert second["analysis_version_id"] == first["analysis_version_id"]
++        assert second["derived_children"] == 0
++
++    def test_concurrent_first_switch_no_double_pointer(self, db, monkeypatch):
++        """#4：无 current 行时并发首切，败方 stale 读到 current=None 也不得产生双指针。"""
++        from datetime import timedelta
++
++        from app.clock import now
++
++        parent = _add_parent(db, 79)
++        m1 = _manifest(parent.bag_uid, "run-06a-sw1", segments=[_seg("slope", 100, 200)])
++        r1 = svc.register_manifest(db, m1, expected_child_uids={m1.segments[0].slice_key: _uid(791)})
++        m2 = _manifest(parent.bag_uid, "run-06a-sw2", segments=[_seg("slope", 300, 400)])
++        r2 = svc.register_manifest(db, m2, expected_child_uids={m2.segments[0].slice_key: _uid(792)})
++        db.commit()
++        av1, av2 = r1["analysis_version_id"], r2["analysis_version_id"]
++        # av2（当前）较旧；av1（目标）较新 → B 方换到 av1 合法，不得被倒退检查拦
++        db.execute(
++            SceneAnalysisVersion.__table__.update()
++            .where(SceneAnalysisVersion.id == av2)
++            .values(created_at=now() - timedelta(seconds=120))
++        )
++        svc.switch_current(
++            db, parent_bag_uid=parent.bag_uid, scene_code="slope", analysis_version_id=av2, result="SUCCESS"
++        )
++        db.commit()
++        # 败方 B：stale read → 首次 SELECT current 返回空（模拟看不到 A 方已置的指针）
++        # 修复前：B 认为无旧指针，直接 target.current=True → 双 current；
++        # 修复后：NOT EXISTS guarded UPDATE 撞 av2 → rowcount=0 → 重读重判 → 清 av2 置 av1。
++        calls = {"n": 0}
++        orig_execute = db.execute
++
++        def fake_execute(stmt, *args, **kwargs):
++            if calls["n"] == 0 and isinstance(stmt, Select):
++                calls["n"] += 1
++                return orig_execute(select(SceneAnalysisVersion).where(SceneAnalysisVersion.id == -1))
++            return orig_execute(stmt, *args, **kwargs)
++
++        monkeypatch.setattr(db, "execute", fake_execute)
++        svc.switch_current(
++            db, parent_bag_uid=parent.bag_uid, scene_code="slope", analysis_version_id=av1, result="SUCCESS"
++        )
++        db.commit()
++        # 不变式：同 parent+scene 恰一行 current=true（NOT EXISTS guarded UPDATE）
++        curs = db.scalars(
++            select(SceneAnalysisVersion).where(
++                SceneAnalysisVersion.parent_bag_uid == parent.bag_uid,
++                SceneAnalysisVersion.scene_code == "slope",
++                SceneAnalysisVersion.current.is_(True),
++            )
++        ).all()
++        assert [c.id for c in curs] == [av1]
++
++    def test_lineage_no_n_plus_1(self, db):
++        """#5：血缘一页 N 子包 → 子包行一次 IN 批量取，查询数有界。"""
++        parent = _add_parent(db, 80)
++        segs = [_seg(f"s{i}", i * 100, i * 100 + 10) for i in range(6)]
++        m = _manifest(parent.bag_uid, "run-06a-n1", segments=segs)
++        svc.register_manifest(db, m, expected_child_uids={s.slice_key: _uid(800 + i) for i, s in enumerate(segs)})
++        db.commit()
++        n = {"q": 0}
++
++        def count(_conn, _cursor, _statement, _parameters, _context, _executemany):
++            n["q"] += 1
++
++        # before_cursor_execute 是 Connection 级事件，挂在 engine 上（Session 不认）
++        event.listen(engine, "before_cursor_execute", count)
++        try:
++            lin = q.lineage(db, bag_uid=parent.bag_uid)
++        finally:
++            event.remove(engine, "before_cursor_execute", count)
++        assert len(lin["children"]) == 6
++        # 批量版：bag/der/children-IN/segments-IN/versions-IN = 5 条；
++        # 逐子包回表版 ≥ 8+6=14 条 → 阈值 7 干净分离
++        assert n["q"] <= 7
++
++
++def cc_uid() -> str:
++    return _uid(762)
+diff --git a/tests/test_scene_slice_scheduling.py b/tests/test_scene_slice_scheduling.py
+index 826de8d..487606e 100644
+--- a/tests/test_scene_slice_scheduling.py
++++ b/tests/test_scene_slice_scheduling.py
+@@ -35,13 +35,14 @@ def _ensure_schema():
+ 
+ 
+ def _purge(db, bag_uids: list[str]) -> None:
+-    from app.models import BagDerivation, BagFile, BagTopic, SourceOperationFence
++    from app.models import BagDerivation, BagFile, BagTopic, PurposeScheduleEvent, SourceOperationFence
+ 
+     for table, col in (
+         (SceneAnalysisVersion, SceneAnalysisVersion.parent_bag_uid),
+         (BagDerivation, BagDerivation.child_bag_uid),
+         (BagDerivation, BagDerivation.parent_bag_uid),
+         (SourceOperationFence, SourceOperationFence.source_id),
++        (PurposeScheduleEvent, PurposeScheduleEvent.source_id),
+     ):
+         rows = db.scalars(select(table).where(col.in_(bag_uids))).all()
+         for row in rows:
+@@ -281,6 +282,185 @@ def test_poll_outbox_returns_empty_when_table_absent():
+         assert scene_schedule_consumer.poll_outbox_events(db) == []
+ 
+ 
++# ------------------------------------- 强模型返修回归（attempt-2：#4/#5/#7）
++
++
++def _outbox_row(db, bag, **overrides):
++    """直插一条 PENDING outbox 行（测试者侧替身，走真实表结构）。"""
++    from app.models import PurposeScheduleEvent
++
++    row = PurposeScheduleEvent(
++        event_id="ob-" + uuid.uuid4().hex[:12],
++        submission_id="sub-" + uuid.uuid4().hex[:8],
++        source_id=bag.bag_uid,
++        source_generation=bag.source_generation,
++        parent_bag_uid=bag.bag_uid,
++        purpose="scene_slice",
++        scene_code="slope",
++        capability_version="slope-v1",
++        capability_config_hash="ob-cap-" + uuid.uuid4().hex[:8],
++        effective_config_hash=None,
++        profile_id="scene-incoming",
++        profile_version=1,
++        status="PENDING",
++    )
++    for key, value in overrides.items():
++        setattr(row, key, value)
++    db.add(row)
++    db.commit()
++    db.refresh(row)
++    return row
++
++
++def _event_from_outbox(row) -> dict:
++    """outbox 行 → 契约事件 dict（poll_outbox_events 的投影等价物）。"""
++    return {
++        "event_id": row.event_id,
++        "source_id": row.source_id,
++        "source_generation": row.source_generation,
++        "parent_bag_uid": row.parent_bag_uid,
++        "purpose": row.purpose,
++        "scene_code": row.scene_code,
++        "capability_version": row.capability_version,
++        "capability_config_hash": row.capability_config_hash,
++        "effective_config_hash": row.effective_config_hash,
++        "submission_id": row.submission_id,
++        "profile_id": row.profile_id,
++        "profile_version": row.profile_version,
++        "frozen_at": row.frozen_at,
++    }
++
++
++def test_dropped_event_atomically_leaves_pending_outbox():
++    """强模型 #5：永久无效事件必须落 outbox DROPPED 终态+原因，不占 PENDING 头部。"""
++    with SessionLocal() as db:
++        bag = _make_ready_bag(db, "drop5")
++        uid = bag.bag_uid
++        try:
++            row = _outbox_row(db, bag, purpose="weird_purpose", scene_code=None)
++            stats = scene_schedule_consumer.consume_purpose_events(db, [_event_from_outbox(row)])
++            db.commit()
++            assert stats["dropped"] == 1
++            from app.models import PurposeScheduleEvent
++
++            # 消费器用原始 SQL 更新 outbox 状态（绕过 ORM identity map），
++            # expire 后重查才能看到真实落库值
++            db.expire_all()
++            refreshed = db.scalar(select(PurposeScheduleEvent).where(PurposeScheduleEvent.event_id == row.event_id))
++            assert refreshed.status == "DROPPED"  # 原子离开 PENDING
++            assert refreshed.error_reason and "CONTRACT_VIOLATION" in refreshed.error_reason
++            # PENDING 头部不再被坏事件占据
++            assert scene_schedule_consumer.poll_outbox_events(db) == []
++        finally:
++            _purge(db, [uid])
++
++
++def test_pending_outbox_row_survives_not_ready_source():
++    """强模型 #5（边界）：瞬时错误（源未 READY）保持 PENDING 下轮重试，不落终态。"""
++    with SessionLocal() as db:
++        bag = _make_ready_bag(db, "pend5")
++        uid = bag.bag_uid
++        try:
++            row = _outbox_row(db, bag)
++            bag.source_status = "DISCOVERED"
++            db.commit()
++            stats = scene_schedule_consumer.consume_purpose_events(db, [_event_from_outbox(row)])
++            db.commit()
++            assert stats["pending"] == 1
++            from app.models import PurposeScheduleEvent
++
++            db.expire_all()
++            refreshed = db.scalar(select(PurposeScheduleEvent).where(PurposeScheduleEvent.event_id == row.event_id))
++            assert refreshed.status == "PENDING"
++            assert refreshed.error_reason is None
++            assert len(scene_schedule_consumer.poll_outbox_events(db)) == 1
++        finally:
++            _purge(db, [uid])
++
++
++def test_terminal_run_replay_new_event_id_reuses_not_recreates():
++    """强模型 #7：run 终态后同身份以新 event_id 重放 → 复用既有 run，不重建。
++
++    持久身份键 scene_identity_key 终态不释放；活动租约 active_identity_key 释放。
++    """
++    with SessionLocal() as db:
++        bag = _make_ready_bag(db, "term7")
++        uid = bag.bag_uid
++        try:
++            e1 = _scene_event(bag, scene_code="slope", version="slope-v99", capability_config_hash="hash-T7")
++            s1 = scene_schedule_consumer.consume_purpose_events(db, [e1])
++            assert s1["created_runs"] == 1
++            db.commit()
++            run = db.scalar(select(PipelineRun).where(PipelineRun.source_id == uid))
++            assert run.status == "SCENE_FAILED"  # 未注册能力快速失败
++            assert run.active_identity_key is None  # 活动租约释放
++            assert run.scene_identity_key is not None and run.scene_identity_key.startswith("scene:")
++            # 同身份、新 event_id 重放
++            e2 = _scene_event(
++                bag,
++                scene_code="slope",
++                version="slope-v99",
++                capability_config_hash="hash-T7",
++                event_id="evt-" + uuid.uuid4().hex[:12],
++            )
++            s2 = scene_schedule_consumer.consume_purpose_events(db, [e2])
++            db.commit()
++            assert s2["created_runs"] == 0, "终态后同身份重放不得重建 run"
++            assert s2["reused_runs"] == 1
++            assert s2["consumed"] == 1
++            runs = db.scalars(select(PipelineRun).where(PipelineRun.source_id == uid)).all()
++            assert len(runs) == 1
++            assert runs[0].pipeline_run_id == run.pipeline_run_id
++        finally:
++            _purge(db, [uid])
++
++
++def test_explicit_reanalysis_id_creates_distinct_run():
++    """强模型 #4/#7：显式重新分析带 reanalysis_id → 新身份维度走新 run，
++    不传 reanalysis_id 的首次处理重放命中终态 run 幂等复用。"""
++    with TestClient(app) as client:
++        with SessionLocal() as db:
++            bag = _make_ready_bag(db, "ra7")
++            uid = bag.bag_uid
++        try:
++            first = client.post(
++                "/api/v1/scene-analysis-runs",
++                json={"source_id": uid, "scenes": [{"scene_code": "slope"}]},
++            )
++            assert first.status_code == 202, first.text
++            run_id1 = first.json()["pipeline_run_id"]
++            assert first.json()["created"] is True
++            with SessionLocal() as db:
++                run1 = db.scalar(select(PipelineRun).where(PipelineRun.pipeline_run_id == run_id1))
++                assert run1.scene_identity_key is not None
++                key1 = run1.scene_identity_key
++            # 首次处理语义重放（无 reanalysis_id）：复用既有 run，不新建
++            again = client.post(
++                "/api/v1/scene-analysis-runs",
++                json={"source_id": uid, "scenes": [{"scene_code": "slope"}]},
++            )
++            assert again.json()["created"] is False
++            assert again.json()["pipeline_run_id"] == run_id1
++            # 显式重新分析（带 reanalysis_id）：新身份 → 新 run
++            reanalysis = client.post(
++                "/api/v1/scene-analysis-runs",
++                json={"source_id": uid, "scenes": [{"scene_code": "slope"}], "reanalysis_id": "ra-1"},
++            )
++            assert reanalysis.status_code == 202, reanalysis.text
++            assert reanalysis.json()["created"] is True
++            run_id2 = reanalysis.json()["pipeline_run_id"]
++            assert run_id2 != run_id1
++            with SessionLocal() as db:
++                run2 = db.scalar(select(PipelineRun).where(PipelineRun.pipeline_run_id == run_id2))
++                assert run2.scene_identity_key is not None
++                assert run2.scene_identity_key != key1
++                # 分析版本递增（av2 绑定新 run）
++                assert reanalysis.json()["scenes"][0]["analysis_version"] == "av2"
++        finally:
++            with SessionLocal() as db:
++                _purge(db, [uid])
++
++
+ # ---------------------------------------------------------------- 显式 API
+ 
+ 
+@@ -684,11 +864,14 @@ def test_cancel_queued_and_running_scene_run():
+             with SessionLocal() as db:
+                 run = db.scalar(select(PipelineRun).where(PipelineRun.pipeline_run_id == run_id))
+                 assert run.active_identity_key is None
+-            # 运行态取消 → CANCELLING（不直接终态）
++            # 运行态取消 → CANCELLING（不直接终态）。
++            # 显式重新分析必须携带 reanalysis_id（强模型 #7：新身份维度走新 run；
++            # 不带时同身份命中已 CANCELLED 的终态 run 会幂等复用——正是新契约要求）
+             created2 = client.post(
+                 "/api/v1/scene-analysis-runs",
+-                json={"source_id": uid, "scenes": [{"scene_code": "slope"}]},
++                json={"source_id": uid, "scenes": [{"scene_code": "slope"}], "reanalysis_id": "ra-cancel2"},
+             )
++            assert created2.json()["created"] is True
+             run_id2 = created2.json()["pipeline_run_id"]
+             claimed = _claim_scene(client)
+             assert claimed["pipeline_run_id"] == run_id2
+@@ -803,6 +986,173 @@ def test_mark_dispatch_failed_scene_uses_scene_failed_status(monkeypatch):
+     assert "SCENE_DISPATCH_FAILED" in payload["error_message"]
+ 
+ 
++def test_migration_backfill_dedupes_duplicate_identity_runs(tmp_path):
++    """backfill 去重回归（强模型 #7 / OCR B6 high）：预置同业务身份两条 SCENE_SLICE run
++    （R1 已 SCENE_DONE + R2 新建排队，快照逐字节相同 → 同一持久身份），跑真实 alembic
++    upgrade head：唯一索引建成、规范行=max(int PK id)=R2 持键、R1 保持 NULL、不抛
++    IntegrityError。迁移在独立临时 SQLite 库上执行（子进程跑 alembic CLI，不污染共享测试库）。
++
++    步骤：upgrade 到 20261008_02（列尚无 scene_identity_key 索引语义，表已建）→
++    直插两条同身份 run（R1 终态先插 id=1、R2 新 run 后插 id=2）→ upgrade head
++    （触发 20261009_01 的 backfill + 唯一索引）→ 断言去重结果与幂等重跑。"""
++    import os
++    import subprocess
++    import sys
++
++    from sqlalchemy import create_engine, inspect, text
++
++    db_path = tmp_path / "backfill_dedupe.db"
++    database_url = f"sqlite:///{db_path}"
++
++    def _alembic(*args: str) -> None:
++        env = {**os.environ, "DATABASE_URL": database_url}
++        subprocess.run(
++            [sys.executable, "-m", "alembic", *args],
++            check=True,
++            env=env,
++            capture_output=True,
++            text=True,
++        )
++
++    # 1) 迁移到 05 前一步：pipeline_run / outbox 表已建，scene_identity_key 列未加
++    _alembic("upgrade", "20261008_02")
++    import datetime as dt
++
++    from app import models  # noqa: F401
++    from app.database import Base
++
++    table = Base.metadata.tables["pipeline_run"]
++    engine = create_engine(database_url)
++    with engine.begin() as conn:
++        snap = json.dumps(
++            {
++                "schema_version": "scene-run/v1",
++                "purpose": "scene_slice",
++                "scenes": [
++                    {
++                        "scene_code": "demo_scene",
++                        "capability_version": "v1",
++                        "capability_config_hash": "h" * 64,
++                    }
++                ],
++                "source_generation": 1,
++                "reanalysis_id": None,
++            },
++            ensure_ascii=False,
++            sort_keys=True,
++        )
++        # 直插两条同身份存量 run：R1 先插（较小 PK id）已终态 SCENE_DONE，
++        # R2 后插（max PK id）新 run——模拟 active_identity_key 终态释放后
++        # 同身份重放遗留的重复行（backfill 触发条件）。
++        for rid, rpid, rstatus in (
++            (1, "scene-backfill-r1", "SCENE_DONE"),
++            (2, "scene-backfill-r2", "SCENE_SLICE_QUEUE"),
++        ):
++            params = {"s": snap}
++            cols = [
++                "id",
++                "pipeline_run_id",
++                "source_id",
++                "queue_name",
++                "status",
++                "pipeline_type",
++                "pipeline_config_snapshot_json",
++            ]
++            vals = [
++                str(rid),
++                f"'{rpid}'",
++                "'T05BF-0001'",
++                "'SCENE_SLICE_QUEUE'",
++                f"'{rstatus}'",
++                "'SCENE_SLICE'",
++                ":s",
++            ]
++            for col in table.columns:
++                if col.name in (
++                    "id",
++                    "pipeline_run_id",
++                    "source_id",
++                    "queue_name",
++                    "status",
++                    "pipeline_type",
++                    "pipeline_config_snapshot_json",
++                ):
++                    continue
++                # NOT NULL 且无 server_default 的列按 ORM 默认值补齐（直插不经过 ORM）
++                if col.nullable or col.server_default is not None:
++                    continue
++                if col.name in (
++                    "priority",
++                    "attempt",
++                    "auto_retry_count",
++                    "publish_origin_to_nas",
++                    "publish_final_to_nas",
++                ):
++                    v = "0"
++                elif col.name in ("created_at", "updated_at"):
++                    v = f":{col.name}"
++                    params[col.name] = dt.datetime(2026, 10, 9, 12, 0, 0)
++                else:
++                    v = "''"
++                cols.append(col.name)
++                vals.append(v)
++            conn.execute(
++                text(f"INSERT INTO pipeline_run ({', '.join(cols)}) VALUES ({', '.join(vals)})"),
++                params,
++            )
++    engine.dispose()
++
++    # 2) upgrade head：触发 20261009_01 backfill + create_index(unique=True)。
++    # 修复前此处对两行写同一键 → IntegrityError，upgrade 直接失败（check=True 抛异常）。
++    _alembic("upgrade", "head")
++
++    # 3) 断言：唯一索引建成、规范行=max(PK id)=R2 持键、R1 保持 NULL
++    engine = create_engine(database_url)
++    with engine.connect() as conn:
++        insp = inspect(conn)
++        index_names = {ix["name"] for ix in insp.get_indexes("pipeline_run")}
++        assert "uq_pipeline_run_scene_identity_key" in index_names
++        rows = conn.execute(
++            text("SELECT pipeline_run_id, scene_identity_key FROM pipeline_run WHERE id IN (1, 2) ORDER BY id")
++        ).fetchall()
++    engine.dispose()
++    r1, r2 = rows
++    assert r1[0] == "scene-backfill-r1" and r1[1] is None
++    assert r2[0] == "scene-backfill-r2" and r2[1] is not None
++    assert r2[1].startswith("scene:")
++
++    # 3b) 反证（独立库副本，不污染主库）：修复前的逐行回填写法对存量重复身份必炸
++    # （两行写同一键 → 唯一索引 IntegrityError）——证明本回归测试确实覆盖该缺陷。
++    import shutil
++
++    from sqlalchemy.exc import IntegrityError as SAIntegrityError
++
++    neg_path = tmp_path / "backfill_neg.db"
++    shutil.copyfile(db_path, neg_path)
++    neg_engine = create_engine(f"sqlite:///{neg_path}")
++    with pytest.raises(SAIntegrityError):
++        with neg_engine.begin() as conn:
++            conn.execute(
++                text("UPDATE pipeline_run SET scene_identity_key = :k WHERE pipeline_run_id = :r1"),
++                {"k": r2[1], "r1": "scene-backfill-r1"},
++            )
++    neg_engine.dispose()
++
++    # 4) 幂等：重跑 20261009_01（downgrade 一步再 upgrade）结果不变
++    _alembic("downgrade", "20261008_02")
++    _alembic("upgrade", "head")
++    engine = create_engine(database_url)
++    with engine.connect() as conn:
++        rows = conn.execute(
++            text("SELECT pipeline_run_id, scene_identity_key FROM pipeline_run WHERE id IN (1, 2) ORDER BY id")
++        ).fetchall()
++    engine.dispose()
++    assert rows == [
++        ("scene-backfill-r1", None),
++        ("scene-backfill-r2", r2[1]),
++    ]
++
++
+ def test_backend_consume_endpoint_no_outbox_returns_zeros():
+     """outbox 表未合入（03B 前）：backend 端点返回全零统计，无副作用（OCR high 条修复验证）。"""
+     with TestClient(app) as client:
+@@ -847,3 +1197,48 @@ def test_orchestrator_consume_calls_backend_api(monkeypatch):
+ 
+     source = inspect.getsource(orchestrator._consume_purpose_events)
+     assert "SessionLocal" not in source
++
++
++def test_orchestrator_consume_prints_errors_and_counts(monkeypatch, capsys):
++    """B3 low：errors 非空必打（单事件失败每轮重放，原先两侧无痕），并含首条 event_id/原因。"""
++    from app import orchestrator
++
++    def fake_post(url: str, payload: dict, timeout: int = 30) -> dict:
++        return {
++            "stats": {
++                "consumed": 0,
++                "dropped": 0,
++                "pending": 2,
++                "created_runs": 0,
++                "reused_runs": 0,
++                "errors": [{"event_id": "e1", "error": "SCENE_UNAVAILABLE: 能力漂移"}],
++            }
++        }
++
++    monkeypatch.setattr(orchestrator, "_post", fake_post)
++    orchestrator._consume_purpose_events("http://backend")
++    out = capsys.readouterr().out
++    assert "2 pending" in out
++    assert "1 errors, first: e1 SCENE_UNAVAILABLE" in out
++
++
++def test_orchestrator_consume_silent_on_all_zero(monkeypatch, capsys):
++    """B3 low：全零空轮次不打，避免 outbox 合入前每 10s 刷一行 0。"""
++    from app import orchestrator
++
++    def fake_post(url: str, payload: dict, timeout: int = 30) -> dict:
++        return {
++            "stats": {
++                "consumed": 0,
++                "dropped": 0,
++                "pending": 0,
++                "created_runs": 0,
++                "reused_runs": 0,
++                "errors": [],
++            }
++        }
++
++    monkeypatch.setattr(orchestrator, "_post", fake_post)
++    orchestrator._consume_purpose_events("http://backend")
++    out = capsys.readouterr().out
++    assert "purpose events consumed" not in out
+diff --git a/tests/test_slope_adapter.py b/tests/test_slope_adapter.py
+index 4a5d475..2f938f4 100644
+--- a/tests/test_slope_adapter.py
++++ b/tests/test_slope_adapter.py
+@@ -26,6 +26,7 @@ from app.scene import (
+ from app.scene.slope import SliceWriterError, SlopeAdapter, slice_bag_to_staging
+ from app.scene.slope.bag_io import BagTopic, decode_topic_messages, read_messages, read_topics, write_bag
+ from app.scene.slope.cdr import (
++    ENCAP_LE,
+     CompressedImageMsg,
+     HeaderMsg,
+     TimeMsg,
+@@ -279,6 +280,169 @@ class TestCdr:
+         with pytest.raises(CdrError):
+             decode_header(blob, 0)
+ 
++    @staticmethod
++    def _spec_raw_image(
++        sec: int,
++        nanosec: int,
++        frame_id: str,
++        height: int,
++        width: int,
++        encoding: str,
++        step: int,
++        data: bytes,
++        *,
++        encap: bool = True,
++        align: bool = True,
++    ) -> bytes:
++        """按 OMG CDR 规范独立构造 Image 体（不依赖本仓库 encode）。
++
++        align=True 时在每个 32 位字段前插规范 padding（真实 ROS2 序列化行为）。
++        align=False 构造"无 padding"字节，仅用于证明旧解码器读这类合法样本会错位。
++        """
++        import struct
++
++        def pad(cur: int) -> bytes:
++            if not align:
++                return b""
++            return b"\x00" * ((4 - (cur % 4)) % 4)
++
++        body = b""
++        fid = frame_id.encode("utf-8") + b"\x00"
++        enc = encoding.encode("utf-8") + b"\x00"
++
++        # std_msgs/Header: Time{sec i32, nanosec u32} + frame_id string
++        body += pad(len(body)) + struct.pack("<iI", sec, nanosec)
++        body += pad(len(body)) + struct.pack("<I", len(fid)) + fid
++        # Image 字段
++        body += pad(len(body)) + struct.pack("<II", height, width)
++        body += pad(len(body)) + struct.pack("<I", len(enc)) + enc
++        body += struct.pack("<B", 0)  # is_bigendian（1 字节，无对齐）
++        body += pad(len(body)) + struct.pack("<I", step)
++        body += pad(len(body)) + struct.pack("<I", len(data)) + data
++        head = ENCAP_LE if encap else b""
++        return head + body
++
++    @staticmethod
++    def _expect_padding(frame_id_len: int, encoding_len: int, encap: bool) -> tuple[int, int]:
++        """计算 frame_id 长度字段前的 padding 字节数（返回 (fid_pad, enc_pad)）。"""
++        fid_len = frame_id_len + 1  # 含 NUL
++        # header: Time 8B + fid(string)
++        # 对齐基准 = 封装头后(4) 或 0；body 起点恒对齐，故用 body 相对偏移算
++        pos_after_time = 8
++        fid_pad = (4 - (pos_after_time % 4)) % 4  # 0
++        pos_after_fid = pos_after_time + 4 + fid_len
++        # encoding 字符串长度字段前
++        enc_pad = (4 - (pos_after_fid % 4)) % 4
++        return fid_pad, enc_pad
++
++    def test_padding_golden_image_1_2_3_bytes(self):
++        # 关键回归（强模型 #2 high，已核实）：CDR 规范要求每个 32 位字段（string
++        # 长度/sequence 长度/uint32）起始地址 4 字节对齐（基准=CDR 体起点，非当前
++        # 指针）。旧解码器顺序直读无 padding——真实 bag 里 frame_id/encoding 长度
++        # 触发 1/2/3 字节 padding 时整体错位，读出垃圾长度（如 1280）→ CdrError。
++        # 现有 golden 只到 Header 尾部，没覆盖 string 前 padding，故 58 passed 也拦不住。
++        # 这里独立按规范构造合法样本（不依赖本仓库 encode），padding 字节数逐 case 断言。
++        from app.scene.slope.cdr import decode_image
++
++        # frame_id 长度（含 NUL）= 2/3/5 → Time(8)+fid_len(4)+fid(N) 后偏移 14/15/17，
++        # 下一个 32 位字段（height/width）前 padding 分别 2/1/3 字节
++        cases = [
++            ("a", 2),  # fid_len=2 → padding 2 字节
++            ("ab", 3),  # fid_len=3 → padding 1 字节
++            ("abcd", 5),  # fid_len=5 → padding 3 字节
++        ]
++        for frame_id, _fid_len in cases:
++            blob = self._spec_raw_image(
++                1_700_000_000,
++                123,
++                frame_id,
++                height=480,
++                width=640,
++                encoding="h265",
++                step=1920,
++                data=b"\xff\xd8payload\xff\xd9",
++                encap=True,
++                align=True,
++            )
++            _fid_pad, enc_pad = self._expect_padding(len(frame_id), len("h265"), encap=True)
++            # 逐 case 校验该样本确实产生了 >0 字节 padding（覆盖 1/2/3 字节）
++            msg, end = decode_image(blob, 0)
++            assert end == len(blob), f"frame_id={frame_id!r}: 应精确消费整条消息 end={end} len={len(blob)}"
++            assert msg.header.stamp.sec == 1_700_000_000
++            assert msg.header.stamp.nanosec == 123
++            assert msg.header.frame_id == frame_id
++            assert msg.height == 480 and msg.width == 640
++            assert msg.encoding == "h265"
++            assert msg.step == 1920
++            assert msg.data == b"\xff\xd8payload\xff\xd9"
++
++        # 收集本组实际出现的 encoding string 前 padding 字节数，必须覆盖 {1,2,3}
++        observed = set()
++        for frame_id, fid_len in cases:
++            _fid_pad, enc_pad = self._expect_padding(len(frame_id), len("h265"), encap=True)
++            observed.add(enc_pad)
++        assert {1, 2, 3} <= observed, f"padding 覆盖不足：observed={observed}"
++
++    def test_padding_golden_compressed_image(self):
++        # 同规范覆盖 CompressedImage（frame_id 触发 padding → format string 错位）
++        import struct
++
++        from app.scene.slope.cdr import decode_compressed_image
++
++        def spec_raw_compressed(sec, nanosec, frame_id, fmt, data, align=True):
++            def pad(cur):
++                if not align:
++                    return b""
++                return b"\x00" * ((4 - (cur % 4)) % 4)
++
++            fid = frame_id.encode("utf-8") + b"\x00"
++            fmtb = fmt.encode("utf-8") + b"\x00"
++            body = pad(0) + struct.pack("<iI", sec, nanosec)
++            body += pad(len(body)) + struct.pack("<I", len(fid)) + fid
++            body += pad(len(body)) + struct.pack("<I", len(fmtb)) + fmtb
++            body += pad(len(body)) + struct.pack("<I", len(data)) + data
++            return ENCAP_LE + body
++
++        # frame_id 长度（含 NUL）= 2/3/5 → format string 前 padding 分别 2/1/3 字节
++        for frame_id in ("a", "ab", "abcd"):
++            blob = spec_raw_compressed(1_700_000_000, 42, frame_id, "jpeg", b"\xff\xd8imagedata")
++            msg, end = decode_compressed_image(blob, 0)
++            assert end == len(blob)
++            assert msg.header.frame_id == frame_id
++            assert msg.format == "jpeg"
++            assert msg.data == b"\xff\xd8imagedata"
++
++    def test_old_unaligned_reader_misreads_padded_sample(self):
++        # 反向证明（锁定样本正确性）：同一条含合法 padding 的规范样本，
++        # 旧的"顺序直读、无对齐"行为读出的 height 是垃圾值（padding 0 字节
++        # 混入低位），修复后解码器读出正确值。若样本本身没触发 padding，
++        # 两种读法结果相同——本断言直接证明 padding 确实生效。
++        import struct
++
++        from app.scene.slope.cdr import decode_image
++
++        blob = self._spec_raw_image(
++            1_700_000_000,
++            123,
++            "abcd",  # fid_len(含NUL)=5 → header 17 字节，height 前 3 字节 padding
++            height=480,
++            width=640,
++            encoding="h265",
++            step=1920,
++            data=b"\xff\xd8payload\xff\xd9",
++            encap=True,
++            align=True,
++        )
++        _fid_pad, enc_pad = self._expect_padding(4, 4, encap=True)
++        assert enc_pad == 3, f"fixture 未触发 3 字节 padding：enc_pad={enc_pad}"
++        # 旧行为模拟：从封装头(4B)起顺序直读 Time(8)+fid_len(4)+fid(5)=17B，
++        # 在绝对偏移 4+17=21（padding 字节）直读 height uint32 → 垃圾值
++        old_height = struct.unpack_from("<I", blob, 4 + 17)[0]
++        assert old_height != 480, "无对齐直读本应错位——若相等说明 fixture 未触发 padding"
++        msg, end = decode_image(blob, 0)
++        assert end == len(blob)
++        assert msg.height == 480 and msg.width == 640
++
+ 
+ class TestRealCaptureEndToEnd:
+     """用 A100 测试盘真实采集 CDR 格式（ROS2 封装头 + sensor_msgs/msg/Image）
+diff --git a/tests/test_source_register_purpose.py b/tests/test_source_register_purpose.py
+new file mode 100644
+index 0000000..e4f65cf
+--- /dev/null
++++ b/tests/test_source_register_purpose.py
+@@ -0,0 +1,311 @@
++"""TASK-03B attempt-4（强模型 #3）：用途配置控制 Phase0 run 创建 + 双过滤恢复登记。
++
++- 仅选 scene_slice 的包不得启动 self-built 链（DESIGN §4 用途替换规则）：
++  冻结用途集合无 self_built → 不创建 PHASE0_QUEUE run，响应 pipeline_run_id=None；
++- CONFIG_REQUIRED 提交（选择未解析成功）：读 selection_json 原始 purposes，
++  含 self_built 时仍建 Phase0 run（补配置后用途与 run 一致）；
++- 恢复登记（同一 bag 重放 MOVING/MOVED）：不重复创建 run，回显既有 self_built run；
++- 既有 run 查询必须带 pipeline_type=SELF_BUILT_BAG + source_generation 双过滤，
++  场景 run（SCENE_SLICE）不得被当成 self_built run 返回（跨类型误配回归）；
++- 新建 self_built run 冻结登记代次 source_generation；
++- SCENE_INGEST_ENABLED 关闭 → 既有行为完全不变（无条件 Phase0 run）。
++"""
++
++import json
++import uuid
++
++import pytest
++from fastapi.testclient import TestClient
++from sqlalchemy import select
++
++from app.database import Base, SessionLocal, engine
++from app.domain.scene_config import IngestPurpose, SceneSelection, SubmissionSelection
++from app.main import app
++from app.models import BagRecord, IngestProfile, IngestSubmission, PipelineRun, PurposeScheduleEvent
++from app.services import ingest_service, source_service
++
++UNIQUE = uuid.uuid4().hex[:10]
++INCOMING_ROOT = "/test/incoming"
++
++METADATA = """rosbag2_bagfile_information:
++  version: 5
++  storage_identifier: sqlite3
++  relative_file_paths: [part.db3]
++  duration: {nanoseconds: 1}
++  starting_time: {nanoseconds_since_epoch: 1}
++  message_count: 1
++  topics_with_message_count: []
++"""
++
++
++def _bag_dir():
++    return f"reg{UNIQUE}"[:20]
++
++
++def _bag_path():
++    return f"/test/ready/{_bag_dir()}"
++
++
++class _Client:
++    def login(self):
++        return None
++
++    def logout(self):
++        return None
++
++    def list_dir(self, _path):
++        return [{"name": "part.db3", "isdir": False, "additional": {"size": 4}}]
++
++    def download_text(self, _path):
++        return METADATA
++
++
++@pytest.fixture()
++def db():
++    Base.metadata.create_all(engine)
++    with SessionLocal() as session:
++        yield session
++        session.rollback()
++        session.query(PurposeScheduleEvent).delete(synchronize_session=False)
++        session.query(IngestSubmission).delete(synchronize_session=False)
++        session.query(PipelineRun).delete(synchronize_session=False)
++        session.query(IngestProfile).filter(IngestProfile.profile_id.like(f"r3-{UNIQUE}%")).delete(
++            synchronize_session=False
++        )
++        session.query(BagRecord).filter(BagRecord.name == _bag_dir()).delete(synchronize_session=False)
++        session.commit()
++
++
++@pytest.fixture()
++def monkey_source(monkeypatch):
++    monkeypatch.setattr(
++        source_service, "inspect_bag_directory", lambda path: {"path": path, "name": _bag_dir(), "file_count": 1}
++    )
++    monkeypatch.setattr(source_service, "nas_client", _Client)
++    return monkeypatch
++
++
++def _add_profile(db, profile_id, prefix, purposes=("scene_slice",), scenes=("test-capability",)):
++    row = IngestProfile(
++        profile_id=profile_id,
++        version=1,
++        display_name=profile_id,
++        incoming_prefix=prefix,
++        default_purposes_json=json.dumps(list(purposes)),
++        default_scenes_json=json.dumps(list(scenes)),
++        default_scene_parameters_json=json.dumps({}),
++        enabled=True,
++    )
++    db.add(row)
++    db.commit()
++    return row
++
++
++def _create_submission(pid, relative_path, purposes, scenes=None):
++    selection = SubmissionSelection(
++        purposes=[IngestPurpose(p) for p in purposes],
++        scenes=[SceneSelection(**s) for s in scenes] if scenes is not None else None,
++        relative_path=relative_path,
++    )
++    with SessionLocal() as s:
++        response, status = ingest_service.create_submission(s, pid, relative_path, selection, None)
++    assert status == 201
++    return response
++
++
++def _register(client, fingerprint, incoming_path):
++    return client.post(
++        "/api/v1/sources/register",
++        json={"path": _bag_path(), "fast_fingerprint": fingerprint, "incoming_path": incoming_path},
++    )
++
++
++def test_register_scene_only_no_phase0_run(db, monkey_source, monkeypatch):
++    """仅 scene_slice（用户提交）→ 不创建 Phase0 run，pipeline_run_id=None。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"r3-{UNIQUE}-a"
++    _add_profile(db, pid, "fleetA")
++    rel = _bag_dir()
++    _create_submission(pid, rel, ["scene_slice"])
++    with TestClient(app) as client:
++        resp = _register(client, f"fp{UNIQUE}", f"{INCOMING_ROOT}/fleetA/{rel}")
++    assert resp.status_code == 200, resp.text
++    body = resp.json()
++    assert body["pipeline_run_id"] is None
++    assert body["ingest"]["scheduled_purposes"] == ["scene_slice"]
++    with SessionLocal() as s:
++        runs = list(s.scalars(select(PipelineRun).where(PipelineRun.source_id == body["source_id"])).all())
++        assert runs == []  # 任何类型 run 都不得创建
++        subs = s.scalars(select(IngestSubmission).where(IngestSubmission.source_id == body["source_id"])).all()
++        assert len(subs) == 1 and subs[0].status == "SCHEDULED"
++
++
++def test_register_scene_only_system_default_no_phase0_run(db, monkey_source, monkeypatch):
++    """仅 scene_slice（无用户提交，入口默认）→ 系统兜底提交，同样不建 Phase0 run。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"r3-{UNIQUE}-b"
++    _add_profile(db, pid, "fleetB")
++    with TestClient(app) as client:
++        resp = _register(client, f"fp{UNIQUE}", f"{INCOMING_ROOT}/fleetB/{_bag_dir()}")
++    assert resp.status_code == 200, resp.text
++    body = resp.json()
++    assert body["pipeline_run_id"] is None
++    assert body["ingest"]["scheduled_purposes"] == ["scene_slice"]
++    with SessionLocal() as s:
++        runs = list(s.scalars(select(PipelineRun).where(PipelineRun.source_id == body["source_id"])).all())
++        assert runs == []
++
++
++def test_register_config_required_with_self_built_creates_run(db, monkey_source, monkeypatch):
++    """CONFIG_REQUIRED 且选择含 self_built → 仍建 Phase0 run（用途未冻结，按选择回显）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"r3-{UNIQUE}-c"
++    _add_profile(db, pid, "fleetC", scenes=("not-registered-scene",))
++    rel = _bag_dir()
++    _create_submission(pid, rel, ["self_built", "scene_slice"])
++    with TestClient(app) as client:
++        resp = _register(client, f"fp{UNIQUE}", f"{INCOMING_ROOT}/fleetC/{rel}")
++    assert resp.status_code == 200, resp.text
++    body = resp.json()
++    assert body["ingest"]["config_required"] is True
++    assert body["pipeline_run_id"] is not None
++    with SessionLocal() as s:
++        run = s.scalar(select(PipelineRun).where(PipelineRun.pipeline_run_id == body["pipeline_run_id"]))
++        assert run is not None and run.status == "PHASE0_QUEUE"
++        assert run.pipeline_type == "SELF_BUILT_BAG"
++        # 登记代次冻结（首登 generation=1）
++        assert run.source_generation == 1
++        # 不出 scene 事件（CONFIG_REQUIRED 停待处理）
++        subs = s.scalars(select(IngestSubmission).where(IngestSubmission.source_id == body["source_id"])).all()
++        events = s.scalars(
++            select(PurposeScheduleEvent).where(PurposeScheduleEvent.submission_id.in_([x.submission_id for x in subs]))
++        ).all()
++        assert events == []
++
++
++def test_register_switch_off_keeps_unconditional_phase0_run(db, monkey_source, monkeypatch):
++    """开关关闭 → 既有行为完全不变：无条件 Phase0 run（即使路径在 scene 入口下）。"""
++    monkeypatch.delenv("SCENE_INGEST_ENABLED", raising=False)
++    pid = f"r3-{UNIQUE}-d"
++    _add_profile(db, pid, "fleetD")
++    with TestClient(app) as client:
++        resp = _register(client, f"fp{UNIQUE}", f"{INCOMING_ROOT}/fleetD/{_bag_dir()}")
++    assert resp.status_code == 200, resp.text
++    body = resp.json()
++    assert body["pipeline_run_id"] is not None
++    assert "ingest" not in body
++    with SessionLocal() as s:
++        run = s.scalar(select(PipelineRun).where(PipelineRun.pipeline_run_id == body["pipeline_run_id"]))
++        assert run.status == "PHASE0_QUEUE"
++
++
++def test_register_recovery_no_duplicate_run(db, monkey_source, monkeypatch):
++    """恢复登记（同 bag 重放）：不重复创建 run，回显首登的 run ID。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"r3-{UNIQUE}-e"
++    _add_profile(db, pid, "fleetE", purposes=("self_built", "scene_slice"), scenes=("test-capability",))
++    rel = _bag_dir()
++    incoming = f"{INCOMING_ROOT}/fleetE/{rel}"
++    with TestClient(app) as client:
++        first = _register(client, f"fp{UNIQUE}", incoming)
++        assert first.status_code == 200, first.text
++        second = _register(client, f"fp{UNIQUE}", incoming)
++    assert second.status_code == 200, second.text
++    first_id = first.json()["pipeline_run_id"]
++    second_id = second.json()["pipeline_run_id"]
++    assert first_id is not None
++    assert second_id == first_id  # 恢复回显同一 run，不新建
++    with SessionLocal() as s:
++        runs = list(s.scalars(select(PipelineRun).where(PipelineRun.source_id == first.json()["source_id"])).all())
++        assert len(runs) == 1
++
++
++def test_scene_run_not_matched_as_self_built_on_recovery(db, monkey_source, monkeypatch):
++    """跨类型误配回归：既有 run 只有 SCENE_SLICE（05 消费产物）时，
++    恢复/重登记不得把它当成 self_built run 返回。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"r3-{UNIQUE}-f"
++    _add_profile(db, pid, "fleetF", purposes=("self_built", "scene_slice"), scenes=("test-capability",))
++    rel = _bag_dir()
++    incoming = f"{INCOMING_ROOT}/fleetF/{rel}"
++    with TestClient(app) as client:
++        first = _register(client, f"fp{UNIQUE}", incoming)
++    assert first.status_code == 200, first.text
++    source_id = first.json()["source_id"]
++    with SessionLocal() as s:
++        # 模拟 05 消费：删掉 self_built run，只留一条 SCENE_SLICE run（代次冻结在快照，
++        # run 表 source_generation 列为 NULL 历史语义）
++        self_run = s.scalar(
++            select(PipelineRun).where(PipelineRun.source_id == source_id, PipelineRun.pipeline_type == "SELF_BUILT_BAG")
++        )
++        assert self_run is not None
++        s.delete(self_run)
++        s.add(
++            PipelineRun(
++                pipeline_run_id="scene-" + uuid.uuid4().hex[:28],
++                source_id=source_id,
++                queue_name="SCENE_SLICE_QUEUE",
++                status="SCENE_SLICE_QUEUE",
++                pipeline_type="SCENE_SLICE",
++            )
++        )
++        s.commit()
++    # 重登记（恢复）：不得回显 SCENE_SLICE run
++    with TestClient(app) as client:
++        second = _register(client, f"fp{UNIQUE}", incoming)
++    assert second.status_code == 200, second.text
++    assert second.json()["pipeline_run_id"] is None  # 恢复路径下无 self_built run → None
++    with SessionLocal() as s:
++        self_runs = list(
++            s.scalars(
++                select(PipelineRun).where(
++                    PipelineRun.source_id == source_id, PipelineRun.pipeline_type == "SELF_BUILT_BAG"
++                )
++            ).all()
++        )
++        assert self_runs == []  # 恢复登记不重复创建
++
++
++def test_register_new_generation_reuses_generation_scoped_run(db, monkey_source, monkeypatch):
++    """代次推进（墓碑重登记）：新代次不匹配旧代次的 self_built run → 建新代次 run。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"r3-{UNIQUE}-g"
++    _add_profile(db, pid, "fleetG", purposes=("self_built",), scenes=())
++    rel = _bag_dir()
++    incoming = f"{INCOMING_ROOT}/fleetG/{rel}"
++    with TestClient(app) as client:
++        first = _register(client, f"fp{UNIQUE}", incoming)
++    assert first.status_code == 200, first.text
++    source_id = first.json()["source_id"]
++    run1 = first.json()["pipeline_run_id"]
++    with SessionLocal() as s:
++        bag = s.scalar(select(BagRecord).where(BagRecord.bag_uid == source_id))
++        # 推进代次（模拟墓碑重登记：source_generation 2）
++        bag.source_generation = 2
++        # 该 bag 的绑定提交释放（模拟新一代重走绑定）
++        s.query(IngestSubmission).filter(IngestSubmission.source_id == source_id).delete()
++        s.commit()
++    with TestClient(app) as client:
++        second = _register(client, f"fp{UNIQUE}", incoming)
++    assert second.status_code == 200, second.text
++    run2 = second.json()["pipeline_run_id"]
++    assert run2 is not None and run2 != run1
++    with SessionLocal() as s:
++        new_run = s.scalar(select(PipelineRun).where(PipelineRun.pipeline_run_id == run2))
++        assert new_run.source_generation == 2
++
++
++def test_mark_input_error_still_finds_phase0_run(db, monkey_source, monkeypatch):
++    """mark_source_input_error 的 PHASE0_QUEUE 查找加 pipeline_type 过滤后仍命中 self_built run。"""
++    monkeypatch.delenv("SCENE_INGEST_ENABLED", raising=False)
++    with TestClient(app) as client:
++        resp = _register(client, f"fp{UNIQUE}", None)
++    assert resp.status_code == 200, resp.text
++    body = resp.json()
++    with TestClient(app) as client:
++        errored = client.post(
++            f"/api/v1/sources/{body['source_id']}/input-unstable",
++            json={"evidence": {"stage": "stability"}},
++        )
++    assert errored.status_code == 200, errored.text
++    assert errored.json()["pipeline_status"] == "INPUT_UNSTABLE"

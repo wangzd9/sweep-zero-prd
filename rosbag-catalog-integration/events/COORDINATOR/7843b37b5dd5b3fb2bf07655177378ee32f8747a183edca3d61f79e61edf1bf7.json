@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-220553-task10-ack-booked",
+  "occurred_at": "2026-10-11T22:08:34+08:00",
+  "recorded_at": "2026-10-11T22:08:34+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "2号 TASK-10 attempt-1 22:04 ACK 并开工（wt-04a-t10@scene/task-10-e2e base ca8730d，端到端四步长任务后台驱动），协调者记账，不催单不接管",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/2号/TASK-10/attempt-1-ack.md",
+  "next": "每轮核 2号 进展；交付→机械核验→串行 OCR→合入→TESTER 验证→P0 收口"
+}

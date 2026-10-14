@@ -1,0 +1,12 @@
+{
+  "event_id": "TESTER-poll-20261011-172453-idle",
+  "occurred_at": "2026-10-11T17:26:46+08:00",
+  "recorded_at": "2026-10-11T17:26:46+08:00",
+  "role": "TESTER",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "5min巡检：无新派单，main 98f6c88 零前移，t08c-1 在途(执行者停滞告警归协调者跟进)，维持IDLE",
+  "evidence": "sessions/TESTER.md",
+  "next": "等t08c-1交付合入后如发TESTER新派单再ACK开工"
+}

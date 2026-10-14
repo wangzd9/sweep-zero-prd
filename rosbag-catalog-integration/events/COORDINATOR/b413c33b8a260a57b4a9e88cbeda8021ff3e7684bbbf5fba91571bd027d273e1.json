@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-182053-t08c1-merged",
+  "occurred_at": "2026-10-11T19:22:40+08:00",
+  "recorded_at": "2026-10-11T19:22:40+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "ACCEPT_MERGED",
+  "summary": "t08c-1 bf48a45 机械核验全绿+OCR 逐文件6/6 0findings+--no-ff合入main 0a8ca8a推origin；08两单均合入收口2/2",
+  "evidence": "inbox/coordinator/TASK-08/t08c-1-acceptance-decision.md;main 0a8ca8a;reviews/TASK-08/t08c-1/ocr-batches.md",
+  "next": "TESTER合入后9红文件全绿复核在途 post-merge-0a8ca8a 已派19:18"
+}

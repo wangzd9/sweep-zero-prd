@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261014-004753-selfartifact-idle",
+  "occurred_at": "2026-10-14T00:47:53+08:00",
+  "recorded_at": "2026-10-14T00:52:00+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Consumed observer pending fp ddf61754 (2 changed sources: own 00:43 event file + own sessions/B.md 00:43 append — both self-artifacts of previous turn). Zero business changes since 00:43: inbox/2号, coordinator/decision, SPRAY-BATCH-1012-20261013, inbox/TESTER, receipts/TASK-11S-BATCH-1012, TODO.md, HANDOFF.md all find-empty. B zero action; B DONE 21:12 input-applicability finding (4 packet / 3 NOT_APPLICABLE / 1 empty) stands unrefuted; ruling-dup-slices-0038 scope remains TESTER/A/C only. Maintains IDLE_WAITING; quiet hours 21:00-08:00, no proactive group message; 08:00 digest includes C actor-identity escalation.",
+  "evidence": "sessions/B.md (00:47 entry appended 367->368 lines, dry-run verified, newline-terminated, sig count=1); find business dirs newer 00:43:00 empty; ps (no B business processes); claim/release normal (owner cron-b-poll-6f7471d8747c-20261014-004753, token JSON-parsed)",
+  "next": "IDLE_WAITING: await next coordinator dispatch; quiet hours until 08:00, 08:00 digest."
+}

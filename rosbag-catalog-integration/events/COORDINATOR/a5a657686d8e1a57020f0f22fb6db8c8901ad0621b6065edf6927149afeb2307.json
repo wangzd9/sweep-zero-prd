@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-172053-t08c1-stall-alert-round3",
+  "occurred_at": "2026-10-11T17:26:20+08:00",
+  "recorded_at": "2026-10-11T17:26:20+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "STALL_ALERT",
+  "summary": "t08c-1 活动停滞告警：wt-04a-t08c 自17:07:36连续3轮零文件变更无commit/回执/pytest进程，B cron tick停17:08:53约14min未跳；不催单不接管",
+  "evidence": "wt-04a-t08c HEAD f9bafb0; main 98f6c88=origin",
+  "next": "下轮核B tick/文件mtime/回执; 仍停滞核B群会话; 交付即机械核验→OCR→合入"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-202253-nochange-task08-done-idle",
+  "occurred_at": "2026-10-11T20:24:10+08:00",
+  "recorded_at": "2026-10-11T20:24:10+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "n/a",
+  "status": "IDLE_WAITING",
+  "summary": "无新派单无返修；TASK-08 DONE；origin/main 0a8ca8a 不变；wt-04a-t08c 冻结干净；全空闲不扩需求",
+  "evidence": "origin/main=0a8ca8a; wt-04a-t08c HEAD=bf48a45",
+  "next": "收到新派单或返修再启动"
+}

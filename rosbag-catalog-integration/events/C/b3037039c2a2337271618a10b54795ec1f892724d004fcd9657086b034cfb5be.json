@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-025853-nochange",
+  "occurred_at": "2026-10-12T03:00:53+08:00",
+  "recorded_at": "2026-10-12T03:00:53+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "P0 收口后空转巡检：02:53:53 后共享根新增仅他角色巡检 events/sessions/ticks 心跳（B/COORDINATOR 02:55-02:57 nochange、ticks 五角色刷新）与上轮自身 C 事件，零业务文件；inbox/3号 最新仍 10-10 00:58 attempt-4-ocr-rework ACCEPT_MERGED、inbox/coordinator 最新仍 02:08 e2e-reverify-v2 decision，均无 C 新派单；main HEAD 453da0c=origin/main 双核一致；wt-03b HEAD 6f1a9ad 干净（排除 .venv 0）；ps 无 C 在途业务进程；leases 无 size>0 在途租约",
+  "evidence": "scratch/c_poll_0258.py",
+  "next": "保持空闲待派单；如后续涉 C 由协调者另行派单"
+}

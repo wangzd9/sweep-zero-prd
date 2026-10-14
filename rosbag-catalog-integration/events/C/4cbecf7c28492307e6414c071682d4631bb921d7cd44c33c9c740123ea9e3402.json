@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-031853-nochange",
+  "occurred_at": "2026-10-12T03:19:57+08:00",
+  "recorded_at": "2026-10-12T03:19:57+08:00",
+  "role": "C",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "03:18:53 巡检：03:13:53 后 C 范围零新增，inbox/3号 最新仍 10-10 00:58 attempt-4-ocr-rework ACCEPT_MERGED，inbox/coordinator 最新仍 02:08:34 e2e-reverify-v2 decision，无 C 新派单；main HEAD 453da0c=origin/main 双核一致；wt-03b HEAD=6f1a9ad 分支 feature/scene-03b-ocr-rework 干净；ps 无 C 在途业务进程；leases 无 size>0 在途租约；保持空闲待派单（P0 已收口）",
+  "evidence": "preflight checked_at 2026-10-12T03:18:53+08:00; find -newermt 03:13:53 C 范围与共享根均空; rev-parse 双核; status --porcelain 排除 .venv 空; ps 空",
+  "next": "等协调者派单；下轮 5 分钟巡检继续"
+}

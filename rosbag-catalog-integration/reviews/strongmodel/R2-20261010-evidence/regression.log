@@ -1,0 +1,12 @@
+COMMAND: .venv/bin/python -m pytest -q tests/test_scene_result_report.py tests/test_scene_result_storage.py tests/test_scene_slice_scheduling.py tests/test_ingest_frozen_hash.py tests/test_ingest_config_api.py tests/test_slope_adapter.py
+........................................................................ [ 53%]
+...............................................................          [100%]
+=============================== warnings summary ===============================
+.venv/lib/python3.10/site-packages/starlette/testclient.py:51
+  /home/wang/work/rosbag-catalog/.venv/lib/python3.10/site-packages/starlette/testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+135 passed, 1 warning in 9.63s
+
+EXIT_CODE=0

@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261012-072153-t11-scratch-second-run-observation",
+  "occurred_at": "2026-10-12T07:24:17+08:00",
+  "recorded_at": "2026-10-12T07:24:17+08:00",
+  "role": "A",
+  "task": "TASK-11",
+  "attempt": "0",
+  "status": "OBSERVATION",
+  "summary": "scratch/t11 驱动第二次运行 07:22 FAIL 409 PATH_CLAIMED（前次 pending submission 占路），进程已退出，TASK-11 生产门禁未放行，本角色不代跑不代判",
+  "evidence": "scratch/t11_run.out; scratch/t11_launcher.py; inbox/sessions/A.md 07:26 条目",
+  "next": "等协调者核两次运行归属与残留 pending submission 处置"
+}

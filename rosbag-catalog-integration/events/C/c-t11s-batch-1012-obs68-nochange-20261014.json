@@ -1,0 +1,16 @@
+{
+  "event_id": "c-t11s-batch-1012-obs68-nochange-20261014",
+  "occurred_at": "2026-10-14T09:03:00+08:00",
+  "recorded_at": "2026-10-14T09:04:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "prerun_fingerprint": "cc6e477a5c7b7eb4532376c6ce4d9d00fd85ec6511f3b9fb4b8919b08346ee4c",
+  "supersedes_context": "prerun 09:00:10 独立扫描观测新指纹 cc6e477a（obs67 自产 canonical 记账触发），前条 08:58:53 指纹 3b4f3c66 ack 时 STALE_OBSERVATION 被拒=新输入未消费非失败，本轮直接处理 cc6e477a 不循环重试旧指纹；ACK 21:07:41 在案不重复领取；快照 classification_reasons 所列 12S-C/16B 旧单均 DONE 已接受非新派单不领取",
+  "summary": "C 第68轮只读观察（处理机 09:02-09:03 实测）：与 obs67 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜续跑不 kill/retry）；scene-4acf689f（16_02_03 正式链 source 91FFEEC1…/submission 24d60fee…/profile scene-spray/spray-v1）SCENE_RUNNING attempt=1 auto_retry_count=0、heartbeat 09:02:37 续租 lease 至 09:04:37、八步 QUEUED 口径不变；8767 ok active_runs=[4acf689f ACCEPTED pid1]；proxy pid 3495931 连续未重启 ELAPSED 12:40:07 TIME 01:20:51（obs67 +1s 持续非零）、RSS 18137668 同量级；work 树 checkpoint.json stat mtime 2026-10-14 00:23:10.474817688 +0800 未翻（模型段完成信号未到）、find -newermt 08:55 零命中=零新写；VLM 通道容器 3376cd90f44e /proc/1/net/tcp 实测 1 条 ESTAB→192.168.2.45:8002 在途；资源/入口面：NAS //192.168.2.77/public（/mnt/nas_backup cifs 挂载实测）98T/70T/29T 71% 不变、up 5 天 23:21、load 2.16/2.23/2.19 与 obs59-67 同量级、incoming/spray 仍仅 rosbag2_2026_10_12-16_33_10 空包目录（D6 正式拒绝痕迹 A 面不变）。本批 8 包无新终态，无升级条件命中（heartbeat 续租正常/run 未 FAILED/VLM 通道在途）。C 全程只读（ssh curl 8180/8767、stat/find/ps/docker exec 只读 net/tcp、df/uptime），未 kill/未删/未重启/未 retry/未改任何生产路径。白天口径本轮无变化不报进度。",
+  "evidence": "处理机 09:02-09:03 实测 ssh curl 8180/8767、stat checkpoint.json mtime 00:23:10 未翻、find -newermt 08:55 count=0、ps -p 3495931 ELAPSED 12:40:07 TIME 01:20:51、docker exec net/tcp ESTAB grep 1F42 count=1、mount/df cifs 98T 71%、uptime load 2.16；canonical sessions/C.md 追加前末行换行已核验（计算/校验在前、共享文件最后写入、临时条目文件+独立 python append）、旧镜像 inbox/sessions/C.md 本轮未触",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按 ruling-4acf-infer-active-0218（heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且通道消失）；③ flat 三提交 a65a25a7/87dfebaa/518089ed 绑定 run 出现后 C 按 run 核账；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。白天状态变化即时通报",
+  "owner": "C-cron-poll-20261014-090500-t11s-obs68",
+  "source": "inbox/events/C/c-t11s-batch-1012-obs68-nochange-20261014.json"
+}

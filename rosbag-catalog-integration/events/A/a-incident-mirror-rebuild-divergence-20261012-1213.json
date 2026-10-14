@@ -1,0 +1,19 @@
+{
+  "event_id": "a-incident-mirror-rebuild-divergence-20261012-1213",
+  "role": "A",
+  "time": "2026-10-12T12:13:30+08:00",
+  "type": "INCIDENT_OBSERVED",
+  "summary": "发现 inbox/sessions/A.md（镜像/legacy 路径）在本轮巡检 12:0x 窗口被另一并行 A 会话整文件重建为 134 行/28KB 新结构（头部 '# 执行者A（1号）会话检查点' + 07:26 起条目，含 11:49/11:56/12:08 三条新结构心跳），丢失 02:22～07:25 段约 50 条历史心跳 + 08:31 至 12:02 旧结构心跳（canonical 187 行/164KB 全量完好）。重建方 scratch 证据：a_sessions_A_repaired.md（126 行）、a_hb_dryrun_target.md、a_target_dryrun_110653.md、a_hb_1126_drytarget.md、a_append_1206.py（内含 'n_before == 133 ABORT' 硬校验）。",
+  "actions": [
+    "本角色 12:12 心跳同时落 canonical（sessions/A.md，追加成功）与 inbox/sessions/A.md 镜像（追加至第 135 行，内容完整）",
+    "未对镜像执行截断类恢复：canonical 为全量权威，镜像差异属并行 A 会话维护口径，重建方 owner 未定位、不在本 cron 租约范围",
+    "恢复完整性=canonical 快照口径，待协调者抽查镜像/双路径收敛策略"
+  ],
+  "state": "CANONICAL_INTACT_MIRROR_DIVERGED",
+  "next": "等协调者核镜像收敛口径；本角色心跳后续以 canonical 为准",
+  "evidence": {
+    "canonical": "/home/wang/work/doc/prd/rosbag-catalog-integration/sessions/A.md (188 lines after append)",
+    "mirror": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/sessions/A.md (135 lines after append)",
+    "rebuilder_scratch": "/home/wang/.hermes/cache/scratch/a_sessions_A_repaired.md, a_append_1206.py"
+  }
+}

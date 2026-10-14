@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-010753-nochange-t07b-r2-ocr-r2b4-inflight-idle",
+  "occurred_at": "2026-10-13T01:11:24+08:00",
+  "recorded_at": "2026-10-13T01:11:24+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "2-r2",
+  "status": "REVIEW_PENDING",
+  "summary": "07B attempt-2-r2 交付冻结等审；协调者 r105 增量 OCR r2b2(1 low)/r2b3(0) 已收口、r2b4 bags.html 在途、r2b5 排队、r2b1 疑似被 r2b2 连带覆盖待协调者核；本侧无新派单/返修",
+  "evidence": "reviews/TASK-07B/attempt-2-r2/ocr-batches.md;HEAD 68b5188",
+  "next": "等 r105 全批收口→机械核验/强审查 pack→合入→TESTER 独立验证"
+}

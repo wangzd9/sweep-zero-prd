@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-4acf-stall-continue-20261014023213",
+  "occurred_at": "2026-10-14T02:32:13+08:00",
+  "recorded_at": "2026-10-14T02:32:13+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "02:2x 跨夜增量只读实测（唤醒源=上轮 02:11 自写事件 7bd8e2c4…+sessions 回声，已核读，无新派单/新 decision）：4acf689f SCENE_RUNNING attempt1 heartbeat 02:23:41 持续刷新、八步仍全 QUEUED started_at=NULL（23:05:32 入队至 02:23 约 198min）；/proc/3495931/status voluntary_ctxt_switches 60130→60155（12s +25，~125/min 与 02:1x 同口径低速事件循环）、nonvoluntary 221 不变、top %CPU=0.0/RES 17.4g、proxy docker stats cpu=0.90%/mem=20.84GiB——01:4x 起静默段持续，定性分歧（DB 八步零推进 vs C obs22 进程层 INFER 段在算）维持报协调者裁决，TESTER 不自行 cancel/retry。ingest_submission 8 行 02:2x 实测不变（flat 三提交 a65a25a7/87dfebaa/518089ed+空包 7a71e404 仍 PENDING_INPUT source_id 全空，14_42_48 正式全链 NOT_RUN）；scan_job 3999（02:15:41）incoming SUCCESS failed:2 空包拒绝 10min 周期持续；scene run 7=6DONE+1RUNNING 无新 run；PASS 基线不变。",
+  "evidence": "pipeline_run heartbeat=2026-10-14 02:23:41; step_run 8/8 QUEUED started_at=NULL; /proc/3495931/status voluntary_ctxt_switches 60130→60155 (12s); nonvoluntary 221; top %CPU=0.0 RES 17.4g; docker stats proxy cpu=0.90% mem=20.84GiB; 8767 active_runs=[4acf689f ACCEPTED pid:1]; ingest_submission 8 rows flat PENDING_INPUT source_id NULL; scan_job 3999 02:15:41 SUCCESS {dirs:3 bags:1 failed:2}",
+  "next": "等协调者统一裁决 4acf689f 定性（静默段 ~2.5h+ 持续）及处置（cancel/retry/继续观察由协调者/A 执行）；SCENE_DONE 后跨 DB3 边界/产物/两次 reconcile（16_02_03 正式全链）；A flat 三提交绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）"
+}

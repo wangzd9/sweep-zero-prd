@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-225553-t10-driver-building",
+  "occurred_at": "2026-10-11T22:58:50+08:00",
+  "recorded_at": "2026-10-11T22:58:50+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "2号 TASK-10 端到端驱动构建中，offset 扫描 7 条全 NOT_CONSTANT 观察在案，零交付零合入",
+  "evidence": "events/COORDINATOR/coord-poll-20261011-225553-t10-driver-building.md",
+  "next": "等 2号 交付，交付即核验→OCR→合入→TESTER 验证→P0 收口"
+}

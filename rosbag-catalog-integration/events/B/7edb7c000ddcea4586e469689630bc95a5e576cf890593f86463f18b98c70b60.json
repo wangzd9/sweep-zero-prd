@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-035753-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T03:58:39+08:00",
+  "recorded_at": "2026-10-12T03:58:39+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "P0收口后第N轮空转：无新派单无返修，main 453da0c双核不变，wt-04a-t10d3冻结干净，无本侧在途进程",
+  "evidence": "sessions/B.md 本轮巡检行",
+  "next": "仅按需巡检与事件接续，TASK-11生产门禁未放行不自行启动"
+}

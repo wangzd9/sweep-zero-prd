@@ -1,0 +1,406 @@
+diff --git a/app/templates/bags.html b/app/templates/bags.html
+index 723c8c0..016c1b6 100644
+--- a/app/templates/bags.html
++++ b/app/templates/bags.html
+@@ -17,10 +17,10 @@
+   {% set _tab_base = filters.remove_url('view') %}
+   {% set _tab_sep = '?' if _tab_base == '/bags' else '&' %}
+   <nav class="view-tabs" aria-label="数据视图">
+-    <a class="view-tab{% if _view == 'slices' %} active{% endif %}" href="{{ _tab_base }}">当前可用切片</a>
+-    <a class="view-tab{% if _view == 'originals' %} active{% endif %}" href="{{ _tab_base }}{{ _tab_sep }}view=originals">原始包</a>
+-    <a class="view-tab{% if _view == 'all' %} active{% endif %}" href="{{ _tab_base }}{{ _tab_sep }}view=all" title="含非当前版本切片（标注历史）、原始包与全部数据">全部/历史</a>
+-    <span class="view-tab-note">默认视图为当前可用切片；原始包与全部数据经上方视图切换访问（旧入口书签行为不变）</span>
++    <a class="view-tab{% if _view == 'slices' %} active{% endif %}" href="{{ _tab_base }}" title="当前可用切片（AVAILABLE 且当前版本）">切片</a>
++    <a class="view-tab{% if _view == 'originals' %} active{% endif %}" href="{{ _tab_base }}{{ _tab_sep }}view=originals" title="全部原始输入：自建数据集、英伟达数据集、切片原始数据">原始数据</a>
++    <a class="view-tab{% if _view == 'all' %} active{% endif %}" href="{{ _tab_base }}{{ _tab_sep }}view=all" title="含原始数据、切片（当前/历史/下架）与全部既有记录">全部</a>
++    <span class="view-tab-note">默认视图为切片（当前可用）；原始数据与全部经上方视图切换访问（旧入口书签行为不变）</span>
+   </nav>
+ 
+   <form id="bag-search-form" class="search-box" method="get">
+@@ -235,7 +235,7 @@
+           <td data-label="场景">{% if sc.get('_role') == 'slice' %}<div class="bag-scene-cell"><span class="badge bag-scene-badge">{{ sc.scene_code or '—' }}</span>{% if sc.label %}<span class="bag-scene-label" title="模型判定标签">{{ sc.label }}</span>{% endif %}{% if sc.current is false %}<span class="bag-scene-history" title="非当前版本（换版后保留可查）">历史</span>{% endif %}{% if bag.availability == 'WITHDRAWN' %}<span class="bag-scene-withdrawn" title="人工下架：模型原结果保留，退出默认可用检索，all 视图仍可见">已下架</span>{% endif %}<a class="bag-scene-parent" href="/bags/{{ sc.parent_uid }}" title="父包：{{ sc.parent_name or sc.parent_uid }}">{{ sc.parent_name or sc.parent_uid or '父包' }} ↗</a></div>{% elif sc.get('scene_summary') %}<div class="bag-scene-cell">{% for code, bucket in sc.scene_summary.items() %}<div class="bag-scene-line" title="当前版本：{{ bucket.current_version or '无' }}">{{ code }} · <span class="status {{ 'done' if bucket.status == 'SUCCESS' else 'failed' if bucket.status in ('FAILED','INPUT_INVALID') else 'queued' }}">{{ bucket.status }}</span> · {{ bucket.slice_count }} 切片</div>{% endfor %}</div>{% else %}<span class="muted">—</span>{% endif %}</td>
+           <td data-label="状态">{% if sc.get('_role') == 'slice' and bag.availability %}<span class="status {{ 'done' if bag.availability == 'AVAILABLE' else 'queued' if bag.availability == 'PENDING' else 'failed' }}"{% if bag.availability == 'WITHDRAWN' %} title="人工下架：模型原结果保留，退出默认可用检索（all 视图可见）"{% endif %}>{{ '已下架' if bag.availability == 'WITHDRAWN' else bag.availability }}</span>{% else %}<span class="status {{ ('done' if nv and nv.pipeline_status in ['NVIDIA_DONE','PUBLISHED'] else 'queued' if nv and nv.pipeline_status == 'NVIDIA_QUEUE' else 'running' if nv and nv.pipeline_status == 'RUNNING' else 'failed' if nv else (bag.status|lower)) }}">{{ nv.pipeline_status_zh if nv else bag.status }}</span>{% endif %}</td>
+           <td data-label="采集时间">{{ (bag.started_at.strftime('%Y-%m-%d %H:%M:%S') if bag.started_at else (nv.pipeline_created.strftime('%Y-%m-%d %H:%M') if nv else '—')) }}</td>
+-          <td data-label="车辆"><span class="bag-vehicle-cell" title="{{ '—' if nv else (bag.vehicle.vehicle_code if bag.vehicle else bag.identifier_candidate or '待认领') }}">{{ bag.vehicle.vehicle_code if bag.vehicle else (bag.identifier_candidate or '待认领') if not nv else '—' }}</span></td>
++          <td data-label="车辆"><span class="bag-vehicle-cell" title="{{ bag.vehicle.vehicle_code if bag.vehicle else ('—' if nv or bag.dataset_type == 'nvidia_physicalai' else (bag.identifier_candidate or '待认领')) }}">{{ bag.vehicle.vehicle_code if bag.vehicle else ('—' if nv or bag.dataset_type == 'nvidia_physicalai' else (bag.identifier_candidate or '待认领')) }}</span></td>
+           <td data-label="数据来源">{% set _kinds = data_kind_ctx.get(bag.bag_uid) %}{% if _kinds %}{% for k in _kinds %}<span class="badge" title="数据分类：{{ data_kind_labels.get(k, k) }}">{{ data_kind_labels.get(k, k) }}</span>{% endfor %}{% else %}<span class="badge" title="未知历史：all 视图保留但不猜测类型">未分类</span>{% endif %}</td>
+           <td data-label="文件大小" class="bag-size-cell">{% if nv %}{{ nv.size_bytes|filesize if nv.size_bytes else '—' }}{% else %}{{ bag.total_size_bytes|filesize }}{% endif %}</td>
+           <td data-label="操作" class="bag-actions-col"><a class="bag-icon-btn" href="{{ detail_urls[bag.bag_uid] }}" title="查看详情" aria-label="查看详情"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a><button type="button" class="bag-icon-btn" data-copy-icon="1" data-copy-text="{{ access_by_uid[bag.bag_uid].remote }}" title="复制路径" aria-label="复制路径"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>{% if bag.dataset_type == 'self_built' and cleanup_enabled %}<button type="button" class="bag-icon-btn bag-cleanup-btn" data-cleanup-source="{{ bag.bag_uid }}" data-cleanup-name="{{ bag.name }}" title="清理 Bag" aria-label="清理 Bag"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button><span class="bag-cleanup-status" data-cleanup-status="{{ bag.bag_uid }}" hidden></span>{% endif %}</td>
+@@ -268,7 +268,7 @@
+           </td>
+         </tr>
+         {% else %}
+-        <tr><td colspan="9"><div class="empty-result"><strong>没有找到匹配的 Bag</strong><span>请清空筛选条件或修改关键词后重试。当前视图无匹配数据时，可切换上方视图（原始包/全部历史）。</span><a class="button ghost" href="/bags">清空筛选条件</a></div></td></tr>
++        <tr><td colspan="9"><div class="empty-result"><strong>没有找到匹配的 Bag</strong><span>当前筛选组合无匹配数据（条件均生效，未静默丢弃）；请清空筛选条件或切换上方视图（切片/原始数据/全部）。</span><a class="button ghost" href="/bags">清空筛选条件</a></div></td></tr>
+         {% endfor %}
+       </tbody>
+     </table>
+diff --git a/tests/test_task16cb_bag_views.py b/tests/test_task16cb_bag_views.py
+new file mode 100644
+index 0000000..1802788
+--- /dev/null
++++ b/tests/test_task16cb_bag_views.py
+@@ -0,0 +1,363 @@
++"""TASK-16C-B Bag 三视图（DESIGN §7.3.3 / §8.4，REQ-16、REQ-05 / AC-16、AC-05）。
++
++覆盖（本叶文件面：app/web/bags.py + app/templates/bags.html + /bags 详情可达）：
++- 视图 tab 显示名="切片/原始数据/全部"（URL 值 slices/originals/all 保留），
++  切 tab 保留 q/data_kind 等筛选且 page 归 1，取消筛选链接保留其余条件；
++- NVIDIA 空数据行（无 run/无 Topic/无采集时间/无车辆）：不显示"待认领"、
++  时间/大小/Topic 正常显示（nv fallback），双用途行显示两个分类徽标；
++- 不相容筛选组合显示明确空结果（条件不静默丢弃）；
++- Bag 详情/父包追溯/受控获取入口可达（列表 return_to 携带全部条件，
++  父包链接从列表与详情均可达）。
++
++共享分类谓词消费 A 面 data_kind_context/originals_view_condition，不自建规则；
++独立浏览器取证交 TESTER。
++"""
++
++from __future__ import annotations
++
++from datetime import datetime
++
++import pytest
++from fastapi.testclient import TestClient
++from sqlalchemy import select
++from sqlalchemy.orm import Session
++
++from app.database import Base, SessionLocal, engine
++from app.main import app
++from app.models import BagDerivation, BagPurpose, BagRecord, SceneAnalysisVersion, SceneSegment
++from app.services.bag_search_service import data_kind_context
++
++UID_PREFIX = "T16CB"
++SCENE = "slope"
++
++
++def _uid(n: int) -> str:
++    return f"{UID_PREFIX}{n:020d}"
++
++
++@pytest.fixture
++def db():
++    session: Session = SessionLocal()
++    try:
++        _purge_prefix(session)
++    except Exception:  # noqa: BLE001 — purge 前表可能缺失（全量顺序跑的前序用例干扰），重建后再清
++        session.rollback()
++    Base.metadata.create_all(engine)
++    try:
++        _purge_prefix(session)
++    except Exception:  # noqa: BLE001
++        session.rollback()
++    try:
++        yield session
++    finally:
++        try:
++            session.rollback()
++        except Exception:  # noqa: BLE001
++            pass
++        session.close()
++        _purge_prefix()
++
++
++def _purge_prefix(session: Session | None = None) -> None:
++    s = session or SessionLocal()
++    try:
++        avs = s.scalars(
++            select(SceneAnalysisVersion.id).where(SceneAnalysisVersion.parent_bag_uid.like(f"{UID_PREFIX}%"))
++        ).all()
++        if avs:
++            s.execute(SceneSegment.__table__.delete().where(SceneSegment.analysis_version_id.in_(avs)))
++        s.execute(
++            SceneAnalysisVersion.__table__.delete().where(SceneAnalysisVersion.parent_bag_uid.like(f"{UID_PREFIX}%"))
++        )
++        s.execute(
++            BagDerivation.__table__.delete().where(
++                BagDerivation.parent_bag_uid.like(f"{UID_PREFIX}%") | BagDerivation.child_bag_uid.like(f"{UID_PREFIX}%")
++            )
++        )
++        from app.models import bag_scene
++
++        bag_ids = s.scalars(select(BagRecord.id).where(BagRecord.bag_uid.like(f"{UID_PREFIX}%"))).all()
++        if bag_ids:
++            s.execute(BagPurpose.__table__.delete().where(BagPurpose.bag_id.in_(bag_ids)))
++            s.execute(bag_scene.delete().where(bag_scene.c.bag_id.in_(bag_ids)))
++        s.execute(BagRecord.__table__.delete().where(BagRecord.bag_uid.like(f"{UID_PREFIX}%")))
++        s.commit()
++    except Exception:  # noqa: BLE001
++        s.rollback()
++    finally:
++        s.close()
++
++
++def _add_bag(
++    session: Session,
++    n: int,
++    *,
++    bag_role: str = "ORIGINAL",
++    dataset_type: str = "self_built",
++    availability: str | None = None,
++    started_at: datetime | None = None,
++    size_bytes: int = 0,
++) -> BagRecord:
++    bag = BagRecord(
++        bag_uid=_uid(n),
++        name=f"bag-{n:02d}",
++        relative_path=f"/test/scene16cb/bag-{n:02d}",
++        bag_role=bag_role,
++        dataset_type=dataset_type,
++        availability=availability,
++        status="READY",
++        started_at=started_at,
++        total_size_bytes=size_bytes,
++        duration_ns=1000 if size_bytes else 0,
++        message_count=0,
++    )
++    session.add(bag)
++    return bag
++
++
++def _add_derivation(session: Session, parent_uid: str, child_uid: str, **kwargs) -> BagDerivation:
++    der = BagDerivation(
++        parent_bag_uid=parent_uid,
++        child_bag_uid=child_uid,
++        scene_code=SCENE,
++        slice_key=kwargs.pop("slice_key", f"{SCENE}-{child_uid[-4:]}"),
++        run_id=f"{UID_PREFIX}-run",
++        start_ns=0,
++        end_ns=1000,
++        duration_ns=1000,
++        **kwargs,
++    )
++    session.add(der)
++    return der
++
++
++def _add_version(session: Session, parent_uid: str, *, current: bool = True) -> SceneAnalysisVersion:
++    ver = SceneAnalysisVersion(
++        parent_bag_uid=parent_uid,
++        scene_code=SCENE,
++        analysis_version=1,
++        run_id=f"{UID_PREFIX}-run",
++        result="SUCCESS",
++        current=current,
++    )
++    session.add(ver)
++    session.flush()
++    return ver
++
++
++def _add_segment(session: Session, ver: SceneAnalysisVersion, label: str = SCENE) -> SceneSegment:
++    seg = SceneSegment(
++        analysis_version_id=ver.id,
++        label=label,
++        start_ns=0,
++        end_ns=1000,
++        duration_ns=1000,
++        slice_key=f"{SCENE}-s0",
++        publish_target=True,
++    )
++    session.add(seg)
++    return seg
++
++
++def _seed(db: Session) -> dict[str, BagRecord]:
++    base = datetime(2026, 1, 1)
++    self_built = _add_bag(db, 1, started_at=base)
++    db.flush()
++    db.add(BagPurpose(purpose="self_built", bag_id=self_built.id))
++    nvidia = _add_bag(db, 2, bag_role="NOT_APPLICABLE", dataset_type="nvidia_physicalai", started_at=base)
++    dual = _add_bag(db, 3, started_at=base)
++    db.flush()
++    db.add(BagPurpose(purpose="scene_slice", bag_id=dual.id))
++    db.add(BagPurpose(purpose="self_built", bag_id=dual.id))
++    parent = _add_bag(db, 4, started_at=base, size_bytes=2048)
++    ver = _add_version(db, parent.bag_uid)
++    seg = _add_segment(db, ver)
++    slice_bag = _add_bag(db, 5, bag_role="SCENE_SLICE", availability="AVAILABLE", started_at=base, size_bytes=1024)
++    db.flush()
++    _add_derivation(
++        db,
++        parent.bag_uid,
++        slice_bag.bag_uid,
++        analysis_version_id=ver.id,
++        segment_id=seg.id,
++    )
++    db.commit()
++    return {
++        "self_built": self_built,
++        "nvidia": nvidia,
++        "dual": dual,
++        "parent": parent,
++        "slice": slice_bag,
++    }
++
++
++class TestViewTabs:
++    """视图 tab 显示名与参数保留（DESIGN §7.3.3：URL 值不变、显示名=切片/原始数据/全部）。"""
++
++    def test_tab_labels_and_default_active(self, db: Session) -> None:
++        _seed(db)
++        with TestClient(app) as client:
++            page = client.get("/bags")
++            assert page.status_code == 200
++            assert 'class="view-tab active" href="/bags"' in page.text
++            for label, title in (
++                ("切片", "当前可用切片（AVAILABLE 且当前版本）"),
++                ("原始数据", "全部原始输入：自建数据集、英伟达数据集、切片原始数据"),
++                ("全部", "含原始数据、切片（当前/历史/下架）与全部既有记录"),
++            ):
++                assert title in page.text
++            assert ">切片</a>" in page.text
++            assert ">原始数据</a>" in page.text
++            assert ">全部</a>" in page.text
++            assert 'href="/bags?view=originals"' in page.text
++            assert 'href="/bags?view=all"' in page.text
++
++    def test_tab_switch_keeps_filters_and_resets_page(self, db: Session) -> None:
++        rows = _seed(db)
++        slice_name = rows["slice"].name
++        with TestClient(app) as client:
++            page2 = client.get("/bags?q=" + slice_name + "&data_kind=scene_slice&page=2")
++            assert page2.status_code == 200
++            tabs = page2.text[page2.text.index("view-tabs") : page2.text.index("view-tab-note")]
++            # 每个 tab 都保留 q 与 data_kind；切 tab 不携带 page
++            assert tabs.count(f"q={slice_name}") == 3
++            assert tabs.count("data_kind=scene_slice") == 3
++            assert "page=2" not in tabs
++            assert "page=1" not in tabs
++
++    def test_remove_filter_link_keeps_view_and_others(self, db: Session) -> None:
++        _seed(db)
++        with TestClient(app) as client:
++            page = client.get("/bags?view=originals&data_kind=nvidia_original")
++            assert page.status_code == 200
++            # 取消 data_kind 的 chip 链接须保留 view=originals（remove_url 归 page=1 且只删该字段）
++            assert "数据分类：英伟达原始数据" in page.text or "数据分类" in page.text
++            # 视图 chip 的 remove_url 去掉 view 但保留 data_kind（第一个带 href 的 chip 即视图 chip）
++            chip_block = page.text[page.text.index("chip-list") :]
++            first_href = chip_block.split('href="')[1].split('"')[0]
++            assert "view=" not in first_href
++            assert first_href.endswith("data_kind=nvidia_original")
++            # 数据分类 chip 的 remove_url 保留 view=originals
++            hrefs = [h.split('"')[0] for h in chip_block.split('href="')[1:3]]
++            assert any(h.endswith("view=originals") for h in hrefs)
++
++    def test_detail_urls_carry_all_conditions(self, db: Session) -> None:
++        _seed(db)
++        with TestClient(app) as client:
++            page = client.get("/bags?view=originals&q=bag-03")
++            assert page.status_code == 200
++            # 详情链接 return_to 保留 view 与 q（urlencode 后为 %2Fbags%3Fview%3Doriginals%26q%3Dbag-03）
++            assert "return_to=" in page.text
++            assert "view%3Doriginals" in page.text
++            assert "q%3Dbag-03" in page.text
++
++
++class TestNvidiaEmptyRow:
++    """NVIDIA 空数据行：无 run/无 Topic/无采集时间/无车辆仍正常显示（派单自测项）。"""
++
++    def test_nvidia_no_run_no_vehicle_shows_dash_not_unclaimed(self, db: Session) -> None:
++        base = datetime(2026, 1, 1)
++        nvidia = _add_bag(db, 10, bag_role="NOT_APPLICABLE", dataset_type="nvidia_physicalai", started_at=base)
++        self_built = _add_bag(db, 11, started_at=base)
++        db.commit()
++        with TestClient(app) as client:
++            page = client.get("/bags?view=originals")
++            assert page.status_code == 200
++            assert nvidia.name in page.text
++            # NVIDIA 行无车辆显示"—"，不显示"待认领"；自建行显示"待认领"
++            assert "待认领" in page.text  # 自建行
++            rows = page.text.split("<tr data-bag-row")
++            for row in rows[1:]:
++                if nvidia.bag_uid in row:
++                    assert "待认领" not in row
++                    assert "—" in row  # 车辆/Topic 面正常空值展示
++            # NVIDIA 分类徽标（消费 A 面 data_kind_context）
++            ctx = data_kind_context(db, [nvidia, self_built])
++            assert ctx[nvidia.bag_uid] == ["nvidia_original"]
++
++    def test_nvidia_time_and_size_display(self, db: Session) -> None:
++        base = datetime(2026, 3, 5, 10, 30, 0)
++        nvidia = _add_bag(
++            db,
++            12,
++            bag_role="NOT_APPLICABLE",
++            dataset_type="nvidia_physicalai",
++            started_at=base,
++            size_bytes=3 * 1024 * 1024,
++        )
++        db.commit()
++        with TestClient(app) as client:
++            page = client.get("/bags?view=originals&data_kind=nvidia_original")
++            assert page.status_code == 200
++            rows = page.text.split("<tr data-bag-row")
++            for row in rows[1:]:
++                if nvidia.bag_uid in row:
++                    assert "2026-03-05 10:30:00" in row  # 采集时间显示 bag.started_at
++                    assert "3.0 MiB" in row  # 文件大小显示（无 NVIDIA_FINAL artifact fallback bag 自身）
++
++
++class TestDualPurposeAndEmpty:
++    """双用途双标一行、不相容组合明确空结果。"""
++
++    def test_dual_purpose_two_badges_one_row(self, db: Session) -> None:
++        rows = _seed(db)
++        with TestClient(app) as client:
++            page = client.get("/bags?view=originals&data_kind=scene_original")
++            assert page.status_code == 200
++            # UID 只出现一行（同一 UID 的列表行唯一；详情链接在行内多次引用属正常）
++            body = page.text[page.text.index("<tbody>") : page.text.index("</tbody>")]
++            row_blocks = [r for r in body.split("<tr data-bag-row")[1:] if rows["dual"].bag_uid in r]
++            assert len(row_blocks) == 1
++            row = row_blocks[0]
++            assert "场景原始数据" in row
++            assert "自建原始数据" in row  # 双用途双标（消费 A 面 data_kind_context）
++
++    def test_incompatible_filters_show_empty_not_dropped(self, db: Session) -> None:
++        _seed(db)
++        with TestClient(app) as client:
++            # data_kind=scene_slice 限定切片，但 dataset_type=self_built 与种子切片（默认 self_built
++            # 数据集类型）组合下仍应命中；换成 NVIDIA 数据集类型 + 场景切片分类=不相容空集
++            page = client.get("/bags?dataset_type=nvidia_physicalai&data_kind=scene_slice")
++            assert page.status_code == 200
++            assert "没有找到匹配的 Bag" in page.text
++            assert "条件均生效，未静默丢弃" in page.text
++            # 两个条件在已选筛选区均保留
++            assert "英伟达数据集" in page.text
++            assert "场景切片" in page.text
++            # 0 条
++            assert "共 0 条" in page.text
++
++
++class TestDetailTraceAndAccess:
++    """Bag 详情/父包追溯/受控获取入口可达（详情文件属 07A/07B 面，本侧只核入口）。"""
++
++    def test_slice_detail_parent_trace_and_access(self, db: Session) -> None:
++        rows = _seed(db)
++        with TestClient(app) as client:
++            detail = client.get(f"/bags/{rows['slice'].bag_uid}")
++            assert detail.status_code == 200
++            # 父包追溯面板与父包链接（07A lineage 面）
++            assert "父包追溯" in detail.text
++            assert f"/bags/{rows['parent'].bag_uid}" in detail.text
++            # 受控获取面板与取数说明（access.txt）
++            assert "获取数据" in detail.text
++            access = client.get(f"/bags/{rows['slice'].bag_uid}/access.txt")
++            assert access.status_code == 200
++            assert "rsync" in access.text
++
++    def test_parent_detail_children_entry(self, db: Session) -> None:
++        rows = _seed(db)
++        with TestClient(app) as client:
++            detail = client.get(f"/bags/{rows['parent'].bag_uid}")
++            assert detail.status_code == 200
++            # 原始包详情：场景结果面板（场景/状态/切片数），跳切片视图入口
++            assert "场景结果" in detail.text
++            assert f"/bags?view=slices&scene_code={SCENE}" in detail.text
++
++    def test_list_parent_link_reachable(self, db: Session) -> None:
++        rows = _seed(db)
++        with TestClient(app) as client:
++            page = client.get("/bags")
++            assert page.status_code == 200
++            # 切片行父包链接（bags.html 行内 ↗）
++            assert f"/bags/{rows['parent'].bag_uid}" in page.text

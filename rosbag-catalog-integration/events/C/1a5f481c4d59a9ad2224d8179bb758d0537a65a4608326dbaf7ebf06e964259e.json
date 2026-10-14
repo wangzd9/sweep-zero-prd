@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-085853-r137-07b-done-16b-escalated",
+  "occurred_at": "2026-10-13T09:03:53+08:00",
+  "recorded_at": "2026-10-13T09:03:53+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "16B 维持冻结：07B DONE 合入 main 4b9f30a（r136 裁决，非 C）；proxy OCR r136 第4次重试 08:52 rc=1（4/4 连败）→ NEEDS_REVIEW 升级用户裁决待答；无 C 新派单/返修单；wt-03b-t16b HEAD=0208a73 干净、无 C 在途进程",
+  "evidence": "sessions/C.md 09:00 条目; scratch/t16_ocr/b2_r136_retry_progress.txt; inbox/coordinator/TASK-07B/07b-done-merge-decision-20261013.md",
+  "next": "等用户裁决 16B proxy OCR 处置选项（a再试/b换审查方式/c已裁findings先行返修/d搁置）；无新单保持冻结不自测"
+}

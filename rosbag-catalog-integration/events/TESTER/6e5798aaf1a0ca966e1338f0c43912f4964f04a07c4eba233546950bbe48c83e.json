@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-210453-nochange",
+  "occurred_at": "2026-10-12T21:11:21+08:00",
+  "recorded_at": "2026-10-12T21:11:21+08:00",
+  "role": "TESTER",
+  "task": "none",
+  "attempt": "0",
+  "status": "IDLE_POLL",
+  "summary": "空闲巡检：无 TESTER 新派单；07B OCR 批挂跑属协调者面未合入；origin/main=502bf8e 未变",
+  "evidence": "sessions/TESTER.md#2026-10-12-2108",
+  "next": "继续空闲待命，不重复自测"
+}

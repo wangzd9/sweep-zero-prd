@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-batch1012-wake2300-finalbag-op-succeeded-consumed-20261013",
+  "occurred_at": "2026-10-13T23:07:00+08:00",
+  "recorded_at": "2026-10-13T23:12:21+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "CONSUMED",
+  "summary": "23:00唤醒（指纹a8be7ec）变更源消费：①A finalbag op 22:59:21 SUCCEEDED exit 0（16_37_47 REUSE_READY_SHA_MATCH 三文件SHA在ready/spray flat落位 + 16_02_03 REUSE_INCOMING_SHA_MATCH 三文件SHA在incoming/spray flat落位，CIFS拷贝+SHA核验收口）；②A 22:56事件=finalbag op RUNNING（上一状态已核）；③本角色22:58事件=自写回声；④C obs9=只读观察（A 面 16_02_03 tmp 移动+pid 2622094 在途核账）；⑤sessions/A/C mtime 05:04/07:40 为历史文件被扫描窗口捕获，内容核无新 22:5x 条目（A 22:5x 检查点在事件 evidence 引用范围内，session 追加缺失记采集缺口不反推）。无新派单：A 为在途 owner，下回合按既定 next 提交 16_37_47 flat+台账 16_02_03（24d60fee 复用口径以 A 22:56 事件为准）+收口回执；B=DONE 21:12 等下轮；C 按 run 只读核账；TESTER ③④维持 NOT_RUN 等 A 提交后逐包增量核。无 OCR（无代码变更），强审 REVOKED 不续，无合入门禁动作。",
+  "evidence": "operations/A/...finalbag-160203-163747verify/result.json status=SUCCEEDED ended 22:59:21 exit 0 + result.log 两包 REUSE_*_SHA_MATCH 三文件 sha; events/A/1325bc35…json; events/C/c-t11s-batch-1012-anomaly-obs9; lease COORDINATOR token 0a112559… claim 23:06:23",
+  "next": "5min observer 核 A 16_37_47 flat POST（409 如实保留口径）+ 台账/回执 a-attempt-1.md → A 提交收口后 TESTER 逐包增量验收（submission 身份/run 终态/产物/两次 reconcile/SHA 锚定）→ C 按 run 核账；大包跨夜继续不 kill/retry；夜间静默不群报，08:00 汇总"
+}

@@ -1,0 +1,80 @@
+{
+  "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-codex-spray-r3-review/3e65796b-a207-4131-8da4-d124531ccd52.jsonl",
+  "session_ids": [
+    "3e65796b-a207-4131-8da4-d124531ccd52"
+  ],
+  "last_event": {
+    "type": "session_end",
+    "timestamp": "2026-10-13T11:53:34Z"
+  },
+  "terminal_state": "failed",
+  "manifest_schema": "ocr.run-manifest/v1",
+  "input": {
+    "mode": "range",
+    "requested_from": "e1524657bda1f66f03034cb72ef05cd65e0c1dfc",
+    "requested_head": "15e4ef9094c7b51ec6f38832533c670d2664b985",
+    "resolved_base": "e1524657bda1f66f03034cb72ef05cd65e0c1dfc",
+    "resolved_head": "15e4ef9094c7b51ec6f38832533c670d2664b985",
+    "exact_range": "e1524657bda1f66f03034cb72ef05cd65e0c1dfc..15e4ef9094c7b51ec6f38832533c670d2664b985",
+    "source_artifact_sha256": "2d10b9b24ad05378f1b174779fecd0b5453a068b1212f1ee01be7a44bf65ece6"
+  },
+  "ocr_version": "v1.12.13",
+  "coverage_counts": {
+    "selected": 2,
+    "completed": 2,
+    "reused": 0,
+    "failed": 0,
+    "waived": 0
+  },
+  "coverage_complete": false,
+  "remaining_paths": [],
+  "gate_decision": "NOT_EVALUATED",
+  "parse_errors": [],
+  "manifest_failures": [],
+  "item_error_messages": {},
+  "llm_errors": [
+    {
+      "task": "main_task",
+      "error": "context canceled",
+      "count": 1
+    }
+  ],
+  "repeated_tools": [
+    {
+      "file": "app/services/scene_result_report_service.py,scripts/scene_host_proxy.py",
+      "tool": "code_search",
+      "arguments_sha256_prefix": "13c96457527833b8",
+      "count": 2
+    },
+    {
+      "file": "app/services/scene_result_report_service.py,scripts/scene_host_proxy.py",
+      "tool": "code_search",
+      "arguments_sha256_prefix": "4ad14e84199ac317",
+      "count": 2
+    },
+    {
+      "file": "app/services/scene_result_report_service.py,scripts/scene_host_proxy.py",
+      "tool": "file_find",
+      "arguments_sha256_prefix": "1f970c1fd162b585",
+      "count": 2
+    }
+  ],
+  "request_characters": {
+    "count": 94,
+    "max": 212859,
+    "max_frozen_first_two": 30995,
+    "note": "字符统计只用于观察增长，不是OCR本地token估计或模型上下文长度。"
+  },
+  "model_usage": {
+    "responses": 93,
+    "total_prompt_tokens": 4750435,
+    "total_completion_tokens": 239827,
+    "max_prompt_tokens": 77227
+  },
+  "next_steps": [
+    "context canceled可能由客户端压缩/退出触发；需额外进程或服务端证据才能归因。",
+    "存在相同参数的重复工具调用；核对是否必要，不直接判模型无能力。",
+    "文件覆盖不完整或终态不成功；零comments不能放行。"
+  ],
+  "batch_identity_matches": true
+}

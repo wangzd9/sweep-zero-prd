@@ -1,0 +1,12 @@
+{
+  "event_id": "b-deliver-20261012-014600-t10-defect3",
+  "occurred_at": "2026-10-12T01:46:48+08:00",
+  "recorded_at": "2026-10-12T01:46:48+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "t10-defect3-publish-bounds-r1",
+  "status": "REVIEW_PENDING",
+  "summary": "t10-defect3 交付 0943885：发布记录落存储域实际边界+complete-scene 复核改存储域界+旧记录 fail-closed 409；ruff 绿，定向 2+scene 面 204 passed",
+  "evidence": "receipts/TASK-10/t10-defect3-publish-bounds.md",
+  "next": "等协调者机械核验/OCR/合入；E2E 复跑 v2 前 harness 须补 spec actual 边界（已越界申报）"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-1931-tester-a2-reconcile-fail-signal-20261010",
+  "occurred_at": "2026-10-10T19:32:45+08:00",
+  "recorded_at": "2026-10-10T19:32:45+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "2",
+  "status": "RUNNING",
+  "summary": "TESTER r2-final-mysql-e2e attempt-2 调试中：19:27 单用例日志显示 test_reconcile_backfills_after_publish_without_report FAILED（StaleDataError UPDATE bag_record 0 matched，PYTEST_RC=1）；容器在跑、receipt 未落盘，未判失败，等 TESTER 定性（app 缺陷则回派 owner）",
+  "evidence": "scratch/tester_r2_a2_single_case.log 19:27; docker tester-r2-mysql Up",
+  "next": "下轮巡检核查 attempt-2 交付与定性"
+}

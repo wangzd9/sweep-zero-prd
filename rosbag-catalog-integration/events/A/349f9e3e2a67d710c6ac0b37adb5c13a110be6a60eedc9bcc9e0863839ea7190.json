@@ -1,0 +1,11 @@
+{
+  "event_id": "349f9e3e2a67d710c6ac0b37adb5c13a110be6a60eedc9bcc9e0863839ea7190",
+  "role": "A",
+  "task": "TASK-11",
+  "attempt": "observation",
+  "status": "OBSERVING",
+  "ts": "2026-10-12T07:47:00+08:00",
+  "summary": "t11_real_e2e.py 第 6 跑 07:41:40 起跑（launcher t11_launcher.py，输出 hermes scratch t11_run.out）：1a 冻结 0845b402… / 1b source_id BDAE6B9496BB4BCB8ADA70BA46 / 1c PASS / 1d consume 未建 run（幂等复用无新事件）→ explicit run API fallback 建 scene-43a608cc / 3 claimed gen=1 frozen=a8ba9678…；进程 3693100 在途未退出。归属未明，本角色不代跑不代判，供协调者核。",
+  "evidence": "scratch/t11/t11-run.log, /home/wang/.hermes/cache/scratch/t11_run.out, ps 3693100",
+  "next": "下轮巡检核终态 T11_RC"
+}

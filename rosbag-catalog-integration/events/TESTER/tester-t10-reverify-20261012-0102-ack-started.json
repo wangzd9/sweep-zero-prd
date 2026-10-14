@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t10-reverify-20261012-0102-ack-started",
+  "occurred_at": "2026-10-12T01:02:30+08:00",
+  "recorded_at": "2026-10-12T01:02:30+08:00",
+  "role": "TESTER",
+  "task": "TASK-10",
+  "attempt": "e2e-reverify-after-merges/1",
+  "status": "ACK_STARTED",
+  "summary": "两笔返修合入 main a77aa45 后 E2E 复跑派单已 ACK：被测快照双核一致（HEAD=origin/main=a77aa45433，277e40f+d4719f6 均在位）、真实袋 row19 在位只读、驱动固化版 t10_e2e_reverify.py（WT 指 main），长验证后台进程执行后释放控制租约",
+  "evidence": "inbox/TESTER/TASK-10/e2e-reverify-after-merges-ack.md",
+  "next": "驱动收口后逐项核 AC（offset 非 None/全链 SUCCESS/ALL_UNCHANGED/API 获取）→ test-receipts/TEST-TASK10-e2e-reverify/attempt-1.md 回执 PASS/FAIL"
+}

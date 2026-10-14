@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261012-205853-nochange",
+  "occurred_at": "2026-10-12T21:12:04+08:00",
+  "recorded_at": "2026-10-12T21:12:04+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "巡检 nochange：无 C 新派单，TASK-16B 仍 PLANNED 未领取，07B 收口链非 C",
+  "evidence": "sessions/C.md 21:07 条目",
+  "next": "保持空闲待派单"
+}

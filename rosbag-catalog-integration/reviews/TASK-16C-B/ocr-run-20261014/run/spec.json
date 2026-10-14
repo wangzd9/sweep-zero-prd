@@ -1,0 +1,123 @@
+{
+  "schema": "coordinator.ocr-run/v1",
+  "runtime_version": "1.5.0",
+  "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+  "repo": "/home/wang/.local/state/rosbag-scene/wt-04a-t16cb",
+  "base": "bd0db1d2a0fc293cb4562e2079e741739bacb0de",
+  "head": "e399dafbabd253691dcdf757df6cf5ea9e695ff6",
+  "task": "TASK-16C-B",
+  "attempt": "attempt-1",
+  "authorization_source": "inbox/control/V04-UI-RESUME-20261014.md",
+  "config_sha256": "a07c79a6ecee929151c40eb32df90b536660f90c1384aa6c1cecfe4d43eec958",
+  "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8",
+  "provider": "vllm-local",
+  "endpoint": "http://192.168.2.45:8002/v1",
+  "ocr_version": "open-code-review v1.13.0 (1672852) linux/amd64\nbuilt at: 2026-10-13T09:55:57Z\nhttps://github.com/alibaba/open-code-review",
+  "ocr_launcher_sha256": "7668ea8933d987357da1e1815bd9bc32739a8ed57b53a033df47a3164d13e502",
+  "diff_sha256": "0099b28bdebadb75c806344c775cb65cb10d15fbdf76a4e528034419e4912658",
+  "created_at": "2026-10-14T06:09:46.790589+00:00",
+  "global_lock": "/home/wang/.local/state/ocr-runtime/ocr.lock",
+  "project_lock": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/ocr.lock",
+  "artifacts": {
+    "background.md": "ac5a6df468c7bff38e233dca67ed1fa555ff352e4597bef975cee364d5157fe8",
+    "diff.patch": "0099b28bdebadb75c806344c775cb65cb10d15fbdf76a4e528034419e4912658",
+    "ocr_runtime.py": "1fb1ee61ef3e316120b223529190e50e66997ac2e6828451c801276f0ba0faca",
+    "ocr_session_status.py": "5a11e0f04e8d7ca0c0e2d36c34f14ed7186a2f4c02bc546b7357a9cf847e15ac"
+  },
+  "review_identity": "a905194867eac0c10141181895378ff52983706c5827d536890824f9855c51fa",
+  "retry_depth": 0,
+  "run_id": "513ab61d291c4e1e905a22e8a34179c0",
+  "unit": "coordinator-ocr-513ab61d291c4e1e905a22e8a34179c0.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "app/templates/bags.html"
+      ],
+      "exclude": [
+        "tests/test_task16cb_bag_views.py"
+      ],
+      "preview": {
+        "files": [
+          {
+            "path": "app/templates/bags.html",
+            "status": "modified",
+            "insertions": 6,
+            "deletions": 6,
+            "will_review": true
+          },
+          {
+            "path": "tests/test_task16cb_bag_views.py",
+            "status": "added",
+            "insertions": 363,
+            "deletions": 0,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          }
+        ],
+        "total_insertions": 369,
+        "total_deletions": 6,
+        "total_files": 2,
+        "reviewable_count": 1,
+        "excluded_count": 1
+      },
+      "resolved_rules": {
+        "schema_version": "1",
+        "groups": [
+          {
+            "group_id": 1,
+            "source": "system",
+            "pattern": "default",
+            "files": [
+              "app/templates/bags.html"
+            ],
+            "rule": "#### Correctness\nIs the logic correct? Are there missing boundary conditions?\nAre exceptions handled properly?\nIs it thread-safe in concurrent scenarios?\n\n#### Security\nAre there security vulnerabilities such as SQL injection or XSS?\nIs sensitive information handled correctly?\nIs permission validation complete?\n\n#### Performance\nAre there obvious performance issues (e.g., N+1 queries, unnecessary loops)?\nAre resources properly released?\n\n#### Maintainability\nIs the code clear and easy to understand?\nDo names accurately express intent?\nDoes it follow the project’s existing code style and architecture patterns?\n\n#### Test Coverage\nDo critical logic paths have corresponding test cases?\nDo test cases cover boundary conditions?"
+          }
+        ]
+      },
+      "rules_sha256": "dbf257ff319f4cd52770e7e799572f1802d5fa069295c65d2ad2887a1c950d85"
+    }
+  ],
+  "preview": {
+    "files": [
+      {
+        "path": "app/templates/bags.html",
+        "status": "modified",
+        "insertions": 6,
+        "deletions": 6,
+        "will_review": true
+      },
+      {
+        "path": "tests/test_task16cb_bag_views.py",
+        "status": "added",
+        "insertions": 363,
+        "deletions": 0,
+        "will_review": false,
+        "exclude_reason": "default_path"
+      }
+    ],
+    "total_insertions": 369,
+    "total_deletions": 6,
+    "total_files": 2,
+    "reviewable_count": 1,
+    "excluded_count": 1
+  },
+  "parameters": [
+    "--audience",
+    "agent",
+    "--format",
+    "json",
+    "--provider",
+    "vllm-local",
+    "--timeout",
+    "60",
+    "--max-tokens",
+    "0",
+    "--effort",
+    "medium",
+    "--concurrency",
+    "1"
+  ],
+  "request_timeout_seconds": 900,
+  "batch_hard_seconds": 3900
+}

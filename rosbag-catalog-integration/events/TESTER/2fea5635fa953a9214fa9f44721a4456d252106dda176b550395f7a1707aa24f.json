@@ -1,0 +1,12 @@
+{
+  "event_id": "20261011-1944-post-merge-0a8ca8a-delivered",
+  "occurred_at": "2026-10-11T19:44:57+08:00",
+  "recorded_at": "2026-10-11T19:44:57+08:00",
+  "role": "TESTER",
+  "task": "TASK-08",
+  "attempt": "post-merge-0a8ca8a",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "合入后 9 红文件全绿复核交付：main 0a8ca8a 独立真 MySQL 8.4.11 STRICT 隔离容器 14/14 文件 PASS RC=0（9 红 + 06B 回归 35/25 + 迁移链 2/2 + slice_lineage 10+1skipped），容器/网络/库/worktree 0 残留，零业务代码改动",
+  "evidence": "receipts/TASK-08/post-merge-0a8ca8a-red-files.md",
+  "next": "等协调者裁决"
+}

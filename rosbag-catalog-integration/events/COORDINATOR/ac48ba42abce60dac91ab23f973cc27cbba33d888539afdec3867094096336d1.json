@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-075053-nochange",
+  "occurred_at": "2026-10-11T07:51:52+08:00",
+  "recorded_at": "2026-10-11T07:51:52+08:00",
+  "role": "COORDINATOR",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "巡检零业务变化：main 6d30a68 不变，强复审仍等用户手动触发，全角色空闲仅心跳",
+  "evidence": "sessions/COORDINATOR.md#0750-checkpoint",
+  "next": "继续5分钟巡检"
+}

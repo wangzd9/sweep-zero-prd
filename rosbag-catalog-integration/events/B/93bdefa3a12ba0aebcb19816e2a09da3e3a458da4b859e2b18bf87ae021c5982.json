@@ -1,0 +1,12 @@
+{
+  "event_id": "b-rework6-delivered-f4cd654",
+  "occurred_at": "2026-10-11T09:29:51+08:00",
+  "recorded_at": "2026-10-11T09:29:51+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "codex 全链合审 rework-6 3 项（R-01 medium 秒末截断 / R-02 low 动态 head / R-03 low 零 UPDATE）交付 commit f4cd654（base 6d30a68，3 文件 +156/-8），SQLite 全量 825 passed + ruff 绿 + 真实 MySQL 8.4.11 无 CLIENT_FOUND_ROWS 隔离库 A/B（边界矩阵+两步 no-op），回执 receipts/TASK-06B/attempt-1-r2-rework-6.md",
+  "evidence": "receipts/TASK-06B/attempt-1-r2-rework-6.md",
+  "next": "等协调者审核+增量 OCR；交付后 TESTER 无 flag 隔离库复跑 R-01 边界+R-03 零 UPDATE→合入→强模型增量复审"
+}

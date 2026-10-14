@@ -1,0 +1,22 @@
+{
+  "schema": "coordinator-request/v1",
+  "request_id": "cb7acca0db484696c885efcec98c0a21d420ad47dc7de304f6a9470b3d1ed43d",
+  "received_at": "2026-10-13T18:45:14+08:00",
+  "status": "HANDLED",
+  "message_id": "om_x100b63d4c40f9ca0c2533c1ad70a4f1",
+  "chat_id": "oc_b64dc5bf34ec1edcc8cce92ffd56604b",
+  "user_id": "ou_cb93c8e06b797e51a6f66a86f4c3fdaf",
+  "text": "查看一下当前的进度",
+  "context": {
+    "reply_to_message_id": null,
+    "reply_to_text": null,
+    "reply_to_author_id": null,
+    "media_urls": [],
+    "media_types": [],
+    "channel_context": null,
+    "message_type": "text"
+  },
+  "handled_at": "2026-10-13T20:47:25+08:00",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/control/PROGRESS-REQUESTS-CLOSE-20261013.md",
+  "evidence_sha256": "4aa614c3559864a0cb35913160830b4813ce50325b0fe9515fde4f8767eb72e8"
+}

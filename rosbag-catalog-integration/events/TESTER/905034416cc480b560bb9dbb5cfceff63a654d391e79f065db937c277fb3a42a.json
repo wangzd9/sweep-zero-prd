@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-4acf-infer-continue-quiet-20261014034033",
+  "occurred_at": "2026-10-14T03:40:33+08:00",
+  "recorded_at": "2026-10-14T03:40:33+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "03:3x 按 ruling-4acf-infer-active-0218 新口径增量只读实测（唤醒源=prerun 指纹 b4c6c926… 变更源为上轮 03:24 自写事件 8d059c8d…/tester-t11s-batch-1012-4acf-infer-continue-quiet-20261014032419 + sessions/TESTER.md 回声，已核读，协调者 03:28 事件亦确认全部变更源为角色自产回声，无新派单/新 decision）：scene-4acf689f 03:37:16 实测 SCENE_RUNNING attempt1、heartbeat 持续刷新、八步仍全 QUEUED started_at=NULL（入队 ~272min，模型段完成信号未到）；升级条件逐项核全未命中：heartbeat 正常/run 未 FAILED/VLM 03:36:55-03:37:25 四行 Running 3-4 reqs、Waiting 恒 0、prefix cache 93.6-93.8%、MM 85.7%、KV 0.7-4.0%、POST 200 连发/proxy 容器 :8002 ESTAB 记录 4 条/进程 3495931 voluntary_ctxt_switches 68244→68268(+24/12s ~120/min) nonvol 240 不变 RSS 18213940kB State S——INFER 远端推理持续活跃，维持不 kill/cancel/retry；ingest_submission 8 行不变，flat 三提交仍 PENDING_INPUT 串行等 4acf689f 终态 D4③，14_42_48 正式全链 NOT_RUN；scan_job 4015（03:35:43）incoming SUCCESS failed:2 空包拒绝 10min 周期持续；scene run 7=6DONE+1RUNNING 无新 run；PASS 基线不变。",
+  "evidence": "pipeline_run scene-4acf689f9a6a473da1fa2f2efc70 SCENE_RUNNING heartbeat=2026-10-14 03:37:16; step_run 8/8 QUEUED started_at=NULL; /tmp/vllm_qwen38.log 03:36:55-03:37:25 Running 3-4/Waiting 0 prefix cache 93.6-93.8% MM 85.7% KV 0.7-4.0% POST200 连发; docker exec rosbag-scene-proxy grep -c 1F42 /proc/net/tcp=4; /proc/3495931/status voluntary_ctxt_switches 68244→68268 nonvoluntary 240 VmRSS 18213940kB State S; ingest_submission 8 rows 不变 flat 三 PENDING_INPUT; scan_job 4015 03:35:43 SUCCESS {dirs:3 bags:1 failed:2}; 8767 active_runs=[4acf689f ACCEPTED pid:1]",
+  "next": "按裁决新口径继续等 4acf689f 模型段完成信号（checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE，预计持续数小时跨夜继续）；升级条件=heartbeat 4 连败/翻 FAILED/VLM Waiting 持续>0 且 proxy 无 ESTAB/八步翻 FAILED；SCENE_DONE 后核跨 DB3 边界/产物/两次 reconcile（16_02_03 正式全链）；A flat 三提交绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-033253-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T03:34:36+08:00",
+  "recorded_at": "2026-10-12T03:34:36+08:00",
+  "role": "B",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "无新派单无返修，TASK-10 DONE，P0 停止派发，本侧 IDLE_WAITING；origin/main 453da0c 双核不变，无在途进程",
+  "evidence": "sessions/B.md",
+  "next": "按需巡检与事件接续"
+}

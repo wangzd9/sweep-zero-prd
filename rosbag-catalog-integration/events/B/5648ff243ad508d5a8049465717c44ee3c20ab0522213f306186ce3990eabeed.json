@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t11s-batch-1012-ack-deliver-20261013-211247",
+  "occurred_at": "2026-10-13T21:15:52+08:00",
+  "recorded_at": "2026-10-13T21:15:52+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "DONE",
+  "summary": "B claimed TASK-11S-BATCH-1012 attempt-1, read-only evidence check on 8 spray bags (zero commit/model/copy). Per-bag message counts and durations all match manifest. No PCD route input in batch; all spray input is SeyondScan packet route /iv_packets_front_mid. Key finding: 16_31_25 / 16_37_47 / 16_58_28 have NO iv_* input topic, so route-level NOT_APPLICABLE (not NEEDS_RUNTIME_RESULT); 16_33_10 is INVALID_EMPTY_INPUT (0-byte). Cross-DB3 three bags: timestamps contiguous forward, no ordering inversion. Reported, did not edit manifest.",
+  "evidence": "inbox/2号/TASK-11S-BATCH-1012/attempt-1-ack.md;receipts/TASK-11S-BATCH-1012/b-attempt-1.md",
+  "next": "Await coordinator ruling on manifest classification correction and any concrete rework order; no dev action this side."
+}

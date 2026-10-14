@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-121553-r8-dispatch-booked",
+  "occurred_at": "2026-10-11T12:19:57+08:00",
+  "recorded_at": "2026-10-11T12:19:57+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-8",
+  "status": "PENDING",
+  "summary": "12:15 巡检：核对主会话 12:15 新派单 rework-8（codex 第五轮 1 条 info，纯注释行级小修，base b7cee07）；TIMELINE 补录 DISPATCHED+检查点落盘；2号未 ACK，下轮核领单/交付",
+  "evidence": "inbox/2号/TASK-06B/attempt-1-r2-rework-8.md; reviews/codex-r8-rework7-20261010-verdict.md; TIMELINE.md 补录行",
+  "next": "等 2号 ACK rework-8 并交付；交付后协调者直接验收合入（不再起 codex 第六轮），随后更新强复审 R2I-20261010-06 target 等用户手动触发"
+}

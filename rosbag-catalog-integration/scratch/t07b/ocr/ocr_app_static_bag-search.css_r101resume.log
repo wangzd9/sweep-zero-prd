@@ -1,0 +1,34 @@
+[ocr] Summary: 1 file(s) reviewed, 3 comment(s), ~155479 token(s) used (input: ~135038, output: ~20441), 14m0s elapsed
+[ocr] Session: 997d0ddd-1b38-48e2-b39f-9774cfe3286f
+Review complete: 3 finding(s) across 1 selected item(s).
+
+─── app/static/bag-search.css:1376-1385 ───
+[maintainability · medium] Layout mismatch with the container: in `bags.html` this span is a direct
+child of `.bag-scene-cell`, which is `display: flex; flex-direction: column; gap: 4px`. Sibling
+badges (`.bag-scene-badge`, `.bag-scene-history`) use `align-self: flex-start` to stay as compact,
+left-aligned pills. Without it, this badge will stretch to the full width of the cell (min 120px),
+and `margin-left: 6px` (an inline-flow offset) shifts it 6px right, misaligning it with the other
+badges in the column — the column's `gap: 4px` already handles vertical spacing. `display:
+inline-block` also has no effect here, since flex items are blockified. Suggested fix: drop
+`display` and `margin-left`, add `align-self: flex-start`.
+
+
+
+─── app/static/bag-search.css:1384-1384 ───
+[style · low] This file consistently uses CSS custom properties for badge text colors
+(`var(--green)`, `var(--muted)`, `var(--blue)` in the sibling `.bag-scene-*` rules), and `app.css`
+defines `--red: #c43838`. Consider `color: var(--red)` for consistency (the rgba background/border
+is fine — it matches the existing `.revision-flash.err` palette in `bag-detail.css`).
+
+
+
+─── app/static/bag-search.css:1378-1378 ───
+[style · low] `margin-left: 6px` only makes sense for an inline flow, but this badge is always
+rendered as a direct child of the column-flex `.bag-scene-cell` (see bags.html). As a flex item it
+won't sit beside the label/history pills — the margin just shifts it 6px to the right of every other
+left-aligned pill in the column, producing an inconsistent left edge even after `align-self:
+flex-start` is added. If the intent is a stacked pill, drop the margin; if it should appear inline
+next to the scene label, the markup needs a row wrapper (e.g., group it with
+`.bag-scene-label`/`.bag-scene-history` in a `display: flex` line).
+
+

@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-025853-nochange",
+  "occurred_at": "2026-10-13T03:02:55+08:00",
+  "recorded_at": "2026-10-13T03:02:55+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "5分钟巡检无变化：16B 交付冻结等串行 OCR v2（16B 三批未起跑，16A 10/14，b10 在途；16A 新出 M2/L1 CORRECTION 级按账派 A 返修批次，非 C）",
+  "evidence": "sessions/C.md 03:00 条目；reviews/TASK-16/16A-16B-ocr-batches.md v2 段",
+  "next": "等 16A/16B v2 全收口→16B OCR 裁决→合入→real 栈冒烟（16A 接受后）"
+}

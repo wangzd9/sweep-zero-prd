@@ -1,0 +1,2026 @@
+diff --git a/app/api/__init__.py b/app/api/__init__.py
+index 320c399..66682c3 100644
+--- a/app/api/__init__.py
++++ b/app/api/__init__.py
+@@ -12,6 +12,7 @@ from . import (
+     scanner,
+     scene_analysis_runs,
+     scene_capabilities,
++    scene_results,
+     sources,
+ )
+ 
+@@ -29,6 +30,7 @@ for domain_router in (
+     scene_capabilities.router,
+     ingest_submissions.router,
+     scene_analysis_runs.router,
++    scene_results.router,
+ ):
+     router.include_router(domain_router)
+ 
+diff --git a/app/api/scene_results.py b/app/api/scene_results.py
+new file mode 100644
+index 0000000..7c8fd50
+--- /dev/null
++++ b/app/api/scene_results.py
+@@ -0,0 +1,45 @@
++"""场景结果回报与完成 API（TASK-06B，DESIGN §7.1 执行面专用路由）。
++
++- POST /api/v1/scene-analysis-runs/{id}/results          分批幂等登记（租约+源代次+运行类型）
++- POST /api/v1/scene-analysis-runs/{id}/complete-scene   完整性门禁+文件证据+换版+运行终态
++- POST /api/v1/scene-analysis-runs/{id}/reconcile-scene  发布后登记故障补偿（恢复入口）
++
++执行面专用：真实租约/源代次校验在 scene_result_report_service，浏览器不得
++伪造已验证产物。路由注册属共享入口（DESIGN §11.3）：本 commit 带入口改动，
++由协调者合入时接线 app/api/__init__.py。
++"""
++
++from __future__ import annotations
++
++from fastapi import APIRouter, Depends, Request
++from sqlalchemy.orm import Session
++
++from app.database import get_db
++from app.schemas.scene_result import SceneCompleteRequest, SceneReconcileRequest, SceneResultReportRequest
++from app.services import scene_result_report_service
++from app.services.control_plane import idempotency_key
++
++router = APIRouter()
++
++
++@router.post("/api/v1/scene-analysis-runs/{pipeline_run_id}/results")
++def report_scene_result(
++    pipeline_run_id: str, body: SceneResultReportRequest, request: Request, db: Session = Depends(get_db)
++):
++    """执行面回报：携租约、源代次、场景与 manifest，分批幂等登记（200）。"""
++    payload = body.as_payload()
++    return scene_result_report_service.report_result(db, pipeline_run_id, payload, idempotency_key(request, payload))
++
++
++@router.post("/api/v1/scene-analysis-runs/{pipeline_run_id}/complete-scene")
++def complete_scene(pipeline_run_id: str, body: SceneCompleteRequest, request: Request, db: Session = Depends(get_db)):
++    """执行面完成：校验完整 manifest + 文件证据，保存终态并按规则换版（200）。"""
++    payload = body.as_payload()
++    return scene_result_report_service.complete_scene(db, pipeline_run_id, payload)
++
++
++@router.post("/api/v1/scene-analysis-runs/{pipeline_run_id}/reconcile-scene")
++def reconcile_scene(pipeline_run_id: str, body: SceneReconcileRequest, request: Request, db: Session = Depends(get_db)):
++    """恢复补偿：文件已发布、数据库未登记时按发布目录 manifest 补登记/推进可用。"""
++    payload = body.as_payload()
++    return scene_result_report_service.reconcile_scene(db, pipeline_run_id, payload)
+diff --git a/app/schemas/scene_result.py b/app/schemas/scene_result.py
+new file mode 100644
+index 0000000..af4b077
+--- /dev/null
++++ b/app/schemas/scene_result.py
+@@ -0,0 +1,102 @@
++"""场景结果回报与完成请求协议（TASK-06B，DESIGN §7.1）。
++
++执行面专用入口的请求 DTO：
++- POST /api/v1/scene-analysis-runs/{id}/results          分批幂等登记 manifest
++- POST /api/v1/scene-analysis-runs/{id}/complete-scene   完整性门禁 + 换版
++
++manifest 以 JSON 对象承载（04A SceneManifest.to_dict 形状：schema_version/
++scene_code/run_id/source_id/source_generation/source_fingerprint/config_hash/
++outcome/segments/evidence/expected_slice_keys/created_at）。单批区间上限与
++JSON 限额由 06B 服务层与 04A 类型共同强制（拒绝而非截断，DESIGN §7.1/§8.1）。
++
++浏览器不得伪造已验证产物：真实租约/源代次校验在 scene_result_report_service。
++"""
++
++from __future__ import annotations
++
++from pydantic import BaseModel, Field, field_validator
++
++from app.schemas.scene_config import check_json_field_size
++
++
++class SceneResultReportRequest(BaseModel):
++    scene_code: str = Field(min_length=1, max_length=32)
++    lease_token: str | None = Field(default=None, max_length=128)
++    source_generation: int = Field(ge=1)
++    manifest: dict = Field(description="04A SceneManifest.to_dict() JSON 对象")
++    child_bag_uids: dict[str, str] = Field(
++        default_factory=dict, description="slice_key → 子包 bag_uid（仅 publish_target 区间必填）"
++    )
++    idempotency_key: str | None = Field(default=None, max_length=255)
++    publish_root: str | None = Field(default=None, description="受控发布根（complete-scene 文件证据核对用）")
++    vehicle_key: str | None = Field(default=None, max_length=128, description="发布路径车辆段，缺省 unassigned")
++
++    @field_validator("manifest")
++    @classmethod
++    def _manifest_size(cls, v: dict) -> dict:
++        check_json_field_size(v)
++        return v
++
++    @field_validator("child_bag_uids")
++    @classmethod
++    def _child_uid_shape(cls, v: dict[str, str]) -> dict[str, str]:
++        for key, uid in v.items():
++            if not (0 < len(uid) <= 26):
++                raise ValueError(f"child_bag_uids 值必须是 1..26 长度 bag_uid：{uid!r}")
++        return v
++
++    def as_payload(self) -> dict:
++        return {
++            "scene_code": self.scene_code,
++            "lease_token": self.lease_token,
++            "source_generation": self.source_generation,
++            "manifest": self.manifest,
++            "child_bag_uids": self.child_bag_uids,
++            "idempotency_key": self.idempotency_key,
++            "publish_root": self.publish_root,
++            "vehicle_key": self.vehicle_key,
++        }
++
++
++class SceneCompleteRequest(BaseModel):
++    scene_code: str = Field(min_length=1, max_length=32)
++    lease_token: str | None = Field(default=None, max_length=128)
++    source_generation: int = Field(ge=1, description="父包当前源代次（03B bound source_generation 口径）")
++    manifest: dict = Field(description="与登记批次内容身份一致（同 digest）的 04A manifest JSON")
++    child_bag_uids: dict[str, str] = Field(default_factory=dict)
++    publish_root: str | None = Field(default=None, description="受控发布根（文件证据核对必需，NO_MATCH 豁免）")
++    vehicle_key: str | None = Field(default=None, max_length=128, description="发布路径车辆段，缺省 unassigned")
++
++    @field_validator("manifest")
++    @classmethod
++    def _manifest_size(cls, v: dict) -> dict:
++        check_json_field_size(v)
++        return v
++
++    def as_payload(self) -> dict:
++        return {
++            "scene_code": self.scene_code,
++            "lease_token": self.lease_token,
++            "source_generation": self.source_generation,
++            "manifest": self.manifest,
++            "child_bag_uids": self.child_bag_uids,
++            "publish_root": self.publish_root,
++            "vehicle_key": self.vehicle_key,
++        }
++
++
++class SceneReconcileRequest(BaseModel):
++    """恢复补偿入口（无租约字段：运行可能已终态/租约已清；源代次仍必填）。"""
++
++    scene_code: str = Field(min_length=1, max_length=32)
++    source_generation: int = Field(ge=1)
++    publish_root: str | None = Field(default=None, description="受控发布根（恢复按其中 per-slice manifest 对账）")
++    vehicle_key: str | None = Field(default=None, max_length=128)
++
++    def as_payload(self) -> dict:
++        return {
++            "scene_code": self.scene_code,
++            "source_generation": self.source_generation,
++            "publish_root": self.publish_root,
++            "vehicle_key": self.vehicle_key,
++        }
+diff --git a/app/services/scene_publish_service.py b/app/services/scene_publish_service.py
+new file mode 100644
+index 0000000..3aa2404
+--- /dev/null
++++ b/app/services/scene_publish_service.py
+@@ -0,0 +1,245 @@
++"""场景切片 staging 校验/原子发布与 storage_offset 推导（TASK-06B，DESIGN §6）。
++
++职责（执行面编排层，04B writer 之上的发布段）：
++- ``derive_storage_offset``：writer 的 storage_offset_ns 由本层从 manifest + 源 bag
++  推导（TODO 交接约束）：
++  - 区间 basis 全为 bag_storage_ns → 边界已在存储域，offset=0；
++  - 区间 basis 全为 header_stamp_ns → 逐帧解码源 bag 相机 topic，
++    offset = storage_ts - header_ts 必须全帧恒定，否则不可推导；
++  - mixed/证据缺失/解码失败 → 不可推导，**必须阻塞发布**（DESIGN §4：实际时间
++    映射不能验证时阻塞真实切片发布），不得假定 0。
++- ``publish_scene_slices``：同文件系统原子发布到
++  ``<publish_root>/<vehicle_key>/<scene_code>/<parent_uid>_<child_uid>/``；
++  目标已存在仅在完整 manifest 与文件摘要一致时复用（幂等），否则冲突失败，
++  禁止覆盖（DESIGN §6.3）。未知车辆用 unassigned。
++- 发布内容含 per-slice ``slice_manifest.json``（完整 manifest + 切片校验证据 +
++  db3 摘要），是"文件已发布"的对账事实（DESIGN §6.6 恢复器按 manifest 补登记）。
++
++本模块不做数据库登记（06A register_manifest 职责）、不读 Scanner、
++不删除/移动源 bag（父/子文件均不复制，发布为 move 语义）。
++"""
++
++from __future__ import annotations
++
++import json
++import os
++import shutil
++from dataclasses import dataclass
++from pathlib import Path
++
++from app.scene.slope.bag_io import BagIoError, read_messages, read_topics
++from app.scene.types import SceneManifest
++
++PUBLISH_BLOCKED = "PUBLISH_BLOCKED"
++PUBLISH_CONFLICT = "PUBLISH_CONFLICT"
++
++SLICE_MANIFEST_NAME = "slice_manifest.json"
++PUBLISH_SCHEMA = "scene-slice-publish/v1"
++
++
++class PublishError(Exception):
++    """发布阻断/冲突：携带错误码，路由/执行面按码留痕，不当成功。"""
++
++    def __init__(self, code: str, detail: str):
++        self.code = code
++        self.detail = detail
++        super().__init__(f"{code}: {detail}")
++
++
++def _camera_topic_from_manifest(manifest: SceneManifest) -> str | None:
++    """manifest 证据中的相机 topic（04B 适配器写 SLOPE_TOPIC 证据，path=topic 名）。"""
++    for ev in manifest.evidence:
++        if ev.kind == "SLOPE_TOPIC" and ev.path:
++            return ev.path
++    return None
++
++
++def derive_storage_offset(manifest: SceneManifest, source_bag_dir: Path) -> int | None:
++    """推导 writer storage_offset_ns（header 域 → 存储域）。不可推导返回 None。
++
++    判定（见模块 docstring）：
++    - 无 publish_target 区间（NO_MATCH）→ 无切包，offset 无关，返回 0 仅表示
++      "推导已解决"（调用方对空 manifest 不应再切包）；
++    - basis 全 bag_storage_ns → 0；
++    - basis 全 header_stamp_ns → 逐帧 (storage - header) 必须恒定；
++    - mixed/空证据/相机 topic 缺失或读取失败 → None。
++    """
++    bases = {seg.mapping_basis for seg in manifest.publishable_segments()}
++    if not bases:
++        return 0
++    if bases == {"bag_storage_ns"}:
++        return 0
++    if bases != {"header_stamp_ns"}:
++        return None  # mixed_header_and_storage 或其他：不可推导，阻塞发布
++    cam_topic = _camera_topic_from_manifest(manifest)
++    if not cam_topic:
++        return None
++    try:
++        topics = {t.name: t for t in read_topics(source_bag_dir)}
++        if cam_topic not in topics:
++            return None
++        messages = read_messages(source_bag_dir, topic=cam_topic)
++    except BagIoError:
++        return None
++    if not messages:
++        return None
++    offsets: set[int] = set()
++    for m in messages:
++        header_ts = _decode_header_ns(m.data, topics[cam_topic].msgtype)
++        if header_ts is None:
++            return None  # 解码失败：不能证明时间映射（不得当 0）
++        offsets.add(m.timestamp_ns - header_ts)
++    if len(offsets) != 1:
++        return None  # 非恒定偏移：逐帧不一致，不可推导
++    return offsets.pop()
++
++
++def _decode_header_ns(data: bytes, msgtype: str) -> int | None:
++    """解码单条相机消息的 header.stamp → 整数纳秒；失败返回 None（不猜测）。"""
++    from app.scene.slope.cdr import decode_compressed_image, decode_image
++
++    try:
++        if "CompressedImage" in msgtype:
++            obj, _ = decode_compressed_image(data, 0)
++        elif "Image" in msgtype:
++            obj, _ = decode_image(data, 0)
++        else:
++            return None
++    except Exception:  # noqa: BLE001 — 任意解码异常都归"不可推导"（不猜测）
++        return None
++    stamp = obj.header.stamp
++    if not isinstance(stamp.sec, int) or not isinstance(stamp.nanosec, int):
++        return None
++    if stamp.sec < 0 or not (0 <= stamp.nanosec < 1_000_000_000):
++        return None
++    return stamp.sec * 1_000_000_000 + stamp.nanosec
++
++
++@dataclass(frozen=True)
++class SlicePublishSpec:
++    """单个待发布切片的定位与校验证据（来自 04B SliceWriteResult + 子包身份）。"""
++
++    slice_key: str
++    child_bag_uid: str
++    staging_dir: Path
++    db3_sha256: str
++    message_count: int
++    start_ns: int
++    end_ns: int
++    topics: dict[str, int]
++
++
++def publish_scene_slices(
++    manifest: SceneManifest,
++    *,
++    publish_root: Path,
++    vehicle_key: str,
++    specs: list[SlicePublishSpec],
++) -> list[Path]:
++    """把已 staging 校验的切片原子发布到受控路径；返回各切片发布目录。
++
++    - 同文件系统检查（staging 与 publish_root 同设备），跨设备 PUBLISH_BLOCKED
++      （rename 非原子，禁止降级复制——DESIGN §6.3 要求同文件系统原子发布）；
++    - 目标存在：slice_manifest.json 的 manifest digest + db3 摘要全一致 → 复用
++      （幂等重试）；任一不一致 → PUBLISH_CONFLICT（禁止覆盖）；
++    - 发布内容 = staging 目录整体 move + slice_manifest.json（先写入 staging，
++      随目录一起落位，发布后不存在"有文件无 manifest"的中间态）。
++    - 空 specs（NO_MATCH）无操作，返回 []。
++    """
++    if not specs:
++        return []
++    if not publish_root.is_absolute():
++        raise PublishError(PUBLISH_BLOCKED, "publish_root 必须是绝对路径（受控发布根）")
++    try:
++        publish_root.stat()
++    except OSError:
++        publish_root.mkdir(parents=True, exist_ok=True)
++    if os.stat(publish_root).st_dev != os.stat(specs[0].staging_dir).st_dev:
++        raise PublishError(
++            PUBLISH_BLOCKED,
++            f"staging 与发布根不在同一文件系统，无法原子发布（{specs[0].staging_dir} vs {publish_root}）",
++        )
++    vehicle = vehicle_key or "unassigned"
++    manifest_digest = manifest.digest()
++    out: list[Path] = []
++    for spec in specs:
++        target = publish_root / vehicle / manifest.scene_code / f"{manifest.source_id}_{spec.child_bag_uid}"
++        # 先把 per-slice manifest 写入 staging（成为发布内容的一部分）
++        _write_slice_manifest(
++            spec.staging_dir,
++            manifest,
++            manifest_digest,
++            spec,
++            publish_path=str(target),
++        )
++        if target.exists():
++            if not _target_matches(target, manifest_digest, spec.db3_sha256):
++                raise PublishError(
++                    PUBLISH_CONFLICT,
++                    f"目标 {target} 已存在且 manifest/摘要不一致，禁止覆盖（对账先行）",
++                )
++            out.append(target)  # 完整一致 → 复用（幂等重试不重复 move）
++            continue
++        target.parent.mkdir(parents=True, exist_ok=True)
++        tmp = target.parent / (target.name + ".incomplete")
++        if tmp.exists():
++            # 上次崩溃残留：先清理（未完成目录不是合法发布物）
++            shutil.rmtree(tmp)
++        spec.staging_dir.rename(tmp)
++        try:
++            os.replace(tmp, target)  # 同文件系统原子落位
++        except BaseException:
++            if tmp.exists():
++                shutil.rmtree(tmp, ignore_errors=True)
++            raise
++        out.append(target)
++    return out
++
++
++def _write_slice_manifest(
++    staging_dir: Path,
++    manifest: SceneManifest,
++    manifest_digest: str,
++    spec: SlicePublishSpec,
++    *,
++    publish_path: str,
++) -> None:
++    payload = {
++        "schema": PUBLISH_SCHEMA,
++        "manifest_digest": manifest_digest,
++        "manifest": manifest.to_dict(),
++        "slice": {
++            "slice_key": spec.slice_key,
++            "child_bag_uid": spec.child_bag_uid,
++            "db3_sha256": spec.db3_sha256,
++            "message_count": spec.message_count,
++            "start_ns": str(spec.start_ns),
++            "end_ns": str(spec.end_ns),
++            "topics": dict(sorted(spec.topics.items())),
++            "publish_path": publish_path,
++        },
++    }
++    (staging_dir / SLICE_MANIFEST_NAME).write_text(
++        json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8"
++    )
++
++
++def _target_matches(target: Path, manifest_digest: str, db3_sha256: str) -> bool:
++    """目标已存在时核对"完整 manifest 和摘要一致"（DESIGN §6.3）。"""
++    record_file = target / SLICE_MANIFEST_NAME
++    if not record_file.exists():
++        return False  # 无发布记录 = 不完整 → 冲突（不猜测）
++    try:
++        record = json.loads(record_file.read_text(encoding="utf-8"))
++    except (OSError, json.JSONDecodeError):
++        return False
++    if record.get("manifest_digest") != manifest_digest:
++        return False
++    if record.get("slice", {}).get("db3_sha256") != db3_sha256:
++        return False
++    db3 = target / "rosbag2_0.db3"
++    if not db3.is_file():
++        return False
++    import hashlib
++
++    return hashlib.sha256(db3.read_bytes()).hexdigest() == db3_sha256
+diff --git a/app/services/scene_result_report_service.py b/app/services/scene_result_report_service.py
+new file mode 100644
+index 0000000..1be53ab
+--- /dev/null
++++ b/app/services/scene_result_report_service.py
+@@ -0,0 +1,553 @@
++"""场景执行面结果回报、complete-scene 与发布后登记补偿（TASK-06B，DESIGN §6/§7.1）。
++
++路由（/results、/complete-scene）归本任务（05 已声明不实现）；服务层承载：
++- 身份校验：真实租约（05 lease 通道 require_valid_task_lease）、运行类型
++  （pipeline_type=SCENE_SLICE）、源代次（03B bound source_generation 口径：
++  manifest.source_generation 必须等于父包当前代次）、源围栏、配置对账
++  （manifest.config_hash == run 快照 capability_config_hash，两级 hash 不混用，
++  DESIGN §11.2）；
++- 登记：复用 06A register_manifest/switch_current（不另建切片索引）；
++  05 分配的版本行（av{N}）回填为登记事实行（content 身份 + result + 段数），
++  保持"提交时分配的分析版本排序"语义；
++- 完整性门禁（06A 终版契约 #1）：expected_segment_count ==
++  registered_segment_count 等值比较（同基数 = manifest 全部区间数含 flat）；
++  可发布子集用 list_segments(publish_only=True) 与 manifest expected_slice_keys
++  核对，不混入段数基数；
++- PENDING→AVAILABLE：文件（非空/可打开/时间证据：staging 校验证据随 per-slice
++  manifest 落发布目录）与数据库登记均完成才可用（DESIGN §6.4/§6.5）；
++- 换版（契约 #2）：switch_current 3 次有界重试后 409 重放语义；新版失败保旧
++  current 不动；晚到旧版不倒退；成功无命中切空；NOT_APPLICABLE/FAILED 不换版；
++- 补偿：文件已发布、数据库未登记（HTTP 超时等）时，reconcile-scene 按发布目录
++  的 per-slice manifest 补登记并推进可用性，不重复 move/不覆盖。
++
++浏览器不得伪造已验证产物：全部写入口要求有效租约 + 源代次 + 运行类型三重校验。
++"""
++
++from __future__ import annotations
++
++import json
++import re
++
++from fastapi import HTTPException
++from sqlalchemy import select
++from sqlalchemy.orm import Session
++
++from app.clock import now as local_now
++from app.domain.transitions import SCENE_TERMINAL_STATES as SCENE_TERMINAL
++from app.models import BagDerivation, BagRecord, PipelineRun, SceneAnalysisVersion
++from app.scene.types import EvidenceRef, SceneManifest, SceneOutcome
++from app.scene.types import SceneSegment as SegType
++from app.services import scene_result_service
++from app.services.control_plane import idempotent_replay, store_idempotency
++from app.services.scene_result_query import list_segments
++from app.services.scene_slice_service import PIPELINE_TYPE_SCENE_SLICE, finish_scene_run, record_scene_outcome
++from app.services.source_fence import check_fence_for_source
++
++# 05 提交时分配的版本占位格式（allocate_analysis_version：av{N}）；
++# 登记事实行的内容身份是 digest 前 16 位 hex，两者形状可区分。
++_PLACEHOLDER_RE = re.compile(r"^av\d+$")
++
++
++# ---------------------------------------------------------------------------
++# 身份校验（06B 边界：真实租约/源代次/运行类型，替身不得进入生产登记）
++# ---------------------------------------------------------------------------
++
++
++def _require_scene_run(
++    db: Session, pipeline_run_id: str, lease_token: str | None, *, source_generation: int
++) -> PipelineRun:
++    run = db.scalar(select(PipelineRun).where(PipelineRun.pipeline_run_id == pipeline_run_id).with_for_update())
++    if run is None:
++        raise HTTPException(404, f"scene run not found: {pipeline_run_id}")
++    if run.pipeline_type != PIPELINE_TYPE_SCENE_SLICE:
++        raise HTTPException(409, "run is not a scene slice run")
++    from app.domain.security import require_valid_task_lease
++
++    require_valid_task_lease(run, lease_token, local_now())
++    parent = db.scalar(select(BagRecord).where(BagRecord.bag_uid == run.source_id))
++    if parent is None:
++        raise HTTPException(409, "SOURCE_NOT_READY: 父包已不存在（对账先行，不得继续登记）")
++    if parent.source_generation != source_generation:
++        raise HTTPException(
++            409, f"SOURCE_GENERATION_MISMATCH: 回报代次 {source_generation} != 当前 {parent.source_generation}"
++        )
++    check_fence_for_source(db, run.source_id)
++    return run
++
++
++def _run_snapshot(run: PipelineRun) -> dict:
++    return json.loads(run.pipeline_config_snapshot_json or "{}")
++
++
++def _require_scene_entry(run: PipelineRun, scene_code: str) -> dict:
++    entry = next((e for e in _run_snapshot(run).get("scenes") or [] if e.get("scene_code") == scene_code), None)
++    if entry is None:
++        raise HTTPException(422, f"run 未选择场景 {scene_code}（不得回报 run 外场景）")
++    return entry
++
++
++def _find_av_row(db: Session, run: PipelineRun, scene_code: str) -> SceneAnalysisVersion | None:
++    """05 创建 run 时预分配的版本行（显式 API 路径，av{N} + run_id 已绑定）。
++
++    事件消费路径（03B→05）不预分配版本行——此时返回 None，由
++    register_manifest 按 (parent, scene, run_id) 建内容行（版本分配时点=首次
++    回报，幂等；换版排序仍按 created_at/id，较旧运行晚完成不倒退语义不变）。
++    """
++    return db.scalar(
++        select(SceneAnalysisVersion).where(
++            SceneAnalysisVersion.run_id == run.pipeline_run_id,
++            SceneAnalysisVersion.parent_bag_uid == run.source_id,
++            SceneAnalysisVersion.scene_code == scene_code,
++        )
++    )
++
++
++def _link_av_row(db: Session, av_row: SceneAnalysisVersion, manifest: SceneManifest) -> bool:
++    """把 05 预分配的版本占位行升级为 06A 登记事实行（同 run 只有一行，不另建）。
++
++    返回是否**首次**升级为内容身份（True=本 run 尚未登记过该内容；False=内容身份
++    已就位，属重放）。05 占位行已绑定 run_id，register_manifest 按 run_id 查到的
++    就是它——其 analysis_version 必须先升级为内容身份（digest 前 16 位），否则
++    register 判"同 run 不同内容" 409。升级后 register 走回放/补齐路径，行
++    id/created_at 保持 05 提交时点（"提交时分配的分析版本排序"语义，DESIGN §6.7）。
++
++    三态判定（占位 vs 已关联内容身份）：
++    - 当前是占位（av{N}）→ 首次升级，返回 True；
++    - 当前 == 本 manifest 内容身份 → 重放，返回 False；
++    - 当前是**不同**内容身份（16 hex，非占位）→ 同 run 已登记别的内容，
++      06A 契约 DUPLICATE_CONFLICT 409（不盲目覆盖）。
++    占位行已被升级时，register 的 replayed 恒为 True（行存在），需由本返回值修正
++    "首次登记 vs 重放" 语义（06A 契约：首次登记 replayed=False）。
++    """
++    content_identity = manifest.digest()[:16]
++    current = str(av_row.analysis_version or "")
++    if current == content_identity:
++        av_row.result = manifest.outcome.value  # 重放：结果同步（幂等）
++        return False
++    if not _PLACEHOLDER_RE.fullmatch(current):
++        # 已是内容身份且与本次不同：同 run 不同内容 → 冲突，不覆盖
++        raise HTTPException(
++            409,
++            f"DUPLICATE_CONFLICT: run 已登记内容身份 {current}，本次 {content_identity} 不同（不覆盖）",
++        )
++    clash = db.scalar(
++        select(SceneAnalysisVersion).where(
++            SceneAnalysisVersion.parent_bag_uid == av_row.parent_bag_uid,
++            SceneAnalysisVersion.scene_code == av_row.scene_code,
++            SceneAnalysisVersion.analysis_version == content_identity,
++            SceneAnalysisVersion.id != av_row.id,
++        )
++    )
++    if clash is not None:
++        raise HTTPException(409, "DUPLICATE_CONFLICT: 同 parent+scene 已存在同内容身份的版本行（需对账，不合并）")
++    av_row.analysis_version = content_identity
++    av_row.result = manifest.outcome.value
++    av_row.capability_version = manifest.capability_version
++    av_row.config_hash = manifest.config_hash
++    return True
++
++
++def parse_report_manifest(raw: dict, *, run: PipelineRun, scene_code: str, entry: dict) -> SceneManifest:
++    """JSON → SceneManifest，并做配置对账（manifest.config_hash vs 冻结能力 hash）。"""
++    try:
++        outcome = SceneOutcome(str(raw.get("outcome") or ""))
++    except ValueError as exc:
++        raise HTTPException(422, f"MANIFEST_INVALID: 未知 outcome {raw.get('outcome')!r}") from exc
++    segments: list[SegType] = []
++    for s in raw.get("segments") or []:
++        try:
++            segments.append(
++                SegType(
++                    label=str(s.get("label") or ""),
++                    start_ns=int(s["start_ns"]),
++                    end_ns=int(s["end_ns"]),
++                    publish_target=bool(s.get("publish_target")),
++                    mapping_basis=str(s.get("mapping_basis") or ""),
++                    evidence_ref=(s.get("evidence_ref") or None),
++                )
++            )
++        except (KeyError, TypeError, ValueError) as exc:
++            raise HTTPException(422, f"MANIFEST_INVALID: 区间字段非法 {s!r}") from exc
++    try:
++        manifest = SceneManifest(
++            scene_code=scene_code,
++            capability_version=str(raw.get("capability_version") or ""),
++            run_id=run.pipeline_run_id,
++            analysis_version=1,  # 行 id 才是版本身份；digest 不含该字段外的语义
++            source_id=run.source_id,
++            source_generation=int(raw.get("source_generation") or 0),
++            source_fingerprint=str(raw.get("source_fingerprint") or ""),
++            config_hash=str(raw.get("config_hash") or ""),
++            outcome=outcome,
++            segments=tuple(segments),
++            evidence=tuple(
++                EvidenceRef(
++                    kind=str(e.get("kind") or ""), path=e.get("path"), digest=e.get("digest"), count=e.get("count")
++                )
++                for e in raw.get("evidence") or []
++            ),
++            expected_slice_keys=tuple(str(k) for k in raw.get("expected_slice_keys") or []),
++            error_code=raw.get("error_code"),
++            error_detail=raw.get("error_detail"),
++            created_at=raw.get("created_at"),
++        )
++    except Exception as exc:  # 04A 构造限额（>100 区间 / JSON 超限）
++        raise HTTPException(422, f"MANIFEST_INVALID: {exc}") from exc
++    if manifest.run_id != run.pipeline_run_id or manifest.source_id != run.source_id:
++        raise HTTPException(422, "MANIFEST_INVALID: manifest 身份字段与 run 不一致")
++    # 配置对账：04A 单能力维度 config_hash（DESIGN §11.2 两级 hash 不混用）
++    frozen = entry.get("capability_config_hash")
++    if frozen and manifest.config_hash != frozen:
++        raise HTTPException(409, f"CONFIG_MISMATCH: manifest.config_hash 与冻结能力配置 {frozen} 不一致")
++    if manifest.capability_version != entry.get("capability_version"):
++        raise HTTPException(409, "CAPABILITY_MISMATCH: manifest 能力版本与 run 冻结版本不一致")
++    return manifest
++
++
++# ---------------------------------------------------------------------------
++# 登记 / 完整性 / 换版
++# ---------------------------------------------------------------------------
++
++
++def report_result(db: Session, pipeline_run_id: str, payload: dict, idempotency_key: str | None) -> dict:
++    """POST /results：身份校验 + 分批幂等登记（06A 仓储语义，先标 PENDING）。"""
++    operation = f"scene-result-report:{pipeline_run_id}"
++    replay = idempotent_replay(db, operation, idempotency_key, payload)
++    if replay is not None:
++        replay = dict(replay)
++        replay["replayed"] = True
++        return replay
++    run = _require_scene_run(
++        db, pipeline_run_id, payload.get("lease_token"), source_generation=int(payload.get("source_generation") or 0)
++    )
++    scene_code = str(payload.get("scene_code") or "")
++    entry = _require_scene_entry(run, scene_code)
++    manifest = parse_report_manifest(payload.get("manifest") or {}, run=run, scene_code=scene_code, entry=entry)
++    child_uids = {str(k): str(v) for k, v in (payload.get("child_bag_uids") or {}).items()}
++    av_row = _find_av_row(db, run, scene_code)
++    fresh = False
++    if av_row is not None:
++        fresh = _link_av_row(db, av_row, manifest)  # 先升级占位行内容身份，register 再按 run_id 回放/补齐
++    res = scene_result_service.register_manifest(db, manifest, expected_child_uids=child_uids)
++    # 05 占位行已绑 run_id：register 按 run_id 查到该行 → replayed 恒 True。
++    # 首次升级为内容身份（fresh）才是真"首次登记"，按 06A 契约 replayed=False。
++    response = {
++        "pipeline_run_id": pipeline_run_id,
++        "scene_code": scene_code,
++        "analysis_version_id": res["analysis_version_id"],
++        "run_id": res["run_id"],
++        "registered_segments": res["registered_segments"],
++        "derived_children": res["derived_children"],
++        "replayed": (not fresh) and res["replayed"],
++        "availability": "PENDING",  # 文件+登记均完成前不可用（complete-scene 才切）
++    }
++    store_idempotency(db, operation, idempotency_key, payload, response)
++    db.commit()
++    return response
++
++
++def _check_integrity(db: Session, row: SceneAnalysisVersion, manifest: SceneManifest) -> None:
++    """完整性门禁（06A 契约 #1）：段数等值比较 + 可发布子集核对。"""
++    db.expire(row)
++    if row.expected_segment_count != row.registered_segment_count:
++        raise HTTPException(
++            409,
++            f"INCOMPLETE: expected {row.expected_segment_count} != registered {row.registered_segment_count}，"
++            "不能完成版本（DESIGN §6.5）",
++        )
++    if manifest.publishable_segments():
++        listed = list_segments(db, analysis_version_id=row.id, publish_only=True, limit=200)
++        if listed["truncated"]:
++            raise HTTPException(409, "INCOMPLETE: 可发布区间超过单页上限，完整性核对失败")
++        listed_keys = {s["slice_key"] for s in listed["items"]}
++        expected_keys = set(manifest.expected_slice_keys)
++        if expected_keys and listed_keys != expected_keys:
++            raise HTTPException(
++                409,
++                f"INCOMPLETE: 可发布子集 {sorted(listed_keys)} 与 expected_slice_keys {sorted(expected_keys)} 不一致",
++            )
++
++
++def _mark_children_available(db: Session, run: PipelineRun, row: SceneAnalysisVersion) -> list[str]:
++    """PENDING→AVAILABLE：数据库登记完成的子包置可用（文件证据由 complete 前校验）。
++
++    仅本 run 登记的子包（derivation.run_id == 本 run）；started_at/duration/
++    message_count 以登记事实为准（区间首末纳秒与校验消息数）。
++    """
++    uids: list[str] = []
++    ders = db.scalars(
++        select(BagDerivation).where(
++            BagDerivation.run_id == run.pipeline_run_id, BagDerivation.analysis_version_id == row.id
++        )
++    ).all()
++    for der in ders:
++        child = db.scalar(select(BagRecord).where(BagRecord.bag_uid == der.child_bag_uid))
++        if child is None:
++            raise HTTPException(409, f"INCOMPLETE: 子包 {der.child_bag_uid} 登记行缺失（需先 reconcile）")
++        if child.availability != "AVAILABLE":
++            child.availability = "AVAILABLE"
++            if child.started_at is None:
++                from datetime import datetime, timezone
++
++                child.started_at = datetime.fromtimestamp(der.start_ns / 1e9, tz=timezone.utc).replace(tzinfo=None)
++            child.duration_ns = der.duration_ns
++            child.updated_at = local_now()
++        uids.append(der.child_bag_uid)
++    return uids
++
++
++def complete_scene(db: Session, pipeline_run_id: str, payload: dict) -> dict:
++    """POST /complete-scene：完整 manifest 校验 → 登记对账 → 运行终态 → 换版。
++
++    语义（DESIGN §6）：
++    - SUCCESS/NO_MATCH：完整性门禁 + 文件证据校验后先记场景结果并推导运行终态
++      （05 finish_scene_run 单一终态入口），再切当前版本（NO_MATCH 切空）；
++    - NOT_APPLICABLE/FAILED：保存结果语义并推导运行终态，**不替换既有当前结果**
++      （旧结果不替换，switch_current 拒绝非 SUCCESS/NO_MATCH）；
++    - 幂等：run 已终态（终态时租约已清，不再要求 lease token）且本场景已记录
++      同 outcome → 200 重放（不二次登记/换版/终态）；已终态但结果不一致 →
++      409 CONFLICT 留痕；已终态但本场景无记录（自动重试失败等）→ 409。
++    """
++    run = _require_scene_run(
++        db, pipeline_run_id, payload.get("lease_token"), source_generation=int(payload.get("source_generation") or 0)
++    )
++    scene_code = str(payload.get("scene_code") or "")
++    entry = _require_scene_entry(run, scene_code)
++    manifest = parse_report_manifest(payload.get("manifest") or {}, run=run, scene_code=scene_code, entry=entry)
++    outcome = manifest.outcome.value
++    recorded = _recorded_outcome(run, scene_code)
++    if run.status in SCENE_TERMINAL:
++        if recorded != outcome:
++            raise HTTPException(409, f"CONFLICT: run 已终态（{run.status}）且场景结果不一致（{recorded} vs {outcome}）")
++        # 幂等重放：HTTP 超时后执行面重试 complete，终态已定、租约已清——
++        # 不要求有效 lease token，直接回显既有事实（与项目 200 重放约定一致）
++        return {
++            "pipeline_run_id": pipeline_run_id,
++            "scene_code": scene_code,
++            "outcome": outcome,
++            "run_status": run.status,
++            "switch": _replay_switch(db, run, scene_code, outcome),
++            "available_children": _available_children_of(db, run),
++            "replayed": True,
++        }
++    child_uids = {str(k): str(v) for k, v in (payload.get("child_bag_uids") or {}).items()}
++    av_row = _find_av_row(db, run, scene_code)
++    if av_row is not None:
++        _link_av_row(db, av_row, manifest)
++    # 幂等登记（/results 已登记 → 回放补齐；未登记 → 完整登记）
++    res = scene_result_service.register_manifest(db, manifest, expected_child_uids=child_uids)
++    content_row = db.get(SceneAnalysisVersion, res["analysis_version_id"])
++    if content_row is None:
++        raise HTTPException(409, "INCOMPLETE: 登记内容行缺失（需先 /results 登记）")
++    uids: list[str] = []
++    if outcome in (SceneOutcome.SUCCESS.value, SceneOutcome.NO_MATCH.value):
++        _check_integrity(db, content_row, manifest)
++        _verify_published_files(db, run, content_row, manifest, payload)
++        uids = _mark_children_available(db, run, content_row)
++    record_scene_outcome(db, run, scene_code, outcome, manifest.error_detail or "")
++    finished = finish_scene_run(db, run, payload.get("lease_token"))
++    # 登记事实 + 运行终态先落盘：换版冲突（晚到旧版 409）不连带回滚结果——
++    # 否则 run 停在 SCENE_RUNNING，执行面重试 complete 会再次 409，死循环且
++    # 版本行永远进不了"历史"。终态已定后，重试 complete 走顶部终态重放 200。
++    db.commit()
++    if outcome in (SceneOutcome.SUCCESS.value, SceneOutcome.NO_MATCH.value):
++        try:
++            scene_result_service.switch_current(
++                db,
++                parent_bag_uid=content_row.parent_bag_uid,
++                scene_code=scene_code,
++                analysis_version_id=content_row.id,
++                result=outcome,
++            )
++        except HTTPException as exc:
++            if exc.status_code == 409 and not db.get(SceneAnalysisVersion, content_row.id).current:
++                # switch_current 3 次有界重试后 409（契约 #2 重放语义）：
++                # 晚到旧版/竞争收尾 → 如实 409（保旧 current 不动），执行面下轮对账。
++                # 直接 re-raise 保留原 status_code（不得经 _exc 二次解析：
++                # HTTPException str() 形如 "409: CODE: ..."，split 后 409 不在码表 → 误落 500）。
++                db.commit()  # 登记事实与运行终态落盘后再报冲突（见上方说明）
++                raise
++        switch = {"switched": True, "current": True, "reason": None}
++    else:
++        switch = {"switched": False, "current": False, "reason": "NOT_APPLICABLE/FAILED 不替换既有当前结果"}
++    response = {
++        "pipeline_run_id": pipeline_run_id,
++        "scene_code": scene_code,
++        "outcome": outcome,
++        "run_status": finished["status"],
++        "switch": switch,
++        "available_children": uids,
++    }
++    db.commit()
++    return response
++
++
++def _recorded_outcome(run: PipelineRun, scene_code: str) -> str | None:
++    return (_run_snapshot(run).get("scene_outcomes") or {}).get(scene_code, {}).get("outcome")
++
++
++def _replay_switch(db: Session, run: PipelineRun, scene_code: str, outcome: str) -> dict:
++    """complete 重放回显：该场景内容行是否当前指针（不回显猜测值）。"""
++    row = db.scalar(
++        select(SceneAnalysisVersion).where(
++            SceneAnalysisVersion.parent_bag_uid == run.source_id,
++            SceneAnalysisVersion.scene_code == scene_code,
++            SceneAnalysisVersion.run_id == run.pipeline_run_id,
++        )
++    )
++    if row is None or outcome not in (SceneOutcome.SUCCESS.value, SceneOutcome.NO_MATCH.value):
++        return {"switched": False, "current": bool(row.current) if row else False, "reason": "complete 重放（无换版）"}
++    return {"switched": False, "current": bool(row.current), "reason": "complete 重放（已换版/未换版见 current）"}
++
++
++def _available_children_of(db: Session, run: PipelineRun) -> list[str]:
++    """重放回显：该 run 已登记子包中当前 AVAILABLE 的 bag_uid。"""
++    ders = db.scalars(select(BagDerivation).where(BagDerivation.run_id == run.pipeline_run_id)).all()
++    if not ders:
++        return []
++    uids = [d.child_bag_uid for d in ders]
++    rows = db.scalars(select(BagRecord).where(BagRecord.bag_uid.in_(uids))).all()
++    return sorted(b.bag_uid for b in rows if b.availability == "AVAILABLE")
++
++
++def _verify_published_files(
++    db: Session, run: PipelineRun, row: SceneAnalysisVersion, manifest: SceneManifest, payload: dict
++) -> None:
++    """文件证据校验（DESIGN §6.2/§6.4）：发布根非空、可打开、摘要与登记一致才可用。
++
++    publish_root 缺失/文件缺失/摘要不一致 → 409 INCOMPLETE（不得"先可用后补"）。
++    NO_MATCH（无可发布区间）无文件义务，直接放行。
++    本校验在 Backend 发布根（本地/NAS 挂载）读取——P0 单文件系统口径；
++    执行面私有 staging 的原始校验证据由 per-slice manifest 随发布物落位。
++    """
++    if not manifest.publishable_segments():
++        return
++    publish_root = payload.get("publish_root")
++    if not publish_root:
++        raise HTTPException(409, "INCOMPLETE: 未提供 publish_root，无法核对文件证据（不得假定已发布）")
++    from pathlib import Path
++
++    from app.services.scene_publish_service import SLICE_MANIFEST_NAME, _target_matches
++
++    root = Path(str(publish_root))
++    if not root.is_dir():
++        raise HTTPException(409, f"INCOMPLETE: 发布根不可读 {root}")
++    manifest_digest = manifest.digest()
++    for der in db.scalars(
++        select(BagDerivation).where(
++            BagDerivation.run_id == run.pipeline_run_id, BagDerivation.analysis_version_id == row.id
++        )
++    ).all():
++        child_dir = f"{run.source_id}_{der.child_bag_uid}"
++        target = root / (payload.get("vehicle_key") or "unassigned") / manifest.scene_code / child_dir
++        if not target.is_dir():
++            raise HTTPException(409, f"INCOMPLETE: 切片 {der.slice_key} 未发布（{target} 不存在）")
++        # db3 摘要在 per-slice manifest 中（登记事实）；核对发布物与登记一致
++        record_file = target / SLICE_MANIFEST_NAME
++        if not record_file.is_file():
++            raise HTTPException(409, f"INCOMPLETE: 切片 {der.slice_key} 缺少 per-slice manifest（发布不完整）")
++        try:
++            import hashlib
++
++            db3 = target / "rosbag2_0.db3"
++            digest = hashlib.sha256(db3.read_bytes()).hexdigest() if db3.is_file() else None
++        except OSError as exc:
++            raise HTTPException(409, f"INCOMPLETE: 切片 {der.slice_key} 文件不可读（{exc}）")
++        if digest is None:
++            raise HTTPException(409, f"INCOMPLETE: 切片 {der.slice_key} db3 缺失或为空（不得标记可用）")
++        if not _target_matches(target, manifest_digest, digest):
++            raise HTTPException(409, f"INCOMPLETE: 切片 {der.slice_key} 发布物与 manifest/摘要不一致（禁止放行）")
++
++
++# ---------------------------------------------------------------------------
++# 发布后登记故障补偿（DESIGN §6.6）：文件已发布、数据库未登记
++# ---------------------------------------------------------------------------
++
++
++def reconcile_scene(db: Session, pipeline_run_id: str, payload: dict) -> dict:
++    """POST /reconcile-scene：按发布目录的 per-slice manifest 补登记/推进可用。
++
++    - 恢复入口不要求租约（运行可能已终态/租约已清），但要求运行类型 + 源围栏
++      + 场景在 run 内 + 源代次一致（防跨代次补登记）；
++    - 先查登记事实：av 行已关联内容行且完整性满足 → 只做可用性推进；
++    - 未登记 → 从发布目录读 per-slice manifest 重建 SceneManifest（digest 必须
++      全切片一致），幂等登记（06A 语义），再推进；
++    - 不重复 move、不覆盖文件、不创建新 run、不切当前（换版只在 complete）。
++    """
++    run = db.scalar(select(PipelineRun).where(PipelineRun.pipeline_run_id == pipeline_run_id).with_for_update())
++    if run is None:
++        raise HTTPException(404, f"scene run not found: {pipeline_run_id}")
++    if run.pipeline_type != PIPELINE_TYPE_SCENE_SLICE:
++        raise HTTPException(409, "run is not a scene slice run")
++    parent = db.scalar(select(BagRecord).where(BagRecord.bag_uid == run.source_id))
++    if parent is None:
++        raise HTTPException(409, "SOURCE_NOT_READY: 父包已不存在（对账先行，不得补登记）")
++    if parent.source_generation != int(payload.get("source_generation") or 0):
++        gen = payload.get("source_generation")
++        raise HTTPException(409, f"SOURCE_GENERATION_MISMATCH: 对账代次 {gen} != 当前 {parent.source_generation}")
++    check_fence_for_source(db, run.source_id)
++    scene_code = str(payload.get("scene_code") or "")
++    _require_scene_entry(run, scene_code)  # 场景须在 run 内（对账不信任调用方越权场景）
++    manifest, child_uids = _manifest_from_publish_root(run, scene_code, payload)
++    av_row = _find_av_row(db, run, scene_code)
++    if av_row is not None:
++        _link_av_row(db, av_row, manifest)
++    res = scene_result_service.register_manifest(db, manifest, expected_child_uids=child_uids)
++    content_row = db.get(SceneAnalysisVersion, res["analysis_version_id"])
++    if content_row is None:
++        raise HTTPException(409, "INCOMPLETE: 登记内容行缺失")
++    outcome = manifest.outcome
++    response: dict = {
++        "pipeline_run_id": pipeline_run_id,
++        "scene_code": scene_code,
++        "reconciled": True,
++        "registered": content_row.registered_segment_count == content_row.expected_segment_count,
++    }
++    if outcome in (SceneOutcome.SUCCESS.value, SceneOutcome.NO_MATCH.value):
++        _check_integrity(db, content_row, manifest)
++        _verify_published_files(db, run, content_row, manifest, payload)
++        response["available_children"] = _mark_children_available(db, run, content_row)
++    db.commit()
++    return response
++
++
++def _manifest_from_publish_root(
++    run: PipelineRun, scene_code: str, payload: dict
++) -> tuple[SceneManifest, dict[str, str]]:
++    """发布目录 per-slice manifest → (SceneManifest, slice_key→child_uid)。
++
++    恢复事实来源：完整 manifest 以 per-slice 记录为准（各切片记录同一份完整
++    manifest，digest 必须一致），子包身份映射从记录中恢复，不猜测。
++    """
++    root = payload.get("publish_root")
++    if not root:
++        raise HTTPException(409, "INCOMPLETE: reconcile 需要 publish_root（恢复必须按 manifest 对账）")
++    from pathlib import Path
++
++    from app.services.scene_publish_service import SLICE_MANIFEST_NAME
++
++    base = Path(str(root)) / (payload.get("vehicle_key") or "unassigned") / scene_code
++    records = []
++    if base.is_dir():
++        for d in sorted(base.iterdir()):
++            f = d / SLICE_MANIFEST_NAME
++            if d.is_dir() and f.is_file() and d.name.startswith(f"{run.source_id}_"):
++                try:
++                    records.append(json.loads(f.read_text(encoding="utf-8")))
++                except (OSError, json.JSONDecodeError):
++                    raise HTTPException(409, f"INCOMPLETE: per-slice manifest 不可读 {f}")
++    if not records:
++        raise HTTPException(409, f"INCOMPLETE: 发布根 {base} 下无本 run 切片的 manifest 记录（文件未发布或路径不符）")
++    manifest_raw = dict(records[0].get("manifest") or {})
++    entry = _require_scene_entry(run, scene_code)
++    manifest = parse_report_manifest(manifest_raw, run=run, scene_code=scene_code, entry=entry)
++    child_uids: dict[str, str] = {}
++    for rec in records:
++        slice_info = rec.get("slice") or {}
++        child_uid = slice_info.get("child_bag_uid")
++        if child_uid:
++            child_uids[str(slice_info.get("slice_key") or "")] = str(child_uid)
++    digests = {rec.get("manifest_digest") for rec in records}
++    if digests != {manifest.digest()}:
++        raise HTTPException(409, "INCOMPLETE: 发布物 per-slice manifest digest 不一致（混合版本，需人工对账）")
++    return manifest, child_uids
+diff --git a/app/services/scene_slice_service.py b/app/services/scene_slice_service.py
+index 226e966..6d40a35 100644
+--- a/app/services/scene_slice_service.py
++++ b/app/services/scene_slice_service.py
+@@ -317,7 +317,8 @@ def finish_scene_run(db: Session, run: PipelineRun, lease_token: str | None) ->
+     validate_pipeline_transition(run.status, target)
+     now = local_now()
+     run.status = target
+-    run.error_message = "; ".join(reasons)[:2000] or None
++    # error_message 列 NOT NULL（模型默认 ""）：无原因时留空串，不写 None
++    run.error_message = "; ".join(reasons)[:2000] or ""
+     run.updated_at = now
+     clear_task_lease(run)
+     if target == "SCENE_FAILED":
+diff --git a/tests/test_scene_result_report.py b/tests/test_scene_result_report.py
+new file mode 100644
+index 0000000..c83ef08
+--- /dev/null
++++ b/tests/test_scene_result_report.py
+@@ -0,0 +1,1017 @@
++"""场景结果回报/complete-scene/发布/对账（专项 TASK-06B，DESIGN §6/§7.1）。
++
++覆盖验收（TODO §3 TASK-06B / AC-02、05、06、07、08）：
++- 真实租约/源代次验证：claim 租约、错代次 409、非场景 run 409、run 外场景 422、
++  配置 hash 不符 409；
++- 重复单子包幂等：同键 /results 重放 200（idempotency 通道）、同键不同参数 409、
++  同 manifest 无键重登记 200（06A 内容幂等）、同 run 不同内容 409
++  DUPLICATE_CONFLICT、complete 终态重放 200（不要求已清租约）；
++- storage_offset 推导（真实 bag + 真实 CDR 编码/解码）：header/存储差恒定 →
++  推导；全存储 basis → 0；无发布区间 → 0；mixed/非常定/坏帧/缺 topic →
++  不可推导阻塞发布（不假定 0）；
++- staging→原子发布：同文件系统 move + per-slice manifest、目标存在摘要一致
++  复用、不一致冲突禁止覆盖、跨文件系统（tmpfs vs 普通盘）阻塞、空 specs 无操作；
++- 发布后登记故障补偿：reconcile-scene 按发布目录 per-slice manifest 补登记/
++  推进可用、幂等、不切当前（换版只在 complete）、无文件事实如实 409；
++- 晚到旧版不倒退：较旧版本行晚 complete → switch 409 保当前，run 仍置终态留痕；
++- 新版失败保旧：NOT_APPLICABLE 不换版、旧 current 不动、run SCENE_DONE；
++- 无命中切空：NO_MATCH 切空当前版本、无文件义务；
++- PENDING 不可用：complete 前子包 availability=PENDING、complete 后 AVAILABLE +
++  血缘可查；文件缺失不得 complete（409 INCOMPLETE，不得先可用后补）；
++- 分批回报完整性门禁：expected(2) != registered(1) → complete 409 INCOMPLETE。
++
++真实文件链：tests/scene_fixture 确定性 CompressedImage bag（真实 ROS2 CDR 封装）
+++ 04B 真实 writer slice_bag_to_staging（staging 校验：非空/可打开/topic/时间/
++CDR 抽验）+ 06B 发布层，不用自洽 fixture 冒充真实格式。
++"""
++
++from __future__ import annotations
++
++import shutil
++import tempfile
++import uuid
++from datetime import timedelta
++from pathlib import Path
++
++import pytest
++from fastapi.routing import APIRoute
++from fastapi.testclient import TestClient
++from sqlalchemy import delete, select
++
++from app.database import Base, SessionLocal, engine
++from app.main import app
++from app.models import (
++    ApiIdempotency,
++    BagDerivation,
++    BagFile,
++    BagPurpose,
++    BagRecord,
++    BagSceneLabelEvidence,
++    BagTopic,
++    PipelineEvent,
++    PipelineRun,
++    SceneAnalysisVersion,
++    SceneSegment,
++    StepRun,
++)
++from app.scene import get_registry
++from app.scene.slope import slice_bag_to_staging
++from app.scene.slope.writer import SliceWriteResult
++from app.scene.types import EvidenceRef, SceneManifest, SceneOutcome
++from app.scene.types import SceneSegment as SegT
++from app.services import scene_publish_service
++from tests.scene_fixture import CAM_TOPIC, CAM_TYPE, NANO, _enc_image, build_single_db3
++
++T06B = "T06B"
++BASE_S = 1_700_000_000  # 与 scene_fixture.BASE_TS 同源（// NANO），保证区间内有帧
++
++
++@pytest.fixture(autouse=True)
++def _ensure_schema():
++    Base.metadata.create_all(engine)
++    yield
++
++
++@pytest.fixture
++def client():
++    with TestClient(app) as c:
++        yield c
++
++
++def _purge(db, bag_uids: list[str], run_ids: list[str] | None = None) -> None:
++    all_uids = set(bag_uids)
++    if run_ids:
++        all_uids |= set(db.scalars(select(BagDerivation.child_bag_uid).where(BagDerivation.run_id.in_(run_ids))).all())
++    av_ids = [
++        v.id
++        for v in db.scalars(select(SceneAnalysisVersion).where(SceneAnalysisVersion.parent_bag_uid.in_(all_uids))).all()
++    ]
++    if av_ids:
++        db.execute(delete(SceneSegment).where(SceneSegment.analysis_version_id.in_(av_ids)))
++        db.execute(delete(BagSceneLabelEvidence).where(BagSceneLabelEvidence.analysis_version_id.in_(av_ids)))
++    db.execute(delete(SceneAnalysisVersion).where(SceneAnalysisVersion.parent_bag_uid.in_(all_uids)))
++    db.execute(delete(BagDerivation).where(BagDerivation.parent_bag_uid.in_(all_uids)))
++    db.execute(delete(ApiIdempotency).where(ApiIdempotency.operation.startswith("scene-result-report")))
++    bag_ids = [b.id for b in db.scalars(select(BagRecord).where(BagRecord.bag_uid.in_(all_uids))).all()]
++    if bag_ids:
++        for table in (BagFile, BagTopic):
++            db.execute(delete(table).where(table.bag_id.in_(bag_ids)))
++        db.execute(delete(BagPurpose).where(BagPurpose.bag_id.in_(bag_ids)))
++    if run_ids:
++        db.execute(delete(StepRun).where(StepRun.pipeline_run_id.in_(run_ids)))
++        db.execute(delete(PipelineEvent).where(PipelineEvent.pipeline_run_id.in_(run_ids)))
++        db.execute(delete(PipelineRun).where(PipelineRun.pipeline_run_id.in_(run_ids)))
++    db.execute(delete(BagRecord).where(BagRecord.bag_uid.in_(all_uids)))
++    db.commit()
++
++
++def _parent(db, tag: str, *, generation: int = 1) -> BagRecord:
++    uid = f"{T06B}{tag}-{uuid.uuid4().hex[:12]}"
++    bag = BagRecord(
++        bag_uid=uid,
++        name=f"t06b-{tag}-{uuid.uuid4().hex[:8]}",
++        relative_path=f"ready/rosbags/t06b-{uuid.uuid4().hex[:10]}",
++        status="READY",
++        dataset_type="self_built",
++        bag_role="ORIGINAL",
++        fast_fingerprint="fp-" + uuid.uuid4().hex[:12],
++        source_status="READY",
++        source_generation=generation,
++    )
++    db.add(bag)
++    db.commit()
++    return bag
++
++
++def _child_uid() -> str:
++    return f"{T06B}c-{uuid.uuid4().hex[:13]}"
++
++
++def _create_run(client, uid: str, reanalysis_id: str | None = None) -> dict:
++    # reanalysis_id（强模型 #7 持久身份键）：同业务身份全局只建一个 run；
++    # "同一 source 的重新分析产生新版本" 语义下必须带独立 reanalysis_id 走新身份。
++    body: dict = {"source_id": uid, "scenes": [{"scene_code": "slope"}]}
++    if reanalysis_id is not None:
++        body["reanalysis_id"] = reanalysis_id
++    resp = client.post("/api/v1/scene-analysis-runs", json=body)
++    assert resp.status_code == 202, resp.text
++    return resp.json()
++
++
++def _base_url(run_id: str, op: str) -> str:
++    return f"/api/v1/scene-analysis-runs/{run_id}/{op}"
++
++
++def _claim_specific(client, run_id: str) -> dict:
++    """领取并校验拿到的是指定 run；其他测试残留场景 run 则释放回队列重试。"""
++    for _ in range(10):
++        claimed = client.post(
++            "/api/v1/orchestrator/claim", json={"queue": "SCENE_SLICE_QUEUE", "executor_id": "t06b", "ttl_seconds": 300}
++        ).json()
++        if claimed.get("claimed") and claimed["pipeline_run_id"] == run_id:
++            return claimed
++        if claimed.get("claimed"):
++            client.post(
++                f"/api/v1/orchestrator/task-leases/{claimed['lease_token']}/release-claim", json={"reason": "test"}
++            )
++    raise AssertionError("无法领取指定场景 run")
++
++
++def _cap() -> tuple[str, str]:
++    eff = get_registry().effective_params("slope", None)
++    return eff.capability_version, eff.config_hash
++
++
++def _bag_with_offset(bag_dir: Path, *, offset_ns: int, n: int = 8) -> Path:
++    """真实 CompressedImage bag：header 时间 = BASE+i*1s，存储时间 = header + offset_ns。"""
++    msgs = [
++        (CAM_TOPIC, CAM_TYPE, (BASE_S + i) * NANO + offset_ns, _enc_image(BASE_S + i, 0, b"JPEGDATA")) for i in range(n)
++    ]
++    build_single_db3(bag_dir / "rosbag2_0.db3", msgs)
++    return bag_dir
++
++
++def _manifest_dict(
++    run: dict,
++    parent: BagRecord,
++    *,
++    outcome: str,
++    segments: list[tuple[str, int, int]],
++    expected: list[str],
++    flat: list[tuple[str, int, int]] | None = None,
++) -> dict:
++    cap_v, cap_h = _cap()
++    all_segs = list(segments) + (flat or [])
++    return {
++        "schema_version": 1,
++        "scene_code": "slope",
++        "capability_version": cap_v,
++        "run_id": run["pipeline_run_id"],
++        "analysis_version": 1,
++        "source_id": parent.bag_uid,
++        "source_generation": parent.source_generation,
++        "source_fingerprint": parent.fast_fingerprint,
++        "config_hash": cap_h,
++        "outcome": outcome,
++        "segments": [
++            {
++                "label": s[0],
++                "start_ns": str(s[1]),
++                "end_ns": str(s[2]),
++                "duration_ns": str(s[2] - s[1]),
++                "publish_target": True,
++                "slice_key": f"{s[0]}:{s[1]}:{s[2]}",
++                "mapping_basis": "header_stamp_ns",
++                "evidence_ref": None,
++            }
++            for s in all_segs
++        ],
++        "evidence": [{"kind": "SLOPE_TOPIC", "path": CAM_TOPIC, "digest": None, "count": len(segments)}],
++        "expected_slice_keys": expected,
++        "error_code": None,
++        "error_detail": None,
++        "created_at": "2026-10-09T08:00:00+00:00",
++    }
++
++
++def _stage_and_publish(
++    tmp: Path, run: dict, parent: BagRecord, segments: list[tuple[str, int, int]]
++) -> tuple[str, dict[str, str], dict]:
++    """真实链：源 bag → 04B writer staging 校验 → 06B 原子发布。
++
++    返回 (publish_root, slice_key→child_uid, manifest_dict)；manifest_dict 与
++    _manifest_dict 同形状（回报侧直接复用，保证 digest 一致）。
++    """
++    bag_dir = _bag_with_offset(tmp / "src", offset_ns=0)
++    seg_objs = [
++        SegT(label=s[0], start_ns=s[1], end_ns=s[2], publish_target=True, mapping_basis="header_stamp_ns")
++        for s in segments
++    ]
++    staging_root = tmp / "staging"
++    child_uids: dict[str, str] = {}
++    specs = []
++    for s in seg_objs:
++        result: SliceWriteResult = slice_bag_to_staging(bag_dir, staging_root, s, storage_offset_ns=0)
++        child_uid = _child_uid()
++        child_uids[s.slice_key] = child_uid
++        specs.append(
++            scene_publish_service.SlicePublishSpec(
++                slice_key=s.slice_key,
++                child_bag_uid=child_uid,
++                staging_dir=result.out_dir,
++                db3_sha256=result.db3_sha256 or "",
++                message_count=result.message_count,
++                start_ns=s.start_ns,
++                end_ns=s.end_ns,
++                topics=result.topics,
++            )
++        )
++    manifest = SceneManifest(
++        scene_code="slope",
++        capability_version=_cap()[0],
++        run_id=run["pipeline_run_id"],
++        analysis_version=1,
++        source_id=parent.bag_uid,
++        source_generation=parent.source_generation,
++        source_fingerprint=parent.fast_fingerprint,
++        config_hash=_cap()[1],
++        outcome=SceneOutcome.SUCCESS,
++        segments=tuple(seg_objs),
++        evidence=(EvidenceRef(kind="SLOPE_TOPIC", path=CAM_TOPIC, count=len(seg_objs)),),
++        expected_slice_keys=tuple(s.slice_key for s in seg_objs),
++        created_at="2026-10-09T08:00:00+00:00",
++    )
++    publish_root = tmp / "publish"
++    scene_publish_service.publish_scene_slices(manifest, publish_root=publish_root, vehicle_key="", specs=specs)
++    # to_dict 与回报 dict 形状一致（多余键 parse_report_manifest 忽略，digest 由 04A 规范化）
++    return str(publish_root), child_uids, manifest.to_dict()
++
++
++def _report_body(run: dict, parent: BagRecord, *, manifest: dict, child_map: dict[str, str]) -> dict:
++    return {
++        "scene_code": "slope",
++        "lease_token": run["lease_token"],
++        "source_generation": parent.source_generation,
++        "manifest": manifest,
++        "child_bag_uids": child_map,
++    }
++
++
++def _complete_body(body: dict, *, publish_root: str | None, vehicle_key: str = "") -> dict:
++    return {k: v for k, v in body.items() if k != "idempotency_key"} | {
++        "publish_root": publish_root,
++        "vehicle_key": vehicle_key,
++    }
++
++
++# ---------------------------------------------------------------- storage offset
++
++
++def _offset_manifest(*, segments: list[SegT], topic: str | None = CAM_TOPIC) -> SceneManifest:
++    return SceneManifest(
++        scene_code="slope",
++        capability_version="slope-v1",
++        run_id="r-off",
++        analysis_version=1,
++        source_id="src-off",
++        source_generation=1,
++        source_fingerprint="f",
++        config_hash="c" + "a" * 61,
++        outcome=SceneOutcome.SUCCESS,
++        segments=tuple(segments),
++        evidence=(EvidenceRef(kind="SLOPE_TOPIC", path=topic),) if topic else (),
++        expected_slice_keys=tuple(s.slice_key for s in segments if s.publish_target),
++    )
++
++
++class TestStorageOffset:
++    def test_header_basis_derives_constant_offset(self, tmp_path):
++        offset = 3 * NANO
++        bag = _bag_with_offset(tmp_path / "b1", offset_ns=offset)
++        m = _offset_manifest(segments=[SegT("slope", BASE_S * NANO, (BASE_S + 2) * NANO, True, "header_stamp_ns")])
++        assert scene_publish_service.derive_storage_offset(m, bag) == offset
++
++    def test_storage_basis_is_zero(self, tmp_path):
++        bag = _bag_with_offset(tmp_path / "b2", offset_ns=0)
++        m = _offset_manifest(segments=[SegT("slope", BASE_S * NANO, (BASE_S + 2) * NANO, True, "bag_storage_ns")])
++        assert scene_publish_service.derive_storage_offset(m, bag) == 0
++
++    def test_no_publish_segments_resolves_zero(self, tmp_path):
++        bag = _bag_with_offset(tmp_path / "b3", offset_ns=0)
++        m = _offset_manifest(segments=[SegT("flat", BASE_S * NANO, (BASE_S + 2) * NANO, False, "header_stamp_ns")])
++        assert scene_publish_service.derive_storage_offset(m, bag) == 0
++
++    def test_mixed_basis_blocks(self, tmp_path):
++        bag = _bag_with_offset(tmp_path / "b4", offset_ns=0)
++        m = _offset_manifest(
++            segments=[
++                SegT("a", BASE_S * NANO, (BASE_S + 1) * NANO, True, "header_stamp_ns"),
++                SegT("b", (BASE_S + 2) * NANO, (BASE_S + 3) * NANO, True, "bag_storage_ns"),
++            ]
++        )
++        assert scene_publish_service.derive_storage_offset(m, bag) is None
++
++    def test_non_constant_offset_blocks(self, tmp_path):
++        """帧间 header/存储差非常定（采集抖动）→ 不可推导，不得假定 0。"""
++        bag_dir = tmp_path / "b5"
++        bag_dir.mkdir(parents=True, exist_ok=True)
++        msgs = [
++            (CAM_TOPIC, CAM_TYPE, (BASE_S + 0) * NANO + 1 * NANO, _enc_image(BASE_S + 0, 0, b"J1")),
++            (CAM_TOPIC, CAM_TYPE, (BASE_S + 1) * NANO + 2 * NANO, _enc_image(BASE_S + 1, 0, b"J2")),
++        ]
++        build_single_db3(bag_dir / "rosbag2_0.db3", msgs)
++        m = _offset_manifest(segments=[SegT("slope", BASE_S * NANO, (BASE_S + 1) * NANO, True, "header_stamp_ns")])
++        assert scene_publish_service.derive_storage_offset(m, bag_dir) is None
++
++    def test_corrupt_frame_blocks(self, tmp_path):
++        """解码失败帧 → 不可推导（不得当 0 放行）。"""
++        bag_dir = tmp_path / "b6"
++        bag_dir.mkdir(parents=True, exist_ok=True)
++        msgs = [
++            (CAM_TOPIC, CAM_TYPE, (BASE_S + 0) * NANO, _enc_image(BASE_S + 0, 0, b"J1")),
++            (CAM_TOPIC, CAM_TYPE, (BASE_S + 1) * NANO + NANO, b"\x00\x01\x00\x00corrupted"),
++        ]
++        build_single_db3(bag_dir / "rosbag2_0.db3", msgs)
++        m = _offset_manifest(segments=[SegT("slope", BASE_S * NANO, (BASE_S + 1) * NANO, True, "header_stamp_ns")])
++        assert scene_publish_service.derive_storage_offset(m, bag_dir) is None
++
++    def test_missing_camera_topic_blocks(self, tmp_path):
++        bag = _bag_with_offset(tmp_path / "b7", offset_ns=0)
++        m = _offset_manifest(
++            segments=[SegT("slope", BASE_S * NANO, (BASE_S + 2) * NANO, True, "header_stamp_ns")], topic=None
++        )
++        assert scene_publish_service.derive_storage_offset(m, bag) is None
++
++
++# ---------------------------------------------------------------- 原子发布
++
++
++def _publish_manifest(run_id: str, source_id: str, segs) -> SceneManifest:
++    return SceneManifest(
++        scene_code="slope",
++        capability_version="slope-v1",
++        run_id=run_id,
++        analysis_version=1,
++        source_id=source_id,
++        source_generation=1,
++        source_fingerprint="f",
++        config_hash="c" + "a" * 61,
++        outcome=SceneOutcome.SUCCESS,
++        segments=tuple(segs),
++        evidence=(),
++        expected_slice_keys=tuple(s.slice_key for s in segs if s.publish_target),
++        created_at="2026-10-09T08:00:00+00:00",
++    )
++
++
++def _spec(seg: SegT, result: SliceWriteResult, child_uid: str):
++    return scene_publish_service.SlicePublishSpec(
++        slice_key=seg.slice_key,
++        child_bag_uid=child_uid,
++        staging_dir=result.out_dir,
++        db3_sha256=result.db3_sha256 or "",
++        message_count=result.message_count,
++        start_ns=seg.start_ns,
++        end_ns=seg.end_ns,
++        topics=result.topics,
++    )
++
++
++CHILD_UID = "CHILD000000000000000001"
++
++
++class TestAtomicPublish:
++    def test_publish_moves_with_slice_manifest_and_reuses_on_replay(self, tmp_path):
++        seg = SegT("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO, True, "header_stamp_ns")
++        m = _publish_manifest("run-pub", "PUBPARENT000000000001", [seg])
++        bag = _bag_with_offset(tmp_path / "src", offset_ns=0)
++        result = slice_bag_to_staging(bag, tmp_path / "stg", seg, storage_offset_ns=0)
++        root = tmp_path / "publish"
++        outs = scene_publish_service.publish_scene_slices(
++            m, publish_root=root, vehicle_key="", specs=[_spec(seg, result, CHILD_UID)]
++        )
++        target = root / "unassigned" / "slope" / f"PUBPARENT000000000001_{CHILD_UID}"
++        assert outs == [target]
++        assert (target / "rosbag2_0.db3").is_file()
++        assert (target / scene_publish_service.SLICE_MANIFEST_NAME).is_file()
++        # staging 目录已被 move（不再存在）
++        assert not result.out_dir.exists()
++        # 幂等重试：重切同区间 → 同摘要 → 复用不冲突（不重复 move）
++        result2 = slice_bag_to_staging(bag, tmp_path / "stg2", seg, storage_offset_ns=0)
++        assert result2.db3_sha256 == result.db3_sha256
++        scene_publish_service.publish_scene_slices(
++            m, publish_root=root, vehicle_key="", specs=[_spec(seg, result2, CHILD_UID)]
++        )
++        assert (target / "rosbag2_0.db3").is_file()
++        assert (target / scene_publish_service.SLICE_MANIFEST_NAME).is_file()
++
++    def test_publish_conflict_forbids_overwrite(self, tmp_path):
++        seg = SegT("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO, True, "header_stamp_ns")
++        m = _publish_manifest("run-cf", "PUBPARENT000000000001", [seg])
++        bag = _bag_with_offset(tmp_path / "src", offset_ns=0)
++        result = slice_bag_to_staging(bag, tmp_path / "stg", seg, storage_offset_ns=0)
++        root = tmp_path / "publish"
++        scene_publish_service.publish_scene_slices(
++            m, publish_root=root, vehicle_key="", specs=[_spec(seg, result, CHILD_UID)]
++        )
++        target = root / "unassigned" / "slope" / f"PUBPARENT000000000001_{CHILD_UID}"
++        (target / "rosbag2_0.db3").write_bytes(b"corrupted")
++        # 不同内容（不同 manifest digest）再发布 → 冲突，禁止覆盖
++        m2 = _publish_manifest("run-cf2", "PUBPARENT000000000001", [seg])
++        result2 = slice_bag_to_staging(bag, tmp_path / "stg2", seg, storage_offset_ns=0)
++        with pytest.raises(scene_publish_service.PublishError) as ei:
++            scene_publish_service.publish_scene_slices(
++                m2, publish_root=root, vehicle_key="", specs=[_spec(seg, result2, CHILD_UID)]
++            )
++        assert ei.value.code == scene_publish_service.PUBLISH_CONFLICT
++        assert (target / "rosbag2_0.db3").read_bytes() == b"corrupted"  # 原文件未被覆盖
++
++    def test_cross_filesystem_blocked(self, tmp_path):
++        """staging 在 /dev/shm（tmpfs）、发布根在普通文件系统 → PUBLISH_BLOCKED。"""
++        seg = SegT("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO, True, "header_stamp_ns")
++        m = _publish_manifest("run-xfs", "PUBPARENT000000000001", [seg])
++        staging = Path("/dev/shm") / f"t06b-xfs-{uuid.uuid4().hex[:8]}"
++        staging.mkdir(parents=True, exist_ok=True)
++        (staging / "rosbag2_0.db3").write_bytes(b"x")
++        try:
++            assert staging.stat().st_dev != tmp_path.stat().st_dev  # 前提：确为不同设备
++            with pytest.raises(scene_publish_service.PublishError) as ei:
++                scene_publish_service.publish_scene_slices(
++                    m,
++                    publish_root=tmp_path / "publish",
++                    vehicle_key="",
++                    specs=[
++                        scene_publish_service.SlicePublishSpec(
++                            slice_key=seg.slice_key,
++                            child_bag_uid=CHILD_UID,
++                            staging_dir=staging,
++                            db3_sha256="0" * 64,
++                            message_count=1,
++                            start_ns=seg.start_ns,
++                            end_ns=seg.end_ns,
++                            topics={},
++                        )
++                    ],
++                )
++            assert ei.value.code == scene_publish_service.PUBLISH_BLOCKED
++        finally:
++            shutil.rmtree(staging, ignore_errors=True)
++
++    def test_empty_specs_noop(self, tmp_path):
++        m = _publish_manifest("run-empty", "PUBPARENT000000000001", [])
++        assert (
++            scene_publish_service.publish_scene_slices(m, publish_root=tmp_path / "publish", vehicle_key="", specs=[])
++            == []
++        )
++
++
++# ---------------------------------------------------------------- 回报/complete 主链
++
++
++def test_full_report_publish_complete_flow(client):
++    with SessionLocal() as db:
++        parent = _parent(db, "flow")
++        uid = parent.bag_uid
++    run_ids: list[str] = []
++    tmp = None
++    try:
++        created = _create_run(client, uid)
++        run_id = created["pipeline_run_id"]
++        run_ids.append(run_id)
++        run = _claim_specific(client, run_id)
++        segs = [("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO)]
++        key = f"slope:{(BASE_S + 2) * NANO}:{(BASE_S + 4) * NANO}"
++        tmp = Path(tempfile.mkdtemp(prefix="t06b-flow-"))
++        publish_root, child_uids, manifest_dict = _stage_and_publish(tmp, run, parent, segs)
++        child = child_uids[key]
++        body = _report_body(run, parent, manifest=manifest_dict, child_map={key: child})
++        body["idempotency_key"] = "t06b-key"
++        resp = client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=body)
++        assert resp.status_code == 200, resp.text
++        data = resp.json()
++        assert data["registered_segments"] == 1
++        assert data["availability"] == "PENDING"
++        assert data["derived_children"] == 1
++        assert data["replayed"] is False
++        # PENDING：子包登记但不可用（DB 事实；PENDING 不进入可用检索）
++        with SessionLocal() as db:
++            c = db.scalar(select(BagRecord).where(BagRecord.bag_uid == child))
++            assert c is not None and c.availability == "PENDING"
++        # 幂等重放（同键同内容 → idempotency 通道 200）
++        again = client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=body)
++        assert again.status_code == 200
++        assert again.json()["replayed"] is True
++        assert again.json()["analysis_version_id"] == data["analysis_version_id"]
++        # 同键不同参数 → 409（幂等键被不同内容复用）
++        diff = dict(body, manifest=_manifest_dict(run, parent, outcome="NO_MATCH", segments=[], expected=[]))
++        assert client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=diff).status_code == 409
++        # complete：文件证据 + 完整性 → AVAILABLE + 换版 + 终态
++        cbody = _complete_body(body, publish_root=publish_root)
++        done = client.post(f"/api/v1/scene-analysis-runs/{run_id}/complete-scene", json=cbody)
++        assert done.status_code == 200, done.text
++        dd = done.json()
++        assert dd["outcome"] == "SUCCESS"
++        assert dd["run_status"] == "SCENE_DONE"
++        assert dd["switch"] == {"switched": True, "current": True, "reason": None}
++        assert dd["available_children"] == [child]
++        # complete 终态重放（租约已清，不再要求 token）
++        replay = client.post(f"/api/v1/scene-analysis-runs/{run_id}/complete-scene", json=cbody)
++        assert replay.status_code == 200
++        assert replay.json()["replayed"] is True
++        assert replay.json()["run_status"] == "SCENE_DONE"
++        # AVAILABLE：DB 事实 + 血缘可查
++        with SessionLocal() as db:
++            c = db.scalar(select(BagRecord).where(BagRecord.bag_uid == child))
++            assert c.availability == "AVAILABLE"
++            der = db.scalar(select(BagDerivation).where(BagDerivation.child_bag_uid == child))
++            assert der.run_id == run_id and der.parent_bag_uid == uid
++        mf = client.get(f"/api/v1/bags/{child}")
++        assert mf.status_code == 200
++    finally:
++        if tmp is not None:
++            shutil.rmtree(tmp, ignore_errors=True)
++        with SessionLocal() as db:
++            _purge(db, [uid], run_ids)
++
++
++def test_identity_gates(client):
++    with SessionLocal() as db:
++        parent = _parent(db, "gate")
++        uid = parent.bag_uid
++        other = _parent(db, "gate-other")
++        other_uid = other.bag_uid
++    run_ids = []
++    try:
++        created = _create_run(client, uid)
++        run_id = created["pipeline_run_id"]
++        run_ids.append(run_id)
++        run = _claim_specific(client, run_id)
++        segs = [("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO)]
++        key = segs[0][0] + f":{segs[0][1]}:{segs[0][2]}"
++        manifest = _manifest_dict(run, parent, outcome="SUCCESS", segments=segs, expected=[key])
++        body = _report_body(run, parent, manifest=manifest, child_map={key: _child_uid()})
++        # 无租约 token → 409
++        no_lease = dict(body, lease_token=None)
++        assert client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=no_lease).status_code == 409
++        # 错代次 → 409
++        stale = dict(body, source_generation=parent.source_generation + 1)
++        r2 = client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=stale)
++        assert r2.status_code == 409
++        assert "SOURCE_GENERATION_MISMATCH" in r2.json()["detail"]
++        # run 外场景 → 422
++        outside = dict(body, scene_code="waterfog")
++        assert client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=outside).status_code == 422
++        # 非场景 run → 409
++        other_run = client.post(
++            "/api/v1/pipeline-runs", json={"source_id": other_uid, "queue_name": "PHASE0_QUEUE"}
++        ).json()["pipeline_run_id"]
++        run_ids.append(other_run)
++        r4 = client.post(
++            f"/api/v1/scene-analysis-runs/{other_run}/results",
++            json={**body, "lease_token": "whatever", "source_generation": other.source_generation},
++        )
++        assert r4.status_code == 409
++    finally:
++        with SessionLocal() as db:
++            _purge(db, [uid, other_uid], run_ids)
++
++
++def test_config_mismatch_rejected(client):
++    with SessionLocal() as db:
++        parent = _parent(db, "cfg")
++        uid = parent.bag_uid
++    run_ids = []
++    try:
++        created = _create_run(client, uid)
++        run_id = created["pipeline_run_id"]
++        run_ids.append(run_id)
++        run = _claim_specific(client, run_id)
++        segs = [("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO)]
++        key = segs[0][0] + f":{segs[0][1]}:{segs[0][2]}"
++        manifest = _manifest_dict(run, parent, outcome="SUCCESS", segments=segs, expected=[key])
++        manifest["config_hash"] = "b" * 64  # 与冻结能力 hash 不同
++        body = _report_body(run, parent, manifest=manifest, child_map={key: _child_uid()})
++        resp = client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=body)
++        assert resp.status_code == 409
++        assert "CONFIG_MISMATCH" in resp.json()["detail"]
++    finally:
++        with SessionLocal() as db:
++            _purge(db, [uid], run_ids)
++
++
++def test_no_match_completes_empty_current(client):
++    with SessionLocal() as db:
++        parent = _parent(db, "nm")
++        uid = parent.bag_uid
++    run_ids = []
++    try:
++        created = _create_run(client, uid)
++        run_id = created["pipeline_run_id"]
++        run_ids.append(run_id)
++        run = _claim_specific(client, run_id)
++        # NO_MATCH：无目标区间，无文件义务
++        manifest = _manifest_dict(run, parent, outcome="NO_MATCH", segments=[], expected=[])
++        body = _report_body(run, parent, manifest=manifest, child_map={})
++        assert client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=body).status_code == 200
++        done = client.post(
++            f"/api/v1/scene-analysis-runs/{run_id}/complete-scene", json=_complete_body(body, publish_root=None)
++        )
++        assert done.status_code == 200, done.text
++        dd = done.json()
++        assert dd["outcome"] == "NO_MATCH"
++        assert dd["run_status"] == "SCENE_DONE"
++        assert dd["switch"] == {"switched": True, "current": True, "reason": None}
++        assert dd["available_children"] == []  # 切空：无子包但当前版本存在
++        with SessionLocal() as db:
++            cur = db.scalar(
++                select(SceneAnalysisVersion).where(
++                    SceneAnalysisVersion.parent_bag_uid == uid, SceneAnalysisVersion.current.is_(True)
++                )
++            )
++            assert cur is not None and cur.result == "NO_MATCH"
++    finally:
++        with SessionLocal() as db:
++            _purge(db, [uid], run_ids)
++
++
++def test_failed_keeps_old_current(client):
++    with SessionLocal() as db:
++        parent = _parent(db, "fail")
++        uid = parent.bag_uid
++    run_ids = []
++    tmp1 = None
++    try:
++        # 旧版 SUCCESS 成为当前
++        created1 = _create_run(client, uid)
++        run_ids.append(created1["pipeline_run_id"])
++        run1 = _claim_specific(client, created1["pipeline_run_id"])
++        segs = [("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO)]
++        key = segs[0][0] + f":{segs[0][1]}:{segs[0][2]}"
++        tmp1 = Path(tempfile.mkdtemp(prefix="t06b-f1-"))
++        publish_root, child_uids, m1 = _stage_and_publish(tmp1, run1, parent, segs)
++        b1 = _report_body(run1, parent, manifest=m1, child_map={key: child_uids[key]})
++        assert (
++            client.post(f"/api/v1/scene-analysis-runs/{created1['pipeline_run_id']}/results", json=b1).status_code
++            == 200
++        )
++        assert (
++            client.post(
++                f"/api/v1/scene-analysis-runs/{created1['pipeline_run_id']}/complete-scene",
++                json=_complete_body(b1, publish_root=publish_root),
++            ).status_code
++            == 200
++        )
++        # 新版 NOT_APPLICABLE → 不换版，旧 current 不动（重新分析=新身份，带独立 reanalysis_id）
++        created2 = _create_run(client, uid, reanalysis_id=f"t06b-fail-re-{uuid.uuid4().hex[:13]}")
++        run_ids.append(created2["pipeline_run_id"])
++        run2 = _claim_specific(client, created2["pipeline_run_id"])
++        manifest2 = _manifest_dict(run2, parent, outcome="NOT_APPLICABLE", segments=[], expected=[])
++        b2 = _report_body(run2, parent, manifest=manifest2, child_map={})
++        assert (
++            client.post(f"/api/v1/scene-analysis-runs/{created2['pipeline_run_id']}/results", json=b2).status_code
++            == 200
++        )
++        done2 = client.post(f"/api/v1/scene-analysis-runs/{created2['pipeline_run_id']}/complete-scene", json=b2)
++        assert done2.status_code == 200, done2.text
++        d2 = done2.json()
++        assert d2["outcome"] == "NOT_APPLICABLE"
++        assert d2["switch"]["switched"] is False
++        assert d2["run_status"] == "SCENE_DONE"  # 全 NOT_APPLICABLE 可 DONE（不计成功阴性）
++        with SessionLocal() as db:
++            cur = db.scalar(
++                select(SceneAnalysisVersion).where(
++                    SceneAnalysisVersion.parent_bag_uid == uid, SceneAnalysisVersion.current.is_(True)
++                )
++            )
++            assert cur is not None and cur.run_id == created1["pipeline_run_id"]  # 旧 current 不动
++    finally:
++        if tmp1 is not None:
++            shutil.rmtree(tmp1, ignore_errors=True)
++        with SessionLocal() as db:
++            _purge(db, [uid], run_ids)
++
++
++def test_late_old_version_no_rollback(client):
++    """较旧版本行晚 complete → switch 409，当前指针不倒退，run 仍置终态留痕。"""
++    with SessionLocal() as db:
++        parent = _parent(db, "late")
++        uid = parent.bag_uid
++    run_ids = []
++    tmp1 = tmp2 = None
++    try:
++        # run1 先 complete 成为当前
++        created1 = _create_run(client, uid)
++        run_ids.append(created1["pipeline_run_id"])
++        run1 = _claim_specific(client, created1["pipeline_run_id"])
++        segs1 = [("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO)]
++        key1 = segs1[0][0] + f":{segs1[0][1]}:{segs1[0][2]}"
++        tmp1 = Path(tempfile.mkdtemp(prefix="t06b-l1-"))
++        pr1, cu1, m1 = _stage_and_publish(tmp1, run1, parent, segs1)
++        b1 = _report_body(run1, parent, manifest=m1, child_map={key1: cu1[key1]})
++        assert (
++            client.post(f"/api/v1/scene-analysis-runs/{created1['pipeline_run_id']}/results", json=b1).status_code
++            == 200
++        )
++        assert (
++            client.post(
++                f"/api/v1/scene-analysis-runs/{created1['pipeline_run_id']}/complete-scene",
++                json=_complete_body(b1, publish_root=pr1),
++            ).status_code
++            == 200
++        )
++        # run2：把内容行 created_at 改早（模拟晚到的旧版）→ complete 时 switch 409
++        # 重新分析=新身份，带独立 reanalysis_id
++        created2 = _create_run(client, uid, reanalysis_id=f"t06b-late-re-{uuid.uuid4().hex[:13]}")
++        run_ids.append(created2["pipeline_run_id"])
++        run2 = _claim_specific(client, created2["pipeline_run_id"])
++        segs2 = [("slope", (BASE_S + 3) * NANO, (BASE_S + 5) * NANO)]
++        key2 = segs2[0][0] + f":{segs2[0][1]}:{segs2[0][2]}"
++        tmp2 = Path(tempfile.mkdtemp(prefix="t06b-l2-"))
++        pr2, cu2, m2 = _stage_and_publish(tmp2, run2, parent, segs2)
++        b2 = _report_body(run2, parent, manifest=m2, child_map={key2: cu2[key2]})
++        assert (
++            client.post(f"/api/v1/scene-analysis-runs/{created2['pipeline_run_id']}/results", json=b2).status_code
++            == 200
++        )
++        with SessionLocal() as db:
++            row2 = db.scalar(
++                select(SceneAnalysisVersion).where(
++                    SceneAnalysisVersion.parent_bag_uid == uid,
++                    SceneAnalysisVersion.scene_code == "slope",
++                    SceneAnalysisVersion.run_id == created2["pipeline_run_id"],
++                )
++            )
++            row2.created_at = row2.created_at - timedelta(seconds=3600)
++            db.commit()
++        rejected = client.post(
++            f"/api/v1/scene-analysis-runs/{created2['pipeline_run_id']}/complete-scene",
++            json=_complete_body(b2, publish_root=pr2),
++        )
++        assert rejected.status_code == 409, rejected.text
++        assert "DUPLICATE_CONFLICT" in rejected.json()["detail"]
++        with SessionLocal() as db:
++            cur = db.scalar(
++                select(SceneAnalysisVersion).where(
++                    SceneAnalysisVersion.parent_bag_uid == uid, SceneAnalysisVersion.current.is_(True)
++                )
++            )
++            assert cur is not None and cur.run_id == created1["pipeline_run_id"]  # 当前不倒退
++            # run2 已记录终态（结果先于换版落地，保留为历史）
++            r2 = db.scalar(select(PipelineRun).where(PipelineRun.pipeline_run_id == created2["pipeline_run_id"]))
++            assert r2.status == "SCENE_DONE"
++    finally:
++        for t in (tmp1, tmp2):
++            if t is not None:
++                shutil.rmtree(t, ignore_errors=True)
++        with SessionLocal() as db:
++            _purge(db, [uid], run_ids)
++
++
++def test_complete_blocked_when_file_missing(client):
++    with SessionLocal() as db:
++        parent = _parent(db, "miss")
++        uid = parent.bag_uid
++    run_ids = []
++    try:
++        created = _create_run(client, uid)
++        run_id = created["pipeline_run_id"]
++        run_ids.append(run_id)
++        run = _claim_specific(client, run_id)
++        segs = [("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO)]
++        key = segs[0][0] + f":{segs[0][1]}:{segs[0][2]}"
++        manifest = _manifest_dict(run, parent, outcome="SUCCESS", segments=segs, expected=[key])
++        child = _child_uid()
++        body = _report_body(run, parent, manifest=manifest, child_map={key: child})
++        assert client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=body).status_code == 200
++        # 发布根为空 → complete 409 INCOMPLETE（不得先可用后补）
++        empty_root = tempfile.mkdtemp(prefix="t06b-empty-")
++        done = client.post(
++            f"/api/v1/scene-analysis-runs/{run_id}/complete-scene", json=_complete_body(body, publish_root=empty_root)
++        )
++        assert done.status_code == 409, done.text
++        assert "INCOMPLETE" in done.json()["detail"]
++        # 子包仍 PENDING：未推进可用
++        with SessionLocal() as db:
++            c = db.scalar(select(BagRecord).where(BagRecord.bag_uid == child))
++            assert c is not None and c.availability == "PENDING"
++    finally:
++        with SessionLocal() as db:
++            _purge(db, [uid], run_ids)
++
++
++def test_reconcile_backfills_after_publish_without_report(client):
++    """发布后登记故障补偿：/results 超时未登记 → reconcile 按发布目录 manifest 补登记+推进可用。"""
++    with SessionLocal() as db:
++        parent = _parent(db, "rec")
++        uid = parent.bag_uid
++    run_ids = []
++    tmp = None
++    try:
++        created = _create_run(client, uid)
++        run_id = created["pipeline_run_id"]
++        run_ids.append(run_id)
++        run = _claim_specific(client, run_id)
++        segs = [("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO)]
++        key = segs[0][0] + f":{segs[0][1]}:{segs[0][2]}"
++        tmp = Path(tempfile.mkdtemp(prefix="t06b-rec-"))
++        publish_root, child_uids, _ = _stage_and_publish(tmp, run, parent, segs)
++        # 不调用 /results：直接 reconcile（模拟回报 HTTP 超时，文件已发布）
++        rbody = {
++            "scene_code": "slope",
++            "source_generation": parent.source_generation,
++            "publish_root": publish_root,
++            "vehicle_key": "",
++        }
++        resp = client.post(f"/api/v1/scene-analysis-runs/{run_id}/reconcile-scene", json=rbody)
++        assert resp.status_code == 200, resp.text
++        data = resp.json()
++        assert data["reconciled"] is True
++        assert data["registered"] is True
++        assert data["available_children"] == [child_uids[key]]
++        with SessionLocal() as db:
++            child = db.scalar(select(BagRecord).where(BagRecord.bag_uid == child_uids[key]))
++            assert child is not None and child.availability == "AVAILABLE"
++            der = db.scalar(select(BagDerivation).where(BagDerivation.child_bag_uid == child_uids[key]))
++            assert der is not None and der.run_id == run_id and der.parent_bag_uid == uid
++        # 幂等：再次 reconcile 不重复登记
++        again = client.post(f"/api/v1/scene-analysis-runs/{run_id}/reconcile-scene", json=rbody)
++        assert again.status_code == 200
++        assert again.json()["registered"] is True
++        # reconcile 不切当前（换版只在 complete）
++        with SessionLocal() as db:
++            cur = db.scalar(
++                select(SceneAnalysisVersion).where(
++                    SceneAnalysisVersion.parent_bag_uid == uid, SceneAnalysisVersion.current.is_(True)
++                )
++            )
++            assert cur is None
++    finally:
++        if tmp is not None:
++            shutil.rmtree(tmp, ignore_errors=True)
++        with SessionLocal() as db:
++            _purge(db, [uid], run_ids)
++
++
++def test_reconcile_semantics(client):
++    """恢复入口不要求租约：已终态 run 仍可 reconcile；无文件事实如实 409；代次不符 409。"""
++    with SessionLocal() as db:
++        parent = _parent(db, "rec2")
++        uid = parent.bag_uid
++    run_ids = []
++    try:
++        created = _create_run(client, uid)
++        run_id = created["pipeline_run_id"]
++        run_ids.append(run_id)
++        run = _claim_specific(client, run_id)
++        manifest = _manifest_dict(run, parent, outcome="NO_MATCH", segments=[], expected=[])
++        body = _report_body(run, parent, manifest=manifest, child_map={})
++        assert client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=body).status_code == 200
++        done = client.post(
++            f"/api/v1/scene-analysis-runs/{run_id}/complete-scene", json=_complete_body(body, publish_root=None)
++        )
++        assert done.status_code == 200
++        # run 已终态、租约已清：reconcile 不要求 lease token
++        rbody = {
++            "scene_code": "slope",
++            "source_generation": parent.source_generation,
++            "publish_root": tempfile.mkdtemp(prefix="t06b-rec2-"),
++        }
++        # NO_MATCH 发布根下无切片记录 → 409 INCOMPLETE（如实：没有可恢复文件事实）
++        resp = client.post(f"/api/v1/scene-analysis-runs/{run_id}/reconcile-scene", json=rbody)
++        assert resp.status_code == 409
++        assert "INCOMPLETE" in resp.json()["detail"]
++        # 源代次不符 → 409
++        resp2 = client.post(
++            f"/api/v1/scene-analysis-runs/{run_id}/reconcile-scene", json={**rbody, "source_generation": 99}
++        )
++        assert resp2.status_code == 409
++        assert "SOURCE_GENERATION_MISMATCH" in resp2.json()["detail"]
++    finally:
++        with SessionLocal() as db:
++            _purge(db, [uid], run_ids)
++
++
++def test_report_replay_same_manifest_without_key(client):
++    """同 run 同内容不同幂等键 → 200（06A 内容幂等），不 409。"""
++    with SessionLocal() as db:
++        parent = _parent(db, "replay")
++        uid = parent.bag_uid
++    run_ids = []
++    tmp = None
++    try:
++        created = _create_run(client, uid)
++        run_id = created["pipeline_run_id"]
++        run_ids.append(run_id)
++        run = _claim_specific(client, run_id)
++        segs = [("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO)]
++        key = segs[0][0] + f":{segs[0][1]}:{segs[0][2]}"
++        tmp = Path(tempfile.mkdtemp(prefix="t06b-replay-"))
++        _, child_uids, m = _stage_and_publish(tmp, run, parent, segs)
++        manifest = _manifest_dict(run, parent, outcome="SUCCESS", segments=segs, expected=[key])
++        body = _report_body(run, parent, manifest=manifest, child_map={key: child_uids[key]})
++        r1 = client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=body)
++        assert r1.status_code == 200
++        r2 = client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=body)
++        assert r2.status_code == 200
++        assert r2.json()["replayed"] is True
++        assert r2.json()["analysis_version_id"] == r1.json()["analysis_version_id"]
++    finally:
++        if tmp is not None:
++            shutil.rmtree(tmp, ignore_errors=True)
++        with SessionLocal() as db:
++            _purge(db, [uid], run_ids)
++
++
++def test_same_run_different_content_conflict(client):
++    with SessionLocal() as db:
++        parent = _parent(db, "conflict")
++        uid = parent.bag_uid
++    run_ids = []
++    try:
++        created = _create_run(client, uid)
++        run_id = created["pipeline_run_id"]
++        run_ids.append(run_id)
++        run = _claim_specific(client, run_id)
++        segs = [("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO)]
++        key = segs[0][0] + f":{segs[0][1]}:{segs[0][2]}"
++        manifest = _manifest_dict(run, parent, outcome="SUCCESS", segments=segs, expected=[key])
++        body = _report_body(run, parent, manifest=manifest, child_map={key: _child_uid()})
++        assert client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=body).status_code == 200
++        segs2 = [("slope", (BASE_S + 2) * NANO, (BASE_S + 6) * NANO)]
++        key2 = segs2[0][0] + f":{segs2[0][1]}:{segs2[0][2]}"
++        manifest2 = _manifest_dict(run, parent, outcome="SUCCESS", segments=segs2, expected=[key2])
++        body2 = _report_body(run, parent, manifest=manifest2, child_map={key2: _child_uid()})
++        r2 = client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=body2)
++        assert r2.status_code == 409
++        assert "DUPLICATE_CONFLICT" in r2.json()["detail"]
++    finally:
++        with SessionLocal() as db:
++            _purge(db, [uid], run_ids)
++
++
++def test_partial_batch_blocks_complete(client):
++    """分批回报完整性门禁：expected(2) != registered(1) → complete 409 INCOMPLETE。"""
++    with SessionLocal() as db:
++        parent = _parent(db, "part")
++        uid = parent.bag_uid
++    run_ids = []
++    tmp = None
++    try:
++        created = _create_run(client, uid)
++        run_id = created["pipeline_run_id"]
++        run_ids.append(run_id)
++        run = _claim_specific(client, run_id)
++        segs1 = [("slope", (BASE_S + 2) * NANO, (BASE_S + 4) * NANO)]
++        key1 = segs1[0][0] + f":{segs1[0][1]}:{segs1[0][2]}"
++        tmp = Path(tempfile.mkdtemp(prefix="t06b-part-"))
++        pr, cu, _ = _stage_and_publish(tmp, run, parent, segs1)
++        # manifest 声明两个可发布区间（expected=2），但只回报/登记第一个（registered=1）
++        key2 = f"slope:{(BASE_S + 5) * NANO}:{(BASE_S + 6) * NANO}"
++        manifest = _manifest_dict(run, parent, outcome="SUCCESS", segments=segs1, expected=[key1, key2])
++        body = _report_body(run, parent, manifest=manifest, child_map={key1: cu[key1], key2: _child_uid()})
++        r1 = client.post(f"/api/v1/scene-analysis-runs/{run_id}/results", json=body)
++        assert r1.status_code == 200
++        # complete：expected(2) != registered(1) → 409 INCOMPLETE
++        done = client.post(
++            f"/api/v1/scene-analysis-runs/{run_id}/complete-scene", json=_complete_body(body, publish_root=pr)
++        )
++        assert done.status_code == 409, done.text
++        assert "INCOMPLETE" in done.json()["detail"]
++    finally:
++        if tmp is not None:
++            shutil.rmtree(tmp, ignore_errors=True)
++        with SessionLocal() as db:
++            _purge(db, [uid], run_ids)
++
++
++# ---------------------------------------------------------------- 入口注册
++
++
++def test_routes_registered():
++    paths = {r.path for r in app.routes if isinstance(r, APIRoute)}
++    for p in (
++        "/api/v1/scene-analysis-runs/{pipeline_run_id}/results",
++        "/api/v1/scene-analysis-runs/{pipeline_run_id}/complete-scene",
++        "/api/v1/scene-analysis-runs/{pipeline_run_id}/reconcile-scene",
++    ):
++        assert p in paths

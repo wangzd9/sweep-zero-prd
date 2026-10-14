@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-093553-r139-t16a-done",
+  "occurred_at": "2026-10-13T09:46:08+08:00",
+  "recorded_at": "2026-10-13T09:46:08+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16A",
+  "attempt": "t16a-post-merge-verify",
+  "status": "DONE",
+  "summary": "TESTER 16A post-merge verify PASS (real MySQL 8.4.11 roundtrip RC=0, single head, backfill and index evidence, SQLite 68 passed, 0 residue); TASK-16A DONE main 6fb42c4; A slot idle; 16C ledger corrected RUNNING (B ACK); 16B NEEDS_REVIEW frozen pending user ruling a/b/c/d",
+  "evidence": "test-receipts/TEST-TASK16A-post-merge/attempt-1.md; inbox/coordinator/TASK-16A/t16a-post-merge-verify-acceptance-decision-20261013.md",
+  "next": "watch B 16C delivery; await 16B user ruling; dispatch TESTER 16D when all three accepted"
+}

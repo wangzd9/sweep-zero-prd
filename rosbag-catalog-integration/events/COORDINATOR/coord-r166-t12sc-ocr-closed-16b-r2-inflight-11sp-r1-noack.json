@@ -1,0 +1,13 @@
+{
+  "event_id": "coord-r166-t12sc-ocr-closed-16b-r2-inflight-11sp-r1-noack",
+  "occurred_at": "2026-10-13T16:38:00+08:00",
+  "recorded_at": "2026-10-13T16:38:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-C/TASK-16B/TASK-12S-B/TASK-11S-PREP",
+  "attempt": "n/a",
+  "status": "POLL_HANDLED",
+  "summary": "r166（prerun 指纹 efd77c34）：①12S-C 接线增量 OCR（固定入口 run 5a071938，22ffb71..92dcb52 仅27行业务）b01/b02 全收口 rc=0 零 findings coverage 1/1 fingerprint 一致，16:23 AWAITING_DECISION；并行回合裁决 ocr-verdict.md 独立核实认账（强审 NOT_REQUIRED 判断在案，完整链归 12S-D）→ 12S-C 前置编码面 OCR 门禁解除，正式接线验收仍等 16B+12S-B 最终合入。②C 16B r2 已 ACK（15:52 时限内），16:3x 实测 wt-03b-t16b proxy+test 已改=在途未冻结不抢占。③B S9b 已 ACK（16:0x），wt-04a-t12sb decode.py 已改=在途未冻结，16:30 最佳时限已过不代跑，s9_head 冻结后其 OCR（f62a29c..s9_head）为队列首位。④A 11S-PREP r1（16:0x 派单+16:15 用户催办）至今零 ACK 零代码动作（wt-01-t11sp 停 d8f7206），16:40 升级阈值临近→本轮直接升级通报用户（群回合），17:00 冻结时限风险高，G4 证据面 17:30 停止点按 r1 未完成口径汇总。TESTER 12S-BC-freeze 16:19 ACK 在途（A 面 16:45 中期回执）。本轮零新 OCR 起跑、零强审调用、零新派单、零合入。",
+  "evidence": "reviews/TASK-12S-C/attempt-1/ocr/{state.json,b01.log,b02.log,spec.json}; reviews/TASK-12S-C/attempt-1/ocr-verdict.md; inbox/2号/TASK-12S-B/attempt-1-rework-s9b-ack.md; inbox/3号/TASK-16B/attempt-2-r2-ack.md; inbox/TESTER/TASK-12S-BC-freeze/attempt-1-ack.md; git worktree porcelain 实测",
+  "next": "A r1 升级通报后 16:40 仍无 ACK 则记录升级事件+17:30 材料缺口口径；B s9_head/C r2 交付→机械核验→OCR 队列（s9_head 首位）；16:45 TESTER A 面中期回执核；17:30 发布决策材料汇总（G4 按 r1 状态）",
+  "fingerprint": "efd77c34c6555f776cbeb7ebdb847b4702f2b0e418af730541bba94b2b220a76"
+}

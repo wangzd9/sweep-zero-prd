@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-050053-r122-resume-b1-inflight",
+  "occurred_at": "2026-10-13T05:05:38+08:00",
+  "recorded_at": "2026-10-13T05:05:38+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16",
+  "attempt": "2",
+  "status": "INFLIGHT",
+  "summary": "r122巡检：零业务状态变化；16B resume b1 在途~13min持ocr.lock正常；A/B/C交付冻结不变；TESTER空闲",
+  "evidence": "ps1198826-vllm3-0",
+  "next": "r123核b1收口"
+}

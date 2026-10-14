@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-101135-r140b-t16b-retry5-fresh-resume-both-failed-escalated",
+  "occurred_at": "2026-10-13T10:15:13+08:00",
+  "recorded_at": "2026-10-13T10:15:13+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "NEEDS_REVIEW_ESCALATED",
+  "summary": "16B proxy OCR 第5次授权尝试（用户 09:3x 「最优方式」）fresh+resume 双败：fresh 09:58:03 rc=1 + resume a810dbf5 10:05:32 rc=1（session 0daca703，dur 6m23s，同一基础设施根因：scene_host_proxy.py LLM 请求 context compaction cancelled，1 of 7，budget_exceeded=false，非审查驳回）→ NEEDS_REVIEW 维持冻结升级用户裁决：a 按已裁 findings（b1 H1/M1/M2 CONFIRMED+b3 2）先行一次最小返修派 C、proxy 缺口记遗留；b 换审查通道；c 阁置。未裁决前不再自动第三次，C 维持冻结。其余：16A DONE main 6fb42c4（TESTER 09:32 PASS，强审 NOT_REQUIRED）、B=16C RUNNING（7 文件开发中）、A/TESTER 空闲、16D WAITING、main=origin 6fb42c4 双核、强审 60min 0/5 累计 2 在途 0 费用未知、F-040 待用户批准",
+  "evidence": "scratch/t16_ocr/b2_r139_retry5.log; scratch/t16_ocr/b2_r140_resume6.log（10:05:32 rc=1 逐行）; TODO §8 16B 行 r140 段; HANDOFF r140 检查点; sessions/COORDINATOR.md r140",
+  "next": "等用户裁决 a/b/c；监 B 16C 交付"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs73-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T09:55:00+08:00",
+  "recorded_at": "2026-10-14T09:56:52+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第73轮只读观察（处理机 09:51-09:52 实测）：与 obs72 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜续跑不 kill/retry）。scene-4acf689f SCENE_RUNNING attempt=1 heartbeat 09:53:40 续租活跃、checkpoint.json 00:23:10 未翻、find 零新写；VLM 通道 :1F42 本轮无 ESTAB 仅 TIME_WAIT=循环重建空窗，llm-server 直证 Running 2-4/Waiting 单点即回 0/POST 200 连发=推理活跃非中断；incoming/spray 仅 16_33_10 空包（D6 A 面）；本批 8 包无新终态，无升级条件命中。C 全程只读未 kill/删/重启/retry/改生产路径。",
+  "evidence": "8180 SCENE_RUNNING lease 09:53:40 error 空；8767 active_runs=[4acf689f ACCEPTED pid1]；pid 3495931 TIME 01:21:26（+12s）未重启；容器 net/tcp :1F42 ESTAB=0/TIME_WAIT=2；llm-server 09:51:59-09:52:29 Running 2-4 Waiting 单点 1→0 prefix 91.1% POST 200 连发；NAS 98T/70T/29T 71%；canonical sessions/C.md obs73 条目=1（脚本 v1 count 断言误报 ABORT 于 append 后，四重事后核验通过，v2 勘误经干跑+单点替换落盘 623 行）",
+  "next": "接续只读观察：模型段完成信号（checkpoint 翻面/八步推进/SCENE_DONE）取证申报；升级条件=heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且无 ESTAB；串行释放后 flat 三提交绑定新 run 核账；16_33_10 D6 痕迹落 ledger 后核；11:00 时段总结照常；白天无变化不报进度。"
+}

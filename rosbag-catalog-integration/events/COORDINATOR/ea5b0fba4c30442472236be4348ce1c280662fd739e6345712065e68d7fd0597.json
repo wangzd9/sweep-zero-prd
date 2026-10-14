@@ -1,0 +1,12 @@
+{
+  "event_id": "1cfd3dba827be77bb98b4e3e8dcf550647c240494cef3e961fc3c16bb6efbd4c",
+  "occurred_at": "2026-10-11T11:09:07+08:00",
+  "recorded_at": "2026-10-11T11:09:07+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "rework-7",
+  "status": "RUNNING",
+  "summary": "11:05 巡检：2号 rework-7（codex 第四轮 2 条非阻塞行级小修）11:04 ACK 开工在途，无交付；强复审 R2I-20261010-06 仍等用户手动触发；06 聚合门禁不变",
+  "evidence": "inbox/2号/TASK-06B/attempt-1-r2-rework-7-ack.md",
+  "next": "等 2号 rework-7 交付后 OCR 增量；强复审等用户手动触发"
+}

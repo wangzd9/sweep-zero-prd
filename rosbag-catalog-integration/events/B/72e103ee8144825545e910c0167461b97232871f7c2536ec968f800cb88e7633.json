@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-080253-nochange-t11-r8-observed",
+  "occurred_at": "2026-10-12T08:04:46+08:00",
+  "recorded_at": "2026-10-12T08:04:46+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "无变化巡检; main 453da0c双核; T11驱动第8跑08:03起跑(未归属,只观察)",
+  "evidence": "sessions/B.md",
+  "next": "下轮核T11第8跑终态; 等派单/返修"
+}

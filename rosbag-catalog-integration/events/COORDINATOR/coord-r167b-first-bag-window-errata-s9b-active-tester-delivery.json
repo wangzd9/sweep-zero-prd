@@ -1,0 +1,13 @@
+{
+ "event_id": "coord-r167b-first-bag-window-errata-s9b-active-tester-delivery",
+ "occurred_at": "2026-10-13T17:08:00+08:00",
+ "recorded_at": "2026-10-13T17:08:00+08:00",
+ "role": "COORDINATOR",
+ "task": "TASK-12S-D/TASK-12S-B/TASK-16B",
+ "attempt": "n/a",
+ "status": "POLL_HANDLED",
+ "summary": "r167 补充（消费 pending f27bbbcc 增量）：①首包运行时间勘误通知认账——功能首包优先现有 4.38s 小包（span 4.379874754s 已实测）、模型预算 12 帧=12~24 次请求（53s 包 175~350）、timeout 600s 是单请求非整包、C r2 代理无 19:00 总上限、允许当晚更长验收窗口（滚动报进度、不得取消正常任务、不得伪造新 deadline）、延长不解除 G1~G4、17:30 仍做证据盘点；'全绿在 19 点内'收敛为有条件目标；②TESTER 832b6140 交付事件=报告同口径认账（TEST_REPORT_PENDING，s9_head 到达即 ACK 增量复验）；③B S9b 2号交互会话 owner 在途活跃（+368/-54 推进中）维持不催不接管。零新 OCR/强审/派单/合入。",
+ "evidence": "inbox/coordinator/SPRAY-1900-20261013/first-bag-runtime-window-1700.md; events/TESTER/832b6140…json; events/B/b-t12sb-s9b-owner-still-active-20261013-165100.json",
+ "next": "17:30 证据盘点按勘误口径；4492b7f6 收口裁决→强审增量复审→TESTER→合入 16B；s9_head 冻结→核验→OCR 首位→TESTER 增量复验→合入 12S-B；A Docker 迁移窗口后重建 G4 副本",
+ "fingerprint": "f27bbbccda72ddaf1b9419282ba35479b0914196cd6d88cf9562f5d9542edf45"
+}

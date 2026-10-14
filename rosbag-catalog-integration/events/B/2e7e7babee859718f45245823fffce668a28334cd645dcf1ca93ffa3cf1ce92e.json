@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-133753-nochange-t07a-a2r1-ocr-inflight",
+  "occurred_at": "2026-10-12T13:51:00+08:00",
+  "recorded_at": "2026-10-12T13:51:00+08:00",
+  "role": "B",
+  "task": "TASK-07A",
+  "attempt": "2-r1",
+  "status": "REVIEW_PENDING",
+  "summary": "attempt-2-r1 交付冻结 commit 8cc6b80 在 wt-04a-t07a 实测（base f94d006），协调者增量 OCR 在途（ocr review -c 8cc6b80 13:40 起跑，排除 css/tests），本侧无新派单无返修，IDLE_WAITING",
+  "evidence": "receipts/TASK-07A/attempt-2-r1.md",
+  "next": "等协调者机械核验/OCR 收口/合入决策"
+}

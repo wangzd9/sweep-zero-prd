@@ -1,0 +1,396 @@
+{
+  "schema": "coordinator.ocr-run/v1",
+  "runtime_version": "1.5.0",
+  "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+  "repo": "/home/wang/.local/state/rosbag-scene/wt-01-t12sa",
+  "base": "6fb42c4821bc5dfa54531c88fbc0ef1578715748",
+  "head": "77c395b902f8b8b57276ac509e1c2dcc5ab26e90",
+  "task": "TASK-12S-A",
+  "attempt": "1",
+  "authorization_source": "/home/wang/work/doc/prd/rosbag-catalog-integration/reviews/strongmodel/auth-24h-20261013.md",
+  "config_sha256": "a07c79a6ecee929151c40eb32df90b536660f90c1384aa6c1cecfe4d43eec958",
+  "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8",
+  "provider": "vllm-local",
+  "endpoint": "http://192.168.2.45:8002/v1",
+  "ocr_version": "open-code-review v1.12.13 (fabbdb2) linux/amd64\nbuilt at: 2026-10-08T11:52:18Z\nhttps://github.com/alibaba/open-code-review",
+  "ocr_launcher_sha256": "7668ea8933d987357da1e1815bd9bc32739a8ed57b53a033df47a3164d13e502",
+  "diff_sha256": "2cb531d56a2782b76c22fdf2dea6612f52ad2d776beee255227bf2a8e49fa05e",
+  "created_at": "2026-10-13T07:01:47.799765+00:00",
+  "global_lock": "/home/wang/.local/state/ocr-runtime/ocr.lock",
+  "project_lock": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/ocr.lock",
+  "artifacts": {
+    "background.md": "f3c54e4c1517f986ca3b13c80f5b87428a1685e28b67fedb51273cd84f9614d7",
+    "diff.patch": "2cb531d56a2782b76c22fdf2dea6612f52ad2d776beee255227bf2a8e49fa05e",
+    "ocr_runtime.py": "22b6c7f9f08d8ffbcb5aaa90dc25ad4b11acb32e3678f23b18b43aa3e5038080",
+    "ocr_session_status.py": "5a11e0f04e8d7ca0c0e2d36c34f14ed7186a2f4c02bc546b7357a9cf847e15ac"
+  },
+  "review_identity": "7b5cffd0a48dc276953f49a7b3691b9b6f093f18bfa42b005c4f58ce1e29fb6e",
+  "retry_depth": 0,
+  "run_id": "8540bf7ea7f54d89819a04159a39c074",
+  "unit": "coordinator-ocr-8540bf7ea7f54d89819a04159a39c074.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "app/api/ingest_submissions.py"
+      ],
+      "exclude": [
+        "app/schemas/scene_config.py",
+        "app/services/bootstrap.py",
+        "app/services/ingest_service.py",
+        "tests/test_scene_spray_intake.py"
+      ],
+      "preview": {
+        "files": [
+          {
+            "path": "app/api/ingest_submissions.py",
+            "status": "modified",
+            "insertions": 15,
+            "deletions": 3,
+            "will_review": true
+          },
+          {
+            "path": "app/schemas/scene_config.py",
+            "status": "modified",
+            "insertions": 49,
+            "deletions": 0,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          },
+          {
+            "path": "app/services/bootstrap.py",
+            "status": "modified",
+            "insertions": 12,
+            "deletions": 1,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          },
+          {
+            "path": "app/services/ingest_service.py",
+            "status": "modified",
+            "insertions": 292,
+            "deletions": 28,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          },
+          {
+            "path": "tests/test_scene_spray_intake.py",
+            "status": "added",
+            "insertions": 904,
+            "deletions": 0,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          }
+        ],
+        "total_insertions": 1272,
+        "total_deletions": 32,
+        "total_files": 5,
+        "reviewable_count": 1,
+        "excluded_count": 4
+      },
+      "resolved_rules": {
+        "schema_version": "1",
+        "groups": [
+          {
+            "group_id": 1,
+            "source": "system",
+            "pattern": "**/*.{py,pyi,ipynb}",
+            "files": [
+              "app/api/ingest_submissions.py"
+            ],
+            "rule": "> Favor precision over recall: only raise an issue when you are confident it is a real defect, and stay silent when the surrounding context is unclear — a false alarm costs more reviewer trust than a missed minor issue. Treat security and correctness findings as blocking, and style or idiom suggestions as non-blocking.\n\n#### Obvious Typos or Spelling Errors\n- Spelling errors in variable, function, class, or module names at their declaration sites; do not report spelling errors at reference sites, as these are determined by the declaration\n- Strings in log messages or exception messages containing spelling errors that affect readability\n\n#### Dead Code\n- Code blocks that can never be reached (e.g., branches where the condition is always false, code after a `return`, `raise`, `break`, or `continue`)\n- Variables, imports, or function parameters that are declared but never read or referenced\n- Large blocks of commented-out code with no apparent intent to preserve\n- Do not report unused imports, variables, or parameters in `.pyi` stub files; a stub declares an interface it never executes, so re-exported imports, annotation-only declarations, and unreferenced parameter names are expected rather than dead\n\n#### Mutable Default Arguments and Shared State\n- Mutable default arguments such as `def f(x=[])` or `def f(x={})`; the default is created once and shared across every call. Default to `None` and build the value inside the body\n- Class-level mutable attributes shared unintentionally across instances when a per-instance value was intended\n- Module-level mutable globals (lists, dicts, caches) mutated across requests or threads, retaining state in ways that surprise the caller\n- Closures that capture a loop variable by reference and all end up seeing its final value\n- Do not report when the function never mutates the argument, or when the shared default is a deliberate, documented cache or sentinel\n\n#### Boundary and Edge-Case Handling\n- Empty inputs assumed to be non-empty: indexing `xs[0]`, `max()`/`min()`, or slicing without first handling the empty `list`, `str`, `dict`, or iterator\n- Off-by-one and out-of-range access on indices, ranges, or slices, especially at the first/last element\n- `None` reaching code that assumes a value, when an upstream call or default can legitimately return `None` (confirm the data source with `file_read` before flagging)\n- Comparing floats for exact equality with `==`; use `math.isclose` or an explicit tolerance, since floating-point results are not exact\n- Integer/float and division assumptions: unintended truncation with `//`, or `ZeroDivisionError` when a divisor can be zero\n- Heterogeneous or unexpected element types in a collection that the code assumes are uniform (e.g., mixing `None`, numbers, and strings)\n- Dictionary access by key without handling the missing-key case (`d[k]` vs `d.get(k)`), or set/dict operations that assume a key is present\n- Do not report edge cases that a caller or type contract has already ruled out, or inputs that cannot occur given validated boundaries upstream\n\n#### Error Handling and Exceptions\n- Bare `except:` swallows everything, including `KeyboardInterrupt` and `SystemExit`; catch `except Exception` at minimum, and prefer the specific exception types you expect\n- `except Exception` that is still broader than the failure being handled; narrow it to the exceptions actually raised by the guarded call\n- Exceptions caught and silently discarded (`pass`) without logging or re-raising\n- Original traceback lost when re-raising; prefer `raise NewError(...) from err` to preserve the cause\n- Broad `try` blocks that wrap far more than the line that can actually fail, hiding where the error originates\n- `assert` used for runtime validation of external input — assertions are stripped under `python -O`\n\n#### Identity and Equality Comparisons\n- Using `is`/`is not` to compare against literals such as strings, numbers, or tuples; this relies on implementation-specific interning rather than value equality — use `==` (a real correctness risk)\n- Comparing against `True`/`False` with `==`, where a truthy-but-not-`True` value (e.g. `1`, a non-empty container) would compare unequal; prefer a plain truthiness check\n- Reserve `is` for identity checks against singletons and sentinels\n- Comparing against `None` with `==`/`!=` rather than `is`/`is not` is a style preference; report as minor, not blocking\n\n#### Resource Management\n- Files, sockets, locks, or database connections opened without a `with` statement, risking leaks on early return or exception\n- Context managers available but bypassed in favor of manual `open()`/`close()` pairs\n- Resources acquired in a `try` whose `finally` cleanup is missing or incomplete on the error path\n- Iterators or generators holding resources open longer than necessary\n- Do not report short-lived scripts, or handles already managed by an enclosing `with` or framework-managed lifecycle (confirm the surrounding scope with `file_read` before flagging)\n\n#### Performance\nConfirm data scale and that the code is on a hot path before flagging:\n- Building strings with `+=` in a loop instead of accumulating in a list and `\"\".join(...)`, or using an f-string\n- Repeated membership tests against a `list` where a `set` or `dict` would turn O(n) lookups into O(1)\n- Building a full list when a generator would avoid holding everything in memory\n- Recomputing inside a loop a value that is invariant across iterations (e.g., compiling a regex, attribute lookups in hot paths)\n- Passing an eagerly formatted f-string to `logging` (e.g., `logging.info(f\"...\")`) instead of `logging.info(\"%s\", value)`, which defeats lazy formatting when the level is disabled\n\n#### Concurrency and Async\nOnly flag concurrency issues when there is evidence of multi-threaded, multi-process, or async invocation (confirm the call context before reporting):\n- CPU-bound work parallelized with `threading` under the GIL where `multiprocessing` or a process pool is the right tool (traditional CPython; free-threaded builds excepted); I/O-bound work is the case threads actually help\n- Check-then-act races on shared state without a `Lock`, or non-atomic compound updates assumed to be atomic\n- Blocking calls (synchronous I/O, `time.sleep`, `requests`, CPU-heavy work) inside `async def`, stalling the event loop; use the async equivalent or run them in an executor\n- `asyncio` tasks created and never awaited, so exceptions are swallowed and the work may be garbage-collected before it finishes\n- Shared mutable state across threads or tasks without synchronization or a thread-safe structure\n\nDo not report local variables (each thread has its own), read-only access to shared data, or code with no evidence of concurrent use.\n\n#### Security-Sensitive Code\nValidate the data source before flagging; confirm the input is actually attacker-controlled rather than a trusted constant:\n- `eval`, `exec`, or `compile` on untrusted input; this is arbitrary code execution\n- `subprocess` with `shell=True` built from unsanitized input; pass an argument list and avoid the shell\n- `pickle`, `marshal`, or `yaml.load` (without `SafeLoader`) on untrusted data; deserialization can execute arbitrary code\n- SQL built by string concatenation or f-strings instead of parameterized queries\n- Secrets, tokens, passwords, or PII written to logs or committed in source\n- Weak or misused cryptography (`hashlib.md5`/`sha1` for passwords, `random` for security tokens); use `secrets` and vetted libraries\n- Untrusted file paths joined without validation, allowing path traversal"
+          }
+        ]
+      },
+      "rules_sha256": "b9466f8c60402cf31f8c34ce15ce0c0c31d75a2d1a3c46c5a7bb07f9e55bee2f"
+    },
+    {
+      "id": "b02",
+      "files": [
+        "app/schemas/scene_config.py"
+      ],
+      "exclude": [
+        "app/api/ingest_submissions.py",
+        "app/services/bootstrap.py",
+        "app/services/ingest_service.py",
+        "tests/test_scene_spray_intake.py"
+      ],
+      "preview": {
+        "files": [
+          {
+            "path": "app/api/ingest_submissions.py",
+            "status": "modified",
+            "insertions": 15,
+            "deletions": 3,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          },
+          {
+            "path": "app/schemas/scene_config.py",
+            "status": "modified",
+            "insertions": 49,
+            "deletions": 0,
+            "will_review": true
+          },
+          {
+            "path": "app/services/bootstrap.py",
+            "status": "modified",
+            "insertions": 12,
+            "deletions": 1,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          },
+          {
+            "path": "app/services/ingest_service.py",
+            "status": "modified",
+            "insertions": 292,
+            "deletions": 28,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          },
+          {
+            "path": "tests/test_scene_spray_intake.py",
+            "status": "added",
+            "insertions": 904,
+            "deletions": 0,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          }
+        ],
+        "total_insertions": 1272,
+        "total_deletions": 32,
+        "total_files": 5,
+        "reviewable_count": 1,
+        "excluded_count": 4
+      },
+      "resolved_rules": {
+        "schema_version": "1",
+        "groups": [
+          {
+            "group_id": 1,
+            "source": "system",
+            "pattern": "**/*.{py,pyi,ipynb}",
+            "files": [
+              "app/schemas/scene_config.py"
+            ],
+            "rule": "> Favor precision over recall: only raise an issue when you are confident it is a real defect, and stay silent when the surrounding context is unclear — a false alarm costs more reviewer trust than a missed minor issue. Treat security and correctness findings as blocking, and style or idiom suggestions as non-blocking.\n\n#### Obvious Typos or Spelling Errors\n- Spelling errors in variable, function, class, or module names at their declaration sites; do not report spelling errors at reference sites, as these are determined by the declaration\n- Strings in log messages or exception messages containing spelling errors that affect readability\n\n#### Dead Code\n- Code blocks that can never be reached (e.g., branches where the condition is always false, code after a `return`, `raise`, `break`, or `continue`)\n- Variables, imports, or function parameters that are declared but never read or referenced\n- Large blocks of commented-out code with no apparent intent to preserve\n- Do not report unused imports, variables, or parameters in `.pyi` stub files; a stub declares an interface it never executes, so re-exported imports, annotation-only declarations, and unreferenced parameter names are expected rather than dead\n\n#### Mutable Default Arguments and Shared State\n- Mutable default arguments such as `def f(x=[])` or `def f(x={})`; the default is created once and shared across every call. Default to `None` and build the value inside the body\n- Class-level mutable attributes shared unintentionally across instances when a per-instance value was intended\n- Module-level mutable globals (lists, dicts, caches) mutated across requests or threads, retaining state in ways that surprise the caller\n- Closures that capture a loop variable by reference and all end up seeing its final value\n- Do not report when the function never mutates the argument, or when the shared default is a deliberate, documented cache or sentinel\n\n#### Boundary and Edge-Case Handling\n- Empty inputs assumed to be non-empty: indexing `xs[0]`, `max()`/`min()`, or slicing without first handling the empty `list`, `str`, `dict`, or iterator\n- Off-by-one and out-of-range access on indices, ranges, or slices, especially at the first/last element\n- `None` reaching code that assumes a value, when an upstream call or default can legitimately return `None` (confirm the data source with `file_read` before flagging)\n- Comparing floats for exact equality with `==`; use `math.isclose` or an explicit tolerance, since floating-point results are not exact\n- Integer/float and division assumptions: unintended truncation with `//`, or `ZeroDivisionError` when a divisor can be zero\n- Heterogeneous or unexpected element types in a collection that the code assumes are uniform (e.g., mixing `None`, numbers, and strings)\n- Dictionary access by key without handling the missing-key case (`d[k]` vs `d.get(k)`), or set/dict operations that assume a key is present\n- Do not report edge cases that a caller or type contract has already ruled out, or inputs that cannot occur given validated boundaries upstream\n\n#### Error Handling and Exceptions\n- Bare `except:` swallows everything, including `KeyboardInterrupt` and `SystemExit`; catch `except Exception` at minimum, and prefer the specific exception types you expect\n- `except Exception` that is still broader than the failure being handled; narrow it to the exceptions actually raised by the guarded call\n- Exceptions caught and silently discarded (`pass`) without logging or re-raising\n- Original traceback lost when re-raising; prefer `raise NewError(...) from err` to preserve the cause\n- Broad `try` blocks that wrap far more than the line that can actually fail, hiding where the error originates\n- `assert` used for runtime validation of external input — assertions are stripped under `python -O`\n\n#### Identity and Equality Comparisons\n- Using `is`/`is not` to compare against literals such as strings, numbers, or tuples; this relies on implementation-specific interning rather than value equality — use `==` (a real correctness risk)\n- Comparing against `True`/`False` with `==`, where a truthy-but-not-`True` value (e.g. `1`, a non-empty container) would compare unequal; prefer a plain truthiness check\n- Reserve `is` for identity checks against singletons and sentinels\n- Comparing against `None` with `==`/`!=` rather than `is`/`is not` is a style preference; report as minor, not blocking\n\n#### Resource Management\n- Files, sockets, locks, or database connections opened without a `with` statement, risking leaks on early return or exception\n- Context managers available but bypassed in favor of manual `open()`/`close()` pairs\n- Resources acquired in a `try` whose `finally` cleanup is missing or incomplete on the error path\n- Iterators or generators holding resources open longer than necessary\n- Do not report short-lived scripts, or handles already managed by an enclosing `with` or framework-managed lifecycle (confirm the surrounding scope with `file_read` before flagging)\n\n#### Performance\nConfirm data scale and that the code is on a hot path before flagging:\n- Building strings with `+=` in a loop instead of accumulating in a list and `\"\".join(...)`, or using an f-string\n- Repeated membership tests against a `list` where a `set` or `dict` would turn O(n) lookups into O(1)\n- Building a full list when a generator would avoid holding everything in memory\n- Recomputing inside a loop a value that is invariant across iterations (e.g., compiling a regex, attribute lookups in hot paths)\n- Passing an eagerly formatted f-string to `logging` (e.g., `logging.info(f\"...\")`) instead of `logging.info(\"%s\", value)`, which defeats lazy formatting when the level is disabled\n\n#### Concurrency and Async\nOnly flag concurrency issues when there is evidence of multi-threaded, multi-process, or async invocation (confirm the call context before reporting):\n- CPU-bound work parallelized with `threading` under the GIL where `multiprocessing` or a process pool is the right tool (traditional CPython; free-threaded builds excepted); I/O-bound work is the case threads actually help\n- Check-then-act races on shared state without a `Lock`, or non-atomic compound updates assumed to be atomic\n- Blocking calls (synchronous I/O, `time.sleep`, `requests`, CPU-heavy work) inside `async def`, stalling the event loop; use the async equivalent or run them in an executor\n- `asyncio` tasks created and never awaited, so exceptions are swallowed and the work may be garbage-collected before it finishes\n- Shared mutable state across threads or tasks without synchronization or a thread-safe structure\n\nDo not report local variables (each thread has its own), read-only access to shared data, or code with no evidence of concurrent use.\n\n#### Security-Sensitive Code\nValidate the data source before flagging; confirm the input is actually attacker-controlled rather than a trusted constant:\n- `eval`, `exec`, or `compile` on untrusted input; this is arbitrary code execution\n- `subprocess` with `shell=True` built from unsanitized input; pass an argument list and avoid the shell\n- `pickle`, `marshal`, or `yaml.load` (without `SafeLoader`) on untrusted data; deserialization can execute arbitrary code\n- SQL built by string concatenation or f-strings instead of parameterized queries\n- Secrets, tokens, passwords, or PII written to logs or committed in source\n- Weak or misused cryptography (`hashlib.md5`/`sha1` for passwords, `random` for security tokens); use `secrets` and vetted libraries\n- Untrusted file paths joined without validation, allowing path traversal"
+          }
+        ]
+      },
+      "rules_sha256": "39c0ee67e4036004a7265894887e46fe092adc589a2ba29e46aa123d1eef897d"
+    },
+    {
+      "id": "b03",
+      "files": [
+        "app/services/bootstrap.py"
+      ],
+      "exclude": [
+        "app/api/ingest_submissions.py",
+        "app/schemas/scene_config.py",
+        "app/services/ingest_service.py",
+        "tests/test_scene_spray_intake.py"
+      ],
+      "preview": {
+        "files": [
+          {
+            "path": "app/api/ingest_submissions.py",
+            "status": "modified",
+            "insertions": 15,
+            "deletions": 3,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          },
+          {
+            "path": "app/schemas/scene_config.py",
+            "status": "modified",
+            "insertions": 49,
+            "deletions": 0,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          },
+          {
+            "path": "app/services/bootstrap.py",
+            "status": "modified",
+            "insertions": 12,
+            "deletions": 1,
+            "will_review": true
+          },
+          {
+            "path": "app/services/ingest_service.py",
+            "status": "modified",
+            "insertions": 292,
+            "deletions": 28,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          },
+          {
+            "path": "tests/test_scene_spray_intake.py",
+            "status": "added",
+            "insertions": 904,
+            "deletions": 0,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          }
+        ],
+        "total_insertions": 1272,
+        "total_deletions": 32,
+        "total_files": 5,
+        "reviewable_count": 1,
+        "excluded_count": 4
+      },
+      "resolved_rules": {
+        "schema_version": "1",
+        "groups": [
+          {
+            "group_id": 1,
+            "source": "system",
+            "pattern": "**/*.{py,pyi,ipynb}",
+            "files": [
+              "app/services/bootstrap.py"
+            ],
+            "rule": "> Favor precision over recall: only raise an issue when you are confident it is a real defect, and stay silent when the surrounding context is unclear — a false alarm costs more reviewer trust than a missed minor issue. Treat security and correctness findings as blocking, and style or idiom suggestions as non-blocking.\n\n#### Obvious Typos or Spelling Errors\n- Spelling errors in variable, function, class, or module names at their declaration sites; do not report spelling errors at reference sites, as these are determined by the declaration\n- Strings in log messages or exception messages containing spelling errors that affect readability\n\n#### Dead Code\n- Code blocks that can never be reached (e.g., branches where the condition is always false, code after a `return`, `raise`, `break`, or `continue`)\n- Variables, imports, or function parameters that are declared but never read or referenced\n- Large blocks of commented-out code with no apparent intent to preserve\n- Do not report unused imports, variables, or parameters in `.pyi` stub files; a stub declares an interface it never executes, so re-exported imports, annotation-only declarations, and unreferenced parameter names are expected rather than dead\n\n#### Mutable Default Arguments and Shared State\n- Mutable default arguments such as `def f(x=[])` or `def f(x={})`; the default is created once and shared across every call. Default to `None` and build the value inside the body\n- Class-level mutable attributes shared unintentionally across instances when a per-instance value was intended\n- Module-level mutable globals (lists, dicts, caches) mutated across requests or threads, retaining state in ways that surprise the caller\n- Closures that capture a loop variable by reference and all end up seeing its final value\n- Do not report when the function never mutates the argument, or when the shared default is a deliberate, documented cache or sentinel\n\n#### Boundary and Edge-Case Handling\n- Empty inputs assumed to be non-empty: indexing `xs[0]`, `max()`/`min()`, or slicing without first handling the empty `list`, `str`, `dict`, or iterator\n- Off-by-one and out-of-range access on indices, ranges, or slices, especially at the first/last element\n- `None` reaching code that assumes a value, when an upstream call or default can legitimately return `None` (confirm the data source with `file_read` before flagging)\n- Comparing floats for exact equality with `==`; use `math.isclose` or an explicit tolerance, since floating-point results are not exact\n- Integer/float and division assumptions: unintended truncation with `//`, or `ZeroDivisionError` when a divisor can be zero\n- Heterogeneous or unexpected element types in a collection that the code assumes are uniform (e.g., mixing `None`, numbers, and strings)\n- Dictionary access by key without handling the missing-key case (`d[k]` vs `d.get(k)`), or set/dict operations that assume a key is present\n- Do not report edge cases that a caller or type contract has already ruled out, or inputs that cannot occur given validated boundaries upstream\n\n#### Error Handling and Exceptions\n- Bare `except:` swallows everything, including `KeyboardInterrupt` and `SystemExit`; catch `except Exception` at minimum, and prefer the specific exception types you expect\n- `except Exception` that is still broader than the failure being handled; narrow it to the exceptions actually raised by the guarded call\n- Exceptions caught and silently discarded (`pass`) without logging or re-raising\n- Original traceback lost when re-raising; prefer `raise NewError(...) from err` to preserve the cause\n- Broad `try` blocks that wrap far more than the line that can actually fail, hiding where the error originates\n- `assert` used for runtime validation of external input — assertions are stripped under `python -O`\n\n#### Identity and Equality Comparisons\n- Using `is`/`is not` to compare against literals such as strings, numbers, or tuples; this relies on implementation-specific interning rather than value equality — use `==` (a real correctness risk)\n- Comparing against `True`/`False` with `==`, where a truthy-but-not-`True` value (e.g. `1`, a non-empty container) would compare unequal; prefer a plain truthiness check\n- Reserve `is` for identity checks against singletons and sentinels\n- Comparing against `None` with `==`/`!=` rather than `is`/`is not` is a style preference; report as minor, not blocking\n\n#### Resource Management\n- Files, sockets, locks, or database connections opened without a `with` statement, risking leaks on early return or exception\n- Context managers available but bypassed in favor of manual `open()`/`close()` pairs\n- Resources acquired in a `try` whose `finally` cleanup is missing or incomplete on the error path\n- Iterators or generators holding resources open longer than necessary\n- Do not report short-lived scripts, or handles already managed by an enclosing `with` or framework-managed lifecycle (confirm the surrounding scope with `file_read` before flagging)\n\n#### Performance\nConfirm data scale and that the code is on a hot path before flagging:\n- Building strings with `+=` in a loop instead of accumulating in a list and `\"\".join(...)`, or using an f-string\n- Repeated membership tests against a `list` where a `set` or `dict` would turn O(n) lookups into O(1)\n- Building a full list when a generator would avoid holding everything in memory\n- Recomputing inside a loop a value that is invariant across iterations (e.g., compiling a regex, attribute lookups in hot paths)\n- Passing an eagerly formatted f-string to `logging` (e.g., `logging.info(f\"...\")`) instead of `logging.info(\"%s\", value)`, which defeats lazy formatting when the level is disabled\n\n#### Concurrency and Async\nOnly flag concurrency issues when there is evidence of multi-threaded, multi-process, or async invocation (confirm the call context before reporting):\n- CPU-bound work parallelized with `threading` under the GIL where `multiprocessing` or a process pool is the right tool (traditional CPython; free-threaded builds excepted); I/O-bound work is the case threads actually help\n- Check-then-act races on shared state without a `Lock`, or non-atomic compound updates assumed to be atomic\n- Blocking calls (synchronous I/O, `time.sleep`, `requests`, CPU-heavy work) inside `async def`, stalling the event loop; use the async equivalent or run them in an executor\n- `asyncio` tasks created and never awaited, so exceptions are swallowed and the work may be garbage-collected before it finishes\n- Shared mutable state across threads or tasks without synchronization or a thread-safe structure\n\nDo not report local variables (each thread has its own), read-only access to shared data, or code with no evidence of concurrent use.\n\n#### Security-Sensitive Code\nValidate the data source before flagging; confirm the input is actually attacker-controlled rather than a trusted constant:\n- `eval`, `exec`, or `compile` on untrusted input; this is arbitrary code execution\n- `subprocess` with `shell=True` built from unsanitized input; pass an argument list and avoid the shell\n- `pickle`, `marshal`, or `yaml.load` (without `SafeLoader`) on untrusted data; deserialization can execute arbitrary code\n- SQL built by string concatenation or f-strings instead of parameterized queries\n- Secrets, tokens, passwords, or PII written to logs or committed in source\n- Weak or misused cryptography (`hashlib.md5`/`sha1` for passwords, `random` for security tokens); use `secrets` and vetted libraries\n- Untrusted file paths joined without validation, allowing path traversal"
+          }
+        ]
+      },
+      "rules_sha256": "7203ffceb075d6d3c27185f72d31d8b71d196ac54fed56c8a70958fbdea2cc32"
+    },
+    {
+      "id": "b04",
+      "files": [
+        "app/services/ingest_service.py"
+      ],
+      "exclude": [
+        "app/api/ingest_submissions.py",
+        "app/schemas/scene_config.py",
+        "app/services/bootstrap.py",
+        "tests/test_scene_spray_intake.py"
+      ],
+      "preview": {
+        "files": [
+          {
+            "path": "app/api/ingest_submissions.py",
+            "status": "modified",
+            "insertions": 15,
+            "deletions": 3,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          },
+          {
+            "path": "app/schemas/scene_config.py",
+            "status": "modified",
+            "insertions": 49,
+            "deletions": 0,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          },
+          {
+            "path": "app/services/bootstrap.py",
+            "status": "modified",
+            "insertions": 12,
+            "deletions": 1,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          },
+          {
+            "path": "app/services/ingest_service.py",
+            "status": "modified",
+            "insertions": 292,
+            "deletions": 28,
+            "will_review": true
+          },
+          {
+            "path": "tests/test_scene_spray_intake.py",
+            "status": "added",
+            "insertions": 904,
+            "deletions": 0,
+            "will_review": false,
+            "exclude_reason": "user_exclude"
+          }
+        ],
+        "total_insertions": 1272,
+        "total_deletions": 32,
+        "total_files": 5,
+        "reviewable_count": 1,
+        "excluded_count": 4
+      },
+      "resolved_rules": {
+        "schema_version": "1",
+        "groups": [
+          {
+            "group_id": 1,
+            "source": "system",
+            "pattern": "**/*.{py,pyi,ipynb}",
+            "files": [
+              "app/services/ingest_service.py"
+            ],
+            "rule": "> Favor precision over recall: only raise an issue when you are confident it is a real defect, and stay silent when the surrounding context is unclear — a false alarm costs more reviewer trust than a missed minor issue. Treat security and correctness findings as blocking, and style or idiom suggestions as non-blocking.\n\n#### Obvious Typos or Spelling Errors\n- Spelling errors in variable, function, class, or module names at their declaration sites; do not report spelling errors at reference sites, as these are determined by the declaration\n- Strings in log messages or exception messages containing spelling errors that affect readability\n\n#### Dead Code\n- Code blocks that can never be reached (e.g., branches where the condition is always false, code after a `return`, `raise`, `break`, or `continue`)\n- Variables, imports, or function parameters that are declared but never read or referenced\n- Large blocks of commented-out code with no apparent intent to preserve\n- Do not report unused imports, variables, or parameters in `.pyi` stub files; a stub declares an interface it never executes, so re-exported imports, annotation-only declarations, and unreferenced parameter names are expected rather than dead\n\n#### Mutable Default Arguments and Shared State\n- Mutable default arguments such as `def f(x=[])` or `def f(x={})`; the default is created once and shared across every call. Default to `None` and build the value inside the body\n- Class-level mutable attributes shared unintentionally across instances when a per-instance value was intended\n- Module-level mutable globals (lists, dicts, caches) mutated across requests or threads, retaining state in ways that surprise the caller\n- Closures that capture a loop variable by reference and all end up seeing its final value\n- Do not report when the function never mutates the argument, or when the shared default is a deliberate, documented cache or sentinel\n\n#### Boundary and Edge-Case Handling\n- Empty inputs assumed to be non-empty: indexing `xs[0]`, `max()`/`min()`, or slicing without first handling the empty `list`, `str`, `dict`, or iterator\n- Off-by-one and out-of-range access on indices, ranges, or slices, especially at the first/last element\n- `None` reaching code that assumes a value, when an upstream call or default can legitimately return `None` (confirm the data source with `file_read` before flagging)\n- Comparing floats for exact equality with `==`; use `math.isclose` or an explicit tolerance, since floating-point results are not exact\n- Integer/float and division assumptions: unintended truncation with `//`, or `ZeroDivisionError` when a divisor can be zero\n- Heterogeneous or unexpected element types in a collection that the code assumes are uniform (e.g., mixing `None`, numbers, and strings)\n- Dictionary access by key without handling the missing-key case (`d[k]` vs `d.get(k)`), or set/dict operations that assume a key is present\n- Do not report edge cases that a caller or type contract has already ruled out, or inputs that cannot occur given validated boundaries upstream\n\n#### Error Handling and Exceptions\n- Bare `except:` swallows everything, including `KeyboardInterrupt` and `SystemExit`; catch `except Exception` at minimum, and prefer the specific exception types you expect\n- `except Exception` that is still broader than the failure being handled; narrow it to the exceptions actually raised by the guarded call\n- Exceptions caught and silently discarded (`pass`) without logging or re-raising\n- Original traceback lost when re-raising; prefer `raise NewError(...) from err` to preserve the cause\n- Broad `try` blocks that wrap far more than the line that can actually fail, hiding where the error originates\n- `assert` used for runtime validation of external input — assertions are stripped under `python -O`\n\n#### Identity and Equality Comparisons\n- Using `is`/`is not` to compare against literals such as strings, numbers, or tuples; this relies on implementation-specific interning rather than value equality — use `==` (a real correctness risk)\n- Comparing against `True`/`False` with `==`, where a truthy-but-not-`True` value (e.g. `1`, a non-empty container) would compare unequal; prefer a plain truthiness check\n- Reserve `is` for identity checks against singletons and sentinels\n- Comparing against `None` with `==`/`!=` rather than `is`/`is not` is a style preference; report as minor, not blocking\n\n#### Resource Management\n- Files, sockets, locks, or database connections opened without a `with` statement, risking leaks on early return or exception\n- Context managers available but bypassed in favor of manual `open()`/`close()` pairs\n- Resources acquired in a `try` whose `finally` cleanup is missing or incomplete on the error path\n- Iterators or generators holding resources open longer than necessary\n- Do not report short-lived scripts, or handles already managed by an enclosing `with` or framework-managed lifecycle (confirm the surrounding scope with `file_read` before flagging)\n\n#### Performance\nConfirm data scale and that the code is on a hot path before flagging:\n- Building strings with `+=` in a loop instead of accumulating in a list and `\"\".join(...)`, or using an f-string\n- Repeated membership tests against a `list` where a `set` or `dict` would turn O(n) lookups into O(1)\n- Building a full list when a generator would avoid holding everything in memory\n- Recomputing inside a loop a value that is invariant across iterations (e.g., compiling a regex, attribute lookups in hot paths)\n- Passing an eagerly formatted f-string to `logging` (e.g., `logging.info(f\"...\")`) instead of `logging.info(\"%s\", value)`, which defeats lazy formatting when the level is disabled\n\n#### Concurrency and Async\nOnly flag concurrency issues when there is evidence of multi-threaded, multi-process, or async invocation (confirm the call context before reporting):\n- CPU-bound work parallelized with `threading` under the GIL where `multiprocessing` or a process pool is the right tool (traditional CPython; free-threaded builds excepted); I/O-bound work is the case threads actually help\n- Check-then-act races on shared state without a `Lock`, or non-atomic compound updates assumed to be atomic\n- Blocking calls (synchronous I/O, `time.sleep`, `requests`, CPU-heavy work) inside `async def`, stalling the event loop; use the async equivalent or run them in an executor\n- `asyncio` tasks created and never awaited, so exceptions are swallowed and the work may be garbage-collected before it finishes\n- Shared mutable state across threads or tasks without synchronization or a thread-safe structure\n\nDo not report local variables (each thread has its own), read-only access to shared data, or code with no evidence of concurrent use.\n\n#### Security-Sensitive Code\nValidate the data source before flagging; confirm the input is actually attacker-controlled rather than a trusted constant:\n- `eval`, `exec`, or `compile` on untrusted input; this is arbitrary code execution\n- `subprocess` with `shell=True` built from unsanitized input; pass an argument list and avoid the shell\n- `pickle`, `marshal`, or `yaml.load` (without `SafeLoader`) on untrusted data; deserialization can execute arbitrary code\n- SQL built by string concatenation or f-strings instead of parameterized queries\n- Secrets, tokens, passwords, or PII written to logs or committed in source\n- Weak or misused cryptography (`hashlib.md5`/`sha1` for passwords, `random` for security tokens); use `secrets` and vetted libraries\n- Untrusted file paths joined without validation, allowing path traversal"
+          }
+        ]
+      },
+      "rules_sha256": "3772c50fb0eef9235847edf38e3b345abbcc7c5233df15cf13aee745dc2245d3"
+    }
+  ],
+  "preview": {
+    "files": [
+      {
+        "path": "app/api/ingest_submissions.py",
+        "status": "modified",
+        "insertions": 15,
+        "deletions": 3,
+        "will_review": true
+      },
+      {
+        "path": "app/schemas/scene_config.py",
+        "status": "modified",
+        "insertions": 49,
+        "deletions": 0,
+        "will_review": true
+      },
+      {
+        "path": "app/services/bootstrap.py",
+        "status": "modified",
+        "insertions": 12,
+        "deletions": 1,
+        "will_review": true
+      },
+      {
+        "path": "app/services/ingest_service.py",
+        "status": "modified",
+        "insertions": 292,
+        "deletions": 28,
+        "will_review": true
+      },
+      {
+        "path": "tests/test_scene_spray_intake.py",
+        "status": "added",
+        "insertions": 904,
+        "deletions": 0,
+        "will_review": false,
+        "exclude_reason": "default_path"
+      }
+    ],
+    "total_insertions": 1272,
+    "total_deletions": 32,
+    "total_files": 5,
+    "reviewable_count": 4,
+    "excluded_count": 1
+  },
+  "parameters": [
+    "--audience",
+    "agent",
+    "--format",
+    "json",
+    "--provider",
+    "vllm-local",
+    "--timeout",
+    "60",
+    "--max-tokens",
+    "0",
+    "--effort",
+    "medium",
+    "--concurrency",
+    "1"
+  ],
+  "request_timeout_seconds": 900,
+  "batch_hard_seconds": 3900
+}

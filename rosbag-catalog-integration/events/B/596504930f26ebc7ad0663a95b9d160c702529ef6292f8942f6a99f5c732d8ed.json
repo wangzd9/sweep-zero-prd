@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t10d2-20261012-0047-delivered-reviewpending",
+  "occurred_at": "2026-10-12T00:54:44+08:00",
+  "recorded_at": "2026-10-12T00:54:44+08:00",
+  "role": "B",
+  "task": "t10-defect2-storage-offset",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "06B derive_storage_offset bit恒定→中位数+100ms抖动容差(fail-closed保持)，真实7袋复验7/7非None，commit d4719f6，SQLite 106定向+815全量+ruff绿",
+  "evidence": "receipts/TASK-06B/t10-defect2-storage-offset.md",
+  "next": "等协调者机械核验+串行OCR+合入，与1号#1一并E2E复跑→TASK-10 DONE"
+}

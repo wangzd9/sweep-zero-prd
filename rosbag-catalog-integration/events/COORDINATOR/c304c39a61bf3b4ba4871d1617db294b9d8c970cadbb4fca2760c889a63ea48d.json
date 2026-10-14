@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-195553-r95-t07b-ocr-detached-launch",
+  "occurred_at": "2026-10-12T20:04:43+08:00",
+  "recorded_at": "2026-10-12T20:04:43+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07B",
+  "attempt": "attempt-1",
+  "status": "IN_PROGRESS",
+  "summary": "r95: r94 后台跟踪 pid 434432 核实随 cron 会话回收；队列低负载（2 running/0 waiting 实测）→ detached 串行 OCR pid 464164（start_new_session，--max-tokens 30000，b5→b10 六批，flock 持 ocr.lock）",
+  "evidence": "scratch/t07b/ocr/remaining_progress.txt; reviews/TASK-07B/attempt-1/ocr-batches.md",
+  "next": "r96+ 核 remaining_progress.txt 收口态"
+}

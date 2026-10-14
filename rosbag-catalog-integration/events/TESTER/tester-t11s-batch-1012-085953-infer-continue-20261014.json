@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-085953-infer-continue-20261014",
+  "occurred_at": "2026-10-14T09:03:52+08:00",
+  "recorded_at": "2026-10-14T09:03:52+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "09:0x 巡检轮（prerun 指纹 8f69f291…，用户恢复交接入口核读+上轮 08:56 自写事件纯回声）：恢复后按原 ACK 口径增量只读巡检，4acf689f SCENE_RUNNING 八步 QUEUED；proxy volcsw 107844->107868 INFER 持续活跃不 kill/cancel/retry；flat 三提交 3/3 PENDING_INPUT 14_42_48 NOT_RUN；scan 4079\t/public/rosbag_scene_processing/incoming\tSUCCESS\t{\"directories\": 3, \"bags\": 1, \"created\": 0, \"updated\": 0, \"failed\" 周期持续；health ok；PASS 基线不变。全部只读。",
+  "evidence": "scene_runs='scene-4acf689f9a6a473da1fa2f2efc70\\tSCENE_RUNNING\\t1\\t2026-10-14 09:03:37\\t2026-10-14 09:03:37'; steps QUEUED=8/8; volcsw 107844->107868 nvol 349; flat PENDING_INPUT=3/3 subs=9行; scan top='4079\\t/public/rosbag_scene_processing/incoming\\tSUCCESS\\t{\"directories\": 3, \"bags\": 1, \"created\": 0, \"updated\": 0, \"failed\"'; health='{\"status\": \"ok\", \"pid\": 1, \"active_runs\": [{\"pipeline_run_id\": \"scene-4acf689f9a6a473da1fa2f2efc70\", \"stage\": \"ACCEPTED\", \"pid\": 1}]}'",
+  "next": "白天按原节奏巡检；等 4acf689f 模型段完成信号；flat 绑定行出现后核 14_42_48 正式全链；全批 8 包齐后 TEST_REPORT_PENDING；11:00 时段总结照常"
+}

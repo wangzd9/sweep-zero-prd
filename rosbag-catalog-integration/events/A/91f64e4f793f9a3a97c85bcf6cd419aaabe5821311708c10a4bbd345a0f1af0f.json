@@ -1,0 +1,12 @@
+{
+  "event_id": "a-t16ca-attempt1-delivery-20261014T123951",
+  "occurred_at": "2026-10-14T12:39:51+08:00",
+  "recorded_at": "2026-10-14T12:40:08+08:00",
+  "role": "A",
+  "task": "TASK-16C-A",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "交付冻结 a1e416a（base bd0db1d）：核修 OCR C5/C6/C7/16C-c03-02/03/04；pytest 59 passed + 全量 1115 passed(1 项 seed 既有失败,stash 对照非回归)；ruff 全过；MySQL 交 TESTER；回执 receipts/TASK-16C-A/attempt-1.md",
+  "evidence": "commit a1e416a; pytest 59/1115; ruff 0; receipt receipts/TASK-16C-A/attempt-1.md; branch a/task-16c-a-query-api",
+  "next": "等协调者 OCR(ocr_runtime 唯一入口) 与 TESTER 独立验证；返修按协调者优先级回本分支"
+}

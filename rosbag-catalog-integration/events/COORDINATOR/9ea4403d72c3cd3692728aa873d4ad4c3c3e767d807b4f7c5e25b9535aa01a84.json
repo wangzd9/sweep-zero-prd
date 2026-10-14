@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-092553-nochange",
+  "occurred_at": "2026-10-11T09:27:33+08:00",
+  "recorded_at": "2026-10-11T09:27:33+08:00",
+  "role": "COORDINATOR",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE_POLL",
+  "summary": "09:25巡检：2号rework-6继续实测推进（R-01探针r01_ab.py+service 09:23更新），未交付；main 6d30a68不变；强复审R2I结果仍不存在；零新派单/回执，门禁不变",
+  "evidence": "none",
+  "next": "继续按5分钟节奏核B rework-6活体"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-155553-t08-running-i1-closed",
+  "role": "COORDINATOR",
+  "occurred_at": "2026-10-11T15:55:53+08:00",
+  "recorded_at": "2026-10-11T15:58:00+08:00",
+  "task": "TASK-08/TASK-05",
+  "attempt": "attempt-1/i1-1",
+  "status": "POLL_NO_CHANGE",
+  "summary": "巡检：i1-1 6823f2d 已合入 main f9bafb0（15:45，ACCEPT_MERGED，I-1 VERIFICATION_GAP 关闭，本侧独立复核一致）；2号 TASK-08 attempt-1 15:31 ACK 后 wt-04a-t08 联调实测推进（RUNNING，无回执）；1号回空闲等新单；C/TESTER 空闲；无新派单/合入/OCR。",
+  "evidence": "sessions/COORDINATOR.md 15:55 检查点; inbox/coordinator/TASK-05/i1-1-acceptance-decision.md; inbox/2号/TASK-08/attempt-1-ack.md",
+  "next": "等 2号 TASK-08 联调交付验收；无其他在途门禁。"
+}

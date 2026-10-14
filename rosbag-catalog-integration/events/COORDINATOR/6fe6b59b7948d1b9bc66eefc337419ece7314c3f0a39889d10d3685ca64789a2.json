@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-14ae4556629a-20261010-1657-b9r2-restart",
+  "occurred_at": "2026-10-10T16:58:08+08:00",
+  "recorded_at": "2026-10-10T16:58:08+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-03B",
+  "attempt": "5-rework-2",
+  "status": "RUNNING",
+  "summary": "16:57 巡检：B9 首轮 OCR（c285e2e）16:50 FAILED context canceled（2m3s、1/1 item canceled、budget_exceeded=false，llm 侧取消按门禁不算通过）；llm 18002 现 1 running/0 waiting、ocr.lock 空闲 → 同 commit 同输入重跑 B9-r2（16:57:47 起跑，pid 493122/ocr 493148，session 待生成，持 ocr.lock，硬截止 17:25，脚本收口自动回写批次账）；合入唯一门禁维持=B9-r2 无 high/critical → 五笔+小修同批 --no-ff 合入 main（现 eff0479）→ TESTER 派单",
+  "evidence": "reviews/TASK-03B/attempt-5/ocr-c285e2e-03b.log（16:50 r1 失败+16:57:47 r2 起跑）；reviews/TASK-03B/attempt-5/ocr-batches.md（B9-r2 行）",
+  "next": "下轮巡检先查 B9-r2 session mtime/收口（硬截止 17:25），不重复启动；收口无 high/critical 则同批合入"
+}

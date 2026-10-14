@@ -1,0 +1,14 @@
+{
+  "event_id": "c-t11s-batch-1012-obs19-extract-db32-active-20261014",
+  "occurred_at": "2026-10-14T01:13:00+08:00",
+  "recorded_at": "2026-10-14T01:13:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs18（01:05）后新一轮：pending 触发源=sessions/C.md（obs18 自产记账）；ACK 21:07:41 在案不重复领取",
+  "summary": "C 第19轮只读复核（处理机 01:10-01:13 实测 ssh curl 8180/8767、docker ps/exec 读 ps、stat incoming/spray，未 kill/未删/未重启/未 retry/未改任何生产路径）与 obs18 零状态变化并新增进程级在算证据：① 7 scene run 不变——六 SCENE_DONE（c4a88c07/604c0896/bc8c1d1c/a4824f1c/eb4397c3/24ab78bb）+ scene-4acf689f（16_02_03 正式链 source 91FFEEC1 前缀/submission 24d60fee）仍 SCENE_RUNNING attempt=1 auto_retry_count=0 lease_owner=platform-local，heartbeat 01:11:00 续租活跃 lease 至 01:13:00，328 事件链末 15 条全 HEARTBEAT/RESOURCE_HEARTBEAT 无 FAILED，proxy 8767 active_runs=[scene-4acf689f ACCEPTED pid1]；② EXTRACT 面进程级实证：proxy 容器 pid 12623 packet2pointcloud 处理 16_02_03 第 2/2 个 DB3（16_02_03_1.db3）/iv_packets_front_mid 写 attempt-1/pcd，17:06 起跑存活，跨 DB3 大包串行计算中，八步 API 口径仍全 QUEUED 属阶段边界写；proxy 主进程 CPU TIME 11:30/RSS 15.8GB 在算正常；③ incoming/spray 仍仅 16_33_10 空包目录（D6 拒绝痕迹 A 面补台账）；④ flat 三提交 a65a25a7/87dfebaa/518089ed 仍无新绑定 run（D4 第③步归 A 面，SCENE_EXEC_HOST 被 4acf689f 串行占用属预期）；⑤ 资源 NAS 98T/70T/29T 71% 不变、load 1.29/1.35/1.32 无风险。本批 8 包无新终态，跨夜不 kill/retry。",
+  "evidence": "处理机只读实测：8180 pipeline-runs/scene-4acf689f9a6a473da1fa2f2efc70 rc=0（SCENE_RUNNING attempt=1 auto_retry_count=0 frozen_at 2026-10-13T23:05:30 submission_id=24d60fee44554e74b15df3fcdf5d93d5 steps 全 QUEUED heartbeat_at 2026-10-14T01:11:00 lease_expires_at 2026-10-14T01:13:00，事件 328 条末 15 条全 HEARTBEAT/RESOURCE_HEARTBEAT）；8180 pipeline-runs?limit=200 total=24（七 scene run 六 DONE 一 RUNNING）；8767/health rc=0 {status:ok active_runs:[scene-4acf689f ACCEPTED pid1]}；docker exec rosbag-scene-proxy ps：pid1 scene_host_proxy.py CPU TIME 11:30 RSS 15.8GB、pid 12623 packet2pointcloud /nas/rosbag_scene_processing/ready/spray/rosbag2_2026_10_12-16_02_03/rosbag2_2026_10_12-16_02_03_1.db3 /iv_packets_front_mid /var/lib/scene-proxy/work/scene-4acf689f.../attempt-1/pcd START 17:06 存活；stat incoming/spray 仅 rosbag2_2026_10_12-16_33_10（2026-10-12 17:37）；df /mnt/nas_backup 98T 70T 29T 71%；uptime load 1.29/1.35/1.32",
+  "next": "接续只读观察：① scene-4acf689f 终态（16_02_03 跨 DB3 大包，第 2/2 DB3 packet2pointcloud 在算，完成信号=checkpoint 翻转+八步推进+SCENE_DONE）；② 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run，C 按 run 核账（含 ruling-dup-slices-0038 观察面：正式 a65a25a7 绑定 run 对现存 FFDEE943 同 source 切片处置痕迹取证，C 不处置）；③ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

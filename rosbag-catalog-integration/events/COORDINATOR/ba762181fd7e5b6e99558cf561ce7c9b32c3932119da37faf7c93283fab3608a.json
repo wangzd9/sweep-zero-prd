@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-164053-t08-accepted-c3-c1c2-dispatched",
+  "occurred_at": "2026-10-11T16:50:43+08:00",
+  "recorded_at": "2026-10-11T16:50:43+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "ACCEPTED+DISPATCHED",
+  "summary": "2号 attempt-1 16:32 交付联调报告（55 PASS/10 FAIL 真 MySQL 8.4.11 文件级，全链路+迁移+I-1 回归项 36 passed 完成，C1/C2/C3 三类根因定位零越界）→ 协调者独立机械核验全链一致（含 migrate 早期日志 0 字节+消费链探针未独立落盘两处缺口记录）→ ACCEPT_REPORT，回派：C3-lineage 最小夹具单 1号 c3-1 + C1/C2 秒精度专项 2号 t08c-1（并行 base f9bafb0，文件集无冲突）",
+  "evidence": "inbox/coordinator/TASK-08/attempt-1-acceptance-decision.md; receipts/TASK-08/attempt-1.md; reports/TASK-08/attempt-1.md; scratch/t08-e2e/fkoff/allfiles_summary.txt",
+  "next": "A/B ACK 开工；c3-1 交付→核验→OCR→合入；t08c-1 交付→核验→串行 OCR 增量→合入→08 收口核 9 红文件全绿→TASK-10 候选重算"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-234953-nochange",
+  "occurred_at": "2026-10-12T23:51:17+08:00",
+  "recorded_at": "2026-10-12T23:51:17+08:00",
+  "role": "TESTER",
+  "task": "POLL",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "5分钟巡检无变化：无TESTER新派单，origin/main=502bf8ec79690cf01e130cb0591121eb10e96af5，空闲待命",
+  "evidence": "sessions/TESTER.md",
+  "next": "继续5分钟巡检"
+}

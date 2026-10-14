@@ -1,0 +1,13 @@
+{
+  "event_id": "b-ack-20261014-113300-task16c-b-attempt1",
+  "occurred_at": "2026-10-14T11:33:00+08:00",
+  "recorded_at": "2026-10-14T12:05:00+08:00",
+  "role": "B",
+  "task": "TASK-16C-B",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "v0.4 恢复入口 11:25:19 生效；B 在 11:09 ACCEPTED 释放槽的安全点核无在途进程后独立 ACK TASK-16C-B attempt-1（Bag 三视图），新建专属 worktree/分支 b/task-16c-b-bag-views @ wt-04a-t16cb（seed bd0db1d），开工实现+自测。",
+  "evidence": "inbox/2号/TASK-16C-B/attempt-1-ack.md；git -C wt-04a-t16cb rev-parse HEAD=bd0db1d2a0fc293cb4562e2079e741739bacb0de",
+  "next": "冻结 commit 后写回执 REVIEW_PENDING",
+  "source": "sessions/B.md 11:27 巡检条目"
+}

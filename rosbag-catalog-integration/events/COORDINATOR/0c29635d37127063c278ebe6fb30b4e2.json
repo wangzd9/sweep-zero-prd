@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-105053-r144-t16c-ocr-2of7-c5-correction-t16b-retry8-waiter",
+  "occurred_at": "2026-10-13T11:05:00+08:00",
+  "recorded_at": "2026-10-13T11:05:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16C",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "r144 巡检：16C OCR 链 2/7 收口 rc=0（c01 pipelines.py 4 findings 全 low 独立核=C1 死分支/C2 死参数/C3 死变量确认+C4 与 C1 冲突驳回（run_failed 集合实测不含 INPUT_INVALID）；c02 bag_search_service.py 2 medium=C5 双用途筛选与双标展示不一致 CONFIRMED CORRECTION（DESIGN §7.3.3 明文双命中+代码注释自述均可命中，CASE 单值口径致 self_built_original 筛选漏双用途行）+C6 data_kind_labels_for 死代码确认）；c03 在途 c04-c07 排队。TESTER 16C 独立验证 PASS 10:47 交付记账（9 项全过/898 passed 0 新增/0 残留，MySQL 面=无 DDL 仅 SELECT 谓词）=双证据面 1 齐，C5 返修后需复测谓词子项。16B 新事实=交互会话用户 10:47 问询后 10:48:49 挂第 8 次等待器（b2_r143_wait8.py pid 1697095 ps 核存活，effort=low+背景约束+直连 8002+900s，等 16C 链收口后接跑，兜底 delegate 规格+宿主代审；r143 不自动第 8 次政策由交互会话用户动作取代，本侧记账不拦截不代管；ocr config 遗留直连 8002=18002 隧道已断（r144_probe 实测 refused）期间唯一路径，不重置）。门禁：16C 合入维持关闭（C5 已现，全批收口后一次最小返修单派 B）；16A DONE(6fb42c4)/07B DONE(4b9f30a)/16D WAITING 三前置未齐不变。强审期限 2026-10-13 11:33:12（剩约 30min）内本轮零新增（60min 0/5 累计 2 在途 0 费用未知）。",
+  "evidence": "reviews/TASK-16/16A-16B-ocr-batches.md r144 段; scratch/t16c_ocr/t16c_ocr_progress.txt+t16c_c01.log(4 findings session 46b7e357)+t16c_c02.log(2 findings session 03eee6ac); test-receipts/TEST-TASK16C-independent/attempt-1.md; sessions/COORDINATOR.md r144; scratch/r144_probe.py(18002 refused/8002 200/config=直连); wt-04a-t16c HEAD 5c80857 代码实测（SCENE_STEP_NAMES 枚举/run_failed :94/data_kind_case :38-59/data_kind_labels_for 0 调用/transitions INPUT_INVALID 归属）",
+  "next": "r145+ 核 c03-c07 收口→全批 findings 合并一次最小返修单派 B（C5 主项+C1/C2/C3/C6 维护项，限 16C 文件边界）→机械核验→返修增量 OCR→TESTER C5 复测（谓词子项 #3/#4）→16C 合入 DONE→16D 前置 2/3；16B 第 8 次收口后核 rc+config 恢复面记账"
+}

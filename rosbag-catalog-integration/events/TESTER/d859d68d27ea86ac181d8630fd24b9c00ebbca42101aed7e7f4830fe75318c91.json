@@ -1,0 +1,12 @@
+{
+  "event_id": "20261011-204612-poll-task09-ack-readonly",
+  "occurred_at": "2026-10-11T20:46:52+08:00",
+  "recorded_at": "2026-10-11T20:46:52+08:00",
+  "role": "TESTER",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "IDLE_POLL",
+  "summary": "5分钟巡检：2号 TASK-09 attempt-1 20:44 ACK 已开工（执行者范围，只读核实不代审核），inbox/TESTER 零新增无 PENDING，main 0a8ca8a 双核一致，维持 IDLE",
+  "evidence": "sessions/TESTER.md",
+  "next": "等 TASK-09 交付后协调者机械核验，如有 TESTER 复测派单再 ACK 开工"
+}

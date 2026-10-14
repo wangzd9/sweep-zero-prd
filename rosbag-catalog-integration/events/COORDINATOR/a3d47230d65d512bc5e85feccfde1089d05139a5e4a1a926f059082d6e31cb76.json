@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-2240-rework5-ocr-merge-6d30a68-20261010",
+  "occurred_at": "2026-10-10T22:52:20+08:00",
+  "recorded_at": "2026-10-10T22:52:20+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "rework5",
+  "status": "MERGED",
+  "summary": "5c854ea 机械核验全绿+OCR R5-r1 0 findings(session 94bdf176,coverage 2/2)+--no-ff 合入 main 6d30a68(22:46:03,推 origin)+sanity 全绿; TESTER attempt-4(M-1 微秒回归真 MySQL 生产默认连接语义)已派; 强复审 target 更新 6d30a68",
+  "evidence": "reviews/TASK-06B/attempt-1-r2-rework-5/ocr-batches.md; inbox/TESTER/TASK-06/r2-final-mysql-e2e-attempt-4.md; reviews/strongmodel/R2I-20261010-06-pack.md",
+  "next": "TESTER attempt-4 PASS + 强模型增量复审(用户手动) → 03/05/06 聚合 DONE → TASK-08"
+}

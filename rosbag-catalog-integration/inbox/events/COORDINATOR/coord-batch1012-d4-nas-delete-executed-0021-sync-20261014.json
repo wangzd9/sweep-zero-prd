@@ -1,0 +1,14 @@
+{
+  "event_id": "coord-batch1012-d4-nas-delete-executed-0021-sync-20261014",
+  "occurred_at": "2026-10-14T00:27:00+08:00",
+  "recorded_at": "2026-10-14T00:27:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "TRACKING",
+  "supersedes_context": "prerun 00:25:53 指纹 e0d4960e 唤醒；变更源核对=C obs14-d4check（00:23）/B 0021sync-idle（00:23:40）/TESTER 9a111d61（00:24）/A d4-nas-delete-evidence-0021.json（00:25 mtime，00:20:59 at 字段）+本侧 00:21 事件与 sessions 自写回声",
+  "summary": "D4 删除时序②确认收口：A 00:20:59 删 NAS `ready/spray/20261012/`（du 14G，10 文件逐文件 SHA 清单，flat 四包字节 4/4 MATCH=14_42_48/16_00_13/16_37_47/16_58_28 与正式 flat 副本一致，原件移 `.upload-staging/d4-dategrouped-delete-20261014/ready-spray-20261014`，incoming 无 date-grouped 残留，ready 顶层仅剩 7 flat 目录，post_dated_exists=false，`d4-nas-delete-evidence-0021.json`）。BATCH-STATUS 角色行+14_42_48/16_58_28/16_37_47 三逐包行已同步 D4②完成口径。C 00:22 只读核账与 00:19 obs14 一致：六 SCENE_DONE+`scene-4acf689f`（16_02_03 正式链）仍 SCENE_RUNNING（大包跨夜串行，lease 续租活跃，不 kill/retry）；D4 删除后暂无新 run 绑定，三 flat 提交（`a65a25a7`/`87dfebaa`/`518089ed`）409 释放与绑定推进归 A 面，C 只跟踪。TESTER 00:24 口径：D3 dup 面全终态收敛核销已独立确认、4acf689f 八步推进等待、dup FFDEE943 第二份切片处置仍等协调者裁决。无新派单：A/C/TESTER/B 均在既定指针内（resume-ruling-2338 / obs14 next / ruling-2338-verify / idle-waiting）。",
+  "evidence": "receipts/TASK-11S-BATCH-1012/d4-nas-delete-evidence-0021.json(at=2026-10-14T00:20:59, dated_bytes=14930820106, flat_check 4/4 match, moved_to=…/d4-dategrouped-delete-20261014); inbox/events/C/c-t11s-batch-1012-obs14-d4check-20261014.json; inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md(本轮同步, 00:2x mtime)",
+  "next": "5min observer 接续：① A 回执 D4③（flat 三提交 409 释放+scanner 绑定新 run，C 按 run 核账）；② `scene-4acf689f` 跨 DB3 大包终态（checkpoint/续租区分长阶段，不超窗 kill/retry）；③ dup 面 `slices/test/spray` 顶层 FFDEE943×4 第二份切片=TESTER 00:24 口径仍保留现场，待 TESTER 取证后协调者收口处置；④ 08:00 夜间汇总（含 D5 肇事身份 192.168.2.132 上报用户+D4 全链收口+大包终态）",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

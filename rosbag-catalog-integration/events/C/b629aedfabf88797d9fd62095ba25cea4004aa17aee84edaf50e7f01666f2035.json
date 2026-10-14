@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-081353",
+  "occurred_at": "2026-10-11T08:15:08+08:00",
+  "recorded_at": "2026-10-11T08:15:08+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "08:14 巡检：无 C 新派单（inbox/3号/ 仍仅 TASK-03B 已收口），main 6d30a68、wt-03b 6f1a9ad 干净、无在途进程，保持空闲待派单",
+  "evidence": "sessions/C.md",
+  "next": "等待协调者派单"
+}

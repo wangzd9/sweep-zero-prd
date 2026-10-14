@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "input_sha256": "3542f7ff89ec816cc6a59e5864b646fcd5999f2887cd192ef46f757c234398a5",
+  "record": {
+    "kind": "business",
+    "event_id": "COORDINATOR:coord-t16ca-r1-verified-t16cb-ocr-closed-f2-conflict-unified-r12-20261014T1732",
+    "task": "TASK-16C",
+    "attempt": "attempt-1",
+    "status": "REWORK_DISPATCHED",
+    "summary": "并发协调者会话(同逻辑角色)先行落的裁决/收口核实并统一：(1) A 按我 16:42 合并裁决交付 R1 返修 4838ef8(17:15:40,+3/-15 仅 bag_search_service.py)，协调者 17:20 机械核验独立复跑全绿(祖先核 ff2a005→4838ef8 通过/data_kind_case 零残留/~_scene_slice_pred 已入 scene_original/ruff 全绿/74 passed+1 seed 固有 bounded-query stash 同口径)。(2) B 叶 OCR run 513ab61d(16:45 起跑)17:09:40 收口 rc=0 1448s，唯一 finding=bags.html tab 已改名但同屏 view_label(bag_search_service.py:664)仍旧名'原始包/全部/历史'，CONFIRMED UI 一致性低危，修复点在 A 叶文件，B 正确转交不越界。(3) 裁决冲突统一：16:35 中间 verdict 把 F2(scene_original 缺子包排除)裁 REJECTED 理由不成立——_scene_slice_pred 含 derivation 子，16C-c03-04 口径'角色或有效血缘即子包'，F2 维持 CONFIRMED 防御性，我 16:42 合并裁决为最终口径，16:35 记录留痕作废。(4) 据此派 R1-2 续单(inbox/1号/TASK-16C-A/ocr-r1-rework-2-dispatch-20261014.md，base 续 4838ef8，仅 view_label 一处改新名)，同冻结链不新开 attempt；A 最终 head 冻结后只做一次单文件增量 OCR(覆盖 R1+R1-2 同文件小 diff)，两 verdict'不烧 OCR 机械核验即可'口径作废，以 ocr-and-merge'返修产生新 head 旧审查不自动覆盖'为准。A 叶接受门禁维持关闭至 view_label 续 commit+机械核验+单文件增量 OCR+TESTER 增量面(A-OCR-2 组合断言+view_label 页面断言)。1012 大包 SCENE_CANCELLING 维持协调者不 kill/retry 口径等 C 只读核终态。",
+    "evidence": "wt-01-t16ca git log 4838ef8(17:15:40)+git show stat(+3/-15 bag_search_service.py)+grep data_kind_case 零命中+line86 ~_scene_slice_pred 在位；协调者独立 pytest 三文件 74 passed+1 seed 固有(17:25 复跑)；receipts/TASK-16C-A/attempt-1.md OCR 最小返修段(17:17 补录)+inbox/1号/TASK-16C-A/ocr-r1-rework-ack-20261014.md(A 17:15 ACK)；reviews/TASK-16C-B/ocr-run-20261014/run/service.log(17:09:40 ended rc=0 1448s)+ocr-verdict.md(17:20,view_label CONFIRMED 转 A)；reviews/TASK-16C-A/ocr-run-20261014-retry1/ocr-verdict.md(16:35,F2 REJECTED 被覆盖)；inbox/coordinator/TASK-16C-A/ocr-merge-ruling-20261014.md 17:30 冲突统一补段",
+    "next": "A 交付 view_label R1-2 续 commit 冻结→协调者机械核验→单文件增量 OCR(唯一入口,base 4838ef8..新 head)→零 CORRECTION 级+TESTER 增量面→A 叶接受；随后重建三叶固定集成候选(含 A 新 head)→16D 联合验收→16C 聚合；16R 水雾债 fe17e8a..3c9c496 补审候选排 B/A 增量 OCR 收口后 ocr.lock 空窗经唯一入口串行；1012 等 C 取消终态登记",
+    "occurrence": {
+      "kind": "now"
+    },
+    "schema_version": 1,
+    "role": "COORDINATOR",
+    "recorded_at": "2026-10-14T17:39:17+08:00",
+    "occurred_at": "2026-10-14T17:39:17+08:00",
+    "time_source": {
+      "kind": "script_now"
+    }
+  },
+  "complete": true,
+  "session": "sessions/COORDINATOR.md"
+}

@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-13T15:00:53.566952+08:00",
+  "role": "C",
+  "kind": "phase",
+  "start": "2026-10-13T11:00:00+08:00",
+  "end": "2026-10-13T15:00:00+08:00",
+  "artifact": "inbox/control/runtime/digests/2026-10-13/C-phase-1500.json",
+  "roles": [
+    {
+      "role": "C",
+      "start": "2026-10-13T11:00:00+08:00",
+      "end": "2026-10-13T15:00:00+08:00",
+      "totals_seconds": {
+        "working": 0,
+        "waiting": 10169.0,
+        "blocked": 0,
+        "idle": 0,
+        "unknown": 4231.0
+      },
+      "segments": [
+        {
+          "start": "2026-10-13T11:00:00+08:00",
+          "end": "2026-10-13T12:59:00+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "summary": "09:38 巡检：16A 已 DONE（r139：TESTER post-merge 09:32 PASS，main 6fb42c4，非 C）；无 C 新派单/返修单；16B 交付冻结 0208a73 维持 NEEDS_REVIEW=proxy OCR 4/4 连败等用户裁决（a/b/c/d），C 不自测不抢先返修",
+          "sources": [
+            "events/C/fcead19b7de646fcd6f7d3340d9cf5487ef375a88c57530a07b61846bc841a8e.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T12:59:00+08:00",
+          "end": "2026-10-13T13:08:53+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "summary": "12:53 唤醒巡检：窗口唯一 C 变更源=inbox/coordinator/TASK-16B/ocr-contract-fix-20261013.md（12:52 maintenance_notification to COORDINATOR：OCR 工作流修复+诊断器 ocr_session_status.py，第9轮 40e90fea 保留不要重复启动，未新增授权不放行 16B）——无 C 新派单/返修单；16B proxy OCR 第9轮在途核实（ps：runner b2_r144_maxtok9.py pid 1810468+node/ocr 存活 etime 约30min，12:26:35 START 直连8002+m",
+          "sources": [
+            "events/C/70b472ee4cf3376db4b636014a284dd80fa2d23c18c29682985347ac7292754e.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T13:08:53+08:00",
+          "end": "2026-10-13T13:09:31+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "summary": "12:53 唤醒巡检：窗口唯一 C 变更源=inbox/coordinator/TASK-16B/ocr-contract-fix-20261013.md（12:52 maintenance_notification to COORDINATOR：OCR 工作流修复+诊断器 ocr_session_status.py， … 0（r149 口径）已过约6min 仍 INFLIGHT，按协议不接管不 kill 不重复启动，收口后 rc=0→findings 合并最小返修单派 C→16B 解冻 / rc=1→9/9 连败 NEEDS_REVIEW 维持冻结升级用户 a/b/c；16B 交付冻结 0208a73 维持 REVIEW_PEND",
+          "sources": [
+            "events/C/70b472ee4cf3376db4b636014a284dd80fa2d23c18c29682985347ac7292754e.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T13:09:31+08:00",
+          "end": "2026-10-13T13:18:53+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "summary": "OCR第9轮 40e90fea-ed5c-425c-8c42-3e4f59e70827 于13:09:31自然收口 rc=0（progress: DONE rc=0 via DIRECT max-tokens=0；provider已恢复18002；进程1810468/1810491/1810499退出）。jsonl session_end: terminal_state=complete, resolved c2018dd..0208a737, coverage selected=completed=scripts/scene_host_proxy.py, failed/waived/reused=[]。7条accepted cod",
+          "sources": [
+            "events/C/a3bee4c0bd24f85cc26591a7e3d327d6c224acba9b5031b61f07c0d20a4a3f5a.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T13:18:53+08:00",
+          "end": "2026-10-13T13:28:53+08:00",
+          "category": "unknown",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "summary": "OCR第9轮 40e90fea-ed5c-425c-8c42-3e4f59e70827 于13:09:31自然收口 rc=0（progress: DONE rc=0 via DIRECT max-tokens=0；provider已恢复18002；进程1810468/1810491/1810499退出）。jsonl s … ings4.py + b2_r144_maxtok9.log/progress + session jsonl原路径。16B冻结0208a73维持REVIEW_PENDING未合入；按ocr-contract-fix 规则 rc=0/coverage_complete 仅为诊断口径不自动PASS，未启动OCR未动",
+          "sources": [
+            "events/C/a3bee4c0bd24f85cc26591a7e3d327d6c224acba9b5031b61f07c0d20a4a3f5a.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T13:28:53+08:00",
+          "end": "2026-10-13T13:38:17+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T13:38:17+08:00",
+          "end": "2026-10-13T13:46:30+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "2-r1",
+          "summary": "attempt-2-r1 six fixes + 6 regressions delivered frozen: head 40ab818 (base 0208a73); H1 TOCTOU, H2 terminal skip, H4 except Exception, H5 config_hash fail-fast floor (entry lacks submitted params), H6 fsync-before-replace, L1 attempt filter; pytest 20+12 passed, ruff/compileall green, zero out-of-scope diff",
+          "sources": [
+            "events/C/51dbd24520362a1c6351efd84cb6a7acb125dadfc2a67ccff52b824e47f965ab.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T13:46:30+08:00",
+          "end": "2026-10-13T13:48:53+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "2-r1",
+          "summary": "r156 poll consumed: TODO r155 = coordinator mechanical verify of 40ab818 delivery all green; incremental OCR queued behind 12S-B c01/c02 chain. No new dispatch/decision to C (inbox/3号 and inbox/coordinator zero new files after 13:39). 16B frozen REVIEW_PENDING unmerged; closure = incremental OCR -> strong review pack (",
+          "sources": [
+            "events/C/af0925674ce9dec5de207ceeb8b220a5f26ec080c188d49d1b92b08fcf4584a7.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T13:48:53+08:00",
+          "end": "2026-10-13T14:08:53+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "2-r1",
+          "summary": "r156 poll consumed: TODO r155 = coordinator mechanical verify of 40ab818 delivery all green; incremental OCR queued behind 12S-B c01/c02 chain. No new dispatch/ … eview pack (auth-24h-20261013 within grant) -> merge -> 12S-C. 12S-C still WAITING (16B+12S-A+12S-B not all merged). C no in-flight process, no second dev sl",
+          "sources": [
+            "events/C/af0925674ce9dec5de207ceeb8b220a5f26ec080c188d49d1b92b08fcf4584a7.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T14:08:53+08:00",
+          "end": "2026-10-13T14:18:53+08:00",
+          "category": "unknown",
+          "task": "TASK-16B",
+          "attempt": "2-r1",
+          "summary": "r156 poll consumed: TODO r155 = coordinator mechanical verify of 40ab818 delivery all green; incremental OCR queued behind 12S-B c01/c02 chain. No new dispatch/ … eview pack (auth-24h-20261013 within grant) -> merge -> 12S-C. 12S-C still WAITING (16B+12S-A+12S-B not all merged). C no in-flight process, no second dev sl",
+          "sources": [
+            "events/C/af0925674ce9dec5de207ceeb8b220a5f26ec080c188d49d1b92b08fcf4584a7.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T14:18:53+08:00",
+          "end": "2026-10-13T15:00:00+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        }
+      ],
+      "events": [
+        {
+          "event_id": "a3bee4c0bd24f85cc26591a7e3d327d6c224acba9b5031b61f07c0d20a4a3f5a",
+          "occurred_at": "2026-10-13T13:09:31+08:00",
+          "recorded_at": "2026-10-13T13:12:00+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "OCR第9轮 40e90fea-ed5c-425c-8c42-3e4f59e70827 于13:09:31自然收口 rc=0（progress: DONE rc=0 via DIRECT max-tokens=0；provider已恢复18002；进程1810468/1810491/1810499退出）。jsonl session_end: terminal_state=complete, resolved c2018dd..0208a737, coverage selected=completed=scripts/scene_host_proxy.py, failed/waived/reused=[]。7条accepted code_comment（全在scene_host_proxy.py）：F1 high TOCTOU（POST /run丢弃try_reserve返回值可双写）/ F2 high 陈旧状态（post RUNNING后cur未刷新致终态post被跳过，步骤滞留RUNNING）/ F3 medium 原子写缺fsync / F4 low run_detail步骤未按attempt过滤 / F5 high 幂等键缺attempt（重试同终态error_message不同→409，run滞留SCENE_RUNNING）/ F6 medium 参数冻结缺口（raw=None默认重推config_hash vs 后端提交参数冻结值→REGISTER CONFIG_MISMATCH）/ F7 high RESOLVING except过窄（CapabilityError/ValueError未捕获→worker死、ACTIVE残留、同run_id永久409）。证据固化: scratch/t16_ocr/findings_r9.json + extract_findings4.py + b2_r144_maxtok9.log/progress + session jsonl原路径。16B冻结0208a73维持REVIEW_PENDING未合入；按ocr-contract-fix 规则 rc=0/coverage_complete 仅为诊断口径不自动PASS，未启动OCR未动代码。",
+          "evidence": "b2_r144_maxtok9_progress.txt 13:09:31 DONE rc=0; ps aux 进程已退; jsonl 276行 session_end complete; findings_r9.json 7条; sessions/C.md 541行追加条目",
+          "next": "等协调者按rc=0路径将7 findings合并为最小返修单派C；届时ACK新attempt、最小修复+自测后交付冻结；rc=1路径未触发（第9轮未连败）",
+          "source": "events/C/a3bee4c0bd24f85cc26591a7e3d327d6c224acba9b5031b61f07c0d20a4a3f5a.json",
+          "source_mtime": "2026-10-13T13:13:16+08:00"
+        },
+        {
+          "event_id": "c-poll-20261013-125353-ocr-contract-fix-round9-inflight",
+          "occurred_at": "2026-10-13T12:59:00+08:00",
+          "recorded_at": "2026-10-13T13:03:38+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "12:53 唤醒巡检：窗口唯一 C 变更源=inbox/coordinator/TASK-16B/ocr-contract-fix-20261013.md（12:52 maintenance_notification to COORDINATOR：OCR 工作流修复+诊断器 ocr_session_status.py，第9轮 40e90fea 保留不要重复启动，未新增授权不放行 16B）——无 C 新派单/返修单；16B proxy OCR 第9轮在途核实（ps：runner b2_r144_maxtok9.py pid 1810468+node/ocr 存活 etime 约30min，12:26:35 START 直连8002+max-tokens 0+medium）；诊断器实测 40e90fea jsonl 无 terminal_state/manifest（NOT_EVALUATED）58 responses 持续写入（12:54 仍增）非停滞；硬截止 12:50（r149 口径）已过约6min 仍 INFLIGHT，按协议不接管不 kill 不重复启动，收口后 rc=0→findings 合并最小返修单派 C→16B 解冻 / rc=1→9/9 连败 NEEDS_REVIEW 维持冻结升级用户 a/b/c；16B 交付冻结 0208a73 维持 REVIEW_PENDING",
+          "evidence": "sessions/C.md 12:57 条目; ps aux 1810468/1810491/1810499; ocr_session_status.py 40e90fea 诊断; TODO r149 段",
+          "next": "等第9轮收口（硬截止已过在途，处置上报协调者）；rc=0 后等一次最小返修单 ACK 续修；rc=1 维持冻结升级用户",
+          "source": "events/C/70b472ee4cf3376db4b636014a284dd80fa2d23c18c29682985347ac7292754e.json",
+          "source_mtime": "2026-10-13T13:03:38+08:00"
+        },
+        {
+          "event_id": "c-t16b-a2r1-delivered-20261013",
+          "occurred_at": "2026-10-13T13:38:17+08:00",
+          "recorded_at": "2026-10-13T13:38:17+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "2-r1",
+          "status": "REVIEW_PENDING",
+          "summary": "attempt-2-r1 six fixes + 6 regressions delivered frozen: head 40ab818 (base 0208a73); H1 TOCTOU, H2 terminal skip, H4 except Exception, H5 config_hash fail-fast floor (entry lacks submitted params), H6 fsync-before-replace, L1 attempt filter; pytest 20+12 passed, ruff/compileall green, zero out-of-scope diff",
+          "evidence": "receipts/TASK-16B/attempt-2-r1.md; commit 40ab818; git diff --stat 0208a73..40ab818",
+          "next": "wait coordinator mechanical verify -> incremental OCR --from 0208a73 --to 40ab818 -> strong review pack (6 fixes scope) -> merge -> 12S-C wiring",
+          "source": "events/C/51dbd24520362a1c6351efd84cb6a7acb125dadfc2a67ccff52b824e47f965ab.json",
+          "source_mtime": "2026-10-13T13:38:17+08:00"
+        },
+        {
+          "event_id": "c-t16b-r156-poll-consumed-20261013",
+          "occurred_at": "2026-10-13T13:46:30+08:00",
+          "recorded_at": "2026-10-13T13:46:45+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "2-r1",
+          "status": "WAITING_REVIEW",
+          "summary": "r156 poll consumed: TODO r155 = coordinator mechanical verify of 40ab818 delivery all green; incremental OCR queued behind 12S-B c01/c02 chain. No new dispatch/decision to C (inbox/3号 and inbox/coordinator zero new files after 13:39). 16B frozen REVIEW_PENDING unmerged; closure = incremental OCR -> strong review pack (auth-24h-20261013 within grant) -> merge -> 12S-C. 12S-C still WAITING (16B+12S-A+12S-B not all merged). C no in-flight process, no second dev slot.",
+          "evidence": "snapshot C.json fp 232205f7; TODO.md r155; sessions/C.md r156 entry line 543",
+          "next": "wait incremental OCR chain + coordinator new dispatch",
+          "source": "events/C/af0925674ce9dec5de207ceeb8b220a5f26ec080c188d49d1b92b08fcf4584a7.json",
+          "source_mtime": "2026-10-13T13:46:45+08:00"
+        }
+      ],
+      "delivery_records": [],
+      "unverified_sources": [
+        "events/C/C-poll-20261011-082853.md: 时间或内容待核对",
+        "events/C/c-poll-20261013-044353-v2done-t16b-await-resume.json: 时间或内容待核对",
+        "events/C/c-poll-20261013-051853-t16b-b1-3confirmed-b2-inflight.md: 时间或内容待核对",
+        "events/C/c-poll-20261013-055353-t16b-b2-split-fail-16a-incr-done.md: 时间或内容待核对",
+        "inbox/events/C/C-sessions-truncation-20261012-064054.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-042923-t16b2-fail-resume-pending.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-064353-r3ocr-6of6-done-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-065353-r130-t07b-r4-dispatch-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-072853-r132-b-r4-ocr-done-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-074353-r132-r4-ocr-done-no-c-order.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-092853-t16b-ocr4rc1-frozen-user-ruling-pending.md: 时间或内容待核对"
+      ]
+    }
+  ],
+  "current": {
+    "C": {
+      "schema_version": 1,
+      "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+      "role": "C",
+      "observed_at": "2026-10-13T15:00:53+08:00",
+      "control": "ACTIVE",
+      "confirmed_idle": false,
+      "classification_reasons": [
+        "assigned nonterminal task: TASK-16B",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-12S-C/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-12S-C/frame-mapping-contract-note.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-16B/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-16B/attempt-2-r1-dispatch.md"
+      ],
+      "tasks": [
+        {
+          "task": "TASK-16B",
+          "state": "**返修交付已核验**（【r155 2026-10-13 13:4x】C att … anifest，不判停止/通过）→维持延长观察至自然收口，rc 分支同 r150",
+          "progress": "常驻本机代理、后台执行/恢复/租约、远端模型与 NAS 发布接线",
+          "owner": "**返修交付已核验**（【r155 2026-10-13 13:4x】C attempt-2-r1  … sion_end/manifest，不判停止/通过）→维持延长观察至自然收口，rc 分支同 r150"
+        }
+      ],
+      "events": {
+        "C": {
+          "event_id": "c-t16b-r156-poll-consumed-20261013",
+          "occurred_at": "2026-10-13T13:46:30+08:00",
+          "recorded_at": "2026-10-13T13:46:45+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "2-r1",
+          "status": "WAITING_REVIEW",
+          "summary": "r156 poll consumed: TODO r155 = coordinator mechanical verify of 40ab818 delivery all green; incremental OCR queued behind 12S-B c01/c02 chain. No new dispatch/ … eview pack (auth-24h-20261013 within grant) -> merge -> 12S-C. 12S-C still WAITING (16B+12S-A+12S-B not all merged). C no in-flight process, no second dev slot.",
+          "evidence": "snapshot C.json fp 232205f7; TODO.md r155; sessions/C.md r156 entry line 543",
+          "next": "wait incremental OCR chain + coordinator new dispatch",
+          "source": "events/C/af0925674ce9dec5de207ceeb8b220a5f26ec080c188d49d1b92b08fcf4584a7.json",
+          "source_mtime": "2026-10-13T13:46:45+08:00"
+        }
+      },
+      "dispatches": {
+        "C": {
+          "role": "C",
+          "source": "inbox/3号/TASK-12S-C/frame-mapping-contract-note.md",
+          "status": "待核对",
+          "mtime": 1791874561.3082178,
+          "summary": "# 12S-B 帧映射（S9）契约补充通知（r159） > 有效派单以 `inbox/2号/TASK-12S-B/attempt-1-rework-s9-dispatch.md`（r160）为准；本通知补充 C 口径：前 … 赖未合入）；本通知不改变 C 的 §9.2 文件边界。 4. 若 C 在编码中发现 S9 映射契约与 16B dispatch_payload/租约面有接线冲突，按 ACK 口径申报协调者，不单方面改 decode 域。"
+        }
+      },
+      "processes": {
+        "C": {
+          "state": "none"
+        }
+      },
+      "sources": {
+        "TODO.md": "2026-10-13T14:53:54+08:00"
+      },
+      "strong_review": null,
+      "fingerprint": "524e6d2ad5a71a14df8ecb472b2f6d0bab19013d204ebb370244a3e84d7eef50"
+    }
+  }
+}

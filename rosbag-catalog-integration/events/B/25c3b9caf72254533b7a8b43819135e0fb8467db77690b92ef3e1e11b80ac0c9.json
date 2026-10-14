@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-094753-merged",
+  "occurred_at": "2026-10-11T09:50:08+08:00",
+  "recorded_at": "2026-10-11T09:50:08+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "WAITING_TEST",
+  "summary": "rework-6 f4cd654 已由协调者 09:46 --no-ff 合入 main 4697be0（OCR R6-r1 0 findings session 03d83550）；TESTER attempt-5 已派（09:48，base 4697be0）；本侧无在途无新派单",
+  "evidence": "sessions/B.md",
+  "next": "等 TESTER attempt-5 复测与强模型增量复审（用户手动）"
+}

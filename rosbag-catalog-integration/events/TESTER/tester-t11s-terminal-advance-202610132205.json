@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-terminal-advance-dup-harm-202610132205000800",
+  "occurred_at": "2026-10-13T22:05:23+08:00",
+  "recorded_at": "2026-10-13T22:05:23+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "终态推进+双写冲突危害取证：16_00_13 SCENE_DONE/spray SUCCESS 独立PASS（子包051768B1…_16Bc-4654d41f86d36f5c4b 非空68MB/1983msgs、catalog READY、父包子切片数=1幂等）；16_31_25 SCENE_DONE/spray NOT_APPLICABLE 无伪切片PASS（0BBF4C1C切片数=0、零模型）；A申报date-grouped 20261012第二写者已生成3个SCENE_FAILED run（a4824f1c/eb4397c3/24ab78bb，八步全QUEUED=零模型零切片），危害=重复run记录非数据损坏，报协调者裁决；未推进：16_33_10空包PENDING_INPUT/16_37_47落未提交/16_58_28 PENDING_INPUT/14_42_48 flat 409占用方/16_02_03大包冻结UNKNOWN未落incoming，跨夜继续不kill",
+  "evidence": "test-receipts/TASK-11S-BATCH-1012/attempt-1.md#增量验收-220x",
+  "next": "下轮核空包拒绝终态可追溯、14_42_48 409占用方、16_37_47/16_58_28提交+scan、16_02_03落位+runtime跨DB3边界、3个dup SCENE_FAILED run协调者裁决清理/保留；全批齐后交付TEST_REPORT_PENDING"
+}

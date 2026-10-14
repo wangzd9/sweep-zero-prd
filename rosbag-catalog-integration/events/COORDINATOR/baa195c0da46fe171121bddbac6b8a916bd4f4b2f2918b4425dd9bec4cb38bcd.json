@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-075053-p0-idle-r55",
+  "occurred_at": "2026-10-12T07:53:07+08:00",
+  "recorded_at": "2026-10-12T07:53:07+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "r55 巡检：07:45:53 后零业务变化；T11 驱动第 6 跑已收口 FAIL（1b 409 derived 防线/launcher 退出）仅监控 shell 在途，维持只观察不接管；门禁不变",
+  "evidence": "scratch/t11/t11_run.out+ps 3702534 已退出+ticks 五角色",
+  "next": "下轮核 T11 是否第 7 跑/owner 申报"
+}

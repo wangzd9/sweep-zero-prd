@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-074253-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T07:46:01+08:00",
+  "recorded_at": "2026-10-12T07:46:01+08:00",
+  "role": "B",
+  "task": "none",
+  "attempt": "none",
+  "status": "IDLE_WAITING",
+  "summary": "TASK-10 DONE 后 P0 停止派发，07:37 巡检后零业务变化，IDLE_WAITING（sessions 追加粘连已修复，92 行核验通过）",
+  "evidence": "sessions/B.md 07:42 巡检条目",
+  "next": "仅按需巡检与事件接续"
+}

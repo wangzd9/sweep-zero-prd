@@ -1,0 +1,11 @@
+# C 事件：TASK-16B attempt-2-r3 交付冻结
+- event_id: c-t16b-a2r3-delivered-20261013
+- occurred_at: 2026-10-13T18:47:00+08:00
+- role: C
+- task: TASK-16B
+- attempt: 2-r3
+- status: REVIEW_PENDING
+- summary: r3 强审 SR-16B-R2 两项残余 CORRECTION 最小关闭交付冻结：head 603e695 @ wt-03b-t16b（base e152465 单 commit，2 文件 +562/-33 零越界）。R1-02=步骤回报返回确认结果+_finish_success/_finish_failure 未确认时 pending_failure 保留台账（4 反例关闭）；R1-03=失败收尾意图先持久化+recover_pending_runs 含意图台账走 _recover_closeout 对账补报（execute_run 零调用，extra_model_invocations=0）。真实 Backend 约束核后实施（终态清租约后步骤写恒过/update_step attempt 409 守卫/REGISTER-complete 顺序），fixture 建等价守卫面。
+- evidence: receipts/TASK-16B/attempt-2-r3.md; tests/test_scene_host_proxy.py+test_scene_host_orchestrator.py 46 passed（27 既有零回归+7 新 r3+12 orchestrator）; ruff+compileall clean; 603e695
+- next: 等协调者机械核验→增量 OCR e152465..603e695→强审增量复审（只 R1-02/R1-03，授权 6b2d83fb 剩 4/5，期限 2026-10-14 13:27:15）→TESTER 独立核恢复→合入 16B→12S-C 依赖重算
+- source: sessions/C.md 18:4x 条目

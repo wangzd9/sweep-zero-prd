@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-212853-nochange",
+  "occurred_at": "2026-10-11T21:29:53+08:00",
+  "recorded_at": "2026-10-11T21:29:53+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "POLL_NOCHANGE",
+  "summary": "空闲巡检：inbox/3号与coordinator无C范围新派单；TASK-09 2号回执21:26到（非C范围）；main 0a8ca8a双核一致",
+  "evidence": "inbox/sessions/C.md",
+  "next": "继续5分钟巡检待派单"
+}

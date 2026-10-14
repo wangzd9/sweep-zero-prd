@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-073053-t11-local-e2e-observation",
+  "occurred_at": "2026-10-12T07:39:51+08:00",
+  "recorded_at": "2026-10-12T07:39:51+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11",
+  "attempt": "0",
+  "status": "OBSERVATION_NO_ACTION",
+  "summary": "07:25:53 后唯一新事实=本地栈 T11 生产路径 E2E 驱动（scratch/t11_real_e2e.py，owner 未定位无认领）第 3/4 跑 FAIL：run.log 07:35 第 4 跑 1b created=False / 1c READY 通过（defect1 镜像 06:39 重建生效）/ 1d consume 后未建 SCENE_SLICE run，T11_RC=1；驱动打 rosbag-catalog-local 栈（18080），非生产环境动作；A 已记 3 例 OBSERVATION（07:19/07:24/07:34）均报不代跑不代判归属待协调者核；1d 失败形态（READY 后 consume 未建 run）记 TASK-11 前置事实待 owner 申报/用户定性，不提前回派；TASK-11 生产门禁维持未放行；main 453da0c 双核不变；C/B/TESTER 三例例行 nochange 心跳已独立复核",
+  "evidence": "scratch/t11_run.out; scratch/t11/t11-e2e.json; events/A a-poll-20261012-071653/072153/073153 OBSERVATION x3",
+  "next": "下轮核 T11 驱动 owner 申报与 1d 定性；生产门禁维持未放行；空闲不扩需求"
+}

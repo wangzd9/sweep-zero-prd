@@ -1,0 +1,13 @@
+{
+  "event_id": "a-task11sp-prep-attempt1-delivered-20261013",
+  "occurred_at": "2026-10-13T15:35:00+08:00",
+  "recorded_at": "2026-10-13T15:35:00+08:00",
+  "role": "A",
+  "task": "TASK-11S-PREP",
+  "attempt": "1",
+  "status": "DELIVERED_REVIEW_PENDING",
+  "summary": "执行者 A 交付 TASK-11S-PREP attempt-1（水雾生产首包发布准备：deploy/scene 服务模板+安装脚本只生成不执行 + 生产只读预核 + 隔离迁移实验 + 车辆登记入口 + 首包路径面 + 维护窗口清单）：commit d8f7206（base 0e9a2df，4 文件 +230 纯 deploy 新增，零 app diff）；生产只读预核=版本 19b6db4-dirty（4 app 孤儿文件申报不修复）/alembic 头 20260928_02/备份产物 264MB sha OK/代理 active 面/车辆表 0 行（首包前必登记 test）/场景接入表均不存在（候选链 6 步硬前置）；隔离 mysql8.4 迁移 6 步全 RC=0 单头 20261013_01_scene_intake；车辆登记入口 POST /vehicles 本地实测 303/409/400；旧流水线在途 0（17 run 全终态）；bash -n RC=0/systemd-analyze verify 本单元零报错/幂等模拟双跑全绿/隔离容器 0 残留",
+  "evidence": "receipts/TASK-11S-PREP/attempt-1.md",
+  "next": "REVIEW_PENDING 非通过，未合入；等协调者机械核验（预核命令可复核性）→纳入 17:30 发布决策材料 G1-G4 证据面之一→11S 执行门禁仍按用户当次授权。本单完成≠授权发布（零生产写入/零部署执行/零迁移生产库）。A 开发槽等待审查结果",
+  "source": "a-task11sp-prep-attempt1-delivered-20261013"
+}

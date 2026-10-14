@@ -1,0 +1,14 @@
+{
+  "event_id": "c-t11s-batch-1012-obs21-extract-stall-active-20261014",
+  "occurred_at": "2026-10-14T01:42:00+08:00",
+  "recorded_at": "2026-10-14T01:42:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs20（01:23）后新一轮：pending 触发源=obs20 自产事件文件（first_seen 01:25:10）；ACK 21:07:41 在案不重复领取",
+  "summary": "C 第21轮只读复核（处理机 01:32-01:39 实测：ssh curl 8180/8767、docker logs/inspect/exec 只读、ls/find/stat/du/uptime，未 kill/未删/未重启/未 retry/未改任何生产路径）：run 级零变化（4acf689f SCENE_RUNNING attempt=1、hb 01:38:38 活跃、事件 416 末 12 全心跳无 FAILED、8767 active_runs 同）；**EXTRACT jpg 自 01:30:53 UTC 起计数稳定 1781（obs20 时 01:22 仍增长 852→890）+ pcd 5373 不变 → jpg 提取阶段大概率完成，checkpoint 仍 EXTRACT/PENDING 八步全 QUEUED（阶段边界写口径）**；计算面转静：pid1 CPU TIME 5min 仅 +4s、容器日志近 1min 零新行（此前 10min 233 行 FEngine/Open3D EGL 刷屏）、load 0.19 回落——口径=可能已转 INFER（VLM 远端 8002，宿主低 CPU 属预期）或阶段间静止，heartbeat 活跃+无 FAILED，按派单大包跨夜继续不 kill/不 retry/不判卡死，心跳停更或 FAILED 出现再取证申报；incoming/spray 仍仅 16_33_10 空包目录；NAS 71% 不变。另申报本角色文档缺陷修正：obs19/obs20 两条曾误写旧文件 inbox/sessions/C.md（canonical 双文件坑复发），已签名核验迁回 sessions/C.md（564→566 行）并从旧文件删除（56→54 行）。",
+  "evidence": "处理机只读实测 01:32-01:39：8180 完整 id rc=200（SCENE_RUNNING attempt=1 auto_retry_count=0 hb 01:38:38 lease 01:40:38，事件 416 末 12 全 HEARTBEAT/RESOURCE_HEARTBEAT）——首轮 rc=404 系本角色截断 run id 非端点异常；全表 limit=200 count=24 六 SCENE_DONE 一 SCENE_RUNNING；8767/health {status:ok active_runs:[scene-4acf689f9a6a473da1fa2f2efc70 ACCEPTED pid1]}；work=/var/lib/scene-proxy/work/scene-4acf689f9a6a473da1fa2f2efc70/attempt-1：jpg 01:34 与 01:37 两次计数均 1781、末件 frame_001787.jpg mtime 2026-10-13T17:30:53Z、pcd 5373、find -newermt -90s 零命中、checkpoint EXTRACT/PENDING PRECHECK/DONE 八步 QUEUED；docker exec ps：pid1 CPU TIME 01:15:25→01:15:29（5min +4s）、单忙线程 5.5% etime 05:06、State S、Threads 52；docker logs --since 1m 非 FEngine 过滤零新行、--since 10m FEngine 233 行、grep ERROR/Traceback 零命中；stat incoming/spray 仅 rosbag2_2026_10_12-16_33_10（2026-10-12 17:37 未变）；df /mnt/nas_backup 98T 70T 29T 71%；uptime 01:39:17 load 0.19/1.24/2.48；文档修正核验：sessions/C.md 566 行含 obs19/obs20 各 1、inbox/sessions/C.md 54 行两者 0",
+  "next": "接续只读观察：① EXTRACT 完成信号=checkpoint 翻 EXTRACT/DONE+八步推进，或心跳停更/FAILED 出现即取证申报协调者（C 不处置）；② 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账（含 ruling-dup-slices-0038 观察面：正式 a65a25a7 绑定 run 对现存 FFDEE943 同 source 切片处置痕迹取证，C 不处置）；③ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

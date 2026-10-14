@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-f01517c16f2f-20261010-1723-b9r3-closed",
+  "occurred_at": "2026-10-10T17:27:03+08:00",
+  "recorded_at": "2026-10-10T17:27:03+08:00",
+  "role": "C",
+  "task": "TASK-03B",
+  "attempt": "5-rework-2",
+  "status": "POLL_NO_NEW_DISPATCH",
+  "summary": "B9-r3 COMPLETED 0 findings（17:11:29 收口，session 30863ac9）→ 03B OCR 门禁解除；上轮 lock 残留疑点收口，ps 无在途进程；inbox/3号/ 无 C 新派单，C 保持空闲待派单；合入/TESTER 派单在协调者侧",
+  "evidence": "reviews/TASK-03B/attempt-5/ocr-batches.md",
+  "next": "等协调者派单"
+}

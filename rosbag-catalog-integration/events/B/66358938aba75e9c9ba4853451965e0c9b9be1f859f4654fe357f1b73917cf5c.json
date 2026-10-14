@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-152253-strongmodel-pass",
+  "occurred_at": "2026-10-11T15:25:02+08:00",
+  "recorded_at": "2026-10-11T15:25:02+08:00",
+  "role": "B",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "强复审R2I-20261010-06已收口PASS(15:18 result.md CORRECTION0/VERIFICATION_GAP1-LOW-I-1不阻断 03/05/06聚合可收口 TASK-08可启动); inbox/2号无新派单无返修; main 62a85bf双核不变; 等协调者聚合DONE与TASK-08联调派单",
+  "evidence": "reviews/strongmodel/R2I-20261010-06-result.md",
+  "next": "空闲等待协调者聚合收口后TASK-08派单"
+}

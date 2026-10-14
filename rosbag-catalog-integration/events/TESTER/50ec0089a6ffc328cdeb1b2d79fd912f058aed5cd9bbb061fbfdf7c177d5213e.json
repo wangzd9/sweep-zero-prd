@@ -1,0 +1,12 @@
+{
+  "event_id": "20261011-213553-t09-review-pending-idle",
+  "occurred_at": "2026-10-11T21:37:21+08:00",
+  "recorded_at": "2026-10-11T21:37:21+08:00",
+  "role": "TESTER",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "巡检：2号 attempt-1 交付 REVIEW_PENDING 待协调者核验+OCR，main 0a8ca8a 未变，无新派单，维持 IDLE",
+  "evidence": "receipts/TASK-09/attempt-1.md;git:main=0a8ca8a",
+  "next": "等协调者对 a60bb81 核验+OCR+合入；TASK-10 或新复测派单 ACK 后开工"
+}

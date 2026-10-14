@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-085053-r137-t16b-retry4-fail-escalate",
+  "occurred_at": "2026-10-13T08:54:34+08:00",
+  "recorded_at": "2026-10-13T08:54:34+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16B",
+  "attempt": "n/a",
+  "status": "NEEDS_REVIEW_ESCALATED",
+  "summary": "r137 巡检（preflight 08:50:53）：16B proxy OCR 低负载窗口第 4 次重试 08:52:28 收口 rc=1（dur=720s，session 7a3f2d35，Review failed all 1 file，usage 98593 in+32496 out，budget_exceeded=false，报错 LLM 配置/队列；起跑前 vllm running=4/waiting=0 低负载实测）=4/4 连败达成 r126 落账政策上限，NEEDS_REVIEW 维持冻结，**升级用户裁决**（不自动第 5 次重试）；16B 合并返修单暂缓（b1 H1/M1/M2+b3 2 已裁决在案）；A=16A rebase RUNNING（08:47 ACK 到 main 3d2a075）、B=16C RUNNING（08:37 领单 ACK）、TESTER 空闲；main=origin=3d2a075（07B 4b9f30a+F-040 纯文档）。",
+  "evidence": "~/.hermes/cache/scratch/t16_ocr/b2_r136_retry_progress.txt+log",
+  "next": "等用户裁决：a)低负载再试 b)换审查方式 c)裁决已裁 findings 先行返修 d)搁置 16B；A rebase/B 16C 继续巡检"
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "coord-batch1012-1110-bc-closeout-deliveries-accepted-tester-pending-20261014",
+  "occurred_at": "2026-10-14T11:09:00+08:00",
+  "recorded_at": "2026-10-14T11:10:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "BC_CLOSEOUT_DELIVERIES_ACCEPTED_TESTER_REUSE_VERIFY_PENDING",
+  "supersedes_context": "prerun 5a6f2edd（B/C receipts 收尾段 10:56 + C ack + REFRESH-VERIFICATION 10:54 + 1052 自事件 inbox 副本 + sessions 回声）；接续 coord-batch1012-1052-post-spray-closeout-accept-recovery-classify-defects-20261014",
+  "summary": "消费 7 变更源全部落账：① B 收尾增补交付（receipts/b-attempt-1.md §6，10:56）=7 有效 run outcome 逐包 runtime 佐证与原分类零推翻（4 阳性 3 SUCCESS+1 在途/3 路由阴性 NOT_APPLICABLE 零模型/空包拒绝可追溯）+12S-D 缺口矩阵已证/缺证分列交付（真阴性需上游素材、实车 MANUAL×3 非自动匹配、跨 DB3 阳性终态待 4acf 收敛、空包提交层终态待隔离树部署、批量容量收口面），B 释放槽 IDLE_WAITING；② C obs75 收尾交付（receipts/c-attempt-1.md，10:56）=4acf 八步口径更新（PRECHECK/EXTRACT DONE、INFER RUNNING、余 QUEUED，不再称全排队）+flat 三提交 SCHEDULED 源绑定独立复测与 10:23 Codex 回执一致+VLM 六点采样 INFER 活跃续证+完成帧/ETA 仍未知（checkpoint mtime 00:23:10 未翻/work 树 10:00 后零新写）+升级条件逐项未命中不 kill/retry，C 全程只读；③ C 增补 ACK 10:56 在案；④ REFRESH-VERIFICATION 10:54 按配置面口径核读（五 poll enabled 不冒称五会话已启动）；⑤⑥⑦ 自事件 inbox 副本与 sessions 回声。控制动作=BATCH-STATUS 角色占用 B/C 行补 10:56 交付口径（协调者单写）；零新派单/零 OCR/强审 REVOKED 0/5 不续/零合入/零生产写。",
+  "evidence": "receipts/TASK-11S-BATCH-1012/b-attempt-1.md §6（10:56，11566B）；receipts/TASK-11S-BATCH-1012/c-attempt-1.md 收尾段（10:56）；inbox/3号/TASK-11S-BATCH-1012/post-release-closeout-20261014-ack.md（10:56 ACKED）；inbox/coordinator/POST-SPRAY-CLOSEOUT-20261014/REFRESH-VERIFICATION.md（10:54）；BATCH-STATUS.md 角色占用 B/C 行 11:0x 单写更新；sessions/TESTER.md 最新段止于 09:5x（10:49 并入卡未 ACK 无核账回执）",
+  "next": "等 TESTER 消费并入卡（ruling-104x-codex-binding-verify.md 顶部已标注以 post-release-closeout 为准不重复领取）独立核三复用结果：SCHEDULED/gen1/事件 CONSUMED/总 run=7/attempt 不变 + a4824f1c SUCCESS 切片 AVAILABLE/血缘/原 SHA/两次 reconcile 幂等 + eb4397c3·24ab78bb NOT_APPLICABLE 无伪切片 + 大包补报未改 checkpoint 未重启 → 协调者裁决放行；4acf 模型段完成信号出现后接跨 DB3 验收链+全批收口（7 有效终态/独立验收+1 无效拒绝追溯）；12S-D 缺口矩阵随 B 交付保留外部缺证不冒充完成；两项接收缺陷（父子共享快指纹 409 误拒绝/空包提交 PENDING_INPUT 无终态）等用户/后续批次授权再派；TESTER 无回执且其 poll 在途时不催单不抢占",
+  "quiet_hours_note": "白天口径，B/C 交付为实质状态变化即时通报",
+  "source": "inbox/events/COORDINATOR/coord-batch1012-1110-bc-closeout-deliveries-accepted-tester-pending-20261014.json"
+}

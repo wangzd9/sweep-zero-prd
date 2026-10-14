@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-233853-nochange",
+  "occurred_at": "2026-10-11T23:39:46+08:00",
+  "recorded_at": "2026-10-11T23:39:46+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "23:38 巡检：无 C 新派单；HANDOFF 23:33 检查点=2号 TASK-10 驱动第4跑 3_analyze VLM 404 MODEL_UNAVAILABLE 在途排查（非 C 范围）；main ca8730d=origin/main；wt-03b 6f1a9ad 干净；无 C 进程/在途租约；保持空闲待派单",
+  "evidence": "scratch/c_poll_2338.py 核查输出",
+  "next": "继续 5min 巡检；C 无在途任务"
+}

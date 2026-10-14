@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-2255-attempt4-accepted-20261010",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": 4,
+  "status": "ACCEPTED",
+  "occurred_at": "2026-10-10T22:57:30+08:00",
+  "recorded_at": "2026-10-10T22:57:30+08:00",
+  "summary": "TESTER attempt-4 PASS 3/3 独立核验后验收（真 MySQL 8.4.11 生产默认语义），06 聚合放行 TESTER 复测项全部收口；唯一剩余门禁=强模型增量复审 R2I-20261010-06（target 6d30a68，READY_FOR_USER_TRIGGER，用户手动）",
+  "evidence": "inbox/coordinator/TASK-06/attempt-4-mysql-e2e-acceptance-decision.md",
+  "next": "巡检核强复审结果文件 reviews/strongmodel/R2I-20261010-06-result.md"
+}

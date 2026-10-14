@@ -1,0 +1,11 @@
+{
+  "event_id": "coord-poll-20261013-010053-r108-t07b-r2-ocr-b2b3-done",
+  "role": "COORDINATOR",
+  "at": "2026-10-13T01:00:53+08:00",
+  "task": "TASK-07B",
+  "attempt": "attempt-2-r2",
+  "status": "OCR_INFLIGHT",
+  "summary": "R2 增量 OCR b2 service COMPLETED(1 low style 尾换行,log 2 files reviewed 疑似连带 b1 待核)+b3 css COMPLETED(0)+b4 bags.html INFLIGHT 00:58:52 起+b5 QUEUED；detached pid 811234 存活持 ocr.lock",
+  "evidence": "scratch/t07b_r2_ocr/r105_detached_progress.txt;reviews/TASK-07B/attempt-2-r2/ocr-batches.md",
+  "next": "r109 核 b4 收口→b5→b1 覆盖裁决→findings→强审查 pack→合入→TESTER"
+}

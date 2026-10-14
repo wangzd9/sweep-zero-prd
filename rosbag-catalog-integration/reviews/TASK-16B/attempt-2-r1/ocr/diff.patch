@@ -1,0 +1,324 @@
+diff --git a/scripts/scene_host_proxy.py b/scripts/scene_host_proxy.py
+index f5ce9fd..367c539 100644
+--- a/scripts/scene_host_proxy.py
++++ b/scripts/scene_host_proxy.py
+@@ -50,7 +50,6 @@ import time
+ from dataclasses import dataclass
+ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+ from pathlib import Path
+-from urllib.error import HTTPError, URLError
+ 
+ SCRIPT_DIR = Path(__file__).resolve().parent
+ for _p in (SCRIPT_DIR.parent, SCRIPT_DIR,):
+@@ -182,7 +181,12 @@ def state_path(cfg: ProxyConfig, run_id: str) -> Path:
+ def _write_json_atomic(path: Path, payload: dict) -> None:
+     path.parent.mkdir(parents=True, exist_ok=True)
+     tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+-    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
++    # H6：recovery 是崩溃恢复真相源——tmp 写入后先 flush+fsync 再 rename，
++    # 掉电/panic 下 rename 未落盘会丢/回滚文件（同 app/services/remote_bag_lock.py 约定）
++    with open(tmp, "w", encoding="utf-8") as f:
++        f.write(json.dumps(payload, ensure_ascii=False, indent=2))
++        f.flush()
++        os.fsync(f.fileno())
+     os.replace(tmp, path)
+ 
+ 
+@@ -395,6 +399,15 @@ def resolve_spec(
+     from app.scene import get_registry
+ 
+     eff = get_registry().effective_params(scene_code, None, cap_version)
++    # H5：Backend 按提交时参数冻结 capability_config_hash；此处 raw=None 用默认值
++    # 重推，非默认参数 run 会在烧完模型后 REGISTER 才 409 CONFIG_MISMATCH——
++    # 快照 entry 不存提交参数、无法按提交值重推，按派单取 fail-fast 下限
++    frozen_hash = entry.get("capability_config_hash")
++    if frozen_hash and eff.config_hash != str(frozen_hash):
++        raise SpecError(
++            f"capability_config_hash 不一致（冻结={frozen_hash} 默认重推={eff.config_hash}），"
++            "快照未存提交参数无法还原，fail-closed 不执行（不烧模型）"
++        )
+     vehicle = (bag.get("vehicle") or {}).get("vehicle_code") or None
+ 
+     spec = SceneExecSpec(
+@@ -467,14 +480,14 @@ def _report_steps(
+             return target in STEP_TRANSITIONS["QUEUED"]
+         return target in STEP_TRANSITIONS.get(cur, set())
+ 
+-    def post(name: str, target: str, error: str = "") -> bool:
++    def post(name: str, target: str, error: str = "") -> str | None:
+         try:
+             backend.step(run_id, name, target, attempt, lease_token, error=error)
+             current[name] = target
+-            return True
++            return target
+         except Exception as exc:
+             print(f"16B step report failed {run_id}/{name}/{target}: {exc}", flush=True)
+-            return False
++            return None
+ 
+     for name in STEPS:
+         if name == terminal_step:
+@@ -484,14 +497,18 @@ def _report_steps(
+         cur = current.get(name)
+         if status == "DONE":
+             if cur in (None, "QUEUED"):
+-                if not post(name, "RUNNING"):
++                # H2：post 成功后局部 cur 必须刷新为 RUNNING，否则 allowed(cur,"DONE")
++                # 按 QUEUED 判定恒 False，终态 post 被静默跳过（步骤卡 RUNNING）
++                if post(name, "RUNNING") is None:
+                     continue
++                cur = "RUNNING"
+             if allowed(cur, "DONE"):
+                 post(name, "DONE", str(rec.get("detail") or ""))
+         elif status == "FAILED":
+             if cur in (None, "QUEUED"):
+-                if not post(name, "RUNNING"):
++                if post(name, "RUNNING") is None:
+                     continue
++                cur = "RUNNING"
+             err = str(rec.get("detail") or "") or (
+                 f"{error_step}: {error_detail}" if error_step == name else ""
+             )
+@@ -520,7 +537,10 @@ def _report_step_single(
+     if status != "DONE":
+         return
+     try:
+-        current = {s["step_name"]: s["status"] for s in backend.run_detail(run_id).get("steps") or []}
++        # L1：与 _report_steps 对齐，只读本 attempt 的 step 行（scene retry 复用
++        # run_id 递增 attempt，不过滤可能读到上一 attempt 状态）
++        current = {s["step_name"]: s["status"] for s in backend.run_detail(run_id).get("steps") or []
++                   if s.get("attempt") == attempt}
+         cur = current.get(name)
+         if cur in (None, "QUEUED"):
+             backend.step(run_id, name, "RUNNING", attempt, lease_token)
+@@ -661,7 +681,11 @@ def execute_run(cfg: ProxyConfig, backend: Backend, payload: dict) -> None:
+     try:
+         # 停写信号注入 spec：adapter 在帧循环/执行前轮询（取消协作 + 租约失效共用）
+         spec, _run_status = resolve_spec(cfg, backend, payload, stop_event=stop_cancel)
+-    except (SpecError, HTTPError, URLError, RuntimeError) as exc:
++    # H4：resolve_spec 经 registry effective_params 抛 CapabilityError/
++    # CapabilityDisabledError（继承 Exception 非 RuntimeError）、fingerprint_bag
++    # 抛 ValueError 等——过窄捕获会让工作线程静默死、ACTIVE 残留（后续 POST /run
++    # 恒 409）、recovery 不清（重启 phantom run），扩为 Exception 确保失败收尾恒执行
++    except Exception as exc:
+         _finish_failure(cfg, backend, run_id, attempt, lease_token, resource_token,
+                         None, str(exc), stop_cancel, stop_reason["value"], stage="RESOLVING")
+         return
+@@ -900,7 +924,16 @@ def build_server(cfg: ProxyConfig, backend: Backend):
+                     return
+                 self._reply(409, {"error": f"another attempt is active for {run_id}"})
+                 return
+-            ACTIVE.try_reserve(run_id, {"stage": "ACCEPTED", "attempt": attempt, "pid": os.getpid()})
++            # TOCTOU：existing 判空后、try_reserve 前同 run_id 并发可双双通过——
++            # 接住原子返回值，失败者按既有接收重判（already_running/409），禁第二写者
++            if not ACTIVE.try_reserve(run_id, {"stage": "ACCEPTED", "attempt": attempt, "pid": os.getpid()}):
++                existing = ACTIVE.get(run_id)
++                if existing is not None and int(existing.get("attempt") or 0) == int(attempt):
++                    self._reply(200, {"accepted": True, "already_running": True,
++                                      "pipeline_run_id": run_id, "attempt": attempt})
++                else:
++                    self._reply(409, {"error": f"another attempt is active for {run_id}"})
++                return
+             # 台账先落盘（进程身份+检查点）再返回 accepted——派发响应丢失也据此对账
+             try:
+                 save_recovery_state(
+diff --git a/tests/test_scene_host_proxy.py b/tests/test_scene_host_proxy.py
+index 6f894ca..231c1a9 100644
+--- a/tests/test_scene_host_proxy.py
++++ b/tests/test_scene_host_proxy.py
+@@ -39,11 +39,16 @@ from scene_host_proxy import (  # noqa: E402
+     Backend,
+     ProxyConfig,
+     _process_identity,
++    _report_step_single,
++    _report_steps,
++    _write_json_atomic,
+     _writer_stopped,
+     build_server,
+     clear_recovery_state,
++    execute_run,
+     load_config,
+     recover_pending_runs,
++    resolve_spec,
+     save_recovery_state,
+     state_path,
+     validate_runtime_config,
+@@ -503,4 +508,175 @@ def test_recovery_drops_non_running(tmp_path, vlm):
+     assert n == 0
+     assert not state_path(cfg, "scene-rec-2").exists()
+     assert "scene-rec-2" not in ACTIVE
+-    fb.stop()
+\ No newline at end of file
++    fb.stop()
++
++
++# ---------------------------------------------------------------------------
++# attempt-2-r1 回归（OCR 第9轮 7 findings 返修）
++# ---------------------------------------------------------------------------
++def test_run_concurrent_same_identity_single_writer(live_proxy):
++    """H1：existing 判空→try_reserve 的 TOCTOU 窗口内并发同身份 POST，
++    恰一个 accepted(202)，另一个 already_running(200)/409；ACTIVE 恒至多一条。"""
++    client = live_proxy["client"]
++    fb = live_proxy["fb"]
++    run_id = live_proxy["run_id"]
++    payload = {"pipeline_run_id": run_id, "source_id": "SRC1", "attempt": 1,
++               "lease_token": "tok-c", "resource_lease_token": None}
++    results: list = []
++    barrier = threading.Barrier(2)
++
++    def _post():
++        barrier.wait()
++        results.append(client.post("/run", payload))
++
++    ts = [threading.Thread(target=_post) for _ in range(2)]
++    for t in ts:
++        t.start()
++    for t in ts:
++        t.join(timeout=30)
++    assert len(results) == 2
++    codes = sorted(c for c, _ in results)
++    assert codes.count(202) == 1, results     # 恰一个真正受理
++    assert set(codes) <= {200, 202, 409}, results
++    losers = [r for c, r in results if c != 202]
++    assert all(r.get("accepted") is True for r in losers)  # 幂等同一接收结果
++    assert [a["pipeline_run_id"] for a in client.get("/health")[1]["active_runs"]].count(run_id) <= 1
++    # 台账不重复写：recovery 文件只落一份，受理路径恰一次
++    accepted_posts = [p for c, p in results if c == 202]
++    assert len(accepted_posts) == 1
++    _ = fb  # 断言走 health/结果
++
++
++def _cfg_with_backend(tmp_path: Path, fb: FakeBackend, run_id: str) -> ProxyConfig:
++    pub = tmp_path / "pub"
++    pub.mkdir(exist_ok=True)
++    cfg = _cfg(tmp_path, pub)
++    return ProxyConfig(**{**cfg.__dict__, "backend_url": fb.base})
++
++
++def test_report_steps_done_reaches_terminal_from_queued(tmp_path):
++    """H2：DB 侧步骤 QUEUED/None（崩溃恢复重跑且本 attempt 无 RUNNING 行）+
++    checkpoint DONE → 必须 post RUNNING 后刷新 cur 再 post DONE（终态不被跳过）。"""
++    run_id = "scene-h2"
++    fb = FakeBackend(_run_detail(run_id), _source_detail())
++    cfg = _cfg_with_backend(tmp_path, fb, run_id)
++    work_root = tmp_path / "work" / run_id / "attempt-1"
++    work_root.mkdir(parents=True)
++    (work_root / "checkpoint.json").write_text(
++        json.dumps({"steps": {s: {"status": "DONE", "detail": "ok"} for s in
++                              ("PRECHECK", "EXTRACT", "INFER", "SEGMENT", "WRITE",
++                               "VALIDATE", "PUBLISH")}}),
++        encoding="utf-8",
++    )
++    _report_steps(Backend(cfg), run_id=run_id, attempt=1, lease_token="tok",
++                  work_root=work_root, terminal_step="REGISTER")
++    for name in ("PRECHECK", "EXTRACT", "INFER", "SEGMENT", "WRITE", "VALIDATE", "PUBLISH"):
++        statuses = [p["status"] for p in fb.wrote(f"/steps/{name}") if p]
++        assert "RUNNING" in statuses, (name, statuses)
++        assert statuses[-1] == "DONE", (name, statuses)  # 终态落地非卡 RUNNING
++    fb.stop()
++
++
++def test_report_step_single_filters_by_attempt(tmp_path):
++    """L1：_report_step_single 只读本 attempt 的 step 行——上一 attempt 已 DONE、
++    本 attempt QUEUED → 走 QUEUED→RUNNING→DONE，不得把旧态当当前态跳过。"""
++    run_id = "scene-l1"
++    detail = _run_detail(run_id)
++    detail["steps"] = (
++        [{"step_name": s, "attempt": 1, "status": "DONE"} for s in
++         ("PRECHECK", "EXTRACT", "INFER", "SEGMENT", "WRITE", "VALIDATE", "PUBLISH")]
++        + [{"step_name": "REGISTER", "attempt": 1, "status": "DONE"}]
++        + [{"step_name": "REGISTER", "attempt": 2, "status": "QUEUED"}]
++    )
++    fb = FakeBackend(detail, _source_detail())
++    cfg = _cfg_with_backend(tmp_path, fb, run_id)
++    work_root = tmp_path / "work" / run_id / "attempt-2"
++    work_root.mkdir(parents=True)
++    (work_root / "checkpoint.json").write_text(
++        json.dumps({"steps": {"REGISTER": {"status": "DONE", "detail": "ok"}}}),
++        encoding="utf-8",
++    )
++    _report_step_single(Backend(cfg), run_id=run_id, attempt=2, lease_token="tok",
++                        name="REGISTER", work_root=work_root)
++    posted = [(p["status"], p["attempt"]) for p in fb.wrote("/steps/REGISTER") if p]
++    assert ("RUNNING", 2) in posted, posted   # 未因旧 attempt DONE 跳过 RUNNING
++    assert ("DONE", 2) in posted, posted
++    fb.stop()
++
++
++def test_execute_run_resolving_capability_error_finishes_failure(tmp_path, monkeypatch):
++    """H4：resolve_spec 经 effective_params 抛 CapabilityError（继承 Exception 非
++    RuntimeError）→ 不得静默死线程：报 SCENE_FAILED、清 ACTIVE、清 recovery。"""
++    from app.scene import CapabilityError
++    from app.scene import get_registry as _get_reg
++
++    run_id = "scene-h4"
++    fb = FakeBackend(_run_detail(run_id), _source_detail())
++    cfg = _cfg_with_backend(tmp_path, fb, run_id)
++    with ACTIVE._lock:
++        ACTIVE._runs.clear()
++    ACTIVE.try_reserve(run_id, {"stage": "ACCEPTED", "attempt": 1, "pid": os.getpid()})
++    save_recovery_state(cfg, run_id=run_id, attempt=1, lease_token="tok-h4",
++                        resource_lease_token=None, stage="RESOLVING",
++                        identity=_process_identity(), accepted_at=time.time())
++    monkeypatch.setattr(
++        _get_reg(), "effective_params",
++        lambda *a, **k: (_ for _ in ()).throw(CapabilityError("capability disabled")),
++    )
++    payload = {"pipeline_run_id": run_id, "source_id": "SRC1", "attempt": 1,
++               "lease_token": "tok-h4", "resource_lease_token": None, "accepted_at": time.time()}
++    th = threading.Thread(target=execute_run, args=(cfg, Backend(cfg), payload), daemon=True)
++    th.start()
++    th.join(timeout=20)
++    assert not th.is_alive(), "工作线程不得静默死"
++    status_posts = [p for p in fb.wrote("/status") if p]
++    assert any(p.get("status") == "SCENE_FAILED" for p in status_posts), status_posts
++    assert run_id not in ACTIVE
++    assert not state_path(cfg, run_id).exists()
++    fb.stop()
++    with ACTIVE._lock:
++        ACTIVE._runs.clear()
++
++
++def test_resolve_spec_frozen_config_hash_mismatch_fail_fast(tmp_path, monkeypatch):
++    """H5：快照冻结 capability_config_hash 与默认重推值不同 → PRECHECK 前 SpecError
++    fail-fast，编排（模型调用）不得触发。"""
++    from scene_host_orchestrator import SceneHostOrchestrator
++
++    run_id = "scene-h5"
++    detail = _run_detail(run_id)
++    detail["pipeline_config_snapshot"]["scenes"][0]["capability_config_hash"] = "deadbeef" * 8
++    # 本机源路径存在（H5 检查在 source_path 映射之后）
++    (tmp_path / "ready" / "source_bag").mkdir(parents=True, exist_ok=True)
++    fb = FakeBackend(detail, _source_detail())
++    cfg = _cfg_with_backend(tmp_path, fb, run_id)
++    monkeypatch.setattr(SceneHostOrchestrator, "run",
++                        lambda self, spec: (_ for _ in ()).throw(AssertionError("模型不得调用")))
++    payload = {"pipeline_run_id": run_id, "source_id": "SRC1", "attempt": 1,
++               "lease_token": "tok-h5"}
++    with pytest.raises(Exception, match="capability_config_hash"):
++        resolve_spec(cfg, Backend(cfg), payload)
++    fb.stop()
++
++
++def test_write_json_atomic_fsyncs_before_replace(tmp_path, monkeypatch):
++    """H6：原子写 recovery 真相源——先 flush+fsync 再 os.replace，tmp 不留残件。"""
++    events: list[str] = []
++    real_fsync = os.fsync
++    real_replace = os.replace
++
++    def _recording_fsync(fd):
++        events.append("fsync")
++        return real_fsync(fd)
++
++    def _recording_replace(a, b):
++        events.append("replace")
++        return real_replace(a, b)
++
++    monkeypatch.setattr(os, "fsync", _recording_fsync)
++    monkeypatch.setattr(os, "replace", _recording_replace)
++    p = tmp_path / "sub" / "x.json"
++    _write_json_atomic(p, {"k": "v"})
++    assert events == ["fsync", "replace"], events
++    assert json.loads(p.read_text(encoding="utf-8")) == {"k": "v"}
++    assert not list(tmp_path.glob("sub/.*tmp"))
+\ No newline at end of file

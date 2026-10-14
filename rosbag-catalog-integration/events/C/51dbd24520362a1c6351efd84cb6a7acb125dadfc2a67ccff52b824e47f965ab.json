@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t16b-a2r1-delivered-20261013",
+  "occurred_at": "2026-10-13T13:38:17+08:00",
+  "recorded_at": "2026-10-13T13:38:17+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "2-r1",
+  "status": "REVIEW_PENDING",
+  "summary": "attempt-2-r1 six fixes + 6 regressions delivered frozen: head 40ab818 (base 0208a73); H1 TOCTOU, H2 terminal skip, H4 except Exception, H5 config_hash fail-fast floor (entry lacks submitted params), H6 fsync-before-replace, L1 attempt filter; pytest 20+12 passed, ruff/compileall green, zero out-of-scope diff",
+  "evidence": "receipts/TASK-16B/attempt-2-r1.md; commit 40ab818; git diff --stat 0208a73..40ab818",
+  "next": "wait coordinator mechanical verify -> incremental OCR --from 0208a73 --to 40ab818 -> strong review pack (6 fixes scope) -> merge -> 12S-C wiring"
+}

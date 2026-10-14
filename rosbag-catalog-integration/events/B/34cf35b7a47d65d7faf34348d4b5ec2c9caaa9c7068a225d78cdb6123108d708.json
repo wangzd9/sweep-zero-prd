@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-123753-nochange-t07a-ocr-dethtml-r1",
+  "occurred_at": "2026-10-12T12:39:12+08:00",
+  "recorded_at": "2026-10-12T12:39:12+08:00",
+  "role": "B",
+  "task": "TASK-07A",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "无新派单无返修；T07A f94d006 交付冻结等待协调者 OCR dethtml-r1 批收口；main 453da0c 双核不变",
+  "evidence": "sessions/B.md",
+  "next": "等 OCR 收口/机械核验/合入；TASK-11 生产门禁未放行"
+}

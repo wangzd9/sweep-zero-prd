@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-051453-nochange",
+  "occurred_at": "2026-10-13T05:17:33+08:00",
+  "recorded_at": "2026-10-13T05:17:33+08:00",
+  "role": "TESTER",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "巡检 05:14：无 TESTER 新派单，origin/main 502bf8ec 未变，07B R3/16A/16B 未合入，合入门禁维持关闭，16B resume b1 链在协调者面",
+  "evidence": "inbox/sessions/TESTER.md",
+  "next": "保持空闲待命，07B-post-r3 或 16D 派单到达即 ACK 开工"
+}

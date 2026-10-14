@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r153-t12sb-ocr-chain-restarted",
+  "occurred_at": "2026-10-13T13:29:00+08:00",
+  "recorded_at": "2026-10-13T13:29:22+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "r153 巡检（指纹 4a76702d）：① r152 起跑的 12S-B OCR 链被会话回收硬杀（c01 13:21:27 START 后零日志、config 停 8002 未恢复、无进程、ocr.lock 无 holder）→ 本回合恢复 provider 配置并 nohup setsid 重挂 chain.py（pid 1897396，13:28:15 START c01，node 子进程 1897399 存活），参数沿用 r9 成功口径 --max-tokens 0 + OCR_LLM_TIMEOUT=900，base 6fb42c4→f62a29c 不变。② C 已 ACK 16B attempt-2-r1（13:2x，base 0208a73，H1/H2/H4/H5/H6/L1 六处修复+回归）→ 开发中待回执，租约 unverified 在途不抢占。③ 强审 EXPIRED 零新增。",
+  "evidence": "t12sb_ocr/progress.txt（13:28:15 START c01）; ps 1897396/1897399; config.json url 8002(chain 切); inbox/3号/TASK-16B/attempt-2-r1-ack.md; fuser ocr.lock 无 holder",
+  "next": "下轮核 c01 收口 rc/findings → 逐条裁决 → c02 → TESTER 独立验证 → 合入；16B r1 回执落盘后机械核验"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-003x-4acf689f-running-extract-pending-d4-409-20261014",
+  "occurred_at": "2026-10-14T00:36:19+08:00",
+  "recorded_at": "2026-10-14T00:36:19+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "00:3x 跨夜增量只读实测（消费 prerun 指纹 9877395e…，唤醒源=上轮 00:24 事件回声+BATCH-STATUS 00:28 同步+sessions）：16_02_03 合法链 scene-4acf689f 00:33 复核 SCENE_RUNNING attempt1（heartbeat 持续、orchestrator 日志 dispatched 后无 busy 循环）、八步 attempt1 仍全 QUEUED（EXTRACT started_at=NULL，00:07:56 取执行面后约 25min 静默段，跨 DB3 大包 10GB 前置解析/EXTRACT 未开跑，未判卡死需下轮核推进）；D4 第2步独立复核确认=ingest_submission 8 行 date-grouped 三行（03281a51/5e08e73d/7f4e7b75）不在（A 删除与台账一致）；D4 第3步未达成=a65a25a7(14_42_48)/87dfebaa(16_37_47)/518089ed(16_58_28) 仍 PENDING_INPUT 未绑定；scanner 409 口径更新：00:25 最近 12min 日志 409 recovering 行消失、scan_job 3977/3975 SUCCESS failed=2（=16_33_10 空包 missing rosbag2_bagfile_information + 1 历史，flat 绑定仍未发生，409 是否因 submission 删除而释放待 A 绑定回执后核）；NAS 复核 ready/spray 仅 7 flat 包目录（20261012/ date-grouped 已删，D4 第4步完成）+ slices/test/spray 6 目录（FFDEE943×4=dup 双写产物现场保留、051768B1/615A4A7B 各 1=PASS 基线）+ .staging/scene-a4824f1c 壳已清；PASS 基线不变（15_58_23 复用/16_00_13 SUCCESS/16_31_25 NOT_APPLICABLE/16_33_10 拒绝可追溯/16_37_47+16_58_28 SHA/16_02_03 SHA=源）。",
+  "evidence": "test-receipts/TASK-11S-BATCH-1012/attempt-1.md(00:3x段); 生产MySQL 00:33 实测 pipeline_run(7 scene run: 6 SCENE_DONE + 4acf689f SCENE_RUNNING attempt1 updated 00:33:28)/step_run(4acf689f 八步 attempt1 全 QUEUED started NULL)/ingest_submission(8行 flat 三提交 PENDING_INPUT+date-grouped 3行不在)/pipeline_event(4acf689f 末非心跳事件 CLAIMED 00:07:56 后 busy 循环止)/scan_job(id3977 00:25:34 SUCCESS incoming failed:2); orchestrator 日志 dispatched 4acf689f 后 12min 零 busy; scanner 日志 12min 零 409 行; proxy active_runs=[4acf689f ACCEPTED]; NAS ls/du 7 flat 目录+6 slices 目录",
+  "next": "下轮核 4acf689f EXTRACT/八步推进（started_at 是否落值）+跨 DB3 真实时间戳边界准备; A flat 三提交（a65a25a7/87dfebaa/518089ed）scanner 绑定回执后核 SCHEDULED/终态/产物/两次 reconcile（14_42_48 正式全链）; dup FFDEE943 4子包处置等协调者裁决; 全批 8 包齐后 TEST_REPORT_PENDING"
+}

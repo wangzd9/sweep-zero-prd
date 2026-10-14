@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-143353-nochange",
+  "occurred_at": "2026-10-11T14:35:32+08:00",
+  "recorded_at": "2026-10-11T14:35:32+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "无C新派单，TODO 14:31变更为协调者r11收口记账，保持空闲待派单",
+  "evidence": "sessions/C.md",
+  "next": "等协调者派单"
+}

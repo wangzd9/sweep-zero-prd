@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261014-094800-fp-8faab7c3-consumed-echo-nochange-idle",
+  "occurred_at": "2026-10-14T09:48:30+08:00",
+  "recorded_at": "2026-10-14T09:48:30+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Consumed observer pending fp 8faab7c3 (09:45:10 first seen, 09:47:53 recheck): only changed source sessions/B.md is echo of own 09:38 entry written at 09:43:33. Zero new business input: inbox/2号 no files since 04:00 (no dispatch/rework), legacy inbox/sessions/B.md untouched since 10-13 22:54 (canonical file only). B attempt-1 input applicability check stands DONE 21:12 (receipt b-attempt-1.md, ruling b-input-ruling-2117.md, no problem-ID rework). Maintains IDLE_WAITING; 4acf689f overnight INFER observation stays C/TESTER scope; production fixed 3c9c496, B zero commits/models/production writes this batch.",
+  "evidence": "sessions/B.md mtime 09:43:33 (last line = own 09:38 entry, newline-terminated); find inbox/2号 + SPRAY-BATCH dir newer 04:00 empty; inbox/sessions/B.md mtime 2026-10-13T22:54:46 unchanged; ps no B business processes; leases no B lease",
+  "next": "IDLE_WAITING: await next coordinator dispatch or minimal algorithm rework order; 11:00 phase summary per protocol; observer ack fp 8faab7c3 before final."
+}

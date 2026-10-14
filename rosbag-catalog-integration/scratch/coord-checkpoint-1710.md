@@ -1,0 +1,8 @@
+## 2026-10-11 17:10 巡检检查点（cron poll 14ae4556629a，真实 checked_at 2026-10-11T17:10:53+08:00：17:04 后零业务交付，2号 t08c-1 在途活跃）
+
+- **17:04 后零业务交付**：main HEAD `98f6c885dcd4681c63b39bec6e7d2836649c87d2`（= origin/main，rev-parse 双核一致，top1=c3-1 合入 17:02 已在案）；17:04:00 后共享根新增仅 C 17:08 nochange 心跳、BASELINE/TODO/HANDOFF/TIMELINE 自身记账与 sessions tick，**无新回执/派单/decision/合入**（find -newermt 核实）。
+- **2号 t08c-1（C1/C2 秒精度专项）在途活跃，不催单不接管**：ACK 16:54（`b-ack-20261011-165403-t08c1`，base `f9bafb0`=合入前 origin 双核一致）；`wt-04a-t08c`（branch `scene/task-08-c1c2-second-precision`，HEAD 仍 `f9bafb0` 无 commit）17:00 后 `tests/__pycache__` 7 个红文件 pyc（web/bag_cleanup_concurrency/pipeline_api/clone/source_register_purpose/lineage_lifecycle 等）被 pytest 重写=定位/复现实测推进中；git status 干净（仅 .venv 软链）、B tick 17:08 存活 → **RUNNING 定位+真 MySQL A/B 阶段，未交付无回执**。
+- **角色占用**：B=RUNNING（t08c-1）；A 16:41 后 nochange 转空闲（c3-1 已合入冻结）；C 17:08 nochange 空闲；TESTER 空闲（leases TESTER.lock 08:55 零字节例行租约，无在途测试）；`ocr.lock`(16:59)/`coordinator.lock` 0 字节无在途持有者；ps 无协调侧 ocr/pytest 业务进程（仅 wxocr 桌面）。
+- **门禁**：生产启用/真实样本（TASK-09/10/11）维持未放行；TASK-08 收口 1/2（c3-1 已合入 `98f6c88`），剩 t08c-1 交付→机械核验→串行 OCR 增量→合入→9 红文件全绿复核→08 DONE→TASK-10 候选重算。
+- 本轮控制动作：claim（`OWNER_BUSY_OR_UNVERIFIED` 为 TESTER 陈旧零字节锁文件，claim 直接成功）→巡检核查（rev-parse 双核/find -newermt/wt-04a-t08c pyc+status+B tick/ps/lock/leases 复核）→prepend 检查点+event→release，**无新派单、无合入、无 OCR、无状态变更**。
+- **下一步**：下轮核 2号 t08c-1 交付回执 `receipts/TASK-08/`（C1/C2 秒精度修复 commit+真 MySQL A/B 证据）；交付即机械核验→串行 OCR 增量→合入→9 红文件全绿复核→TASK-08 DONE；若连续 2 轮零活动信号则记停滞告警，不自动接管。

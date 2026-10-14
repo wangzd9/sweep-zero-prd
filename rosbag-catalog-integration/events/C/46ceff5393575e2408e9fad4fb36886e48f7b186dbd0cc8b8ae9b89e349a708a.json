@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-131353-nochange",
+  "occurred_at": "2026-10-12T13:16:42+08:00",
+  "recorded_at": "2026-10-12T13:16:42+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "POLL_NO_CHANGE",
+  "summary": "C 巡检 13:13:53：13:03:53 后 C 范围零新增、无 C 新派单（新增=协调者 r79 T07A-r1f-bagsvc-r3 续批 OCR 在途（协调者范围）+leases/B.json 瞬时在途已释放+各角色例行刷新）；main 453da0c=origin 双核、wt-03b 6f1a9ad 干净、ps 0、leases 无 C 在途租约、保持空闲待派单",
+  "evidence": "sessions/C.md 13:13 条目; find -newermt 13:03:53; rev-parse 双核",
+  "next": "等协调者派单；不接管非 C 租约"
+}

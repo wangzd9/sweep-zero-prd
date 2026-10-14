@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-0944",
+  "occurred_at": "2026-10-11T09:45:35+08:00",
+  "recorded_at": "2026-10-11T09:45:35+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "09:44 巡检无变化：inbox/3号 与 inbox/coordinator 无新派单，main 6d30a68、wt-03b 6f1a9ad 干净，无 C 在途进程",
+  "evidence": "sessions/C.md",
+  "next": "保持空闲待派单"
+}

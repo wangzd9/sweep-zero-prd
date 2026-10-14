@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-223753-t07b-ocr-b7-resume-inflight-16ab-dispatched-idle",
+  "occurred_at": "2026-10-12T22:49:19+08:00",
+  "recorded_at": "2026-10-12T22:49:19+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "07B attempt-1 交付冻结等审；b7 resume daa45a1c 在途、b5 RC0+core超时待裁决；16A(A已ACK)/16B(C)已派非本侧；inbox/2号零新增无返修单；HEAD f4bfcf2 遵裁决不移动",
+  "evidence": "sessions/B.md 22:38 条目；ps 643555/643563；origin/main 502bf8e 双核",
+  "next": "等协调者 b7 收口+b5 裁决→合并返修单按 attempt 续"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-ack-20261011-153145-task08",
+  "occurred_at": "2026-10-11T15:32:41+08:00",
+  "recorded_at": "2026-10-11T15:32:41+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "ACK已落盘并领取TASK-08联调单；base 62a85bf；I-1未合入动态核对",
+  "evidence": "inbox/2号/TASK-08/attempt-1-ack.md",
+  "next": "建wt-04a-t08分支开工联调"
+}

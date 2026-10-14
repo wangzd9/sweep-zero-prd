@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t16b-a2r2-delivered-20261013",
+  "occurred_at": "2026-10-13T16:28:00+08:00",
+  "recorded_at": "2026-10-13T16:28:00+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "2-r2",
+  "status": "REVIEW_PENDING",
+  "summary": "16B attempt-2-r2 强审 SR-16B-R1 5 项阻塞最小返修交付冻结：head e152465 @ wt-03b-t16b（base 40ab818 单 commit，2 文件 +506/-43 零越界：只动 scene_host_proxy.py+其测试）。R1-01 resolve_spec 已终态 run 对账拒绝（迟到重复 /run 不重烧模型）；R1-02 _report_steps/reconcile_terminal+ensure_running 终态写入失败按本 attempt 对账补报（已提交但响应丢失/未提交两分支）；R1-03 _confirm_terminal 先对账再清恢复台账（未确认保留台账防 phantom run，其他终态不覆盖）；R1-04 clear_recovery_state unlink 异常吞错留痕、ACTIVE 恒释放；R1-05 _write_json_atomic replace 后 fsync 父目录（掉电目录项耐久，限受支持文件系统）。FakeBackend 升级有状态（step 迁移同 transitions.py 口径+step_fail/status_fail 注入面，既有 20 用例零改动语义）。自测真实执行：26 passed（20 零回归+6 新注入）/39 passed（proxy+orchestrator）/全仓 889 passed 3 failed=test_devflow base 40ab818 临时 worktree 同口径复现（与本单无关）/ruff+compileall clean。真实栈/模型冒烟留 TESTER 收口与 12S-C 接线核验（禁本单自宣 PASS）；12S-C 前置 wt-03b-t12sc@92dcb52 按派单冻结",
+  "evidence": "receipts/TASK-16B/attempt-2-r2.md; tests/test_scene_host_proxy.py 26 passed; 39 passed exit 0; 889 passed 3 failed(base同口径); e152465; 注入: test_r1_01/test_r1_02×2/test_r1_03×3/test_r1_04/H6增强",
+  "next": "等协调者机械核验→增量 OCR --from 40ab818 --to e152465→强审增量复审(只看 R1-01~05, 授权 60min 剩 4/5)→TESTER 收口(r1 口径)→合入 main→16B DONE→重算 12S-C 依赖"
+}

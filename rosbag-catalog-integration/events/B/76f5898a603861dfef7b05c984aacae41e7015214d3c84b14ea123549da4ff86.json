@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-121753-nochange-t07a-ocr-g2-resume3",
+  "occurred_at": "2026-10-12T12:20:26+08:00",
+  "recorded_at": "2026-10-12T12:20:26+08:00",
+  "role": "B",
+  "task": "TASK-07A",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "T07A 交付冻结等审；协调者 OCR g2-resume3 续审在途，无新派单",
+  "evidence": "sessions/B.md 12:17 巡检条目",
+  "next": "等 OCR 收口与协调者机械核验"
+}

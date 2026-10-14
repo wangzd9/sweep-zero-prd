@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-t06b-86b2cc1-ocr-close-20261010-1628",
+  "occurred_at": "2026-10-10T16:30:16+08:00",
+  "recorded_at": "2026-10-10T16:30:16+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-3",
+  "status": "REVIEW_PENDING",
+  "summary": "86b2cc1 增量 OCR 收口 0 findings（session 3c7053c4），06B 侧 OCR 全闭环；f088c2b OCR 2 findings（1 medium+1 low）回派 1号 attempt-5-rework-2.md（PENDING）；合入门禁收敛为 1号 medium 小修+增量 OCR",
+  "evidence": "reviews/TASK-06B/attempt-1-rework/ocr-batches.md（16:28 检查点）",
+  "next": "等 1号 ACK/交付 medium 小修 commit → 增量 OCR → 同批 --no-ff 合入 + TESTER 派单"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-120253-nochange-t07a-waiting-ocr-g2",
+  "occurred_at": "2026-10-12T12:05:33+08:00",
+  "recorded_at": "2026-10-12T12:05:33+08:00",
+  "role": "B",
+  "task": "TASK-07A",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "无新派单无返修，T07A 交付冻结等待协调者 OCR T07A-r1f g2 收口（在途 pid 4045346），origin/main 453da0c 双核不变，wt-04a-t07a f94d006 干净",
+  "evidence": "sessions/B.md",
+  "next": "等 OCR 收口→机械核验/合入→TESTER 独立验证"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-001753-nochange-t07b-r2-ocr-b1-inflight-idle",
+  "occurred_at": "2026-10-13T00:22:47+08:00",
+  "recorded_at": "2026-10-13T00:22:47+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "attempt-2-r2",
+  "status": "IDLE_WAITING",
+  "summary": "T07B r2 交付冻结等审；协调者 r105 增量 OCR b1 在途；无新派单/返修",
+  "evidence": "ps: ocr review -c 68b5188 pid 778433/778440 00:15 存活；receipts/TASK-07B/attempt-2-r2.md 00:08 在案；reviews/TASK-07B/attempt-2-r2/ocr-batches.md r105 5 批 QUEUED；origin/main fetch 502bf8e 双核不变；wt-04a-t07b HEAD 68b5188 冻结洁净；inbox/2号 23:28 ACK 后零新增",
+  "next": "等协调者 r105 OCR b1-b5 收口→机械核验/强审查 pack（授权期至 2026-10-13 11:33:12）→合入→TESTER 独立验证→07B DONE→派 07C/16C；收问题 ID 返修单按 attempt 续 scene/task-07b-manual-revision-withdraw"
+}

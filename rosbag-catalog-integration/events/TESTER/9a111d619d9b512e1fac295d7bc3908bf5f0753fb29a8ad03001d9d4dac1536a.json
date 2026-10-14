@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-002x-d4-submissions-deleted-24ab-done-20261014",
+  "occurred_at": "2026-10-14T00:24:00+08:00",
+  "recorded_at": "2026-10-14T00:24:00+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "00:1x-00:2x 跨夜增量只读实测（消费 prerun 指纹 6f672d1d…，唤醒源=ruling-2338-verify-ack/BATCH-STATUS 同步+上轮 00:09 事件）：D3 dup scene-24ab78bb(16_58_28) 00:07:46 SCENE_DONE NOT_APPLICABLE（缺 /iv_packets_front_mid+/iv_points_front_mid_transformed），205E5054 子包=0 无伪切片零模型，PASS（D3 两 dup 全部收敛核销）；D4 第2步已执行=3 date-grouped submission(03281a51/5e08e73d/7f4e7b75)已从 ingest_submission 删除（全集 8 行 id 1/2/3/4/5/7/11/12 实测）；D4 第3步未达成=A flat a65a25a7(14_42_48)/87dfebaa(16_37_47)/518089ed(16_58_28) 仍 PENDING_INPUT 未绑定、source_id 空，scanner 持续 409（ready/spray/20261012/16_00_13，该 NAS 目录 14,930,820,106B 仍在=D4 第4步未执行，责任 A）；16_02_03 合法链 scene-4acf689f 00:07:56 取 SCENE_EXEC_HOST 后 SCENE_RUNNING，heartbeat 至 00:20:27，八步仍全 QUEUED（跨 DB3 大包 EXTRACT 前置未开，非卡死但需下轮核步骤推进）；D2 dup a4824f1c 双写产物取证更新=.staging/scene-a4824f1c/attempt-2 已空目录(0B)，已发布 4 子包在正式树 slices/test/spray/FFDEE943…(~202MB×4)——现场保留要求指向正式树 4 子包目录，处置仍等协调者裁决；PASS 基线不变。",
+  "evidence": "test-receipts/TASK-11S-BATCH-1012/attempt-1.md(00:2x段); 生产MySQL 00:20 实测 pipeline_run(4acf689f SCENE_RUNNING attempt1/24ab78bb+eb4397c3+a4824f1c SCENE_DONE)/pipeline_event(24ab78bb NOT_APPLICABLE payload+RESOURCE_RELEASED 00:07:46; 4acf689f heartbeat 00:20:27)/step_run(4acf689f 八步全 QUEUED)/ingest_submission(8行,date-grouped 3行已删); NAS: ready/spray 8 flat包目录+20261012(14.93GB); slices/test/spray 6子包(FFDEE943=4/051768B1=1/615A4A7B=1/205E5054=0/9C9456B6=0); .staging/scene-a4824f1c attempt-2=0B; 8767 proxy active_runs=[4acf689f ACCEPTED]; orchestrator 日志 4acf689f 曾 busy 循环后 00:07:5x dispatched",
+  "next": "下轮核 4acf689f 八步推进(EXTRACT 开跑)+跨 DB3 真实时间戳边界准备; A D4 第3/4步(删 ready/spray/20261012 NAS+flat 三提交绑定)后核 409 释放+逐包终态/产物/两次 reconcile(14_42_48 正式全链); dup FFDEE943 4子包处置等协调者裁决; 全批 8 包齐后 TEST_REPORT_PENDING"
+}

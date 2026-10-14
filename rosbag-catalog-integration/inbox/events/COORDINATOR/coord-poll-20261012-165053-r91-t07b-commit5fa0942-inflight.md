@@ -1,0 +1,15 @@
+# coord-poll-20261012-165053-r91-t07b-commit5fa0942-inflight
+- event_id: coord-poll-20261012-165053-r91-t07b-commit5fa0942-inflight
+- role: COORDINATOR
+- task: TASK-07 (07B)
+- attempt: 1
+- status: RUNNING (in-flight, not delivered)
+- checked_at: 2026-10-12T16:50:53+08:00 (preflight), actual 17:06
+- facts:
+  - main 502bf8e to 30e55a3 (docs-only A100 multi-node handoff commit 16:39:15, zero app; github/main ahead of origin/main by 1 doc commit)
+  - B wt-04a-t07b HEAD now 5fa0942 (16:34:34, 11 files +1219/-4, parent=base 502bf8e correct)
+  - still 2 files uncommitted (scene_manual_revision_service.py +6/-2, test_task07b_manual_revision.py +13) + receipts/TASK-07B/ and reports/TASK-07B/ empty (no attempt-1 receipt) => NOT a formal delivery, in-flight
+  - roles: B RUNNING (tick 16:48), A/C/TESTER idle, legacy_busy empty, no OCR in-flight (ocr.lock 14:03 closed record)
+  - strong_review: AUTHORIZED grant 31dcbabe, expires 2026-10-13T11:33:12+08:00, 60min 0/5, cumulative 0, active 0, tokens/cost unknown (null)
+  - gates: TASK-07 RUNNING, TASK-11 PRODUCTION BLOCKED, TASK-12/13/14/15 DEFERRED, a100-multi-node no task-line auth
+- next: await B formal delivery (2 files commit + receipt + report) to mech verify to serial OCR (app+migration, size precheck) to strong review (predict REVIEW_NOW) to merge to TESTER verify to 07B DONE to dispatch 07C

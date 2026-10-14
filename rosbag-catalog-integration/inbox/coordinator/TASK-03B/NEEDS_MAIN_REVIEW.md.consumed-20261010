@@ -1,0 +1,53 @@
+---
+task: TASK-03B
+item: f2-rework 交付 f11e617 的验收
+raised_by: 协调者 cron（scene-coordinator-poll, 2026-10-09 15:1x）
+status: NEEDS_MAIN_REVIEW
+related:
+  - inbox/3号/TASK-03B/attempt-2-f2-rework.md（主会话化身所发，ACCEPTED）
+  - reviews/TASK-03B/attempt-2/f2-isolation-retest-evidence.log
+  - receipts/TASK-03B/attempt-2.md（指纹 76b118b1f3 → 190484bafc，本轮 monitor 变化事件）
+---
+
+# 挂起：f11e617（F2 隔离库返修）验收超出 cron 机械范围，待主会话化身裁决
+
+## 事件
+
+本轮唤醒原因：receipts/TASK-03B/attempt-2.md 指纹变化。新内容为 3 号完成
+f2-rework dispatch 要求的隔离库返修并交付 f11e617，回执追加"协调者隔离库复测
+（F2 返修）"段（根因 + 修复 + 隔离库复验 PASS×3 + 新 monkeypatch 回归 + 本地验证），
+status 保持 REWORK_DONE_PENDING_OCR。
+
+## 事实（只读核对，未动 worktree）
+
+- worktree wt-03b HEAD = f11e617，base = a8fac99（a8fac99 已在 main b3280c9 祖先链，合入为小增量）。
+- 范围：`git diff a8fac99 f11e617 --stat` = 2 文件（app/services/ingest_service.py +45/-17、tests/test_ingest_config.py +66），无 .venv/环境产物。
+- 修复内容：内容列 + row_version+1 合并进单条守卫 UPDATE（SET 恒含 row_version+1，守卫命中必 modified，affected≥1；输方 0 匹配 → rowcount==0 → 409），另加 synchronize_session='fetch' 兜底；新增回归 test_patch_concurrent_guard_zero_rows_returns_409（monkeypatch 层，红绿均申报）。
+- 3 号自报隔离库复验 PASS×3（1 OK + 1 HTTP 409、row_version=2、内容不被覆盖），证据 log 已落 reviews/。
+- 无在途 OCR（ps 空）；coordinator.lock 本轮空闲。
+- 本地验证自报：定向 34 passed；全量 667 passed, 10 skipped, 3 failed（3 failed = 已知 devflow 沙箱环境例）。
+
+## 挂起理由（超出机械验收模板，逐条对应禁令）
+
+1. **prompt 硬边界**：当前已知状态明示"F2 的 409 路径有主会话化身实测发现的
+   StaleDataError 缺陷，3号在返修 attempt-3，**勿动 ingest_service.py 相关验收**"。
+   f11e617 改动面正是 ingest_service.py。
+2. **隔离库并发实测归主会话**：返修依据（f2-isolation-evidence.log）与复验
+   （f2-isolation-retest-evidence.log）都是 MySQL 8.4 双独立会话同拍竞争，属
+   "隔离库并发实测"类裁决证据；cron 化身职责清单不含复测/采信该证据。
+3. **验收口径未定**：f2-rework dispatch 尾注"协调者 OCR B1-r2（14b7a64..a8fac99
+   增量）仍在跑，收口后连同本条一起裁决"——合入口径由主会话化身定，cron 不应
+   抢跑合入（不设挂起点的深度验收项促成抢跑合入，正是双化身协议明令防的）。
+
+## 已做的机械动作（边界内）
+
+- ps 查无在途 OCR；lock 测试通过（未做长操作即释放）。
+- 只读范围核对（如上），未跑 pytest/ruff/OCR，未合入，未改 receipt/TODO/HANDOFF。
+
+## 建议主会话化身动作（供参考，非指令）
+
+- 采信或复验 f2-isolation-retest-evidence.log（PASS×3 与 dispatch 要求逐字一致）。
+- 独立复跑 wt-03b 定向 + 全量 pytest + ruff（.venv 软链主仓）。
+- 决定 f11e617 的 OCR 口径（增量 2 文件 vs 与 B1-r2 合并收口）。
+- 合入（--no-ff）+ push + 写 decision + 更新 03B 终版 commit 记录（DESIGN 契约表 F2 条目指向 f11e617）。
+- 回执 attempt-2 的 status 由主会话推进（REWORK_DONE_PENDING_OCR → 终态）。

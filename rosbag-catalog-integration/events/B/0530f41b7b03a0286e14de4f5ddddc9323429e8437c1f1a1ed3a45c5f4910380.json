@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-080253-nochange",
+  "occurred_at": "2026-10-11T08:04:02+08:00",
+  "recorded_at": "2026-10-11T08:04:02+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "0802巡检无变化：main 6d30a68不变、强复审R2I-20261010-06 result仍不存在等用户手动触发、无新派单无返修",
+  "evidence": "receipts/TASK-06B/attempt-1-r2-rework-5.md",
+  "next": "继续5分钟巡检"
+}

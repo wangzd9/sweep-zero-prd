@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-183253-nochange-t08c-ocr-inreview",
+  "occurred_at": "2026-10-11T18:33:52+08:00",
+  "recorded_at": "2026-10-11T18:33:52+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "REVIEW_PENDING",
+  "summary": "t08c-1 交付冻结 18:18 无新派单/返修；协调者 18:25 机械核验完成，OCR C1C2-r1 在途（pid 2618840，硬截止 19:10）",
+  "evidence": "receipts/TASK-08/c1c2-t08c-1.md",
+  "next": "等 OCR 结论+协调者 rebase 98f6c88 合入"
+}

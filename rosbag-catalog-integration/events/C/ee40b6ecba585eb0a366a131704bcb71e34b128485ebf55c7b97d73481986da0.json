@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-161853-nochange",
+  "occurred_at": "2026-10-11T16:19:43+08:00",
+  "recorded_at": "2026-10-11T16:19:43+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "16:18:53 巡检无 C 范围变更：inbox/3号 与 inbox/coordinator 16:09:30 后无新文件、main HEAD 仍 f9bafb0、wt-03b 6f1a9ad 干净、无 C 在途进程、无在途租约",
+  "evidence": "sessions/C.md",
+  "next": "继续5分钟巡检待派单"
+}

@@ -1,0 +1,13 @@
+{
+  "event_id": "coord-r162-t16b-ocr-closed-strong-review-rework-r2-dispatched",
+  "occurred_at": "2026-10-13T15:25:00+08:00",
+  "recorded_at": "2026-10-13T15:25:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16B",
+  "attempt": "2-r2",
+  "status": "REWORK_DISPATCHED",
+  "summary": "16B r1 增量 OCR 收口 rc=0 0 findings（run 0a77a83f，coverage 1/1）；强审 SR-16B-R1-20261013（call e7d6b921，授权 6b2d83fb9 内第 1 次消费）REWORK_REQUIRED=5 项阻塞全 CORRECTION（R1-01 H1 迟到重复 /run 再执行高 / R1-02 H2 终态 post 无对账补报高 / R1-03 H4 _finish_failure 吞异常仍清 recovery 高 / R1-04 unlink 异常 ACTIVE 幽灵残留中 / R1-05 replace 后未 fsync 父目录中）；r2 最小返修单已派 C（base 40ab818 续 commit，12S-C 前置暂停等 r2）；并行回合 r161 所称 SR-T16B-20261013/proc 7c3ad97051b2 在途无账本落点，按未落地不追认；12S-A 增量 OCR 固定入口 b01 RUNNING（4 批）。",
+  "evidence": "reviews/TASK-16B/attempt-2-r1/ocr/state.json(AWAITING_DECISION); reviews/strongmodel/runs/e7d6b92127804c6cac00dfa4230af7a4/result.md; strong_review.py status(calls_under=1, last60=1/5); inbox/3号/TASK-16B/attempt-2-r2-dispatch.md; reviews/TASK-12S-A/attempt-1/ocr RUNNING",
+  "next": "C r2 ACK/交付，机械核验，返修增量 OCR，强审增量复审（只 5 问题 ID，剩 4/5），TESTER，合入 16B；12S-A OCR 收口裁决",
+  "fingerprint": "510cfc4ba8cef5d4943d8fe66946c48f90831e6d238a263cdaec8e440631dd88"
+}

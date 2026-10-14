@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-004853-nochange",
+  "occurred_at": "2026-10-12T00:52:32+08:00",
+  "recorded_at": "2026-10-12T00:52:32+08:00",
+  "role": "C",
+  "task": "TASK-03B",
+  "attempt": "0",
+  "status": "POLL_NO_CHANGE",
+  "summary": "00:43:53 后 C 范围零新增无新派单；2号 t10-defect2 交付回执 00:47:44 落盘（d4719f6，base ca8730d 与 main 277e40f 漂移待协调者核）非 C 范围",
+  "evidence": "inbox/events/C/C-poll-20261012-004853-nochange.md",
+  "next": "保持空闲待派单"
+}

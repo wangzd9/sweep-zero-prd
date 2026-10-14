@@ -1,0 +1,12 @@
+{
+  "event_id": "codex-post-spray-closeout-refresh-20261014",
+  "occurred_at": "2026-10-14T10:49:21+08:00",
+  "recorded_at": "2026-10-14T10:49:21+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "用户要求原五角色继续上线后收尾，刷新接续入口，修正三绑定旧等待；ACK由角色自行完成",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/control/POST-SPRAY-CLOSEOUT-20261014.md",
+  "next": "原角色安全点接续并核复用结果/批次和12S-D缺证，不恢复UI或平台大包优化"
+}

@@ -1,0 +1,17 @@
+{
+ "event_id": "a-t11-ruling1-stop-clean-done-20261012",
+ "role": "A",
+ "task": "TASK-11",
+ "attempt": 0,
+ "status": "CLEANUP_DONE",
+ "ts": "2026-10-12T08:27:36+08:00",
+ "summary": "执行协调者 08:00 归属裁决1（停止 T11 再跑+本地残留清理申报）：第8跑 08:09:58 已自然收口 T11_RC=0、ps 无存活驱动进程（停止达成，非 kill）；清理本地测试栈 MySQL scene 链全表 + 3 行 T11 bag_record（前核 20 行仅 3 为 T11 产物，其余 17 既有数据未动，独立复验 COUNT=0/bag 20→17）、共享根/hs A 侧 t11 驱动文件、t11-publish 子内容（保留 bind-mount 挂载点）、NAS 测试 incoming 两袋副本；coord 侧文件未动留协调者。归属说明：本 cron 08:03 轮为只读观察，第8跑系 A 侧另一并行会话发起无法自证，留协调者核。TASK-11 生产门禁维持未放行。",
+ "evidence": [
+  "~/.hermes/cache/scratch/a_t11_evidence/t11-run.log",
+  "~/.hermes/cache/scratch/a_t11_evidence/t11-e2e.json",
+  "~/.hermes/cache/scratch/a_t11_db_clean.json",
+  "~/.hermes/cache/scratch/a_t11_file_clean.json",
+  "inbox/coordinator/TASK-11/t11-driver-attribution-ruling-20261012.md"
+ ],
+ "next": "协调者核第8跑并行会话归属；TASK-11 是否开启/生产启用待用户独立授权（裁决3）"
+}

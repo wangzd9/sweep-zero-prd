@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-2003-tester-s1-pass-reconcile-20261010",
+  "occurred_at": "2026-10-10T20:04:09+08:00",
+  "recorded_at": "2026-10-10T20:04:09+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "2",
+  "status": "RUNNING",
+  "summary": "TESTER r2-final-mysql-e2e attempt-2 复测推进：S1 三AC真实MySQL全PASS(19:59 s1.log: AC1 fresh head 20261009_02_ingest_frozen rc=0 / AC2 已有库20261009_01->head rc=0 / AC3 幂等 widen 后 upgrade rc=0)，OVERALL PASS；test_reconcile_backfills_after_publish_without_report 真MySQL重跑仍FAILED(StaleDataError UPDATE bag_record expected 1 row 0 matched，t5_echo 19:57)，19:59 已drop全部调试库；attempt-2 未交付，定性待TESTER，06聚合门禁不变",
+  "evidence": "scratch/tester_r2_a2_s1.log; scratch/tester_r2_a2_t5_echo.log; scratch/tester_r2_a2_cleanup.py",
+  "next": "等TESTER attempt-2报告交付；若reconcile失败定性app缺陷则回派owner最小返修"
+}

@@ -1,0 +1,14 @@
+{
+  "event_id": "coord-batch1012-ruling-4acf-infer-active-stall-retracted-20261014",
+  "occurred_at": "2026-10-14T02:18+08:00",
+  "recorded_at": "2026-10-14T02:18+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "RULING",
+  "supersedes_context": "消费 prerun 指纹 3ef3152e（6 变更源）：TESTER 01:52:52 stall-escalate（4acf689f 静默段疑似卡死）+ C obs21 自回声 + A/B/TESTER/COORDINATOR sessions 自写 + test-receipts 自写",
+  "summary": "协调者独立只核实测（处理机 02:05-02:16 + VLM 36.152.27.114 经 A100 02:15-02:16）定性 scene-4acf689f（16_02_03 大包）静默段=INFER 阶段远端模型推理活跃，非卡死：①VLM 日志 Running 3-4 reqs/Waiting 0 + 持续 POST /v1/chat/completions 200 + prefix cache ~95%；②proxy 容器 /proc/1/net/tcp 实测持 ESTABLISHED 连接到 192.168.2.45:8002（TESTER ss 空输出=观测盲区非零连接）；③工作目录 jpg 1781（冻结选帧全量 EXTRACT 完成）+pcd 5373，01:30:53 +08:00 后零新文件=模型段产物进内存/远端非工作目录；④DB lease_expires_at 随 heartbeat 持续前移（02:09→02:11 两测）、error_message 空、八步 QUEUED 为阶段翻转口径；⑤recovery state stage=EXECUTING pid=1 心跳线程正常。裁决：TESTER stall-escalate 撤案（方向误判），下轮改核模型段完成信号（checkpoint/八步推进/SCENE_DONE），不再升级 CPU 静默项；维持不 kill/cancel/retry（跨夜既定口径，无故障前提）；A flat 三提交串行阻塞口径不变。批次状态维持 3 收口+1 空包 D6 收口+4 A 续跑面。零 OCR/零强审（REVOKED 0/5）/零合入/零生产写。夜间静默不群报，08:00 汇总（含 D5 肇事身份上报）。",
+  "evidence": "ruling-4acf-infer-active-0218.md（完整证据链）；VLM log 02:15:45-02:16:15 Running 3-4/Waiting 0/200 OK 连发；/proc/1/net/tcp line75 8602A8C0:EB9C→2D02A8C0:1F42 state 01；8180 scene-analysis-runs status SCENE_RUNNING lease 02:11:40 error ''；docker stats 0.51%/20.62GiB",
+  "next": "5min observer 接续：①4acf689f 模型段推进（checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 终态任一）；②终态后放行 A flat 三提交 D4③ 绑定 + TESTER 跨 DB3 边界/两次 reconcile + dup FFDEE943 核账收口；③升级条件才报（heartbeat 4 连败/FAILED/VLM Waiting>0 且 proxy 无 ESTABLISHED）；08:00 夜间汇总。",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

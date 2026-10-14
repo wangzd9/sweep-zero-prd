@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-083053-nochange",
+  "occurred_at": "2026-10-11T08:32:30+08:00",
+  "recorded_at": "2026-10-11T08:32:30+08:00",
+  "role": "COORDINATOR",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "08:30巡检：零业务变化 main 6d30a68 不变（双核一致），强复审 R2I-20261010-06 仍 READY_FOR_USER_TRIGGER 无 result.md，B/C 例行心跳，A/B/C/TESTER 全空闲，ocr.lock/coordinator.lock 0字节无在途",
+  "evidence": "sessions/COORDINATOR.md",
+  "next": "下轮继续核强复审结果文件与各角色 events"
+}

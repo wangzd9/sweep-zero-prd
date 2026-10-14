@@ -1,0 +1,67 @@
+[ocr] Summary: 1 file(s) reviewed, 2 comment(s), ~298932 token(s) used (input: ~281155, output: ~17777), 6m56s elapsed
+[ocr] Session: 75a3488f-d4f3-4e9f-aab6-f88d2b081873
+Review complete: 2 finding(s) across 1 selected item(s).
+
+─── app/api/scene_manual_revision.py:23-26 ───
+[other · medium] These two handlers are `async def` but they call the service (`revise_scene_labels`
+/ `withdraw_slice`), which does blocking synchronous ORM I/O on a sync `Session` (several `select`
+queries, inserts, `db.commit()`). In FastAPI an `async def` route runs on the event loop, so this
+stalls the whole loop for every DB round-trip, contradicting the documented repo convention (see
+`app/api/ingest_submissions.py`: read the body in an async dependency, then use a sync `def` route
+so ORM runs in the threadpool; `app/api/pipelines.py` uses sync `def` + Pydantic body). Applies to
+both `revise_scene_labels` and `withdraw_slice` below.
+
+Additionally, `await request.json()` is unguarded: an empty body, invalid JSON, or
+valid-JSON-but-non-dict payload (`[]`, `"x"`) raises `json.JSONDecodeError`/`AttributeError` on the
+later `.get(...)` calls → 500 instead of 422, unlike the rest of the API.
+
+Suggested fix: buffer/parse the body in an async dependency that maps parse errors to 422, and make
+the handlers sync `def`.
+
+- @router.patch("/api/v1/bags/{bag_uid}/scene-labels")
+- async def revise_scene_labels(bag_uid: str, request: Request, db: Session = Depends(get_db)):
+-     """人工修正场景标签：body {scene_code, corrected_label, reason, row_version, idempotency_key}。"""
++ async def _json_body(request: Request) -> dict:
++     try:
+-     body = await request.json()
++         body = await request.json()
++     except Exception as exc:
++         raise HTTPException(422, "invalid JSON body") from exc
++     if not isinstance(body, dict):
++         raise HTTPException(422, "request body must be a JSON object")
++     return body
++ 
++ 
++ @router.patch("/api/v1/bags/{bag_uid}/scene-labels")
++ def revise_scene_labels(
++     bag_uid: str, request: Request, body: dict = Depends(_json_body), db: Session = Depends(get_db)
++ ):
++     return scene_manual_revision_service.revise_scene_labels(
++         db, bag_uid, body, request.headers.get("X-Operator"), idempotency_key(request, body)
++     )
++ 
++ 
++ @router.post("/api/v1/bags/{bag_uid}/withdraw")
++ def withdraw_slice(
++     bag_uid: str, request: Request, body: dict = Depends(_json_body), db: Session = Depends(get_db)
++ ):
++     return scene_manual_revision_service.withdraw_slice(
++         db, bag_uid, body, request.headers.get("X-Operator"), idempotency_key(request, body)
++     )
+
+
+─── app/api/scene_manual_revision.py:26-29 ───
+[other · medium] The body is read with raw `await request.json()` instead of a FastAPI/pydantic
+model, so the error surface is inconsistent and partly unhandled: malformed JSON → 400 from
+Starlette, but a missing body → `ClientDisconnect` (a BaseException, not an HTTPException) → 500,
+and a JSON body that is not an object (e.g. a list or scalar) passes `request.json()` fine, then
+crashes with `AttributeError` inside `idempotency_key(payload.get(...))` / the service's
+`body.get(...)` → 500. Sibling API modules in this repo parse bodies through a pydantic DTO and
+explicitly map validation failures to 422 (see `ingest_submissions._parse_model`). Suggest a
+pydantic request model (with `extra="forbid"` / type constraints for `row_version`, `reason`,
+`scene_code`, `idempotency_key`, `corrected_label`, `operator`), or at minimum `data = await
+request.json()` followed by `if not isinstance(data, dict): raise HTTPException(422, ...)`. Note the
+handler docstrings already document the body contract as a JSON object, so rejecting non-object
+payloads keeps behavior consistent with the documented API.
+
+

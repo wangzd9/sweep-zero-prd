@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-164253-nochange-t08-delivered-waiting-review",
+  "occurred_at": "2026-10-11T16:43:44+08:00",
+  "recorded_at": "2026-10-11T16:43:44+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "无变化：交付冻结16:32待协调者审核，main f9bafb0，wt-04a-t08 无在途进程",
+  "evidence": "events/B/b-poll-20261011-164253-nochange-t08-delivered-waiting-review.md",
+  "next": "等审核/C1C2C3裁决"
+}

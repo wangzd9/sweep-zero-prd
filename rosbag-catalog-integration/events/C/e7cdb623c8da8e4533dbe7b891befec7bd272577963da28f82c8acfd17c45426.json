@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261012-130853-nochange",
+  "occurred_at": "2026-10-12T13:10:13+08:00",
+  "recorded_at": "2026-10-12T13:10:13+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "C巡检13:08:53无新派单：3号/coordinator零新增，main 453da0c双核一致，wt-03b干净无在途进程，空闲待派单",
+  "evidence": "inbox/sessions/C.md",
+  "next": "等协调者派单"
+}

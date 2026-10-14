@@ -1,0 +1,115 @@
+{
+  "status": "complete",
+  "llm": {
+    "provider": "vllm-local",
+    "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8"
+  },
+  "message": "Review complete: 3 finding(s) across 1 selected item(s).",
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 3,
+    "total_tokens": 929927,
+    "input_tokens": 812902,
+    "output_tokens": 117025,
+    "elapsed": "51m48s"
+  },
+  "tool_calls": {
+    "total": 31,
+    "by_tool": {
+      "code_comment": 3,
+      "code_search": 9,
+      "file_find": 2,
+      "file_read": 16,
+      "file_read_diff": 1
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [
+    {
+      "path": "scripts/scene_host_proxy.py",
+      "content": "这个新增的目录 fsync 没有对 ENOTSUP/EINVAL 做降级容忍，与 docstring 声称遵循的约定不一致：`remote_bag_lock.py::_fsync_file` 专门对这两类 errno 做了容错（注释写明“部分文件系统（tmpfs 等）不支持”）。在目录 fsync 不受支持的文件系统上，这里会直接抛 OSError，导致 `_write_json_atomic` 硬失败：`/run` 分支里 `save_recovery_state` 抛错 → 500 拒绝该 run；`execute_run` 里（771/787 行）无 try 包裹 → 工作线程静默死亡、ACTIVE 幽灵残留。既然耐久口径本身是“限于受支持文件系统的最佳努力”，此处应与被引用的约定一致，对不受支持的 fs 降级而非硬失败。",
+      "suggestion_code": "    dfd = os.open(str(path.parent), os.O_RDONLY)\n    try:\n        try:\n            os.fsync(dfd)\n        except OSError as exc:  # tmpfs 等不支持 fsync：降级容忍，同 remote_bag_lock._fsync_file\n            if exc.errno not in (errno.EINVAL, errno.ENOTSUP):\n                raise\n    finally:\n        os.close(dfd)",
+      "existing_code": "    dfd = os.open(str(path.parent), os.O_RDONLY)\n    try:\n        os.fsync(dfd)\n    finally:\n        os.close(dfd)",
+      "start_line": 194,
+      "end_line": 198,
+      "category": "other",
+      "severity": "medium"
+    },
+    {
+      "path": "scripts/scene_host_proxy.py",
+      "content": "补充：上面建议中用到 `errno`，但本文件顶部尚未 `import errno`，采纳时需一并加上（`remote_bag_lock.py` 已有 `import errno` 可参照）。",
+      "existing_code": "    dfd = os.open(str(path.parent), os.O_RDONLY)\n    try:\n        os.fsync(dfd)\n    finally:\n        os.close(dfd)",
+      "start_line": 194,
+      "end_line": 198,
+      "category": "documentation",
+      "severity": "low"
+    },
+    {
+      "path": "scripts/scene_host_proxy.py",
+      "content": "The reconcile log prints the *pre-re-post* value of `cur`, but `cur` is never updated to `\"DONE\"` after `backend.step(..., \"DONE\", ...)` succeeds. So even on the confirmed path the message reads e.g. `re-reported \u003crun_id\u003e/REGISTER='RUNNING'-\u003eDONE` (or `'None'-\u003eDONE`), contradicting the literal `-\u003eDONE` suffix and making post-fault reconcile audits mislead: an operator scanning logs for `'DONE'-\u003eDONE` / an actual `DONE` source state won't find it. The preceding `if cur == \"DONE\": return` guarantees this print only runs right after attempting the DONE re-post, so it should reflect the DONE intent.",
+      "suggestion_code": "        if cur not in (\"DONE\", \"FAILED\"):\n            backend.step(run_id, name, \"DONE\", attempt, lease_token, error=str(rec.get(\"detail\") or \"\"))\n            cur = \"DONE\"\n        print(f\"16B terminal step re-reported {run_id}/{name}={cur!r}\", flush=True)",
+      "existing_code": "        if cur not in (\"DONE\", \"FAILED\"):\n            backend.step(run_id, name, \"DONE\", attempt, lease_token, error=str(rec.get(\"detail\") or \"\"))\n        print(f\"16B terminal step re-reported {run_id}/{name}={cur!r}-\u003eDONE\", flush=True)",
+      "start_line": 640,
+      "end_line": 642,
+      "category": "bug",
+      "severity": "low"
+    }
+  ],
+  "groups": [
+    {
+      "label": "scripts/scene_host_proxy.py",
+      "files": [
+        "scripts/scene_host_proxy.py"
+      ]
+    }
+  ],
+  "session_id": "d56113ca-0ca7-4042-829e-f5fc15154f65",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "d56113ca-0ca7-4042-829e-f5fc15154f65",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "40ab8182c177b53fc2ff60ac6bd511b14ab4f1d9",
+      "requested_head": "e1524657bda1f66f03034cb72ef05cd65e0c1dfc",
+      "resolved_base": "40ab8182c177b53fc2ff60ac6bd511b14ab4f1d9",
+      "resolved_head": "e1524657bda1f66f03034cb72ef05cd65e0c1dfc",
+      "exact_range": "40ab8182c177b53fc2ff60ac6bd511b14ab4f1d9..e1524657bda1f66f03034cb72ef05cd65e0c1dfc",
+      "source_artifact_sha256": "e6078ace899298999999a198730e075dd9368c694a784325f278349f56388aec"
+    },
+    "execution": {
+      "ocr_version": "v1.12.13",
+      "provider": "vllm-local",
+      "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "823cf9fc4c48564b4f559abc155f4202e81fd5a4ec94822c8ad7f759c70c4e54",
+      "runtime_config_sha256": "8edc2e1d8571fdf287cc13c33745cd126301e450999b13d052de01b19b6d17d2"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "24da4ffea0635e1ba3c41a11353bf18d6b981e909361eef9708e3c6aa258d5e6",
+          "path": "scripts/scene_host_proxy.py",
+          "fingerprint": "60bd51202aa09a26fa741873109e9d93de6539c071990dc1a83bc08a94a9d86c"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "24da4ffea0635e1ba3c41a11353bf18d6b981e909361eef9708e3c6aa258d5e6",
+          "path": "scripts/scene_host_proxy.py",
+          "fingerprint": "60bd51202aa09a26fa741873109e9d93de6539c071990dc1a83bc08a94a9d86c"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 3108299
+  }
+}

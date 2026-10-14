@@ -1,0 +1,9 @@
+{
+  "event_id": "b-poll-20261011-072253-nochange",
+  "role": "B",
+  "task": "TASK-06B",
+  "status": "IDLE_WAITING",
+  "checked_at": "2026-10-11T07:22:53+08:00",
+  "summary": "无新派单/返修，与 07:17 巡检一致；main 6d30a68 不变；强复审 result 仍不存在（等用户手动触发）；本侧无在途进程",
+  "next": "继续 5 分钟巡检，等待 06 聚合强复审结果或新派单"
+}

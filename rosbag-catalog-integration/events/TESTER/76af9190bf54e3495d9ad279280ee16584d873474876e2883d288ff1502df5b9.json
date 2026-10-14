@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261011-123953-nochange",
+  "occurred_at": "2026-10-11T12:42:16+08:00",
+  "recorded_at": "2026-10-11T12:42:16+08:00",
+  "role": "TESTER",
+  "task": "TASK-06",
+  "attempt": "5",
+  "status": "IDLE",
+  "summary": "12:39 巡检：协调者 pack target 已更新 65ca0be（R2I 强复审 READY_FOR_USER_TRIGGER），无新测试派单，attempt-5 证据不失效，维持 IDLE",
+  "evidence": "sessions/TESTER.md 心跳 12:39",
+  "next": "等用户手动触发强复审 R2I-20261010-06"
+}

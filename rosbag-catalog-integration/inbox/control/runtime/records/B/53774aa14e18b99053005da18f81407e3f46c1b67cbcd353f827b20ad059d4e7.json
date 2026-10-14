@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "input_sha256": "8eafa0f92b0fb1a7691ca34319738dc63154f3af13f3d44aade014a4191c5102",
+  "record": {
+    "event_id": "B:b-poll-20261014-131000-fp-8b5f8869-task16cc-ocr-adjud-cc-r1-b-noaction-idle",
+    "kind": "business",
+    "task": "TASK-16C-B",
+    "attempt": "1",
+    "status": "IDLE",
+    "summary": "Consumed observer pending fp 8b5f8869 (checked_at 13:02:53, wake=new_or_unacknowledged_change). Changed source = inbox/coordinator/TASK-16C-C/ocr-attempt1-adjudication-20261014.md (coordinator OCR run e7a5580c adjudication 13:00, C leaf only): CC-R1 (c05-04 pipeline_detail.html lineage fallback missing <ol> open tag) CONFIRMED, C leaf REVIEW_PENDING->REWORK_PENDING, rework dispatched to C (cc-r1-rework-dispatch-20261014.md, base 522bb3f, no new attempt). B zero action: B delivery e399daf remains frozen DELIVERED_FROZEN awaiting coordinator serial OCR (queued behind C; ocr.lock empty 13:10 stat) + TESTER 16D independent browser verification; cross-surface item tests/test_web.py:366 assertion transfer already closed by A continuation commit 563a91a (12:47 receipt, A single-writer) - B did not and does not touch it. Adjudication line 41 explicitly does not block A/B leaf progress. No new dispatch/rework under inbox/2号 since 11:34 (find -newermt 12:20: zero B-owned hits).",
+    "evidence": "read ocr-attempt1-adjudication-20261014.md (41 lines full); find inbox -newermt 13:02 zero B-surface business hits; git -C wt-04a-t16cb log e399daf frozen clean (only untracked .venv); ps no B-side pytest/ocr processes (only unrelated wechat wxocr); leases dir no B.json before claim, claim cron-b-poll-6f7471d8747c-20261014-130253 ok",
+    "next": "IDLE_WAITING (delivery frozen awaiting coordinator OCR serial slot for B leaf -> TESTER 16D incremental verification -> merge); on receiving rework dispatch (issue ID) continue wt-04a-t16cb per attempt; do not preempt C rework or ack on C's behalf.",
+    "occurrence": {
+      "kind": "now"
+    },
+    "schema_version": 1,
+    "role": "B",
+    "recorded_at": "2026-10-14T13:12:02+08:00",
+    "occurred_at": "2026-10-14T13:12:02+08:00",
+    "time_source": {
+      "kind": "script_now"
+    }
+  },
+  "complete": true,
+  "session": "sessions/B.md"
+}

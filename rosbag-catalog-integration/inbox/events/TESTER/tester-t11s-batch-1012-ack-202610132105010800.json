@@ -1,0 +1,17 @@
+{
+  "event_id": "tester-t11s-batch-1012-ack-202610132105010800",
+  "occurred_at": "2026-10-13T21:05:01+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": 1,
+  "status": "ACKED",
+  "summary": "ACK TASK-11S-BATCH-1012：固定生产快照3c9c496/8包清单/首包复用既有PASS已确认；incoming/spray当前空，等新包上传后逐包增量验收；A/B/C各角色BATCH派单已到，A ACK未落盘；本角色只观察不提交/重试/调模型",
+  "next": "A上传新包后按包增量验收（八步/血缘/获取/幂等/源SHA/空包拒绝）；全批完成后交付TEST_REPORT_PENDING",
+  "evidence": {
+    "production_snapshot": "3c9c496",
+    "incoming_spray_empty": true,
+    "upload_staging_absent": true,
+    "first_bag_run": "scene-c4a88c0746e9422ca35136035fe7 SCENE_DONE",
+    "bag_count_manifest": 8
+  }
+}

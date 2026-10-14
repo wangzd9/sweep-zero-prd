@@ -1,0 +1,13 @@
+{
+  "event_id": "c-t11s-batch-1012-obs17-ruling-consumed-nochange-20261014",
+  "occurred_at": "2026-10-14T00:46:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs16-nochange（00:37）后新一轮：pending 触发源=BATCH-STATUS 00:4x 刷新 + 新裁决 ruling-dup-slices-0038.md（00:39，first_seen 00:40:10）；ACK 21:07:41 在案不重复领取",
+  "summary": "C 第17轮只读复核（处理机 00:45-00:46 实测 ssh curl 8180/8767、df、uptime，未 kill/未删/未重启/未 retry/未改任何生产路径）与 obs16 **零状态变化**：① 7 scene run 不变——六 SCENE_DONE（c4a88c07/604c0896/bc8c1d1c/a4824f1c/eb4397c3/24ab78bb）+ scene-4acf689f（16_02_03 正式链 source 91FFEEC1…）仍 SCENE_RUNNING attempt=1 auto_retry_count=0 lease_owner=platform-local，heartbeat 00:45:29 续租活跃、lease 至 00:47:29、八步全 QUEUED，proxy 8767 active_runs=[4acf689f ACCEPTED]，跨 DB3 大包串行中不因观察超窗 kill/retry；② flat 三提交 a65a25a7/87dfebaa/518089ed 仍无新绑定 run（D4 第③步归 A 面）；③ 新裁决 ruling-dup-slices-0038 对 C 口径=**继续只读核账、不处置**（FFDEE943×4 第二份切片不删不并不新开清理任务，处置并入 TESTER 对 a65a25a7 绑定 run 的两次 reconcile 核账，正式 run 终态若暴露发布失败/覆盖异常则保留现场报协调者——C 观察面保持）；④ 资源：NAS 98T/70T/29T 71% 不变、load 1.53/1.28/1.30、8767 ok。**本批 8 包无新终态**，夜间静默不主动群报，08:00 随协调者汇总",
+  "evidence": "处理机只读实测：curl 8180 pipeline-runs?limit=200 rc=200 total=24（7 scene run 状态与 obs16 一致）；pipeline-runs/scene-4acf689f9a6a473da1fa2f2efc70 rc=200（SCENE_RUNNING attempt=1 auto_retry_count=0 lease_expires_at 00:47:29 heartbeat_at 00:45:29 steps 8×QUEUED，submission 24d60fee 不变）；8767/health rc=200 active_runs=[scene-4acf689f ACCEPTED]；df /mnt/nas_backup 98T 70T 29T 71%；uptime load 1.53/1.28/1.30",
+  "next": "接续只读观察：① scene-4acf689f 终态（跨 DB3 大包）；② 串行释放后 flat 三提交绑定新 run，C 按 run 核账（含 ruling-dup-slices-0038 观察面：正式 run PUBLISH/REGISTER 对现存 FFDEE943 同 source 切片的处置痕迹，取证供 TESTER reconcile 核账，C 不处置）；③ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

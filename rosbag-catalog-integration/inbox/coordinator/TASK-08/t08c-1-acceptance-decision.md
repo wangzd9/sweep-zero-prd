@@ -1,0 +1,25 @@
+# Decision：C1/C2 秒精度时间戳专项（t08c-1）验收 + 合入后验证派单
+
+- status: ACCEPT_MERGED + POST_MERGE_VERIFICATION_DISPATCHED
+- 裁决时间：2026-10-11 19:18 +08:00（cron poll，真实 checked_at 2026-10-11T18:20:53+08:00 preflight）
+- task/attempt：T08-C1C2 / t08c-1（TASK-08 attempt-1 联调 §C1/§C2 同根因家族回派）
+- 交付：2号（B），commit `bf48a45f022757bf4850d360995cee252df083d3`（18:12:27），base `f9bafb0`，分支 `scene/task-08-c1c2-second-precision`，worktree `wt-04a-t08c`
+- 范围：7 文件 +91/-18，零迁移、零越界（未动 06B 已修域 `scene_result_report_service.py`、未动 C3 lineage 夹具）
+  - C2 缺陷3 同根因家族：`bag_cleanup_service.run_inspection`（7 分支 `_bump_if_changed` 仅业务变化才推进 updated_at）、`worker_heartbeat`（lease/updated_at 整秒落库+变化检测心跳幂等）、`catalog_ingest.upsert_bag`（捕获 10 业务字段，幂等重登记零 UPDATE + started_at 整数除秒 M-1）、`clone rebind`（纯 touch 整秒对齐）
+  - C1 读回秒精度：`source_service.mark_source_copy_deleted` + `artifact_service.mark_artifact_deleted`（deleted_at 整秒）、`mark_source_input_error`（order_by 加 `id.desc()` 次级排序确定性收敛）、`bootstrap`（demo seed started_at 去小数秒）
+  - `tests/test_bag_cleanup_concurrency`：删测试自身对 app 已推进 run 的陈旧 session 冗余 no-op 覆写（探针 `test_t08c_probe8` 实证 app `claim_run` 行为正确，未弱化断言）
+- 协调者独立机械核验（本轮 19:18 实测，非采信回执）：
+  - diff 范围 vs 派单 AC 逐文件核对一致（6 app + 1 test，tests 侧仅删测试自身冗余写）
+  - `wt-04a-t08c` 实测 HEAD=`bf48a45`、文件集 7、commit message 口径覆盖 C1/C2 全修复点、worktree 干净（仅 `.venv` 软链）
+  - 真 MySQL 日志逐份核对（15 份 `~/.hermes/cache/scratch/t08c/logs/mysql_*.log`）：8 红文件 passed 数与回执声明一致（api 24/concurrency 11/worker 19/clone 2/source_register 8/pipeline 25/lineage 3/web 41）+ 06B 回归 35/25 + 迁移链 RC=0
+  - SQLite 全量独立复跑（wt-04a-t08c，PYTEST_DISABLE_PLUGIN_AUTOLOAD=1）：**825 passed / 3 failed（同集 test_devflow 沙箱环境性）/ 10 skipped**，与回执一致非本单回归
+  - merge-tree `98f6c88 vs bf48a45` **MERGE-CLEAN**（base 漂移仅 1 号 c3-1 纯测试 `test_scene_slice_lineage.py`，与本批文件集零交集）
+  - 关键定性核实：C2 根因"生产 create_engine 无 CLIENT_FOUND_ROWS"与 06B 缺陷3 同定论一致（receipts/rework-6 + TESTER attempt-5 报告已纠的口径），修复方向=幂等不依赖 UPDATE 行计数语义，**未削弱任何断言**
+- 串行 OCR C1C2-r1（本轮 19:0x-19:1x，逐文件单审，见账 `reviews/TASK-08/t08c-1/ocr-batches.md`）：
+  - **6/6 app 文件全部 `Review complete: 0 finding(s)`**（session 6d53233c/692a65eb/1426c954/0736fd03/baffd04b/cc427894）
+  - `tests/test_bag_cleanup_concurrency.py` default_path 排除（纯测试先例口径，独立验证挂 TESTER/合入后复核）
+  - 本 cron 环境后台 OCR 进程被回合边界 reap + 前台 420s 上限（单组含 bag_cleanup 1213 行必爆），改逐文件单审后全收口；中途 v1/v2/v3/p2/p3 作废尝试未计入结果
+- 合入：**--no-ff 合入 main `0a8ca8a`（2026-10-11 19:17，推 origin 98f6c88..0a8ca8a）**，parents `98f6c88`+`bf48a45`；合入后 sanity（主仓 HEAD=0a8ca8a）：alembic heads 单头 `20261009_02_ingest_frozen` ✓ / ruff 7 文件 All checks passed ✓
+- TASK-08 收口进度：两单均已合入（c3-1→`98f6c88` 17:02 + t08c-1→`0a8ca8a` 19:17，收口条件 2/2）；**剩 9 红文件全绿复核**（2号交付已证 8 红文件文件级全绿 + scheduling 由 c3-1 覆盖，合入后需 TESTER 独立真 MySQL 取证确认合入产物 main `0a8ca8a` 无回归）
+- 合入后验证派单：TESTER `inbox/TESTER/TASK-08/post-merge-0a8ca8a-red-files.md`（9 红文件真 MySQL 8.4.11 STRICT 隔离库文件级全绿 + 06B 回归 35/25 不破坏 + 迁移链 RC=0，用完即毁 0 残留）
+- 裁决人：协调者 cron（单写租约持有，控制动作即时释放）

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-125053-nochange",
+  "occurred_at": "2026-10-11T12:50:53+08:00",
+  "recorded_at": "2026-10-11T12:50:53+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "0",
+  "status": "NOCHANGE",
+  "summary": "12:50 巡检：12:45:53 后零业务变化；main HEAD 65ca0be（= origin/main，rev-parse 双核一致）；强复审 R2I-20261010-06 result 仍缺（目录最新 12:31 pack target 65ca0be），保持 READY_FOR_USER_TRIGGER；无新派单/回执，A/B/C/TESTER 例行心跳均报空闲。",
+  "evidence": "git rev-parse HEAD=origin/main=65ca0beb0111a2d45065206886d432bd20eb76d0；find -newermt 2026-10-11 12:45:53 业务目录零新业务文件（仅 runtime ticks/leases 与 sessions 心跳）；ps 无 ocr/pytest 业务进程（仅既有 alembic+uvicorn 本地服务）；ocr.lock/coordinator.lock 0 字节无在途持有者",
+  "next": "下轮核强复审 R2I-20261010-06 结果文件与 inbox 新派单/回执；空闲不扩需求"
+}

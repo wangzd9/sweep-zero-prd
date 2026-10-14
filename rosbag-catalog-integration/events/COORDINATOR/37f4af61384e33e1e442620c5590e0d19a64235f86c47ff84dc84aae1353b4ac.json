@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-batch1012-0558-infer-continue-noaction-quiet-202610140558",
+  "occurred_at": "2026-10-14T05:59:24+08:00",
+  "recorded_at": "2026-10-14T05:59:24+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "05:58 静默巡检：6 变更源全核读，零外部新派单/新裁决/零 coordinator_requests；05:57 处理机+llm-server 只读实测 4acf689f 仍 SCENE_RUNNING（heartbeat 05:57:55、八步 QUEUED 模型段约412min）、VLM Running3/Waiting0 推理活跃，ruling-4acf 维持不 kill/不 retry；flat 三提交 PENDING_INPUT 等 A D4③、14_42_48 NOT_RUN、run 7=6DONE+1RUNNING、PASS 基线不变。控制动作=零。",
+  "evidence": "处理机 05:57 只读实测（tester_0550_check.py 复跑）：pipeline_run scene-4acf689f SCENE_RUNNING attempt1 heartbeat=05:57:55；step_run 八步 QUEUED；ingest_submission flat 三行 PENDING_INPUT source_id=NULL、16_02_03 24d60fee SCHEDULED 91FFEEC1；scan_job 4043 incoming SUCCESS dirs:3 bags:1 failed:2 05:55:48；8767 health active_runs=[4acf689f ACCEPTED pid:1]；llm-server vllm log tail Running 3/Waiting 0 连发；本角色全程只读未写生产",
+  "next": "5min observer 接续核模型段完成信号（checkpoint 翻 EXTRACT/DONE、八步 DB 推进或 SCENE_DONE 任一）→ 终态后放行 A D4③+TESTER 增量验收；升级条件命中才重新裁决；08:00 夜间汇总（含 D5 肇事身份 192.168.2.132 上报+强审 REVOKED 0/5）"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-12sbc-freeze-delivery-20261013",
+  "occurred_at": "2026-10-13T16:54:04+08:00",
+  "recorded_at": "2026-10-13T16:54:04+08:00",
+  "role": "TESTER",
+  "task": "TASK-12S-BC-freeze",
+  "attempt": "1",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "12S-B 0320a8e + 12S-C 92dcb52 冻结产物前置验证交付：A 面 PASS（16 条 40 用例锚定+spray 域 166+全仓 977 零新增；镜像内真实解码 1184 消息/44 scan/44 PCD rc=0、S4 上色 12/12 aligned 非灰度、valid_frames=12、全链 27.1s）；S9 缺陷最小复现在案（0320a8e 真实包 DECODE_FAILED 44!=1184，按口径不判 FAIL，随 s9_head 增量复验，19:00 首包硬约束通报）；B 面 PASS（wiring 11+域 345+全仓 1005 零新增；disabled spray fail-closed 不落入坡道、slope yaml 对 base 逐字段一致）",
+  "evidence": "test-receipts/TEST-TASK12S-BC-freeze/attempt-1.md",
+  "next": "交协调者裁决；S9b s9_head 冻结到达即 ACK 增量复验（复用本探针 1184/44 独立计数与 PCD 序列）；12S-D 联调三前置齐后按新派单执行"
+}

@@ -1,0 +1,17 @@
+{
+  "event_id": "c-t11s-batch-1012-obs64-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T08:41:00+08:00",
+  "recorded_at": "2026-10-14T08:42:30+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs63（08:33）后第64轮：prerun 08:38:53 指纹 4a91e916 触发源=sessions/C.md obs63 自产记账；ACK 21:07:41 在案不重复领取；白天口径",
+  "summary": "C 第64轮只读观察（处理机 08:40 实测）：与 obs63 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜续跑不 kill/retry）。scene-4acf689f 仍 SCENE_RUNNING attempt=1 lease 08:42:05 正常续租；work checkpoint mtime 00:23:10 未翻零新写；VLM 通道 ESTAB→192.168.2.45:8002 在案；llm-server Running 3/Waiting 0/POST 200 OK 连发=推理活跃。本批 8 包无新终态，无升级条件命中。C 全程只读，未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "处理机 08:40 只读实测：8180 SCENE_RUNNING error 空 lease_expires_at 08:42:05 lease_owner=platform-local；8767/health ok active_runs=[4acf689f ACCEPTED pid1]；18000 ready=production；pid 3495931 ELAPSED 12:17:53 TIME 01:20:37 未重启；checkpoint.json mtime 2026-10-14 00:23:10.474817688 未翻、find -newermt 08:25=0；容器 net/tcp ESTAB 888A→1F42；llm-server vllm 08:40:28 Running 3/Waiting 0/gen 185.8 tok/s/POST 200 OK；NAS 98T/70T/29T 71%、load 2.35/2.26/2.17 同量级、incoming/spray 仅 16_33_10 空目录",
+  "next": "接续只读观察：checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者；升级条件=heartbeat 4 连败/FAILED/VLM Waiting 持续>0（ruling-4acf-infer-active-0218 口径）",
+  "quiet_hours_note": "08:00 后白天口径：状态变化即时通报，本轮无变化不报进度",
+  "source": "canonical events/C/",
+  "lease_owner": "C-cron-poll-20261014-083853-t11s-obs64",
+  "lease_token": "e6cdaa06255f4cb38e1da5f3f0d23f67"
+}

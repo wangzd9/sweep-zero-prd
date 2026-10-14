@@ -1,0 +1,72 @@
+{
+  "state": "AWAITING_DECISION",
+  "updated_at": "2026-10-13T08:02:50.370018+00:00",
+  "pid": 2023402,
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/coordinator-ocr-8540bf7ea7f54d89819a04159a39c074.service",
+  "run_id": "8540bf7ea7f54d89819a04159a39c074",
+  "unit": "coordinator-ocr-8540bf7ea7f54d89819a04159a39c074.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "app/api/ingest_submissions.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-13T07:02:01.838125+00:00",
+      "pid": 2023473,
+      "process_start_ticks": "27518334",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-01-t12sa/f3e4cbdc-00ca-4d34-8e5e-b121e89421b4.jsonl",
+      "session_mtime": 1791876205.2575366,
+      "returncode": 0,
+      "ended_at": "2026-10-13T07:24:49.867002+00:00",
+      "duration_seconds": 1368.03
+    },
+    {
+      "id": "b02",
+      "files": [
+        "app/schemas/scene_config.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-13T07:24:50.039056+00:00",
+      "pid": 2054406,
+      "process_start_ticks": "27655155",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-01-t12sa/f1fec16d-290a-46f1-ba1c-943e8d4acbe7.jsonl",
+      "session_mtime": 1791877171.6263168,
+      "returncode": 0,
+      "ended_at": "2026-10-13T07:41:28.011147+00:00",
+      "duration_seconds": 997.97
+    },
+    {
+      "id": "b03",
+      "files": [
+        "app/services/bootstrap.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-13T07:41:28.174237+00:00",
+      "pid": 2079015,
+      "process_start_ticks": "27754968",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-01-t12sa/ee1d7981-3760-49e6-aee6-f7a3e138e839.jsonl",
+      "session_mtime": 1791877352.8672888,
+      "returncode": 0,
+      "ended_at": "2026-10-13T07:42:52.691435+00:00",
+      "duration_seconds": 84.52
+    },
+    {
+      "id": "b04",
+      "files": [
+        "app/services/ingest_service.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-13T07:42:52.843328+00:00",
+      "pid": 2080814,
+      "process_start_ticks": "27763435",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-01-t12sa/1fba88c1-2b55-4cce-9e97-003dcf1009e9.jsonl",
+      "session_mtime": 1791878389.8363683,
+      "returncode": 0,
+      "ended_at": "2026-10-13T08:02:50.332819+00:00",
+      "duration_seconds": 1197.49
+    }
+  ],
+  "gate_decision": "NOT_EVALUATED",
+  "ended_at": "2026-10-13T08:02:50.370024+00:00"
+}

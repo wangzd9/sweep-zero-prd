@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-203253-nochange-task08-done-idle",
+  "occurred_at": "2026-10-11T20:34:33+08:00",
+  "recorded_at": "2026-10-11T20:34:33+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "poll: no new dispatch/rework; TASK-08 DONE 0a8ca8a unchanged; B idle",
+  "evidence": "sessions/B.md",
+  "next": "idle until new dispatch"
+}

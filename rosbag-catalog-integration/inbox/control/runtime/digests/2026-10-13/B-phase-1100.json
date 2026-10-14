@@ -1,0 +1,212 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-13T11:00:53.487804+08:00",
+  "role": "B",
+  "kind": "phase",
+  "start": "2026-10-13T08:00:00+08:00",
+  "end": "2026-10-13T11:00:00+08:00",
+  "artifact": "inbox/control/runtime/digests/2026-10-13/B-phase-1100.json",
+  "roles": [
+    {
+      "role": "B",
+      "start": "2026-10-13T08:00:00+08:00",
+      "end": "2026-10-13T11:00:00+08:00",
+      "totals_seconds": {
+        "working": 600.0,
+        "waiting": 1327.0,
+        "blocked": 0,
+        "idle": 0,
+        "unknown": 8873.0
+      },
+      "segments": [
+        {
+          "start": "2026-10-13T08:00:00+08:00",
+          "end": "2026-10-13T08:54:59+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T08:54:59+08:00",
+          "end": "2026-10-13T09:04:59+08:00",
+          "category": "working",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "summary": "16C attempt-1 ACK 开工：base 4b9f30a，分支 b/task-16c-scene-ui-minimal @ wt-04a-t16c",
+          "sources": [
+            "events/B/375c7eda758833873d901c2df7b31f9183c6d4cf23863154d743966ef0ec676b.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T09:04:59+08:00",
+          "end": "2026-10-13T10:00:54+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T10:00:54+08:00",
+          "end": "2026-10-13T10:10:54+08:00",
+          "category": "waiting",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "summary": "ad37ae1 界面最小补齐三件交付：data_kind 四类谓词/双用途双标、GET /api/v1/bags 集合路由、场景八步详情（快照 scene_outcomes 第一真相+终态停刷新+无 A100 面）；15 新用例全绿、全仓 876 passed（4 failed 均 base 既有）",
+          "sources": [
+            "events/B/6ac33b1670861220d6f7458f52fa0c5e028241737709022980f15f50cdd05c0a.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T10:10:54+08:00",
+          "end": "2026-10-13T10:47:53+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T10:47:53+08:00",
+          "end": "2026-10-13T11:00:00+08:00",
+          "category": "waiting",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "summary": "ad37ae1 界面最小补齐三件交付：data_kind 四类谓词/双用途双标、GET /api/v1/bags 集合路由、场景八步详情（快照 scene_outcomes 第一真相+终态停刷新+无 A100 面）；15 新用例全绿、全仓 876 passed（4 failed 均 base 既有）",
+          "sources": [
+            "events/B/6ac33b1670861220d6f7458f52fa0c5e028241737709022980f15f50cdd05c0a.json"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "event_id": "t16c-att1-deliver-0959",
+          "occurred_at": "2026-10-13T10:00:54+08:00",
+          "recorded_at": "2026-10-13T10:00:54+08:00",
+          "role": "B",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "ad37ae1 界面最小补齐三件交付：data_kind 四类谓词/双用途双标、GET /api/v1/bags 集合路由、场景八步详情（快照 scene_outcomes 第一真相+终态停刷新+无 A100 面）；15 新用例全绿、全仓 876 passed（4 failed 均 base 既有）",
+          "evidence": "receipts/TASK-16C/attempt-1.md",
+          "next": "等协调者机械核验→OCR→TESTER 独立验证→16C DONE",
+          "source": "events/B/6ac33b1670861220d6f7458f52fa0c5e028241737709022980f15f50cdd05c0a.json",
+          "source_mtime": "2026-10-13T10:00:54+08:00"
+        },
+        {
+          "event_id": "b-t16c-attempt1-ack-started-20261013-0840",
+          "occurred_at": "2026-10-13T08:54:59+08:00",
+          "recorded_at": "2026-10-13T08:54:59+08:00",
+          "role": "B",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "status": "RUNNING",
+          "summary": "16C attempt-1 ACK 开工：base 4b9f30a，分支 b/task-16c-scene-ui-minimal @ wt-04a-t16c",
+          "evidence": "inbox/2号/TASK-16C/attempt-1-ack.md",
+          "next": "开发自测中",
+          "source": "events/B/375c7eda758833873d901c2df7b31f9183c6d4cf23863154d743966ef0ec676b.json",
+          "source_mtime": "2026-10-13T08:54:59+08:00"
+        }
+      ],
+      "delivery_records": [],
+      "unverified_sources": [
+        "events/B/b-ack-20261012-232800-task07b-a2r2.md: 时间或内容待核对",
+        "events/B/b-deliver-20261012-233000-task07b-a2r2.md: 时间或内容待核对",
+        "events/B/b-incident-20261012-125600.md: 时间或内容待核对",
+        "events/B/b-poll-20261011-123253-rework8-merged-65ca0be.json: 时间或内容待核对",
+        "events/B/b-poll-20261011-142253-r9-accept-booked.json: 时间或内容待核对",
+        "events/B/b-poll-20261012-085253-t11-run8-integrated-a-cleanup-b-idle.md: 时间或内容待核对",
+        "events/B/b-poll-20261012-113753-t07a-ocr-inflight-idle.md: 时间或内容待核对",
+        "events/B/b-poll-20261013-082253-tester-postr-pass-waiting-merge.md: 时间或内容待核对",
+        "events/B/tester-attempt4-pass-20261010-2257.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-054753-restore-spotcheck-passed.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-124753.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-143253-t07a-tester-postmerge-pass-b-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-175753-t07b-delivered-ocr-b1-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-182253-t07b-ocr-b3-b4-done-b5-inflight-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-185753-t07b-ocr-b3-2findings-b6-cancelled-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-222753-t07b-ocr-b5-rc0-core-timeout-b7-resume-inflight.json: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-011253-t07b-ocr-r2b4-stalled-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-060253-t07b-r3-frozen-16a-ocr-done-16b-needsreview-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-063753-r3-ocr-6of6-done-medium-pending-ruling.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-073253-t07b-r4-ocr-done-strongreview-pending-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-repair-20261013-014853-sessions-append-glue.md: 时间或内容待核对"
+      ]
+    }
+  ],
+  "current": {
+    "B": {
+      "schema_version": 1,
+      "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+      "role": "B",
+      "observed_at": "2026-10-13T11:00:53+08:00",
+      "control": "ACTIVE",
+      "confirmed_idle": false,
+      "classification_reasons": [
+        "assigned nonterminal task: TASK-07",
+        "assigned nonterminal task: TASK-16C",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-07A/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-07A/attempt-2-r1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-16C/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-08/attempt-1-dispatch.md"
+      ],
+      "tasks": [
+        {
+          "task": "TASK-07",
+          "state": "🏃",
+          "progress": "2号 / attempt-1（派单 `inbox/2号/TASK-08/attempt-1-dispatch.md`）",
+          "owner": "【r131 2026-10-13 07:14】B R4 ACK 开工（07:02，base `4ba … tempt-1-dispatch.md`，base `4b9f30a`，§8.4 口径，待 ACK）"
+        },
+        {
+          "task": "TASK-16C",
+          "state": "**REVIEW_PENDING**（r142 已交付冻结 rebase 接线  … ON+TESTER PASS 双证据齐 → DONE → 16D 前置 2/3）",
+          "progress": "场景八步详情、三视图/类型谓词、正式查询 API、旧界面兼容",
+          "owner": "**REVIEW_PENDING**（r142 已交付冻结 rebase 接线 head `5c80 … 零 CORRECTION+TESTER PASS 双证据齐 → DONE → 16D 前置 2/3）"
+        }
+      ],
+      "events": {
+        "B": {
+          "event_id": "t16c-att1-deliver-0959",
+          "occurred_at": "2026-10-13T10:00:54+08:00",
+          "recorded_at": "2026-10-13T10:00:54+08:00",
+          "role": "B",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "ad37ae1 界面最小补齐三件交付：data_kind 四类谓词/双用途双标、GET /api/v1/bags 集合路由、场景八步详情（快照 scene_outcomes 第一真相+终态停刷新+无 A100 面）；15 新用例全绿、全仓 876 passed（4 failed 均 base 既有）",
+          "evidence": "receipts/TASK-16C/attempt-1.md",
+          "next": "等协调者机械核验→OCR→TESTER 独立验证→16C DONE",
+          "source": "events/B/6ac33b1670861220d6f7458f52fa0c5e028241737709022980f15f50cdd05c0a.json",
+          "source_mtime": "2026-10-13T10:00:54+08:00"
+        }
+      },
+      "dispatches": {
+        "B": {
+          "role": "B",
+          "source": "inbox/2号/TASK-16C/attempt-1-dispatch.md",
+          "status": "待核对",
+          "mtime": 1791851942.5153332,
+          "summary": "# TASK-16C 界面最小补齐 attempt-1 派单（协调者 r136 派发，2026-10-13 08:5x） - **角色/owner**：执行者 B（2号）｜**attempt**：attempt-1｜** … it sha、文件集、自测结果、边界零越界申报）；发现需扩面（新表/迁移/16A 16B 域文件/预览统计）立即停并回报协调者，不自行扩。 - **后续**：机械核验→串行 OCR→合入 main→16C DONE；16"
+        }
+      },
+      "processes": {
+        "B": {
+          "state": "none"
+        }
+      },
+      "sources": {
+        "TODO.md": "2026-10-13T10:44:24+08:00"
+      },
+      "strong_review": null,
+      "fingerprint": "33223e5967e87d5aea946935e70d493757cb62f608a4f53f411583b8221fbb47"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t16b-r2-20261013-184500-strong-rework-reconfirmed",
+  "occurred_at": "2026-10-13T18:45:00+08:00",
+  "recorded_at": "2026-10-13T18:45:00+08:00",
+  "role": "TESTER",
+  "task": "TASK-16B",
+  "attempt": "16B-r2 attempt-1（报告修订）",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "消费 strong-result-addendum（18:03:29）：强审 SR-16B-R2-20261013（call 005277e6）REWORK_REQUIRED，R1-01/04/05 关闭、R1-02/03 未关闭。TESTER 独立最小复现 4/4 反例确认（真实 Backend→FakeBackend HTTP 链，只读被测代码）：R1-02 DONE 分支（DONE 写入未提交+对账读超时→步骤永久卡 RUNNING、run=SCENE_DONE、recovery 被收尾清除）；R1-02 FAILED 分支（FAILED 未提交+对账读超时、run 级 SCENE_FAILED 已确认→步骤卡 RUNNING、recovery 清除）；R1-03 阶段1（SCENE_FAILED 上报未提交→_confirm_terminal=False、台账保留 stage=EXECUTING 无失败目标/错误事实、run 仍 SCENE_RUNNING）；R1-03 阶段2（重启 recover_pending_runs→recovered=1、extra_model_invocations=1 重入模型执行，强审同口径）。r2 模块测试 27/39/889 passed 维持（无新增回归），但 R1-02/03 记 FAIL 阻塞合入；r2 整体 REWORK_REQUIRED 独立佐证成立，不把模块绿当最终 PASS。报告已修订 test-receipts/TEST-TASK16B-r2/attempt-1.md，交协调者裁决",
+  "evidence": "test-receipts/TEST-TASK16B-r2/attempt-1.md（第一节 4 行复现表）; /home/wang/.hermes/cache/scratch/repro_r2_counterexamples.py 输出 reconfirmed_counterexamples=4/4; reviews/strongmodel/runs/005277e6e60a43308431b5505f0bf6dc/result.md",
+  "next": "等协调者按 r2 强审结果裁决；r3 冻结后 TESTER 另核 R1-02/R1-03 两反例与恢复路径；S9b=f76e2a9 增量单接续"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs59-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T08:02:00+08:00",
+  "recorded_at": "2026-10-14T08:02:36+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第59轮只读观察（08:00 静默窗口末轮，处理机/llm-server 08:00 实测）：与 obs58 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜不 kill/retry）。",
+  "evidence": "8180 scene-4acf689f SCENE_RUNNING attempt=1 error 空 lease_expires_at 08:02:03 续租活跃 frozen_at 23:05:30 八步全 QUEUED；8767 active_runs=[4acf689f ACCEPTED pid1]；pid 3495931 ELAPSED 11:37:44 TIME 01:20:10（+6s）未重启；checkpoint.json mtime 00:23:10.474817688 未翻 find -newermt 30min=0；VLM 07:59:38-08:00:28 Running 2-3/Waiting 全 0/prefix 93.1-93.3%；NAS 98T/70T/29T 71% 不变 incoming/spray 仅 16_33_10 空目录（D6 A 面）.upload-staging 两证据目录无在传；load 2.18 单点上抬 5/15min 低位非本 run 产生按事实记录不升级",
+  "next": "白天接续只读观察：模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者；升级条件按裁决=heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且 proxy 无 ESTAB"
+}

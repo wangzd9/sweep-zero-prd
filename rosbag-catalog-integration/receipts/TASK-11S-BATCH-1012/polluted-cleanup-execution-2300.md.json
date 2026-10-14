@@ -1,0 +1,43 @@
+{
+  "executed_at": "2026-10-13T23:05:00+08:00",
+  "ruling": "ruling-doublewrite-2210 授权②（收窄执行）",
+  "deleted": [
+    {
+      "submission_id": "13dc398c93014e0eaf35265746c27d17",
+      "relative_path": "rosbag2_2026_10_08-14_42_48",
+      "reason": "第二写者 flat 污染（A 21:27 409 PATH_CLAIMED 直接根因）；删时实测 PENDING_INPUT 零绑定零 run；path_claim_key 10be480b… 删除前唯一占用、删后核验 flat 路径零占用（A 23:06 正式重提交 201 a65a25a7… 成功）",
+      "backup": "polluted-submission-13dc398c-backup-2300.json"
+    }
+  ],
+  "kept_despite_ruling": [
+    {
+      "submission_id": "24d60fee44554e74b15df3fcdf5d93d5",
+      "relative_path": "rosbag2_2026_10_12-16_02_03",
+      "reason": "删除前实测已演进为 SCHEDULED（23:05:30）：flat 文件物理出现（第二写者 cp 21:26 启动、21:52 后完成，非在途新写者；A op 22:59 逐文件 SHA 核验 REUSE_INCOMING_SHA_MATCH）→ scanner 绑定 source 91FFEEC1（source_copy id122, 10105905152B）→ run scene-4acf689f SCENE_SLICE_QUEUE。全列快照实测 source_metadata 完整含 vehicle_code=test（更正：A 22:2x 读取截断 400 字符误判『无 source_metadata』，23:0x 全量复核两行 13dc398c/24d60fee 快照均含完整 source_metadata，ruling 第16行『无 source_metadata』系同口径读取误差，特此申报）→ 该行现为 16_02_03 唯一有效 flat 提交（目标态=每包恰好一条带车辆绑定 flat submission），删除将造成该包零提交，违背目标态 → 保留，待协调者确认"
+    },
+    {
+      "submission_id": "03281a5159344364b227b1b524521106",
+      "reason": "date-grouped 14_42_48；ruling 前提『run 已终态 SCENE_FAILED』23:01 实测失效：attempt-2 scene-a4824f1c SCENE_RUNNING（lease platform-local，heartbeat 23:01:08，proxy active_runs ACCEPTED）；删除在途 run 的 submission 未授权且不安全 → 暂停"
+    },
+    {
+      "submission_id": "5e08e73da0b84cf1a69ba5fb580d652b",
+      "reason": "date-grouped 16_37_47；attempt-2 scene-eb4397c3 SCENE_SLICE_QUEUE（23:01:30 更新）→ 暂停同上"
+    },
+    {
+      "submission_id": "7f4e7b757f7043f8a546080e8d51488a",
+      "reason": "date-grouped 16_58_28；attempt-2 scene-24ab78bb SCENE_SLICE_QUEUE（22:53:02 更新）→ 暂停同上"
+    }
+  ],
+  "nas_date_grouped_cleanup": "PAUSED：ready/spray/20261012/* 删除与在途 attempt-2 run（引用 flat ready 源 source_copy）纠缠，且 ruling 前提失效；等待 attempt-2 终态+更新裁决",
+  "keep_rows_verified_intact": [
+    "9949d1a7",
+    "e5649055",
+    "99615748",
+    "7a71e404",
+    "518089ed"
+  ],
+  "a_new_submissions_2306": {
+    "rosbag2_2026_10_08-14_42_48": "a65a25a70bd74934bdde31eadce69ba7 (201 PENDING_INPUT, stable key spray1012:…0195a14f)",
+    "rosbag2_2026_10_12-16_37_47": "87dfebaa5b614f37acda5e25cd834295 (201 PENDING_INPUT, stable key spray1012:…ef68da1f)"
+  }
+}

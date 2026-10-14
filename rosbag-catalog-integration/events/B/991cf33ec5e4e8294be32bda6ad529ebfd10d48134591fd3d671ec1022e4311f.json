@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-034753-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T03:49:33+08:00",
+  "recorded_at": "2026-10-12T03:49:33+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "-",
+  "status": "IDLE_WAITING",
+  "summary": "nochange: TASK-10 DONE, P0 idle, origin/main 453da0c",
+  "evidence": "origin/main=453da0c",
+  "next": "poll"
+}

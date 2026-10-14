@@ -1,0 +1,12 @@
+{
+  "event_id": "b-rework9-delivered-c2cee73",
+  "occurred_at": "2026-10-11T14:02:18+08:00",
+  "recorded_at": "2026-10-11T14:02:18+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-9",
+  "status": "REVIEW_PENDING",
+  "summary": "rework-9 交付：tests:1163 docstring 无条件兼容声明改限定边界口径，1 file +3/-1 纯 docstring 零行为变更（AST 865 常量仅 1 条差异/6604 非常量节点一致）；ruff 绿+定向 36 passed",
+  "evidence": "receipts/TASK-06B/attempt-1-r2-rework-9.md",
+  "next": "等协调者 AST 验证直接验收合入（不再起 codex 第八轮）"
+}

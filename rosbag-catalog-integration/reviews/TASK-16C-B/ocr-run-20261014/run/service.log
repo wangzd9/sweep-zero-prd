@@ -1,0 +1,27 @@
+{
+  "state": "AWAITING_DECISION",
+  "updated_at": "2026-10-14T09:09:40.520840+00:00",
+  "pid": 3910847,
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/coordinator-ocr-513ab61d291c4e1e905a22e8a34179c0.service",
+  "run_id": "513ab61d291c4e1e905a22e8a34179c0",
+  "unit": "coordinator-ocr-513ab61d291c4e1e905a22e8a34179c0.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "app/templates/bags.html"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-14T08:45:31.756239+00:00",
+      "pid": 3910932,
+      "process_start_ticks": "36779370",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t16cb/05c7f5b0-680a-4e4b-aed8-4f656878f049.jsonl",
+      "session_mtime": 1791968930.4493935,
+      "returncode": 0,
+      "ended_at": "2026-10-14T09:09:40.480536+00:00",
+      "duration_seconds": 1448.72
+    }
+  ],
+  "gate_decision": "NOT_EVALUATED",
+  "ended_at": "2026-10-14T09:09:40.520843+00:00"
+}

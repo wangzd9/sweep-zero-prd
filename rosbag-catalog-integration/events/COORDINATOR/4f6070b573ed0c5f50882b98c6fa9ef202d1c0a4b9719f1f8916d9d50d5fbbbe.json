@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-t10-e2e-v2-pass-done-p0-closed-20261012-020053",
+  "occurred_at": "2026-10-12T02:11:14+08:00",
+  "recorded_at": "2026-10-12T02:11:14+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "2",
+  "status": "DONE",
+  "summary": "TESTER E2E 复跑 v2 attempt-2 02:01 交付 PASS，协调者独立机械核验全链一致（manifest actual 边界/db3 sha256+topics 三方一致/源袋 7 文件同口径复测 ALL_UNCHANGED/lineage 404=app 无路由非 AC 失败）→ TASK-10 DONE main 453da0c，P0 收口停止派发，强审查 NOT_REQUIRED",
+  "evidence": "test-receipts/TEST-TASK10-e2e-reverify/attempt-2.md; inbox/coordinator/TASK-10/e2e-reverify-v2-acceptance-decision.md",
+  "next": "P0 已收口；巡检降常规空转；TASK-11 待用户独立授权"
+}

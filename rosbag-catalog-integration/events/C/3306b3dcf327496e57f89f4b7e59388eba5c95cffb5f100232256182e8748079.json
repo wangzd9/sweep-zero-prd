@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-040853-nochange",
+  "occurred_at": "2026-10-12T04:11:31+08:00",
+  "recorded_at": "2026-10-12T04:11:31+08:00",
+  "role": "C",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "IDLE_NO_CHANGE",
+  "summary": "P0 收口后空转巡检：零业务新增、无 C 新派单、main 453da0c 双核一致、wt-03b 干净、无在途进程/租约",
+  "evidence": "scratch/c_poll_0408.py",
+  "next": "保持空闲待派单"
+}

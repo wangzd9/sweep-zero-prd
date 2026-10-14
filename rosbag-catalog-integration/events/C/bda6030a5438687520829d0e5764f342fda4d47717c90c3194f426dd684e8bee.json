@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261012-131853-nochange",
+  "occurred_at": "2026-10-12T13:21:40+08:00",
+  "recorded_at": "2026-10-12T13:21:40+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "POLL_NO_CHANGE",
+  "summary": "C 巡检 13:18:53：13:13:53 后 C 范围零新增、无 C 新派单（inbox/3号 实测空）；新增=协调者 r79 T07A attempt-1 OCR 裁决 ACCEPT_REPORT_WITH_REWORK（bags.html 2 处 medium）+ 2号 attempt-2-r1 派单 13:15/ACK 13:19 已开工（2号范围）+ ocr 账/TODO 刷新；main 453da0c=origin 双核、wt-03b 6f1a9ad 干净、ps 0；leases B.json/COORDINATOR.json 在途未到期不接管；保持空闲待派单",
+  "evidence": "sessions/C.md 13:20 条目; find -newermt 13:13:53; inbox/coordinator/TASK-07A/attempt-1-ocr-ruling-20261012.md; inbox/2号/TASK-07A/attempt-2-r1-ack.md; rev-parse 双核",
+  "next": "等协调者派单；T07A attempt-2-r1 收口链在 2号/协调者范围"
+}

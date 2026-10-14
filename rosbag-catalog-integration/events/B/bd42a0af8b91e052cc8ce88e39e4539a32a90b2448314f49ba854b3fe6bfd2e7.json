@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-230553-user-restore-handoff-ack-resume-b-idle",
+  "occurred_at": "2026-10-13T23:05:00+08:00",
+  "recorded_at": "2026-10-13T23:06:30+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "User restore handoff consumed: instructed to read attempt-1-dispatch.md and ACK/execute B scope. Verified dispatch (20:58) + ACK (21:12) already on disk; B attempt-1 read-only input evidence DONE 21:12, accepted and closed by coordinator ruling b-input-ruling-2117 (no rework for B); ruling-doublewrite-2210 scope is all A/TESTER/C, B row stays DONE. Per protocol 'existing ACK resumes, no re-claim' - no duplicate ACK, no redo of old task. Observer watch observed==acknowledged key-for-key (no content-level new input; pending fingerprint identical to 22:42 round). ps: no B-side business processes. A operations bigbags-copy=RECONCILED / finalbag-160203-163747verify=SUCCEEDED (A 22:56 RUNNING event continues in flight) - A's, not taken over. Zero commit/model/prod-write this side.",
+  "evidence": "inbox/2号/TASK-11S-BATCH-1012/attempt-1-dispatch.md;inbox/2号/TASK-11S-BATCH-1012/attempt-1-ack.md;inbox/coordinator/SPRAY-BATCH-1012-20261013/b-input-ruling-2117.md;inbox/coordinator/SPRAY-BATCH-1012-20261013/ruling-doublewrite-2210.md;inbox/control/runtime/observer/B.json;sessions/B.md",
+  "next": "IDLE_WAITING: await next dispatch from coordinator; quiet hours - no proactive group messages, 08:00 summary."
+}

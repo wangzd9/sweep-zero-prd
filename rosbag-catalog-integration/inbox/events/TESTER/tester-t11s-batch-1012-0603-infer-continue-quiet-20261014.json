@@ -1,0 +1,12 @@
+{
+ "event_id": "tester-t11s-batch-1012-0603-infer-continue-quiet-20261014",
+ "occurred_at": "2026-10-14T06:03:00+08:00",
+ "recorded_at": "2026-10-14T06:03:00+08:00",
+ "role": "TESTER",
+ "task": "TASK-11S-BATCH-1012",
+ "attempt": "1",
+ "status": "IN_PROGRESS",
+ "summary": "06:02 静默期增量只读巡检（prerun 指纹 619daae0，唤醒源=sessions 回声即上轮 05:54 自写事件 0551，无新派单/新 decision）：scene 4acf689f SCENE_RUNNING attempt1 heartbeat=06:01:55 八步全 QUEUED（约417min）；升级条件逐项未命中（VLM 06:01:27-06:01:57 Running 2-3/Waiting 0/prefix 92.2%/KV 2.2-3.9%/MM 88.6%/POST 200 连发；proxy 3495931 volcsw 85868→85893（12s +25 持续递增）、nvolcsw 283、RSS 18213948kB S）INFER 远端推理持续活跃，不 kill/cancel/retry；flat 三提交 a65a25a7/87dfebaa/518089ed 仍 PENDING_INPUT source_id=NULL 等 A D4 第三步，14_42_48 正式全链 NOT_RUN；ingest_submission 8 行不变；scan_job 4043/4042（05:55:47-48）新周期 incoming SUCCESS {dirs:3 bags:1 failed:2} 空包拒绝可追溯；scene run 7=6DONE+1RUNNING 无新 run；8767 health=ok active_runs=[4acf689f ACCEPTED]；PASS 基线不变。全部动作只读，未提交/retry/调模型/写生产。",
+ "evidence": "pipeline_run scene-4acf689f9a6a473da1fa2f2efc70 SCENE_RUNNING attempt1 heartbeat=2026-10-14 06:01:55；step_run 八步 QUEUED started_at=NULL；ingest_submission 8 行（flat 三提交 PENDING_INPUT source_id=NULL）；scan_job 4043 incoming SUCCESS dirs:3 bags:1 failed:2 05:55:48；health active_runs=[4acf689f ACCEPTED]；proxy 3495931 volcsw 85868→85893（12s 直接 /proc/status grep 双采样）RSS 18213948kB S；VLM 06:01:27-06:01:57 Running 2-3 Waiting 0 prefix 92.2% KV 2.2-3.9% MM 88.6% POST 200 连发；探针 tester_0600_check.py + tester_0600_ctx.py exit 0",
+ "next": "继续等 4acf689f 模型段完成信号（checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE，跨夜继续）；A flat 三提交绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）"
+}

@@ -1,0 +1,47 @@
+{
+  "state": "AWAITING_DECISION",
+  "updated_at": "2026-10-13T10:27:52.969926+00:00",
+  "pid": 2258991,
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/coordinator-ocr-01407cec85ec435ea1aed996d70ced09.service",
+  "run_id": "01407cec85ec435ea1aed996d70ced09",
+  "unit": "coordinator-ocr-01407cec85ec435ea1aed996d70ced09.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "app/scene/spray/adapter.py",
+        "app/scene/spray/render.py",
+        "app/scene/spray/decode.py",
+        "app/scene/spray/time_map.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-13T09:52:20.056326+00:00",
+      "pid": 2259060,
+      "process_start_ticks": "28540156",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sb/f951f13f-9824-4a08-bd9b-e6cd2bb3bd1d.jsonl",
+      "session_mtime": 1791886262.6203835,
+      "returncode": 0,
+      "ended_at": "2026-10-13T10:12:49.367968+00:00",
+      "duration_seconds": 1229.31
+    },
+    {
+      "id": "b02",
+      "files": [
+        "app/scene/spray/pcd_io.py",
+        "app/scene/spray/precheck.py",
+        "app/scene/spray/references.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-13T10:12:49.533769+00:00",
+      "pid": 2286158,
+      "process_start_ticks": "28663104",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sb/dfe990b0-8183-4c2b-a8d4-a4bc46eb4eac.jsonl",
+      "session_mtime": 1791887195.4634743,
+      "returncode": 0,
+      "ended_at": "2026-10-13T10:27:52.941437+00:00",
+      "duration_seconds": 903.41
+    }
+  ],
+  "gate_decision": "NOT_EVALUATED",
+  "ended_at": "2026-10-13T10:27:52.969934+00:00"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "codex-v04-resume-ocr-legacy-20261014",
+  "occurred_at": "2026-10-14T11:25:19+08:00",
+  "recorded_at": "2026-10-14T11:25:19+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16",
+  "attempt": "ui-resume-1",
+  "status": "DISPATCHED",
+  "summary": "用户恢复最小界面，三叶/独立准备及15项OCR遗留已派；角色自行ACK",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/control/V04-UI-RESUME-20261014.md",
+  "next": "原角色安全点接单，逐叶固定SHA验证与OCR，16R并行核覆盖债"
+}

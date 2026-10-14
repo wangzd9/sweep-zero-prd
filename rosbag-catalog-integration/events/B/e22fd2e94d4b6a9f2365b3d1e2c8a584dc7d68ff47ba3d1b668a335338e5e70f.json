@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t06b-r6-medium-delivered-20261010-1558",
+  "occurred_at": "2026-10-10T16:02:56+08:00",
+  "recorded_at": "2026-10-10T16:02:56+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-2",
+  "status": "REVIEW_PENDING",
+  "summary": "r6 两条 medium 小修交付：M-1 updated_at 写库 aware_now→local_now（naive 与 bag_record 表同口径）+ M-2 父包缺指纹 fail-open→fail-closed 409；各带 1 定向回归；31/812/ruff 绿",
+  "evidence": "commit 9325155; receipts/TASK-06B/attempt-1-r2-rework-2.md",
+  "next": "等协调者对 a07c181..tip 增量 OCR 无 high/critical 后与 f088c2b+c67600d+a07c181 同批 --no-ff 合入"
+}

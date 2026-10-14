@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-022753-nochange-p0-idle",
+  "occurred_at": "2026-10-12T02:30:52+08:00",
+  "recorded_at": "2026-10-12T02:30:52+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "P0收口后例行巡检：无新派单/返修，main 453da0c 双核不变，冻结 worktree 干净，本侧IDLE",
+  "evidence": "sessions/B.md 顶部 02:28 巡检行",
+  "next": "仅按需巡检与事件接续"
+}

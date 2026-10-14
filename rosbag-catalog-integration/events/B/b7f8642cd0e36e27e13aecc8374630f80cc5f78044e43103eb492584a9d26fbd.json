@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-043753-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T04:46:14+08:00",
+  "recorded_at": "2026-10-12T04:46:14+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "none",
+  "status": "IDLE_WAITING",
+  "summary": "04:37巡检无变化：2号01:20后零新增，main 453da0c双核，P0收口DONE，ps无在途",
+  "evidence": "none",
+  "next": "仅收新派单/返修再启动"
+}

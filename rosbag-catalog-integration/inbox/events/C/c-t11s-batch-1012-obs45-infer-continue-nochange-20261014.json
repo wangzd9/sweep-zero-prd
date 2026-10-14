@@ -1,0 +1,13 @@
+{
+  "event_id": "c-t11s-batch-1012-obs45-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T05:57:30+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs44（05:4x）后新一轮：prerun 05:53:53 指纹 0f561897 changed_sources=sessions/C.md 自产 obs44 行；ACK 21:07:41 在案不重复领取",
+  "summary": "C 第45轮只读观察（处理机+llm-server 05:56-05:57 实测）：与 obs44 零状态变化=模型段完成信号仍未到，INFER 持续活跃，大包跨夜继续不 kill/不 retry/不判卡死。① scene-4acf689f（source 91FFEEC1…）SCENE_RUNNING attempt=1 error 空、lease_expires_at 05:58:55 续租活跃 lease_owner=platform-local；② 8767 health ok active_runs=[scene-4acf689f ACCEPTED pid1]；③ proxy pid 3495931 docker top TIME 01:18:39（obs44 01:18:31，+8s 持续非零）；④ 八步 QUEUED 阶段边界写口径未翻、checkpoint.json mtime 2026-10-14 00:23:10.47 未变、attempt-1 树 find -newermt 10min=0 零新写、jpg 1781/pcd 5373 与 obs34-44 同；⑤ VLM 通道容器 /proc/1/net/tcp 实测 1 条 ESTAB（state 01）8602A8C0:AE96→2D02A8C0:1F42（192.168.2.45:8002，临时端口再重建=长连接循环重建非通道消失，余 TIME_WAIT 残迹）；⑥ VLM 远端直证（llm-server 直连 /tmp/vllm_qwen38.log 05:55:47-05:57:37 12 点采样）：Running 1-4 reqs、Waiting 单点 1 次 W2（05:56:27 一次=非持续>0，与 obs43 单点 W1 同口径）、prefix cache 92.0-92.3%、MM cache 88.5-88.6%、gen 吞吐 34.8-199.3 tok/s、POST /v1/chat/completions 累计 182567 连发=推理活跃续证；⑦ 资源面：NAS 98T/70T/29T 71% 不变、load 0.48/0.42/0.42 低位、up 5 天 20:16、生产栈 8 容器全在；⑧ incoming/spray 仍仅 16_33_10 空包目录（D6 A 面不变）、upload-staging 空、提交台账 7 条不变。**无升级条件命中**（heartbeat 无连败/run 未 FAILED/VLM Waiting 非持续>0 且 proxy 有 ESTAB）。C 全程只读，未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "处理机 05:56-05:57 只读实测：curl 8180 api/v1/scene-analysis-runs/scene-4acf689f…（SCENE_RUNNING/attempt=1/lease_expires_at 05:58:55/error 空/source 91FFEEC1…）、curl 8767/health（ok active_runs=[scene-4acf689f ACCEPTED pid1]）、docker top rosbag-scene-proxy（pid 3495931 TIME 01:18:39）、docker exec cat /proc/1/net/tcp（1 条 ESTAB AE96→1F42 192.168.2.45:8002）、host work 树 find -newermt 10min=0、stat checkpoint.json=2026-10-14 00:23:10.47、ls jpg=1781 pcd=5373、df /mnt/nas_backup 98T/70T/29T 71%、uptime load 0.48、ls incoming/spray（仅 rosbag2_2026_10_12-16_33_10 空包目录）、ls upload-staging=空、docker ps 8 容器全在；llm-server 直连读 /tmp/vllm_qwen38.log 05:55:47-05:57:37 12 点（Running 1-4/Waiting 单点 W2 一次/prefix 92.0-92.3%/MM 88.5-88.6%/gen 34.8-199.3 tok/s）。租约 owner C-cron-poll-20261014-055353-t11s-obs45（05:56:04 claim，token 10b3a4c6 整体 JSON 解析）",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按裁决 ruling-4acf-infer-active-0218=heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且 proxy 无 ESTAB；③ 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账（含 ruling-dup-slices-0038 观察面）；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

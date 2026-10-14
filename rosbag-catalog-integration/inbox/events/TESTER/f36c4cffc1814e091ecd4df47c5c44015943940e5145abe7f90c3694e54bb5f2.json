@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t16d-prep-checkpoint-mysql-browser-20261014",
+  "occurred_at": "2026-10-14T12:42:00+08:00",
+  "recorded_at": "2026-10-14T12:33:22+08:00",
+  "role": "TESTER",
+  "task": "TEST-TASK16D",
+  "attempt": "1",
+  "status": "PREP_IN_PROGRESS",
+  "summary": "TASK-16D 准备检查点：专属 worktree wt-tester-16d-20261014 detached @ seed bd0db1d（干净、未动 seed/旧 B 冻结树/主仓脏文件）；真实浏览器就绪；seed 缺陷口径定位 C5 双标 vs 单值 CASE / C7 日期直入 DateTime / C8 CANCELLED null.querySelector / cursor 16C-c03-02/03/04；隔离 MySQL 与 Compose 栈配方就绪未起。准备阶段无正式联合验收结论。",
+  "evidence": "test-receipts/TEST-TASK16D/attempt-1.md",
+  "next": "起隔离严格 MySQL 库+8 类 fixture，复现 C5/C7/C8+cursor 风险落证据；叶冻结到达做对应面增量验证"
+}

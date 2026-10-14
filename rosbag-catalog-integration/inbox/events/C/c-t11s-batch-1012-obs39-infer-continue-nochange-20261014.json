@@ -1,0 +1,14 @@
+{
+  "event_id": "c-t11s-batch-1012-obs39-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T04:57:30+08:00",
+  "recorded_at": "2026-10-14T04:59:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs38（04:5x）后新一轮：prerun 04:53:53 指纹 52a71ec9 changed_sources=sessions/C.md 自产 obs38 行；ACK 21:07:41 在案不重复领取",
+  "summary": "C 第39轮只读观察（处理机 04:56 实测）：与 obs38 零状态变化=模型段完成信号仍未到，INFER 持续活跃，大包跨夜继续不 kill/不 retry/不判卡死。① scene-4acf689f（16_02_03 正式链）SCENE_RUNNING attempt=1 error 空、lease_expires_at 04:57:51 续租活跃；② 8767 active_runs=[4acf689f ACCEPTED pid1]；③ work 树 15min 零新写、checkpoint.json mtime 00:23:10 未翻、jpg 1781/pcd 5373 不变；④ pid 3495931 TIME 01:17:52（obs38 +3s 持续非零）；⑤ VLM 8002 ESTAB 在途（临时端口 E098→E094 循环重建非消失）；⑥ VLM 远端直证 04:56:06-26 Running 3-4/Waiting 单点 1→0/prefix cache 91.9-92.0%/POST 200 连发=推理活跃续证；⑦ 资源面 NAS 98T/70T/29T 71%、load 0.42 低位不变。无升级条件命中（heartbeat 无连败/run 未 FAILED/VLM Waiting 非持续>0）。",
+  "evidence": "处理机 04:56-04:57 只读实测：ssh curl 8180/8767、docker top/exec /proc/net/tcp、host find/stat、llm-server 直连读 /tmp/vllm_qwen38.log 04:56:06-04:56:26 三点采样、df/uptime；C 全程只读未 kill/未删/未重启/未 retry/未改任何生产路径；canonical sessions/C.md 585→586 行（obs38 末行缺换行接缝已修复，签名计数 obs38=1/obs39=1 双断言通过）",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按裁决 ruling-4acf-infer-active-0218=heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且 proxy 无 ESTAB；③ 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账（含 ruling-dup-slices-0038 观察面）；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

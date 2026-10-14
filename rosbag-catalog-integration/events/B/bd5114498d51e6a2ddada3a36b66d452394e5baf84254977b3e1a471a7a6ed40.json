@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-075753-nochange-p0-idle-t11-r7",
+  "occurred_at": "2026-10-12T07:58:57+08:00",
+  "recorded_at": "2026-10-12T07:58:57+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "3",
+  "status": "IDLE_WAITING",
+  "summary": "巡检无变化：无新派单/返修，main 453da0c 双核，T11 驱动第7跑 3_claim FAIL 记前置观察",
+  "evidence": "sessions/B.md 07:57 条目; scratch/t11_run.out T11_RC=1",
+  "next": "空闲等待新派单/返修"
+}

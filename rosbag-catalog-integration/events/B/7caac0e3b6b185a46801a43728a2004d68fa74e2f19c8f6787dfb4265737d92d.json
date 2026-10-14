@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-064753-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T06:50:29+08:00",
+  "recorded_at": "2026-10-12T06:50:29+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "0",
+  "status": "POLL_NO_CHANGE",
+  "summary": "06:42后零业务变化；inbox/2号无新派单返修；main 453da0c双核不变；IDLE_WAITING维持",
+  "evidence": "sessions/B.md 06:48巡检条目",
+  "next": "等TASK-11生产门禁放行或新派单"
+}

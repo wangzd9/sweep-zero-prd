@@ -1,0 +1,12 @@
+{
+  "event_id": "20261011-2149-postmerge-ca8730d-delivered",
+  "occurred_at": "2026-10-11T21:49:31+08:00",
+  "recorded_at": "2026-10-11T21:49:31+08:00",
+  "role": "TESTER",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "交付 post-merge-ca8730d 独立真 MySQL 8.4.11 STRICT 验证：全部 PASS（06B 60/slope 44/alembic 单头 31表/SQLite 813 passed 10 skipped/ruff 绿/隔离 0 残留），满足 09 收口条件待协调者裁决写 DONE+TASK-10 派单",
+  "evidence": "test-receipts/TEST-TASK09-post-merge-ca8730d/attempt-1.md;reports/TEST-TASK09-post-merge-ca8730d/attempt-1.md",
+  "next": "等协调者裁决收口 09→DONE→TASK-10 候选重算派单；PASS 即交付不预跑"
+}

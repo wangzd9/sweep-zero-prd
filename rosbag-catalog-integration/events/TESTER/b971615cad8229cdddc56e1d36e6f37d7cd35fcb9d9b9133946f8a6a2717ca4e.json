@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-s1-retest-pointer-a2-20261010-2014",
+  "occurred_at": "2026-10-10T20:13:47+08:00",
+  "recorded_at": "2026-10-10T20:13:47+08:00",
+  "role": "TESTER",
+  "task": "TASK-06",
+  "attempt": "2",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "r2-final-mysql-e2e-s1-retest 派单(19:07)与已交付 attempt-2 同口径同被测快照(main 0f6aa87)，ACK后按证据复用收口TEST_REPORT_PENDING指针attempt-2，不重跑；reconcile用例FAIL维持06B app缺陷定性待回派",
+  "evidence": "inbox/TESTER/TASK-06/r2-final-mysql-e2e-s1-retest.md; reports/TASK-06/r2-final-mysql-e2e-attempt-2.md; test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-2.md",
+  "next": "等协调者裁决缺陷3回派2号，修复后新attempt复测reconcile用例"
+}

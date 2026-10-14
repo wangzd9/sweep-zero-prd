@@ -1,0 +1,470 @@
+{
+  "steps": {
+    "1a_submission": {
+      "status": 201,
+      "body": {
+        "submission_id": "bb88da322c164ed391211e607a3167a2",
+        "profile_id": "default",
+        "profile_version": 1,
+        "relative_path": "1165414093_slope_20260818_105105_105120",
+        "status": "PENDING_INPUT",
+        "row_version": 1,
+        "config_required": false,
+        "effective_config": {
+          "schema_version": "scene-config-v1",
+          "profile_id": "default",
+          "profile_version": 1,
+          "purposes": [
+            "scene_slice"
+          ],
+          "scenes": [
+            {
+              "scene_code": "slope",
+              "capability_version": "slope-v1",
+              "parameters": {
+                "segment_len": 15,
+                "overlap": 3,
+                "min_effective": 5
+              }
+            }
+          ],
+          "config_hash": "0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0"
+        },
+        "effective_config_hash": "0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0",
+        "bound_source_id": null,
+        "bound_source_generation": null
+      }
+    },
+    "1b_register": {
+      "status": 200,
+      "body": {
+        "source_id": "13551AA0FD504BF28BC282DD7E",
+        "pipeline_run_id": null,
+        "created": true,
+        "summary": {
+          "path": "/test/incoming/1165414093_slope_20260818_105105_105120",
+          "name": "1165414093_slope_20260818_105105_105120",
+          "file_count": 1,
+          "topic_count": 22,
+          "message_count": 11279,
+          "duration_ns": 14980806397,
+          "total_size_bytes": 239415296
+        },
+        "ingest": {
+          "matched": true,
+          "scheduled_purposes": [
+            "scene_slice"
+          ],
+          "self_built": false,
+          "config_required": false
+        }
+      }
+    },
+    "1c2_ready_precondition": {
+      "source_status_before": "DISCOVERED",
+      "set_to": "READY",
+      "note": "harness precondition; app code has 0 setters of source_status=READY (finding #1)"
+    },
+    "1c_source_detail": {
+      "status": 200,
+      "body": {
+        "source_id": "13551AA0FD504BF28BC282DD7E",
+        "bag": {
+          "bag_uid": "13551AA0FD504BF28BC282DD7E",
+          "name": "1165414093_slope_20260818_105105_105120",
+          "status": "READY",
+          "relative_path": "incoming/1165414093_slope_20260818_105105_105120",
+          "started_at": "2026-08-18T10:51:05",
+          "duration_ns": 14980806397,
+          "total_size_bytes": 239415296,
+          "message_count": 11279,
+          "vehicle": null,
+          "tags": [],
+          "files": [
+            {
+              "name": "1165414093_slope_20260818_105105_105120_0.db3",
+              "size_bytes": 239415296,
+              "sequence_no": 0
+            }
+          ],
+          "topics": [
+            {
+              "name": "/bev/cam_front_8m_jpg",
+              "message_type": "sensor_msgs/msg/CompressedImage",
+              "message_count": 54
+            },
+            {
+              "name": "/bev/cam_front_jpg",
+              "message_type": "sensor_msgs/msg/CompressedImage",
+              "message_count": 54
+            },
+            {
+              "name": "/bev/cam_left_jpg",
+              "message_type": "sensor_msgs/msg/CompressedImage",
+              "message_count": 54
+            },
+            {
+              "name": "/bev/cam_rear_jpg",
+              "message_type": "sensor_msgs/msg/CompressedImage",
+              "message_count": 54
+            },
+            {
+              "name": "/bev/cam_right_jpg",
+              "message_type": "sensor_msgs/msg/CompressedImage",
+              "message_count": 54
+            },
+            {
+              "name": "/chcnav/rawimu",
+              "message_type": "sensor_msgs/msg/Imu",
+              "message_count": 1474
+            },
+            {
+              "name": "/iv_packets_front_mid",
+              "message_type": "seyond/msg/SeyondScan",
+              "message_count": 4037
+            },
+            {
+              "name": "/iv_packets_rear_mid",
+              "message_type": "seyond/msg/SeyondScan",
+              "message_count": 1050
+            },
+            {
+              "name": "/jinlvlomp/localization/estimate_pose",
+              "message_type": "lomp_msgs/msg/Localization",
+              "message_count": 1500
+            },
+            {
+              "name": "/perception/curb_array",
+              "message_type": "curb_msgs/msg/CurbArray",
+              "message_count": 120
+            },
+            {
+              "name": "/perception/detected_objects",
+              "message_type": "perception_msgs/msg/ObjectList",
+              "message_count": 54
+            },
+            {
+              "name": "/perception/detected_objects/markers",
+              "message_type": "visualization_msgs/msg/MarkerArray",
+              "message_count": 51
+            },
+            {
+              "name": "/perception/grid_occ_fusion",
+              "message_type": "perception_msgs/msg/TrackList",
+              "message_count": 54
+            },
+            {
+              "name": "/perception/label_mapping",
+              "message_type": "std_msgs/msg/String",
+              "message_count": 0
+            },
+            {
+              "name": "/perception/label_mask/camera_cam_3M_front",
+              "message_type": "sensor_msgs/msg/Image",
+              "message_count": 54
+            },
+            {
+              "name": "/perception/label_mask/camera_cam_3M_right",
+              "message_type": "sensor_msgs/msg/Image",
+              "message_count": 54
+            },
+            {
+              "name": "/perception/label_mask/camera_cam_8M_wa_front",
+              "message_type": "sensor_msgs/msg/Image",
+              "message_count": 54
+            },
+            {
+              "name": "/perception/tracked_objects",
+              "message_type": "perception_msgs/msg/TrackList",
+              "message_count": 54
+            },
+            {
+              "name": "/perception/tracked_objects/markers",
+              "message_type": "visualization_msgs/msg/MarkerArray",
+              "message_count": 54
+            },
+            {
+              "name": "/planning/trajectory",
+              "message_type": "planning_msgs/msg/Trajectory",
+              "message_count": 150
+            },
+            {
+              "name": "/tf",
+              "message_type": "tf2_msgs/msg/TFMessage",
+              "message_count": 1500
+            },
+            {
+              "name": "/vehicle/chassis",
+              "message_type": "vehicle_msgs/msg/Chassis",
+              "message_count": 749
+            }
+          ],
+          "transfer": {
+            "ssh_host": "192.168.2.77",
+            "ssh_user": "SYSC",
+            "remote_path": "/volume1/public/incoming/1165414093_slope_20260818_105105_105120",
+            "rsync": "rsync -ah --info=progress2 --partial SYSC@192.168.2.77:/volume1/public/incoming/1165414093_slope_20260818_105105_105120/ ./1165414093_slope_20260818_105105_105120/",
+            "scp": "scp -r SYSC@192.168.2.77:/volume1/public/incoming/1165414093_slope_20260818_105105_105120 .",
+            "smb": "\\\\192.168.2.77\\public\\incoming\\1165414093_slope_20260818_105105_105120"
+          }
+        },
+        "copies": [
+          {
+            "storage_type": "NAS_RAW",
+            "path": "/test/incoming/1165414093_slope_20260818_105105_105120",
+            "fingerprint": "8f622686afb11d166130d792c2045d8bd50f1552663301a25d27d6dea7515617",
+            "pipeline_run_id": null,
+            "id": 1,
+            "file_count": 1,
+            "total_size_bytes": 239415296,
+            "verified_at": "2026-10-12T01:03:13.466217",
+            "deleted_at": null
+          }
+        ],
+        "pipeline_runs": []
+      }
+    },
+    "1d_consume": {
+      "status": 200,
+      "body": {
+        "stats": {
+          "consumed": 1,
+          "dropped": 0,
+          "pending": 0,
+          "created_runs": 1,
+          "reused_runs": 0,
+          "errors": [],
+          "affected_run_ids": [
+            "scene-7a441d21a2ef42579e48c5e65ecd"
+          ]
+        }
+      }
+    },
+    "1d_explicit_fallback": {
+      "status": 202,
+      "body": {
+        "pipeline_run_id": "scene-7a441d21a2ef42579e48c5e65ecd",
+        "status": "SCENE_SLICE_QUEUE",
+        "created": false,
+        "source_id": "13551AA0FD504BF28BC282DD7E",
+        "scenes": [
+          {
+            "scene_code": "slope",
+            "capability_version": "slope-v1",
+            "capability_config_hash": "a8ba9678eb3fcbb6338e403a63c29522beb0d729635b2adc7c4ecad3dc0e9a40",
+            "analysis_version": "av1"
+          }
+        ],
+        "effective_config_hash": "0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0"
+      }
+    },
+    "3_claim": {
+      "status": 200,
+      "body": {
+        "claimed": true,
+        "pipeline_run_id": "scene-7a441d21a2ef42579e48c5e65ecd",
+        "lease_token": "83269a491816469988c237a0b738c0dd",
+        "attempt": 1,
+        "source_generation": null,
+        "pipeline_type": "SCENE_SLICE"
+      }
+    },
+    "3_claim_retry": {
+      "claimed": true,
+      "run": "scene-7a441d21a2ef42579e48c5e65ecd"
+    },
+    "3_run_detail": {
+      "status": 200,
+      "body": {
+        "pipeline_run_id": "scene-7a441d21a2ef42579e48c5e65ecd",
+        "source_id": "13551AA0FD504BF28BC282DD7E",
+        "status": "SCENE_RUNNING",
+        "attempt": 1,
+        "pipeline_type": "SCENE_SLICE",
+        "scenes": [
+          {
+            "capability_config_hash": "a8ba9678eb3fcbb6338e403a63c29522beb0d729635b2adc7c4ecad3dc0e9a40",
+            "capability_version": "slope-v1",
+            "scene_code": "slope"
+          }
+        ],
+        "analysis_versions": {
+          "slope": "av1"
+        },
+        "effective_config_hash": "0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0",
+        "submission_id": "bb88da322c164ed391211e607a3167a2",
+        "profile_id": "default",
+        "frozen_at": "2026-10-12T01:03:13.467983",
+        "scene_outcomes": {},
+        "reanalysis_id": null,
+        "lease_owner": "t10-b",
+        "lease_expires_at": "2026-10-12T01:13:13.517927",
+        "error_message": "",
+        "steps": [
+          {
+            "step_name": "PRECHECK",
+            "attempt": 1,
+            "status": "QUEUED",
+            "error_message": ""
+          },
+          {
+            "step_name": "EXTRACT",
+            "attempt": 1,
+            "status": "QUEUED",
+            "error_message": ""
+          },
+          {
+            "step_name": "INFER",
+            "attempt": 1,
+            "status": "QUEUED",
+            "error_message": ""
+          },
+          {
+            "step_name": "SEGMENT",
+            "attempt": 1,
+            "status": "QUEUED",
+            "error_message": ""
+          },
+          {
+            "step_name": "WRITE",
+            "attempt": 1,
+            "status": "QUEUED",
+            "error_message": ""
+          },
+          {
+            "step_name": "VALIDATE",
+            "attempt": 1,
+            "status": "QUEUED",
+            "error_message": ""
+          },
+          {
+            "step_name": "PUBLISH",
+            "attempt": 1,
+            "status": "QUEUED",
+            "error_message": ""
+          },
+          {
+            "step_name": "REGISTER",
+            "attempt": 1,
+            "status": "QUEUED",
+            "error_message": ""
+          }
+        ]
+      }
+    },
+    "3_analyze": {
+      "outcome": "SUCCESS",
+      "latency_s": 143.6,
+      "segments": [
+        {
+          "label": "slope",
+          "start_ns": "1787021465142223739",
+          "end_ns": "1787021479550464104",
+          "duration_ns": "14408240365",
+          "publish_target": true,
+          "slice_key": "slope:1787021465142223739:1787021479550464104",
+          "mapping_basis": "header_stamp_ns",
+          "evidence_ref": "frame_log#0"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "SLOPE_FRAME_LOG",
+          "path": "/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/work/frame_log.json",
+          "digest": "35cada665ee6bb2d44071eab0022b074cd6902491a638028be61ddaa86e26172",
+          "count": 14
+        },
+        {
+          "kind": "SLOPE_TOPIC",
+          "path": "/bev/cam_front_8m_jpg",
+          "digest": null,
+          "count": 54
+        }
+      ],
+      "error_code": null,
+      "error_detail": null
+    },
+    "4_manifest": {
+      "publishable": [
+        "slope:1787021465142223739:1787021479550464104"
+      ]
+    },
+    "4_offset": {
+      "derive_storage_offset": 100381744,
+      "note": "None -> PUBLISH_BLOCKED (fail-closed, real data non-constant)"
+    },
+    "4_publish": {
+      "published": [
+        "/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/publish/unassigned/slope/13551AA0FD504BF28BC282DD7E_T10Sb9fe892cbcbc4d6a"
+      ]
+    },
+    "4_report": {
+      "status": 200,
+      "body": {
+        "pipeline_run_id": "scene-7a441d21a2ef42579e48c5e65ecd",
+        "scene_code": "slope",
+        "analysis_version_id": 1,
+        "run_id": "scene-7a441d21a2ef42579e48c5e65ecd",
+        "registered_segments": 1,
+        "derived_children": 1,
+        "replayed": false,
+        "availability": "PENDING"
+      }
+    },
+    "4_complete": {
+      "status": 409,
+      "body": {
+        "detail": "INCOMPLETE: 切片 slope:1787021465142223739:1787021479550464104 消息超出区间上界 1787021479647655120 > 1787021479550464104"
+      }
+    }
+  },
+  "verdicts": {
+    "1a_submission": "OK_FROZEN",
+    "1b_register": "OK",
+    "1c2_ready_precondition": "PRECONDITION_APPLIED",
+    "1_run_created": "OK",
+    "3_claim": "OK",
+    "3_analyze": "SUCCESS",
+    "4_offset": "OK_CONSTANT",
+    "4_publish": "OK",
+    "4_complete": "STATUS_409"
+  },
+  "source_hash_before": {
+    "1165414093_slope_20260818_105105_105120_0.db3": {
+      "size": 239415296,
+      "mtime": 1787108691.1123288,
+      "sha256_head1MB": "6c6e90819b8e5f036505dabdac58146eedf496b056012731cec5b6e401d7470e"
+    },
+    "bev_cam_front_8m_jpg.mp4": {
+      "size": 20078993,
+      "mtime": 1787108684.1855834,
+      "sha256_head1MB": "329c9d4d3e596ab3d3ba42cde24fe6e01eab7b80520d1fd763f3b5469e086bdb"
+    },
+    "bev_cam_front_jpg.mp4": {
+      "size": 5999593,
+      "mtime": 1787108685.851804,
+      "sha256_head1MB": "bdf37b1bac33f95ed411102ffab5e34f94732bd21e87638cec20c571d88bafb9"
+    },
+    "bev_cam_left_jpg.mp4": {
+      "size": 7473509,
+      "mtime": 1787108691.16746,
+      "sha256_head1MB": "e6d8c0037f2b599a4948ef513e1bc51d549530c98d17eb7b8860bfd7ed21c1ff"
+    },
+    "bev_cam_rear_jpg.mp4": {
+      "size": 5248772,
+      "mtime": 1787108685.3629272,
+      "sha256_head1MB": "93e5b9fafb9523f5a0f5a2abc128e92faf1eadfdba899c152c2a530b6056407d"
+    },
+    "bev_cam_right_jpg.mp4": {
+      "size": 4662102,
+      "mtime": 1787108685.5248804,
+      "sha256_head1MB": "4de8cae7d5f9f639f941a216d94af0760c85e535fa136f5de4713448c2493a58"
+    },
+    "metadata.yaml": {
+      "size": 11758,
+      "mtime": 1787108685.7184832,
+      "sha256_head1MB": "a2c60bdd9237e31fecb7242f9cdea5e6289a93f6ad4c91d2b94a0e9bebaacfd3"
+    }
+  },
+  "error": null
+}

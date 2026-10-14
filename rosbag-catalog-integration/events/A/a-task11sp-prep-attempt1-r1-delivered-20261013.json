@@ -1,0 +1,14 @@
+{
+  "event_id": "a-task11sp-prep-attempt1-r1-delivered-20261013",
+  "occurred_at": "2026-10-13T17:58:00+08:00",
+  "recorded_at": "2026-10-13T17:58:00+08:00",
+  "role": "A",
+  "task": "TASK-11S-PREP",
+  "attempt": "1-r1",
+  "status": "DELIVERED_REVIEW_PENDING",
+  "summary": "执行者 A 交付 TASK-11S-PREP attempt-1-r1 装配返修（四处置返，按 state-correction 17:1x 收窄口径）：冻结 commit 769d69f（base d8f7206 续，deploy/scene 5 文件 +128/-31 纯装配面，零 app/scripts 业务 diff）。r1-1 scene-host.service 宿主机 Python→docker compose 装配 + 新增 scene-proxy.yaml（rosbag-spray-runtime:20261013 固定镜像/host 网络/受审代码只读挂载 /code/state+work+发布根 bind/SCENE_SLICE_PUBLISH_HOST_ROOT compose 插值 fail-closed）+ install_scene_host.sh 幂等三分支覆盖三文件；r1-2 env.example SPRAY_MODEL_ENDPOINT→SPRAY_VLM_ENDPOINT（adapter.py:407 实读口径）+ 补 SPRAY_VLM_MODEL/SPRAY_VLM_API_KEY，SPRAY_DECODER_PATH 全仓零消费面如实申报不发明（12S-B 域观察项供协调者核）；r1-3 DEPLOY-ENTRY 逐字节一致口径→发布时点固定受审候选 SHA 校验（.deployed-git-revision 式不写死旧 head，12S-C 92dcb52+16B-r2 e152465 在案）；r1-4 生产数据副本隔离升级实验复用 g4r3.log 16:55:22 成功区块（RC_restore=0/RC_upgrade=0，20260928_02→20261013_01_scene_intake，Bag13/pipeline17 不变，RESIDUAL=0，备份 sha ca91e4ae 同 12:17 产物，不重跑）。",
+  "evidence": "receipts/TASK-11S-PREP/attempt-1.md（r1 段）; ~/.hermes/cache/scratch/t11sp_r165/g4r3.log（16:55:22 区块）; commit 769d69f @ wt-01-t11sp",
+  "self_tests": "bash -n RC=0; compose yaml 解析+装配一致性 6 断言全过（镜像/host/env_file/command/只读挂载/插值键）; 幂等模拟三跑全 ASSERT OK（run1 三文件落地/run2 同 hash 零覆盖/run3 异 hash 备份+替换，scratch 全 stub 不触系统路径）; SPRAY_MODEL_ENDPOINT 残留 grep 零命中（勘误注记除外）",
+  "cleanup": "mysqldata(103M 失败块残留)+mysqldata.1791881722(8.4G 成功块 datadir) 已删（root 分区 100%→51%，8.4G 释放）；备份/实验日志证据保留 scratch 供协调者复核",
+  "next": "REVIEW_PENDING 非通过，未合入；等协调者机械核验（装配一致性面可复跑）→增量 OCR（d8f7206..769d69f 部署面小增量，排 12S-C OCR 后串行）→并入 17:30/17:45 G4 证据包（G4 副本缺口补齐，r1 未完成口径解除）。本单不授权任何生产写入；远端安装仍等 17:45 放行盘点+用户当次授权。A 开发槽等待审查结果，不占第二单。ACK 迟落盘已如实申报（16:06 会话卡 VLM 长调用被终止，17:09 续接，协调者误判已纠正落账）。"
+}

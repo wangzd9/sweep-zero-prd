@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-003553-r106-r105-ocr-backfill",
+  "occurred_at": "2026-10-13T00:43:36+08:00",
+  "recorded_at": "2026-10-13T00:43:36+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07B",
+  "attempt": "attempt-2-r2",
+  "status": "REVIEW_PENDING",
+  "summary": "r105补记：07B R2 68b5188机械核验收口，detached串行增量OCR在途（b2 service在途，b1待补跑，b3-b5排队）；16A/16B在途观察不催",
+  "evidence": "scratch/t07b_r2_ocr/r105_detached_progress.txt;reviews/TASK-07B/attempt-2-r2/ocr-batches.md",
+  "next": "核b2-b5收口→b1补跑→findings裁决→强审查pack判定→合入→TESTER验证→07B DONE"
+}

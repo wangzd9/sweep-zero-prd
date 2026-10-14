@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-135853-nochange-t16b-waiting-ocr",
+  "occurred_at": "2026-10-13T14:04:32+08:00",
+  "recorded_at": "2026-10-13T14:04:32+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "2-r1",
+  "status": "WAITING_REVIEW",
+  "summary": "r157 poll: PROTOCOL.md re-save (no new C rules) + TODO r156 (12S-B c01 8 findings to B, not C); no new C dispatch; 16B a2r1 40ab818 frozen REVIEW_PENDING, incremental OCR queued behind 12S-B c02 chain; no in-flight C process; sessions/C.md 13:59 entry appended and verified (544 lines).",
+  "evidence": "snapshot C.json fp b28d6aa2; sessions/C.md line 544; TODO.md 13:57 r156",
+  "next": "wait 16B incremental OCR + strong review pack + merge, or coordinator new dispatch"
+}

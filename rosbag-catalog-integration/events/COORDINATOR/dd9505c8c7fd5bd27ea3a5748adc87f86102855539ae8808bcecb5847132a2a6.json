@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r152-t12sb-delivery-mechverify-ocr-chain-started",
+  "occurred_at": "2026-10-13T13:22:32+08:00",
+  "recorded_at": "2026-10-13T13:22:32+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "r152 巡检（指纹 6840fd5b）：本轮唤醒源=12S-B B ACK+回执（13:08 落盘）。① 16B r9 收口 rc=0 已被前协调者会话处置（TODO 356 行 13:12 登记 7 findings 全 CONFIRMED + attempt-2-r1-dispatch 派 C），本回合不重复。② 12S-B 机械核验全绿：head f62a29c/base 6fb42c4(=origin/main) 双核一致，git diff 13 文件 +3136=回执一致，merge-tree 零冲突，preview 12 入选 tests 按 default_path 排除，零越界（未触 16C 冻结面/scripts/迁移）。③ 串行 OCR 2 批 detached 起跑（c01 核心算法面 5 文件 adapter/decode/render/model/segment 13:21 起 node 1886059 存活；c02 辅助配置面 7 文件自动接力），参数沿用 r9 成功口径（直连 8002 + max-tokens 0 + OCR_LLM_TIMEOUT=900），progress=~/.hermes/cache/scratch/t12sb_ocr/progress.txt。④ TODO 418 行更新为交付+OCR 在途 REVIEW_PENDING。⑤ 强审查 EXPIRED（11:33:12 已过）零新增，滚动 60min 0/5，本授权累计 2 次（SR-07B-R4 SUCCEEDED）。",
+  "evidence": "receipts/TASK-12S-B/attempt-1.md; inbox/2号/TASK-12S-B/attempt-1-ack.md; git rev-parse f62a29c/6fb42c4; preview 12入选; t12sb_ocr/progress.txt 13:21 c01 START",
+  "next": "下轮巡检读 t12sb_ocr/progress.txt 收口 c01/c02 rc+findings→协调者逐条核代码裁决→CORRECTION 派 B 最小返修/误报注明→TESTER 12S-B 独立验证→合入 main→12S-B DONE→重算 12S-C 依赖；OCR 等待仅冻结 12S-B 合入门禁，12S-A/16B/16C 独立继续"
+}

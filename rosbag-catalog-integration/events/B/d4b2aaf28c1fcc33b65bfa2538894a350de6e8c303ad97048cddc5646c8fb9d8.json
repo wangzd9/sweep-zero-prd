@@ -1,0 +1,13 @@
+{
+ "event_id": "d4b2aaf28c1fcc33b65bfa2538894a350de6e8c303ad97048cddc5646c8fb9d8",
+ "occurred_at": "2026-10-10T18:17:53+08:00",
+ "recorded_at": "2026-10-10T18:17:53+08:00",
+ "role": "B",
+ "task": "TASK-06B",
+ "attempt": "r2-final-mysql-e2e",
+ "status": "WAITING_TEST",
+ "summary": "TESTER r2-final-mysql-e2e 交付：6 PASS/1 FAIL（S1 R2-01 迁移链 1406，回派 1 号）；S3 定性 PASS；缺陷2（测试夹具 uid 超长）建议回派 2 号待正式派单；本侧维持 WAITING_TEST",
+ "evidence": "test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-1.md; inbox/TESTER/TASK-06/r2-final-mysql-e2e.md",
+ "next": "等协调者验收 TESTER 报告并回派 S1（1号）与缺陷2夹具（2号，若正式派单）",
+ "_migrated_from_legacy": "checked_at schema, 协调者 2026-10-10 19:0x timeline 聚合修复"
+}

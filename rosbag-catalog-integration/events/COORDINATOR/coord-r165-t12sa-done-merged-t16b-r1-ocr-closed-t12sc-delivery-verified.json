@@ -1,0 +1,13 @@
+{
+  "event_id": "coord-r165-t12sa-done-merged-t16b-r1-ocr-closed-t12sc-delivery-verified",
+  "occurred_at": "2026-10-13T16:12:00+08:00",
+  "recorded_at": "2026-10-13T16:12:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-A/TASK-16B/TASK-12S-C/TASK-12S-B",
+  "attempt": "n/a",
+  "status": "POLL_HANDLED",
+  "summary": "r165（prerun 指纹 2e34c39f）：①12S-A OCR 4 批全收口裁决零 findings（独立读 bNN.log+diagnosis，b04 16:02 收口）→ 并行回合已合入 main 6c7d983，r165 独立核（祖先 OK/merge-tree 零冲突/app diff 逐字节一致）+补推 origin（推前实测 origin 仍 6fb42c4，推后 6c7d983 双核一致）→ 12S-A 转 DONE；②16B r1 增量 OCR run 0a77a83f AWAITING_DECISION 裁决=弱 OCR 面解除（proxy 单批 0 findings coverage 1/1 batch_identity 一致，session 59b7741a in 734825/out 27169），合入门禁仍关闭（强审 e7d6b921 5 CORRECTION 待 r2），r2 等 C ACK；③C 12S-C attempt-1 前置交付冻结 92dcb52 机械核验全绿（定向 11/回归合集 148/ruff clean/byte-identical 双核 0 行/零越界，独立复跑），回执两处口径（发布根场景子树/车辆读父包）裁决接受不返修，REVIEW_PENDING 待接线核验未合入；④B S9b 单 15:33 在案未 ACK（16:03 时限已过 ~9min，不催单不接管，等 B 下轮 cron 自处理）。三份裁决落盘 inbox/coordinator/{TASK-12S-A,TASK-16B,TASK-12S-C}，TODO §8.2/§9.2 r165 段+DEVELOPMENT-LOG r165 段已记账。本轮零新 OCR 起跑、零强审调用、零新派单（12S-B s9_head OCR/16B r2 OCR/12S-C 消费面 OCR 排队待交付）。",
+  "evidence": "reviews/TASK-12S-A/attempt-1/ocr/b0{1,2,3,4}.log+diagnosis（4×0 findings complete）; reviews/TASK-16B/attempt-2-r1/ocr/b01.log+59b7741a 诊断; rosbag-catalog rev-parse main=origin=6c7d983（r165 push 验证）; wt-03b-t12sc 92dcb52 独立复跑 11/148 passed+ruff clean; inbox/coordinator/TASK-12S-C/attempt-1-mechanical-verification-decision-20261013.md",
+  "next": "B S9b ACK+s9_head 交付（16:30 最佳）→ 机械核验 → 12S-B 增量 OCR（f62a29c..s9_head，固定入口排队首位）；C 16B r2 ACK→交付 → 核验 → r2 增量 OCR → 强审增量复审（剩 4/5）→ TESTER → 合入 16B；12S-C 消费面 OCR+强审 pack 排 16B/12S-B 后；17:15 A 11S-PREP 交付核；17:30 发布决策材料汇总",
+  "fingerprint": "2e34c39f4ffbddd4b02d81ce51a1b762c8f7d4c7a168c011904441cb87618ba7"
+}

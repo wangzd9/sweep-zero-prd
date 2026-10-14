@@ -1,0 +1,81 @@
+{
+  "status": "complete",
+  "llm": {
+    "provider": "vllm-local",
+    "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8"
+  },
+  "message": "Review complete: 0 finding(s) across 1 selected item(s).",
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 0,
+    "total_tokens": 333366,
+    "input_tokens": 309893,
+    "output_tokens": 23473,
+    "elapsed": "6m6s"
+  },
+  "tool_calls": {
+    "total": 20,
+    "by_tool": {
+      "code_search": 12,
+      "file_read": 8
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [],
+  "groups": [
+    {
+      "label": "app/services/scene_result_report_service.py",
+      "files": [
+        "app/services/scene_result_report_service.py"
+      ]
+    }
+  ],
+  "session_id": "81a9e337-336a-48c3-95e4-2cfaeb01dfb7",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "81a9e337-336a-48c3-95e4-2cfaeb01dfb7",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "commit",
+      "requested_head": "4e2158e",
+      "resolved_base": "0f6aa8738b8c95d1dec49de7ba2fa0f52484f6fc",
+      "resolved_head": "4e2158e443e1b4d5c8af1f97ef8ce870e5f60b85",
+      "exact_range": "0f6aa8738b8c95d1dec49de7ba2fa0f52484f6fc..4e2158e443e1b4d5c8af1f97ef8ce870e5f60b85",
+      "source_artifact_sha256": "92c54f7d1c048c0840151543180e78e48d14660b85dcbff444495465351a07f7"
+    },
+    "execution": {
+      "ocr_version": "v1.12.13",
+      "provider": "vllm-local",
+      "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8",
+      "configured_concurrency": 8,
+      "rule_config_sha256": "d5e28d02ed5cdf85b533907db24b47f1be02847db764a4ded208dbaf54380ae1",
+      "runtime_config_sha256": "3cf97d1b18c7594d2cab955a06b507c732a1363ee2c029e58e608660f57296ef"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "87d28e4a19c636ed52e08d5576e8fd6202090b244972b1edbd65fc350c297066",
+          "path": "app/services/scene_result_report_service.py",
+          "fingerprint": "4ac544bd5f6810f7fffa2afb1d3c1ca83d974bfc6d4780f6d0f0495f019109af"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "87d28e4a19c636ed52e08d5576e8fd6202090b244972b1edbd65fc350c297066",
+          "path": "app/services/scene_result_report_service.py",
+          "fingerprint": "4ac544bd5f6810f7fffa2afb1d3c1ca83d974bfc6d4780f6d0f0495f019109af"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 365883
+  }
+}

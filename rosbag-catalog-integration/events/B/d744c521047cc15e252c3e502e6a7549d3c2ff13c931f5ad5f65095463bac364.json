@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t12sb-attempt1-delivered-20261013-131200",
+  "occurred_at": "2026-10-13T13:12:00+08:00",
+  "recorded_at": "2026-10-13T13:11:24+08:00",
+  "role": "B",
+  "task": "TASK-12S-B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "12S-B attempt-1 交付冻结：spray 能力适配器 base 6fb42c4→f62a29c（13文件+3136行），两路线+冻结选帧+双pass归一+整数ns分段+身份键缓存+7参考图受控+预检；spray 54 passed/场景域142/全仓937+4(base既有)；ruff clean/merge-tree零冲突；真实decode/render/VLM NOT_RUN(依赖缺失)；1012只读bag packet路线适用",
+  "evidence": "receipts/TASK-12S-B/attempt-1.md;commit f62a29c211ac846342dd79b2937962f8cb3c172c",
+  "next": "等协调者机械核验→串行OCR(16C链持ocr.lock)→TESTER独立验证→合入main"
+}

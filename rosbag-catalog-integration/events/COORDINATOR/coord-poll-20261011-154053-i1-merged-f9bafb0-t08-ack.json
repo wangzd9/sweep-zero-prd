@@ -1,0 +1,17 @@
+{
+  "event_id": "coord-poll-20261011-154053-i1-merged-f9bafb0-t08-ack",
+  "role": "COORDINATOR",
+  "occurred_at": "2026-10-11T15:45:00+08:00",
+  "recorded_at": "2026-10-11T15:46:00+08:00",
+  "task": "TASK-05/TASK-08",
+  "attempt": "i1-1/attempt-1",
+  "status": "MERGED",
+  "summary": "1号 i1-1 6823f2d（夹具 bag_uid hex16→hex9 + len<=26 assert，零 app 变更）独立机械核验全绿：单 commit base=62a85bf、diff 仅 tests/test_scene_slice_scheduling.py +5/-1、真 MySQL 8.4.11 STRICT 隔离库文件级 36 passed RC=0 容器即毁 0 残留（a-i1-mysql-suite.out 复核）、wt-01-i1 干净；OCR I1-r1 纯测试交付预期 0 入选（R8/R9 先例）→ --no-ff 合入 main f9bafb0（15:45 推 origin 62a85bf..f9bafb0），合入后 sanity 全绿（ruff/SQLite 36 passed/alembic 单头 20261009_02_ingest_frozen/main=origin 双核一致）→ I-1 VERIFICATION_GAP 关闭。另核 2号 TASK-08 attempt-1 15:31 ACK 已开工（wt-04a-t08 分支 scene/task-08-integration，联调中，I-1 回归项按 ACK 口径以合入 commit f9bafb0 为准 rebase 复核）。TESTER 15:21 通报的强复审子 agent 孤儿容器 r2i6-mysql 本轮 ps/docker 复核已 0 残留，无需处置。",
+  "evidence": [
+    "inbox/coordinator/TASK-05/i1-1-acceptance-decision.md",
+    "receipts/TASK-05/i1-1.md",
+    "main f9bafb0b44e70e275ba0dd91ca3f0e078e002004",
+    "inbox/2号/TASK-08/attempt-1-ack.md"
+  ],
+  "next": "2号 TASK-08 联调报告验收（失败回派最小修复）；I-1 回归项随联调动态核对"
+}

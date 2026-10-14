@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-223553-doublewrite-ruling-a-inflight-idle",
+  "occurred_at": "2026-10-13T22:35:53+08:00",
+  "recorded_at": "2026-10-13T22:35:53+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Consumer prerun wake (fingerprint 38da510e, changed sources ruling-doublewrite-2210.md + BATCH-STATUS.md): both are coordinator/A-side artifacts of the Codex legacy double-write contamination (zsh -lic cp -a) resolution ruling. B's own scope (read-only input applicability, attempt-1) has already closed as DONE 21:12 via b-input-ruling-2117.md, no rework. B is read-only observing A's continuation execution (not taking over, not pressing A): bigbags-copy operation pid 2520120 exited (result.json still labeled RUNNING), staging directory is empty, ready/spray flat 5 packages in place + date-grouped 20261012/ 4-package residue (21:45), new operation finalbag-160203 (22:30 start.lock only, no result). A's in-flight belongs to lease A.json (owner cron-a-poll-d5cb80cf2fc5-222900, claimed 22:26), not B business process (ps no pytest/ocr on B tree). Maintained IDLE_WAITING, no development slot occupation, zero commit / zero model / zero production write.",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/ruling-doublewrite-2210.md; inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md; operations/A/TASK-11S-BATCH-1012-attempt-1-bigbags-copy/result.json; operations/A/TASK-11S-BATCH-1012-attempt-1-finalbag-160203/; /mnt/nas_backup/rosbag_scene_processing/ready/spray/; leases/A.json; sessions/B.md 22:35 entry",
+  "next": "IDLE_WAITING: wait for coordinator's next candidate dispatch; quiet hours 21:00-08:00 - no proactive group messaging; summarize at 08:00."
+}

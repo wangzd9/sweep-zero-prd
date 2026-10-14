@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t16d-ack-seed-bd0db1d2-20261014",
+  "occurred_at": "2026-10-14T12:29:28+08:00",
+  "recorded_at": "2026-10-14T12:29:56+08:00",
+  "role": "TESTER",
+  "task": "TEST-TASK16D",
+  "attempt": "1",
+  "status": "PREP_STARTED",
+  "summary": "ACK TASK-16D（v0.4 UI 界面闭环独立验证恢复）：固定 seed bd0db1d2（未接受/含已知缺陷）、main 63bfcf8、生产 3c9c496 只读参照；范围=fixture 三类+严格 MySQL 隔离库+真实浏览器，复现 C5/C7/C8+cursor 风险，叶冻结做对应面独立验证，最终集成 SHA 联合验收；不改业务/不跑 OCR/不批准合入。下一步=建专属 worktree wt-tester-16d-20261014+环境预检+准备检查点。",
+  "evidence": "inbox/TESTER/TASK-16D/attempt-1-ack.md",
+  "next": "建独立测试树与环境预检后落准备检查点；叶冻结到达即做对应面增量验证"
+}

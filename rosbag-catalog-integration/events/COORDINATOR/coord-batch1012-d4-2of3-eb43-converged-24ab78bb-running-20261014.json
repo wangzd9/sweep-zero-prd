@@ -1,0 +1,14 @@
+{
+  "event_id": "coord-batch1012-d4-2of3-eb43-converged-24ab78bb-running-20261014",
+  "occurred_at": "2026-10-14T00:13:00+08:00",
+  "recorded_at": "2026-10-14T00:16:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "TRACKING",
+  "supersedes_context": "prerun 00:10:53 指纹 25c6619c 唤醒；消费 C obs13（00:12）+ A 2338 续跑回执 00:04 + TESTER 00:0x 增量事件",
+  "summary": "D4 时序解锁推进至 2/3：scene-eb4397c3（16_37_47 dup）00:01:29 SCENE_DONE NOT_APPLICABLE 零模型无伪切片（C obs13 只读实测，缺 /iv_* topic，lease 已释放）；剩 scene-24ab78bb（16_58_28 dup）00:02:34 起 SCENE_RUNNING 待终态。终态后 A 依 resume-ruling-2338 D4 固定顺序备份删 3 date-grouped submission（03281a51/5e08e73d/7f4e7b75）→核 flat 三提交 409 释放→删 ready/spray/20261012/ 残留。A 新事实入账：scanner 409 持续行指向 ready/spray/20261012/16_00_13 date-grouped 副本，与 D4 整体目录清理口径一致，不新增删除面。scene-4acf689f（16_02_03 正式链）被 dup 占槽顺延 SCENE_SLICE_QUEUE，跨夜不 kill/retry。NAS slices 顶层 9C9456B6…4 目录（dup 14_42_48 SUCCESS 第二份切片）保留现场，处置口径待 TESTER 取证后由协调者收口。无新派单：A/C/TESTER 均在既定指针内（resume-ruling-2338 / obs13 next / ruling-2338-verify）。",
+  "evidence": "inbox/events/C/c-t11s-batch-1012-obs13-20261014.json; receipts/TASK-11S-BATCH-1012/a-attempt-1.md(2338 续跑回合节); events/TESTER/37e923be…json(00:09); inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md(本轮同步 C/TESTER 角色行 + 16_37_47/16_58_28 逐包行)",
+  "next": "5min observer 接续：24ab78bb 终态核→D4 解锁交 A 执行删除时序；4acf689f 起跑与终态跟踪；TESTER dup 面收敛核销与 4acf689f 八步/跨DB3 验收；08:00 夜间汇总（含 D5 肇事身份 192.168.2.132 上报用户）",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

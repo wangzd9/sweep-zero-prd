@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-024853-nochange",
+  "occurred_at": "2026-10-12T02:50:05+08:00",
+  "recorded_at": "2026-10-12T02:50:37+08:00",
+  "role": "C",
+  "task": "C",
+  "attempt": "none",
+  "status": "no_change",
+  "summary": "02:48:53 preflight ACTIVE；02:23:53 后 C 范围零新增：inbox/3号 与 inbox/coordinator find -newermt 实测为空，无 C 新派单；main HEAD 453da0c=origin/main 双核一致（TASK-10 已 DONE 收口，非 C）；wt-03b HEAD 6f1a9ad 分支 feature/scene-03b-ocr-rework 干净（status --porcelain 排除 .venv 实测 0）；ps 无 C 在途业务进程（0）；leases B.json 在途（02:48:53 claim，2号巡检，未到期不接管，非 C）；保持空闲待派单",
+  "evidence": "none",
+  "next": "none"
+}

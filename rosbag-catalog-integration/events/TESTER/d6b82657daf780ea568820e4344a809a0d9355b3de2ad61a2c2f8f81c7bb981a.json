@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t16a-post-merge-verify-pass-20261013",
+  "occurred_at": "2026-10-13T09:34:08+08:00",
+  "recorded_at": "2026-10-13T09:34:08+08:00",
+  "role": "TESTER",
+  "task": "TASK-16A",
+  "attempt": "t16a-post-merge-verify",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "16A post-merge 独立验证 PASS 交付：真 MySQL 8.4.11 全链迁移三趟 RC=0+单头+回填取证；SQLite 56+12=68 passed；test_web 单跑失败按 r138 口径申报非 16A 回归；容器 0 残留",
+  "evidence": "test-receipts/TEST-TASK16A-post-merge/attempt-1.md",
+  "next": "待协调者裁决（PASS 即 16A DONE）"
+}

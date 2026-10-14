@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-195753-t07b-ocr-b5-exit-no-output-idle",
+  "occurred_at": "2026-10-12T20:00:56+08:00",
+  "recorded_at": "2026-10-12T20:00:56+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "b5 后台 OCR 实测退出未收口(0字节无 Review complete、无存活进程)=再 reap 未记账；b3 1 medium 仍待裁决；07B 交付冻结等审不变",
+  "evidence": "sessions/B.md 19:57 巡检条目 + scratch/t07b/ocr/b5_lowtok_out.txt 0字节",
+  "next": "协调者按恢复入口处置 b5 退出(NEEDS_MAIN_REVIEW 预案) 续跑 b6-b10"
+}

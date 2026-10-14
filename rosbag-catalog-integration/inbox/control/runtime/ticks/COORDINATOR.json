@@ -1,0 +1,23 @@
+{
+  "checked_at": "2026-10-14T18:10:11+08:00",
+  "role": "COORDINATOR",
+  "mode": "script_poll",
+  "control": "ACTIVE",
+  "wakeAgent": true,
+  "reason": "new_or_unacknowledged_change",
+  "fingerprint": "f6fcf8024b66ed1105159b00430bc094e2ceec32bffd2ec179318af6d65d9076",
+  "changed_sources": [
+    "TODO.md",
+    "event:A:A:a-t11s-bigbag-4acf689f-cancelling-not-converged-20261014",
+    "event:A:A:a-t16ca-ocr-r1-rework-4838ef8-delivered-20261014T171540",
+    "event:A:A:a-t16ca-ocr-r12-chip-label-1489bc6-delivered-20261014T174026",
+    "event:B:B:b-poll-20261014-173253-fp-951c41a4-b-leaf-ocr-gate-met-idle",
+    "event:B:b-poll-20261014-173253-fp-951c41a4-b-leaf-ocr-gate-met-idle",
+    "event:C:C:t11s-obs78-session-line-20261014",
+    "event:C:c-t11s-batch-1012-obs78-scene-run-cancelled-after-oom-20261014",
+    "event:COORDINATOR:COORDINATOR:coord-t11s-batch-1012-4acf-cancel-confirmed-exec-host-freed-20261014T1755",
+    "event:COORDINATOR:COORDINATOR:coord-t11s-batch-1012-4acf-scene-cancelling-obs-20261014T1640",
+    "event:COORDINATOR:COORDINATOR:coord-t16ca-ocr-retry1-closed-r1-rework-dispatched-b-ocr-inflight-20261014T1642",
+    "event:COORDINATOR:COORDINATOR:coord-t16ca-r1-verified-t16cb-ocr-closed-f2-conflict-unified-r12-20261014T1732"
+  ]
+}

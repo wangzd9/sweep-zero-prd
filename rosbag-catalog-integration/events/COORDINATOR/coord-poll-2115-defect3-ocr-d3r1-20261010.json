@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-2115-defect3-ocr-d3r1-20261010",
+  "occurred_at": "2026-10-10T21:18:00+08:00",
+  "recorded_at": "2026-10-10T21:24:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1-defect3-reconcile-replay",
+  "status": "OCR_RUNNING",
+  "summary": "2号 4e2158e 机械核验全绿（单文件+27/-3零越界、方向一致、开发自测真MySQL A/B复现闭环+SQLite 31/822+ruff绿）→ 串行OCR D3-r1 起跑（session 5ee653d5，pid 851050持ocr.lock，硬截止21:55）；main 0f6aa87未合入，06聚合门禁仍不通过",
+  "evidence": "reviews/TASK-06B/attempt-1-defect3-reconcile-replay/ocr-batches.md; receipts/TASK-06B/attempt-1-defect3-reconcile-replay.md",
+  "next": "下轮巡检查D3-r1收口→无high/critical即--no-ff合入main推origin→派TESTER新attempt复测→强模型增量复审（用户手动）"
+}

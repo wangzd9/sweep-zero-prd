@@ -1,0 +1,21 @@
+=== S1 返修 attempt-6-rework 真实 MySQL 证据 2026-10-10 18:54:50 +0800 ===
+container image: 6ea90827b110  network: host
+VERSION()
+8.4.11
+Variable_name	Value
+sql_mode	ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+--- 1) 全新库 s1_fresh: alembic upgrade head ---
+RC=0
+20261009_02_ingest_frozen (head)
+version_num
+20261009_02_ingest_frozen
+Field	Type	Null	Key	Default	Extra
+version_num	varchar(32)	NO	PRI	NULL	
+
+--- 2) 已有库 s1_existing: 先 upgrade 停在 20261009_01，再 upgrade head ---
+STEP_RC=0
+20261009_01_scene_identity_key
+RC=0
+version_num
+20261009_02_ingest_frozen

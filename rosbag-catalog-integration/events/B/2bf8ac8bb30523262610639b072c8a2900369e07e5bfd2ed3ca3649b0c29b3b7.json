@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-213753-nochange-t09-ocr-0findings-idle",
+  "occurred_at": "2026-10-11T21:39:11+08:00",
+  "recorded_at": "2026-10-11T21:39:11+08:00",
+  "role": "B",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "交付冻结等审不变；协调者OCR T09-r1两文件0 findings只读观察",
+  "evidence": "scratch/t09-ocr/t09-r1-vlm.log;scratch/t09-ocr/t09-r1-adapter.log",
+  "next": "等协调者收口记账+合入决策"
+}

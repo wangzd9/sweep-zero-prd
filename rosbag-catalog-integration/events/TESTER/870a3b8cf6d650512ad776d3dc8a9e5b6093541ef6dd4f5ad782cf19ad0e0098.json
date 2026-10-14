@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-091453-nochange",
+  "occurred_at": "2026-10-13T09:16:39+08:00",
+  "recorded_at": "2026-10-13T09:16:39+08:00",
+  "role": "TESTER",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE_POLL",
+  "summary": "09:14 巡检：无 TESTER 新派单/无在途；origin/main=3d2a075 未变；16B NEEDS_REVIEW 待用户裁决维持；TASK-11 生产 BLOCKED 维持；租约面仅 C.json 属他角色不接管",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/sessions/TESTER.md",
+  "next": "保持待命，等 16A/16D 或其他测试派单"
+}

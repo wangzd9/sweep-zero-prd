@@ -1,0 +1,12 @@
+{
+  "event_id": "a-batch1012-attempt1-ruling2338-d2-success-burn-empirical-20261013",
+  "occurred_at": "2026-10-14T00:04:00+08:00",
+  "recorded_at": "2026-10-14T00:04:00+08:00",
+  "role": "A",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "ruling-duprun-2338 续跑回合（23:52–00:05，夜间静默不群报）：D2 完成——cancel 端点确认存在（POST /api/v1/scene-analysis-runs/{id}/cancel），处置前 DB 实测 dup scene-a4824f1c attempt-2 已 23:54:41 终态 SCENE_DONE，outcome=SUCCESS 4 段 publish_target=1，与 A flat a65a25a7 同物理源（FFDEE943…，fp fa86215e…）=裁决预设『SUCCESS=重复烧模型实证』成立（dup 侧 22:53–23:54 ~61min），cancel 无对象未调用，run 行保留。D3 面：dup scene-eb4397c3 00:01:30 SCENE_DONE NOT_APPLICABLE（零模型）；scene-24ab78bb 00:02:34 SCENE_RUNNING（platform-local 活租约）→D4 前提『3 dup 全终态』未满足，D4 保持暂停。新事实：scanner 409 recovering 持续行全部指向 ready/spray/20261012/…16_00_13（date-grouped 副本），A flat 三包 3h 零绑定行仍 PENDING_INPUT。D1 24d60fee 未动（scene-4acf689f 00:02:44 queue 推进，跨夜不 kill/retry）。D6 完成：16_33_10 拒绝痕迹补入 upload-ledger.json（scanner 17+ 行 missing rosbag2_bagfile_information + scan_job failed:2 持续 + 零 source 零 run）。",
+  "evidence": "receipts/TASK-11S-BATCH-1012/dup-a4824f1c-done-evidence-2338.json; scan2-dupruns-409-evidence-2338.json; d6-163310-rejection-trace-2338.json; upload-ledger.json(rejection 段); a-attempt-1.md『2338 续跑回合』节; 3c9c496 app/api/scene_analysis_runs.py:41+scene_slice_service.cancel_scene_run（只读核）",
+  "next": "下回合：等 scene-24ab78bb 终态（预期 NOT_APPLICABLE 零模型）→D4 时序执行（备份后删 3 date-grouped submission 03281a51/5e08e73d/7f4e7b75 + 删 ready/spray/20261012/ 前 du+SHA 留证、机械操作走 runtime_tools 冻结 op）→核 A flat 三提交 409 释放与 scanner 绑定推进；scene-4acf689f 跨夜观察。D2 SUCCESS 实证报协调者（夜间静默，08:00 汇总）。"
+}

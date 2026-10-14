@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-4acf-infer-continue-quiet-20261014030512",
+  "occurred_at": "2026-10-14T03:05:12+08:00",
+  "recorded_at": "2026-10-14T03:05:12+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "03:0x 按 ruling-4acf-infer-active-0218 新口径增量只读实测（唤醒源=prerun 指纹 88b5055d… 变更源为上轮 02:53:53 自写事件 95cd853b…/tester-t11s-batch-1012-4acf-infer-continue-quiet-20261014025353… + sessions/TESTER.md 回声，已核读，无新派单/新 decision）：4acf689f 03:02:44 实测 SCENE_RUNNING attempt1、heartbeat 30s 节奏持续刷新、八步仍全 QUEUED started_at=NULL（入队 ~237min，模型段完成信号未到）；升级条件逐项核全未命中：heartbeat 正常无连败/run 未 FAILED/VLM 03:02:35-03:03:25 六行 Running 1-4 reqs、Waiting 恒 0、prefix cache 95.0%、MM 83.8%、KV 1.7-7.0%/POST 200 连发/proxy 容器 :8002 ESTAB 3 条/RSS 18.2GB State S——INFER 远端推理持续活跃，维持不 kill/cancel/retry；ingest_submission 8 行 03:0x 不变，flat 三提交仍 PENDING_INPUT 串行等 4acf689f 终态 D4③，14_42_48 正式全链 NOT_RUN；scan_job 4007（02:55:42）incoming SUCCESS failed:2 空包拒绝 10min 周期持续；scene run 7=6DONE+1RUNNING 无新 run；PASS 基线不变。",
+  "evidence": "pipeline_run heartbeat=2026-10-14 03:02:44 SCENE_RUNNING; step_run 8/8 QUEUED started_at=NULL; /tmp/vllm_qwen38.log 03:02:35-03:03:25 Running 1-4/Waiting 0 prefix cache 95.0% MM 83.8%; docker exec rosbag-scene-proxy grep -c 1F42 /proc/net/tcp=3; /proc/3495931 VmRSS=18213940kB State S; docker stats proxy cpu=1.25%/mem=21.29GiB; ingest_submission 8 rows 不变; scan_job 4007 02:55:42 SUCCESS {dirs:3 bags:1 failed:2}; 8767 active_runs=[4acf689f ACCEPTED pid:1]",
+  "next": "按裁决新口径继续等 4acf689f 模型段完成信号（checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE，预计持续数小时跨夜继续）；升级条件=heartbeat 4 连败/翻 FAILED/VLM Waiting 持续>0 且 proxy 无 ESTAB/八步翻 FAILED；SCENE_DONE 后核跨 DB3 边界/产物/两次 reconcile（16_02_03 正式全链）；A flat 三提交绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）"
+}

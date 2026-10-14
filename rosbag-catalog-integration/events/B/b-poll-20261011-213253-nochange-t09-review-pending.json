@@ -1,0 +1,11 @@
+{
+  "event_id": "b-poll-20261011-213253-nochange-t09-review-pending",
+  "role": "B",
+  "ts": "2026-10-11T21:34:45+08:00",
+  "checked_at": "2026-10-11T21:32:53+08:00",
+  "task": "TASK-09",
+  "attempt": 1,
+  "status": "REVIEW_PENDING",
+  "summary": "21:27后 inbox/2号、coordinator、receipts、reports 零新增；交付 a60bb81 冻结等审（协调者机械核验+串行OCR+§G裁决）；origin/main 0a8ca8a 不变；wt-04a-t09 干净、无本侧在途进程；IDLE_WAITING",
+  "next": "收到协调者审核结论/返修/新单再启动"
+}

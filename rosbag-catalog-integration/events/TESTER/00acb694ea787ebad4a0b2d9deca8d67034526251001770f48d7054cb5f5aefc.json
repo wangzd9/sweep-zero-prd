@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-170453-nochange",
+  "occurred_at": "2026-10-12T17:17:25+08:00",
+  "recorded_at": "2026-10-12T17:17:25+08:00",
+  "role": "TESTER",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "5分钟巡检无变化：origin/main 502bf8e 未动，无新 TESTER 派单/回执/事件，维持 IDLE",
+  "evidence": "sessions/TESTER.md",
+  "next": "继续5分钟巡检"
+}

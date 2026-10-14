@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-112753-t16c-paused-ocr-c03-done-c04-inflight",
+  "occurred_at": "2026-10-13T11:32:30+08:00",
+  "recorded_at": "2026-10-13T11:32:30+08:00",
+  "role": "B",
+  "task": "TASK-16C",
+  "attempt": "1",
+  "status": "PAUSED",
+  "summary": "11:27:53 巡检（fingerprint d1e20609，变更源仅 TODO.md=r144 OCR 口径注记）：16C 维持用户暂停（10:47 界面增量暂停），交付/在途证据保存不返修不合入；无 B 新派单/返修（inbox/2号 零新增）；16C 串行 OCR c03 scene_result_query.py 11:28:51 收口 rc=0 4 findings（c01 4/c02 2 含 C5 medium CONFIRMED CORRECTION 维持 r144 口径），c04 api/sources.py ps 实测在途（node 1743630/opencodereview 1743638，父 1682826 持 ocr.lock）——协调者门禁面只读观察；TESTER 独立验证维持 10:46-10:47 PASS 口径；wt-04a-t16c HEAD=5c80857 冻结洁净不移动，origin/main 6fb42c4 不变 16C 未合入（暂停）；leases 无 B 残留 owner。",
+  "evidence": "sessions/B.md 11:32 巡检条目；~/.hermes/cache/scratch/t16c_ocr/t16c_ocr_progress.txt c03 DONE 行；ps ocr review --from 6fb42c4 --to 5c80857 --exclude …api/sources.py 在途",
+  "next": "等协调者暂停口径下 16C OCR 全链收口处置（C5 CORRECTION 是否出返修单/或随暂停搁置）；恢复且收问题 ID 返修单按 attempt 续 b/task-16c-scene-ui-minimal；空闲只读巡检不扩需求、不碰生产。"
+}

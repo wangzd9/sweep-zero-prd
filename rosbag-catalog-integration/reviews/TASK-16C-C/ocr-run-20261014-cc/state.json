@@ -1,0 +1,42 @@
+{
+  "state": "AWAITING_DECISION",
+  "updated_at": "2026-10-14T04:46:09.093073+00:00",
+  "pid": 3584317,
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/coordinator-ocr-e7a5580cdf9f4eed8b448aad1c61f53b.service",
+  "run_id": "e7a5580cdf9f4eed8b448aad1c61f53b",
+  "unit": "coordinator-ocr-e7a5580cdf9f4eed8b448aad1c61f53b.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "app/templates/pipeline_detail.html"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-14T04:24:41.388193+00:00",
+      "pid": 3584392,
+      "process_start_ticks": "35214290",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-c-16cc/4a5ae762-a67c-4775-985d-063bcce45c48.jsonl",
+      "session_mtime": 1791952699.4431052,
+      "returncode": 0,
+      "ended_at": "2026-10-14T04:41:37.233937+00:00",
+      "duration_seconds": 1015.84
+    },
+    {
+      "id": "b02",
+      "files": [
+        "app/web/pipelines.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-14T04:41:37.394962+00:00",
+      "pid": 3611062,
+      "process_start_ticks": "35315890",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-c-16cc/7cb749ec-4054-4fcd-ab61-ddead634350f.jsonl",
+      "session_mtime": 1791953141.1229403,
+      "returncode": 0,
+      "ended_at": "2026-10-14T04:46:09.073545+00:00",
+      "duration_seconds": 271.68
+    }
+  ],
+  "gate_decision": "NOT_EVALUATED",
+  "ended_at": "2026-10-14T04:46:09.093078+00:00"
+}

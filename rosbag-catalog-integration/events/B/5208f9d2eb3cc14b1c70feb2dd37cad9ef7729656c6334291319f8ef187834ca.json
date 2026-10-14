@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-112253-rework7-merged-b7cee07",
+  "occurred_at": "2026-10-11T11:24:13+08:00",
+  "recorded_at": "2026-10-11T11:24:13+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-7",
+  "status": "IDLE_WAITING",
+  "summary": "rework-7 协调者11:22验收合入main b7cee07(OCR R7-r1 0 findings, 定向35 passed复跑), 本侧交付收口转空闲等待",
+  "evidence": "inbox/coordinator/TASK-06B/attempt-1-r2-rework-7-acceptance-decision.md",
+  "next": "06聚合剩余=强复审R2I-20261010-06(target b7cee07,用户手动)→聚合DONE→TASK-08"
+}

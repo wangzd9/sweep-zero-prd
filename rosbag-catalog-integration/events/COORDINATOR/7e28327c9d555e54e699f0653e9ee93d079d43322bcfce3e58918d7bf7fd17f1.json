@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-010553-t10-reverify-v1-fail-defect3-dispatch",
+  "occurred_at": "2026-10-12T01:17:54+08:00",
+  "recorded_at": "2026-10-12T01:17:54+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "e2e-reverify-after-merges/1",
+  "status": "BLOCKED_DISPATCHED",
+  "summary": "TESTER E2E复跑第1跑FAIL定位新缺口#3(app 06B域: complete-scene区间复核header域vs存储域不一致,真包必409);独立核验属实+驱动step5 NameError已修;回派2号t10-defect3-publish-bounds(base a77aa45);TESTER待#3合入后复跑v2",
+  "evidence": "scratch/t10/t10-e2e.json;inbox/2号/TASK-10/t10-defect3-publish-bounds.md",
+  "next": "核2号#3 ACK/交付→机械核验→OCR→合入→TESTER复跑v2"
+}

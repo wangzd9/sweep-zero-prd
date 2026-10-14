@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-202253-nochange-t07b-ocr-b5-r95-idle",
+  "occurred_at": "2026-10-12T20:28:08+08:00",
+  "recorded_at": "2026-10-12T20:28:08+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "T07B交付冻结等审,r95 detached OCR b5在途,本侧无新派单返修,IDLE_WAITING",
+  "evidence": "sessions/B.md; wt-04a-t07b f4bfcf2; origin/main 502bf8e",
+  "next": "等OCR收口+b3裁决+合入"
+}

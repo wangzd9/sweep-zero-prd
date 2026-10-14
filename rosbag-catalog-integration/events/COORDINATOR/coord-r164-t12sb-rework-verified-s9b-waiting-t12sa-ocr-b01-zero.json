@@ -1,0 +1,13 @@
+{
+  "event_id": "coord-r164-t12sb-rework-verified-s9b-waiting-t12sa-ocr-b01-zero",
+  "occurred_at": "2026-10-13T15:45:00+08:00",
+  "recorded_at": "2026-10-13T15:45:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-B/TASK-12S-A/TASK-16B/TASK-11S-PREP",
+  "attempt": "n/a",
+  "status": "POLL_HANDLED",
+  "summary": "r164（prerun 指纹 45f9f56c）：B 12S-B 16条返修 0320a8e 机械核验独立复跑全绿（定向40/spray域94/全仓977+4=base既有零新增/ruff clean，8文件+980/-78 与回执一致，HEAD 双核干净）；S9 漏项实测确认（decode.py:270 仍 len(pc_ds)!=len(src_msgs)、全文件 is_last_scan 零命中）→ S9b 追加单（15:33 落盘，r163 并行回合所派）等 B ACK（16:03 前）+续 commit s9_head（16:30 前最佳）；12S-A 固定入口 OCR run 8540bf7e b01 rc=0 0 findings（coverage 1/1，1368s）、b02 在途健康、b03/b04 排队；TESTER 14:51 交付 12S-A PASS+12S-B PASS@f62a29c（纠正 ACK 15:04 在案）→ 12S-A 合入唯一剩余门禁=OCR 4 批全收口裁决；16B r2 已派 C（强审 REWORK 5 项，授权剩 4/5）等 ACK/交付；A 11S-PREP ACK+边界确认在案（15:2x 用户裁决继续，17:15 交付时限不变）；12S-C 前置暂停等 16B r2 收口。本轮零新 OCR 起跑、零强审调用、零合入、零新派单。",
+  "evidence": "wt-04a-t12sb rev-parse 0320a8e96c76 + pytest 40/94/977+4 + ruff clean（r164 独立复跑）; grep decode.py is_last_scan=0; reviews/TASK-12S-A/attempt-1/ocr state.json b01 REVIEW_COMPLETE b02 RUNNING; events/B/fa55c05d 15:21 交付; events/TESTER/1081d9dd 14:51 + 55c8970e 15:04; inbox/2号/TASK-12S-B/attempt-1-rework-s9b-dispatch.md 15:33; inbox/1号/TASK-11S-PREP/attempt-1-ack.md + boundary-confirmation.md",
+  "next": "B S9b ACK/s9_head 交付 → 机械核验 → 12S-B 增量 OCR（f62a29c..s9_head，排队 12S-A OCR 后）→ TESTER 增量复验 → 合入 12S-B；12S-A OCR b02-b04 收口裁决 → 合入 12S-A；16B r2 ACK/交付 → 核验 → 增量 OCR → 强审复审（剩 4/5）→ TESTER → 合入 16B；A 11S-PREP 17:15 交付核；17:30 发布决策材料汇总",
+  "fingerprint": "45f9f56cc170bf77508a5ed31495a61647eca6ca3f9fcd4bd097d0f74862912d"
+}

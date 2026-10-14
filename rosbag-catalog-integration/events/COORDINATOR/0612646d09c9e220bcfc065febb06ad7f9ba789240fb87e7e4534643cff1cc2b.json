@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-102053-r142-t16c-delivery-verified-rebased-t16c-tester-dispatched",
+  "occurred_at": "2026-10-13T10:27:00+08:00",
+  "recorded_at": "2026-10-13T10:27:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16C",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "B 16C attempt-1 交付 ad37ae1（8 文件 +957/-33，10:00 事件）机械核验全绿（base 4b9f30a 与 main 6fb42c4 零文件交集/15 用例复跑全绿/ruff 绿/路由顺序核）→ 协调者 rebase 接线新 head 5c80857（diff 与 4b9f30a..ad37ae1 逐字节一致，merge-tree 零冲突）→ 16C 转 REVIEW_PENDING：OCR 7 文件排 16B proxy 第 7 次（r141 10:16 直连 8002 在途持 ocr.lock，硬截止 11:16，rc=1 不再自动第八次）收口后串行；TESTER 16C 独立验证派单已落（固定 head 5c80857，8.4 清单 9 项，本单无 DDL）；16A DONE/07B DONE/16B 冻结/16D WAITING 不变；强审期限 11:33:12 内本轮零新增（60min 0/5 累计 2 在途 0 费用未知）",
+  "evidence": "receipts/TASK-16C/attempt-1.md; inbox/TESTER/TASK-16C/t16c-independent-verify-dispatch.md; sessions/COORDINATOR.md r142; reviews/TASK-16/16A-16B-ocr-batches.md r142 段; scratch/t16_ocr/b2_r141_direct7_progress.txt; ps 1658128/1658154",
+  "next": "r143+ 核 16B 第 7 次 rc（11:16 硬截止）→ 16C 7 文件 OCR 串行；监 TESTER 16C ACK/交付；16C 零 CORRECTION+TESTER PASS → 合入 DONE → 16D 前置 2/3"
+}

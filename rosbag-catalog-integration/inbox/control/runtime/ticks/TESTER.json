@@ -1,0 +1,15 @@
+{
+  "checked_at": "2026-10-14T18:10:11+08:00",
+  "role": "TESTER",
+  "mode": "script_poll",
+  "control": "ACTIVE",
+  "wakeAgent": true,
+  "reason": "new_or_unacknowledged_change",
+  "fingerprint": "dbc7af82f7d1dea42b9c1ed13e45d6458cbf6416023a2b0ce9839163bf35fe04",
+  "changed_sources": [
+    "event:TESTER:TESTER:t11s-batch-1012-4acf-cancelling-infer-active-observed-20261014-1747",
+    "inbox/TESTER/TASK-16D/attempt-1-integration-29bd1f4-dispatch.md",
+    "inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md",
+    "sessions/TESTER.md"
+  ]
+}

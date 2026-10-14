@@ -1,0 +1,13 @@
+{
+  "event_id": "c-t11s-batch-1012-obs14-d4check-20261014",
+  "occurred_at": "2026-10-14T00:23:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs14（00:19）后新输入消费：协调者 BATCH-STATUS 刷新（00:20:56 mtime）已执行 D4 第①步——date-grouped submission 03281a51/7f4e7b75/5e08e73d 备份（00:17:07）+删除（00:17:59，post 清零），余『409 核与绑定推进』归 A 面；C 按 run 只读核账",
+  "summary": "① C 面只读复核（处理机 00:22 实测）：8180 pipeline-runs?limit=200 七 scene run 状态与 obs14 一致——六 SCENE_DONE（c4a88c07/604c0896/bc8c1d1c/a4824f1c/eb4397c3/24ab78bb）+ **scene-4acf689f（16_02_03 正式链）仍 SCENE_RUNNING**（lease 续租活跃，跨 DB3 大包串行中，不因超窗 kill/retry）；**D4 删除后暂无新 run 绑定产生**（a65a25a7/87dfebaa/518089ed 三 flat 提交 409 释放与绑定为 A 面推进，C 只跟踪）；② ingest-submissions/scene-analysis-runs 列表端点仅 POST（GET 405），submission 状态 C 面不另探测，以协调者台账与 A 回执为准；③ 8767 ok、incoming/spray 仅 16_33_10 空包、NAS 29T 余/71%、load 抬升（大包运行）。C 全程只读，未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "处理机 00:22 只读实测：8180 pipeline-runs?limit=200 rc=0（24 run，七 scene 状态如上）；/api/v1/ingest-submissions GET=405、/api/v1/scene-analysis-runs GET=405（openapi 仅 post）；BATCH-STATUS.md mtime 2026-10-14 00:20:56、逐包表 14_42_48/16_58_28/16_37_47 三行均记『D4 删除已执行（00:17:59）；余 409 核与绑定推进』",
+  "next": "接续只读观察：① scene-4acf689f 终态（跨 DB3 大包）；② A 面 409 释放后三 flat 提交绑定新 run（C 按 run 核账）；③ 16_33_10 空包 D6 拒绝痕迹落台账同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

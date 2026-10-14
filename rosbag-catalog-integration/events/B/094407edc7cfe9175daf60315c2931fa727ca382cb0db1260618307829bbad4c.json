@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-124253-nochange",
+  "occurred_at": "2026-10-11T12:44:25+08:00",
+  "recorded_at": "2026-10-11T12:44:25+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "nochange: 12:38后业务目录0命中, main 65ca0be 双核一致, 强复审result仍缺(用户手动), 无新派单",
+  "evidence": "sessions/B.md",
+  "next": "等强模型增量复审R2I-20261010-06(用户手动)后继续巡检"
+}

@@ -1,0 +1,13 @@
+{
+  "event_id": "c-t11s-batch-1012-anomaly-obs5-20261013",
+  "occurred_at": "2026-10-13T22:06:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "ANOMALY_UPDATING",
+  "supersedes_context": "第5轮只读观察（obs4 21:46 后 20 分钟窗），接续 c-t11s-batch-1012-anomaly-obs4-20261013 异常链",
+  "summary": "11S-BATCH-1012 C 第5轮只读观察：obs4 后关键变化=**A 上传链已全部无存活进程**——① A 原生 execution pid 2491657 obs4 时存活，本轮 `ps -p 2491657` 实测已退出（operations/A 目录 21:45 后零新文件）；② A 冻结 operation `bigbags-copy` worker/pipeline 2520120/2520138 仍无存活，result.json 仍 status=RUNNING updated_at 21:26:04 steps=[] current_step=1（op 状态机仍未收口，同 obs4）；③ ps 全量 grep cp -a/bigbag/20261012 零在途→**本批当前无任何上传/提交进程在跑，批次静默停摆，等协调者裁决 A 是否续起**。逐包落位核对（du -sb 全尺寸实测）：14_42_48 完整双份 ready/spray/（21:26:23）与 ready/spray/20261012/（21:25:55）均 724637738 字节、16_31_25 已被消费出 incoming（ready 顶层 25184760）、16_00_13/16_58_28 双份在 ready 两组（89664966/6794992397 全尺寸）、**16_37_47 已全尺寸落位**（incoming 顶层与 ready/20261012 均 7321525005=源尺寸，ready 侧 mtime 21:26-30）但 ledger 仍无其条目；15_58_23 REUSE 就绪；16_33_10 空包 0 字节文件仍在 incoming/spray（ledger 21:23:22 PLACED_INCOMING sub=7a71e404 PENDING_INPUT）。**16_02_03（10105917670 最大包）维持全域失踪**：incoming/ready/staging 零命中、无 .tmp 残留、ledger 无条目；源 /home/wang/下载/1012/rosbag2_2026_10_12-16_02_03 完整在位（metadata 12518 + 5368995840 + 4736909312，只读可重拷）。ledger 实测 6 条目（15_58_23 REUSE；16_31_25/16_00_13/16_33_10/14_42_48/16_58_28 PLACED_INCOMING，前 3 包+16_58_28 有 submission HTTP 201 PENDING_INPUT，14_42_48 有 PLACED 无 submission 记录）。backend 18000 仍 HTTP 000（ss 实测本机无 18000 LISTEN，唯一 spray 端口 28180=spray-real-29af08a5-runtime 容器；18080=rosbag-catalog-local-backend-1 健康但 environment=test 为本地栈非生产端点）→ 生产 18000 归属仍待协调者核（疑处理机侧）。NAS 余量正常（staging 设备 free 31.6TB）。C 本轮全程只读（ps/du/stat/ls/find/curl -I/ledger 读取），未 kill/未删/未重启/未改任何生产路径。",
+  "evidence": "ps -p 2491657 无输出；operations/A find -newermt 21:45 空；result.json status=RUNNING steps=[] updated 21:26:04；du -sb 14_42_48 双份=724637738、16_37_47 incoming+ready/20261012=7321525005、16_00_13 双份=89664966、16_58_28 双份=6794992397、16_31_25 ready=25184760 且 incoming 已无；find 全域 *16_02_03* 零命中+*.tmp 零命中；源 ls -la 16_02_03 三文件 10105917670 在位；upload-ledger.json 6 条目摘要（脚本 c_obs5_ledger_digest.py）；curl 18000 HTTP 000×1、ss -ltnp 18000 无 LISTEN、18080 /health/ready=ready environment=test；docker ps spray-real-29af08a5-runtime 28180 Up 3h",
+  "next": "报协调者裁决（批次已静默停摆，非观察窗问题）：① A 链是否续起（op 收口+16_33_10 空包拒绝收口+14_42_48 补 submission 记录）；② 16_02_03 10GB 失踪处置（源完整可重拷，建议先定责后由 A 重拷）；③ 16_37_47 落位但无 ledger 条目=账实不符补账或回退；④ ready 双份 14_42_48/16_00_13/16_58_28 去重与 relative_path 血缘（TESTER 面）；⑤ 生产 backend 18000 归属核实。C 继续按 run 只读观察，不接管 A 槽、不代跑、不 kill/retry",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

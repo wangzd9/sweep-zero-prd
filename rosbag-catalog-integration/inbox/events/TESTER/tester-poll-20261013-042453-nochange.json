@@ -1,0 +1,10 @@
+{
+ "session": "cron-tester-poll-167580c0500b-20261013-042453",
+ "checked_at": "2026-10-13T04:24:53+08:00",
+ "role": "TESTER",
+ "mode": "poll",
+ "status": "no_change_idle",
+ "new_tester_dispatch": null,
+ "origin_main": "502bf8ec79690cf01e130cb0591121eb10e96af5",
+ "note": "仅 A 面 receipt 新增，不接管；07B-post-r3 未派"
+}

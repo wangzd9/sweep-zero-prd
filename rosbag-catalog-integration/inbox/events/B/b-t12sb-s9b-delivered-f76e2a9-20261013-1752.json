@@ -1,0 +1,13 @@
+{
+  "event_id": "b-t12sb-s9b-delivered-f76e2a9-20261013-1752",
+  "occurred_at": "2026-10-13T17:52:00+08:00",
+  "recorded_at": "2026-10-13T17:52:00+08:00",
+  "role": "B",
+  "task": "TASK-12S-B",
+  "attempt": "1-rework-s9b",
+  "status": "REVIEW_PENDING",
+  "summary": "S9b 帧映射契约交付冻结 s9_head=f76e2a9（续 0320a8e，base f62a29c 未移动，仅 decode.py+test_spray_adapter.py 2 文件 +369/-54）。催办 nudge2 消费：核验树面无在途进程后接续，spray 定向回归 98 passed（含 6 条 S9b 新用例）、真实小包 1184->44 锚定用例单跑 PASSED（44 帧/1184 消息/首末 scan 身份与独立 CDR 解析一致/ns 升序无重复）；冻结前 ruff 抓到 1 处新 E501 拆行后复扫绿+回归绿才 commit（唯一额外一轮验证，顺延 17:45->17:51）。回执 receipts/TASK-12S-B/attempt-1-rework.md 增 S9b 段（映射设计+真实断言证据+回归表+催办合规）。",
+  "evidence": "wt-04a-t12sb git rev-parse HEAD=f76e2a9b403577b791ca3688e0da5e574c4c272a;pytest tests/test_spray_rework_16s.py tests/test_spray_adapter.py -q=98 passed;ruff app/scene/spray/+2 test 文件=All checks passed;真实锚定 TestPacketDecode::test_real_bag_1184_to_44_mapping PASSED;sessions/B.md 17:52 条目",
+  "next": "等协调者机械核验 s9_head + 增量 OCR 排队 f62a29c..f76e2a9（12S-A OCR 后）+ TESTER 增量复验（B 侧快照 f76e2a9）；收返修按问题 ID 续本分支最小修复；18:00 发布窗口等 12S-B 合入。",
+  "source": "events/B/b-t12sb-s9b-delivered-f76e2a9-20261013-1752.json"
+}

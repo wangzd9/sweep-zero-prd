@@ -1,0 +1,99 @@
+{
+  "schema_version": "spray-references/v1",
+  "source_commit": "be23177eca685b5f0f75160ca82503beeb63147d",
+  "source_directory": "images/refs",
+  "total_bytes": 15190041,
+  "refs": [
+    {
+      "order": 1,
+      "name": "2026_07_29-17_21_13_457-1785316873457.jpg",
+      "class": "normal",
+      "bytes": 1991039,
+      "sha256": "f6217d478a5052271fdd515f967934a22ceb748dc9de49721d87da4f26a257b3",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "format": "JPEG",
+      "verified": true
+    },
+    {
+      "order": 2,
+      "name": "2026_07_29-17_21_12_257-1785316872257.jpg",
+      "class": "normal",
+      "bytes": 2032911,
+      "sha256": "1409e87992564dccaf0449cf3ee70e1a8220a99cde519c5d4cad34f782e0a4be",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "format": "JPEG",
+      "verified": true
+    },
+    {
+      "order": 3,
+      "name": "2026_07_29-17_21_10_757-1785316870757.jpg",
+      "class": "normal",
+      "bytes": 2091513,
+      "sha256": "fa98957c0c9a31c3e7429466162c3b032f289326152422d3b65e6e9e58e4e460",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "format": "JPEG",
+      "verified": true
+    },
+    {
+      "order": 4,
+      "name": "2026_07_01-11_07_37_357-1782875257357.jpg",
+      "class": "normal",
+      "bytes": 2253293,
+      "sha256": "f56d6a15529cfae28c6b9170489a3fa23954c15112ed9a7bed079ff0459fde46",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "format": "JPEG",
+      "verified": true
+    },
+    {
+      "order": 5,
+      "name": "2026_07_29-17_21_45_257-1785316905257.jpg",
+      "class": "spray",
+      "bytes": 2373045,
+      "sha256": "3ebc9c76215510ff3a8fe184c3753bcee896d57449c6e54ba964ca464882b7ce",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "format": "JPEG",
+      "verified": true
+    },
+    {
+      "order": 6,
+      "name": "2026_07_29-17_20_58_757-1785316858757.jpg",
+      "class": "spray",
+      "bytes": 2283924,
+      "sha256": "13cf7e1d821d40d7f45e9c1f1c5ce7bd5b099221d279907a19e9a16ee2deeac1",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "format": "JPEG",
+      "verified": true
+    },
+    {
+      "order": 7,
+      "name": "2026_07_29-17_21_52_757-1785316912757.jpg",
+      "class": "spray",
+      "bytes": 2164316,
+      "sha256": "e57d9d892a5389b51bb77bc4eca710077670af5173c900aa5d8aefe66cc8e3ed",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "format": "JPEG",
+      "verified": true
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-102953-nochange",
+  "occurred_at": "2026-10-12T10:32:07+08:00",
+  "recorded_at": "2026-10-12T10:32:07+08:00",
+  "role": "TESTER",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "NOCHANGE",
+  "summary": "TESTER 巡检：无新派单，07A 开发在途（B，wt-04a-t07a），main 453da0c 双核一致",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/events/TESTER/tester-poll-20261012-102953-nochange.md",
+  "next": "等 07A 交付合入后如派独立验证单再 ACK 固定快照开工"
+}

@@ -1,0 +1,11 @@
+{
+  "event_id": "coord-poll-20261011-180053-t08c1-coding-expanded-7files",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "RUNNING",
+  "checked_at": "2026-10-11T18:00:53+08:00",
+  "summary": "17:45后零业务交付(main 98f6c88=origin不变)；2号 t08c-1 编码实质推进中未commit无回执，wt-04a-t08c tracked diff 扩至7文件+91/-18(bag_cleanup/catalog_ingest/source_service/artifact_service/bootstrap/clone script/test_bag_cleanup_concurrency)+新探针test_t08c_probe8.py(37行)，最后写入18:00:05；含bootstrap.py/artifact_service.py超出派单枚举文件集，越界/秒精度归属待交付逐点核；不催单不接管；无新派单无合入无OCR",
+  "evidence": "wt-04a-t08c git diff --stat + 逐文件 mtime + find -newermt",
+  "next": "等2号 t08c-1 commit+真MySQL A/B交付回执→机械核验→串行OCR增量→合入→9红文件全绿复核→TASK-08 DONE→TASK-10候选重算"
+}

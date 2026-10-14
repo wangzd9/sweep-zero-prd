@@ -1,0 +1,22 @@
+# 派单：C1+C2 秒精度时间戳专项（TASK-08 联调发现回派）
+
+- task/attempt：T08-C1C2 / t08c-1（TASK-08 attempt-1 联调发现 §C1/§C2 同根因家族，2号报告 §F.2/F.3 合并建议）
+- 角色：2号（B，原报告 owner，持全部复现脚本与根因定位）
+- 固定 base：main `f9bafb0`（= origin/main，含 i1-1；ACK 前若 main 前移以合入时 origin/main 复核。本 base 下 C3-scheduling 3 failed 已消失，C3-lineage 由 1号 c3-1 并行处理，本单不碰 `test_scene_slice_lineage.py`）
+- 根因（2号 attempt-1 报告 §C 已定位，本单修复）：
+  - **C2（5 文件 9 用例）**：claim/重试/幂等二次 UPDATE 以微秒 `updated_at`/时间戳为 WHERE 条件，落 MySQL `DATETIME(0)` 整秒后二次同值匹配 0 行 → SQLAlchemy `check_rowcount` 抛 `StaleDataError`（`app/services/bag_cleanup_service.py:618/:624/:935`、`app/services/source_service.py:205`、clone/pipeline 同型；`test_pipeline_api.py` 1 例为连带）。与 06B 缺陷3（reconcile 幂等二次 UPDATE，`5c854ea`/`4e2158e` 已修回报域）**同根因家族**——修复方向沿用缺陷3定论：幂等/重试不得依赖 UPDATE 行计数语义
+  - **C1（4 文件 3 用例）**：`app/clock.py now()` 微秒 datetime 落 `DATETIME(0)` 列截断整秒，回读与内存微秒值 `isoformat()` 不等 / 秒边界过滤语义偏移（`source_service.deleted_at`、`test_web.py::test_bag_time_filter_supports_second_precision`、`test_lineage_lifecycle.py:51`、pipeline 连带）
+- 范围：
+  - app 修复点逐处列明（文件:行 + 机制 + 修法），修后须声明每点属「app 行为修复」或「测试断言改为读回语义」——**若判定纯测试断言问题（app 行为无 bug），允许只改测试，但须附真 MySQL 探针证明 app 语义正确**
+  - 涉文件预计：`app/services/bag_cleanup_service.py`、`app/services/source_service.py`、`app/api/sources.py`（如涉）、pipeline 相关服务/模型时间列处理 + 对应 5 个测试文件
+  - 不动 06B 已修域（`scene_result_report_service.py`）、不动 C3 lineage 夹具文件、不扩新需求
+- AC：
+  - 真 MySQL 8.4.11 STRICT 隔离库（对齐 t08 口径：独立新库+FK off+create_all，用完即毁 0 残留）下 9 个红测试文件（`test_bag_cleanup_api`/`_concurrency`/`_worker`/`test_clone_published_dataset_records`/`test_source_register_purpose`/`test_pipeline_api`/`test_lineage_lifecycle`/`test_web`）文件级全绿
+  - 06B 回归项不破坏：`test_scene_result_report.py`/`test_scene_result_storage.py` 真 MySQL 仍全绿（35/25）
+  - SQLite 全量口径不回归（主仓 `.venv`，与 main 基线同集）；ruff 绿
+  - app 行为修复点逐处附真 MySQL A/B 证据（修复前复现/修复后 PASS）
+- 停止条件：上述全绿 + 隔离库 0 残留 + 回执 REVIEW_PENDING
+- 路径：新建任务分支（如 `scene/task-08-c1c2-second-precision`）+ 独立 worktree（如 `wt-04a-t08c`）；`wt-04a-t08`（attempt-1）交付冻结不删
+- 交付：回执 `receipts/TASK-08/c1c2-t08c-1.md` + 报告 `reports/TASK-08/c1c2-t08c-1.md`（环境口径、逐修复点 文件:行/机制/修法/定性、命令/退出码、真 MySQL 文件级与 A/B 日志路径、清理证据）
+- 复现材料（自有 scratch）：`~/.hermes/cache/scratch/t08-e2e/fkoff/isol2_*.log`、`allfiles_summary.txt`、`t08_*.py`
+- 越界申报：不得跨模块改无关代码；发现 app 行为 bug 扩大面时先停并回执说明，等协调者裁决

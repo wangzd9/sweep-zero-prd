@@ -1,0 +1,14 @@
+{
+  "event_id": "c-t11s-batch-1012-obs23-infer-phase-active-20261014",
+  "occurred_at": "2026-10-14T02:16:00+08:00",
+  "recorded_at": "2026-10-14T02:16:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs22（02:01）后新一轮：pending 触发源=obs22 自产事件文件+sessions/C.md（mtime 01:40 内容止于 obs17 行，obs18–22 会话行缺失=记账缺口，同 10-13 06:13–07:33 缺口模式，待协调者抽查）；ACK 21:07:41 在案不重复领取",
+  "summary": "C 第23轮只读观察（处理机 02:12-02:16 实测：ssh curl 8180/8767、docker top、容器 /proc/net/tcp、work 树计数×2 间隔 90s、state 只读、logs --since 5m、df/uptime，未 kill/未删/未重启/未 retry/未改任何生产路径）：**与 obs22 零 run 级状态变化，INFER/后续段计算继续**：① scene-4acf689f（16_02_03 正式链）仍 SCENE_RUNNING attempt=1 auto_retry_count=0，lease 续租活跃 02:14:10→02:17:11（~2min 周期与 obs22 一致）、error_message 空、八步仍全 QUEUED（阶段边界写口径，checkpoint.json 00:23 后未更新）；② work 树冻结维持：jpg 1781/pcd 5373 两次采样（02:13、02:14 间隔 90s）零新增、末件 frame_001787.jpg（与 obs22 同 mtime 口径）；③ 进程级证据：pid 3495931 %CPU 21.5 持续非零、RSS 18213936KB≈18.2GB 不变、CPU TIME 01:15:56（obs22 01:50-01:52 时 01:15:40→01:15:42，20min 仅 +14s=低均值持续，非停止）；④ **VLM 8002 ESTAB 维持 1 条但临时端口换绑**：0xCC16(52342)→192.168.2.45:8002（obs22 为 52552），口径=长连接重建而非通道消失，SEGMENT-WRITE 产物目录未现（attempt-1/ 仅 checkpoint.json/jpg/pcd 三件）；⑤ 容器 logs --since 5m 非 FEngine 0 行（无 verbose 口径与 obs22 一致）；⑥ 资源面不变：8767 active_runs=[4acf689f ACCEPTED]、NAS 98T/70T/29T 71%、load 0.24/0.26/0.51 低位、incoming/spray 仍仅 16_33_10 空包（D6 正式拒绝痕迹 A 面补台账）；flat 三提交 a65a25a7/87dfebaa/518089ed 仍无新绑定 run（串行占用属预期）；⑦ 账实申报：sessions/C.md 内容止于 obs17（00:46）行但 mtime 01:40:06，obs18–22 事件在案而会话行缺失，C 不代补不回填，缺口待协调者抽查。按派单大包跨夜继续不 kill/不 retry/不判卡死。",
+  "evidence": "处理机 02:12-02:16 只读实测：8180 scene-analysis-runs/scene-4acf689f9a6a473da1fa2f2efc70 rc=200（SCENE_RUNNING attempt=1 lease_owner=platform-local lease_expires_at 02:14:10→02:17:11 续租活跃 error 空 八步全 QUEUED frozen_at 2026-10-13T23:05:30）；work 树 find /home/data-process/scene/work/scene-4acf689f… 两次采样（02:13:4x、02:15:2x 间隔 90s）jpg 1781/pcd 5373 零新增，attempt-1/ 目录 mtime 01:30 无新子目录；docker top 3376cd90f44e pid 3495931 etime 05:52:44 TIME 01:15:56 %CPU 21.5 RSS 18213936KB；容器 /proc/net/tcp ESTAB 1 条 0xCC16→2D02A8C0:1F42（192.168.2.45:8002 VLM 通道，obs22 端口 52552→本轮 52342 重建）；docker logs --since 5m 非 FEngine 0 行；8767/health active_runs=[4acf689f ACCEPTED]；state/scene-4acf689f….json stage=EXECuting lease_token 95520bbd… accepted_at 00:07:56（容器时）；df /mnt/nas_backup 98T 70T 29T 71%；uptime load 0.24/0.26/0.51；ls incoming/spray 仅 rosbag2_2026_10_12-16_33_10；sessions/C.md wc -l=54 末行 obs17、mtime 2026-10-14T01:40:06",
+  "next": "接续只读观察：① checkpoint 八步翻转（EXTRACT/INFER 阶段边界写）或 lease 停更/FAILED 出现即取证申报协调者（C 不处置）；② VLM 8002 ESTAB 续证与 SEGMENT-WRITE 产物新目录出现判定阶段推进；③ 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账（含 ruling-dup-slices-0038 观察面）；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

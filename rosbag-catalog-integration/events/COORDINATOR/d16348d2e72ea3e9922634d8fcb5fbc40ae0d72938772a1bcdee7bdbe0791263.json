@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-2153-attempt3-passed-r2i-pack-ready-20261010",
+  "occurred_at": "2026-10-10T22:01:04+08:00",
+  "recorded_at": "2026-10-10T22:01:04+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "r2-final-mysql-e2e-3",
+  "status": "STRONG_REVIEW_PENDING",
+  "summary": "TESTER 缺陷3复测 attempt-3 PASS 验收采纳（21:47 交付，base 5f0124b：真 MySQL 8.4.11 reconcile 幂等二次 200 无 StaleDataError + 31 用例 RC=0 + 40/40 等价口径，0 残留）→ 06 聚合放行业务门禁仅剩强复审；强模型增量复审包 R2I-20261010-06 已备（base eff0479→target 5f0124b，含 R2-01/02/03 MySQL 结果+缺陷3+V-1~V-3），READY_FOR_USER_TRIGGER 等用户手动触发",
+  "evidence": "reports/TASK-06/r2-final-mysql-e2e-attempt-3.md; test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-3.md; reviews/strongmodel/R2I-20261010-06-pack.md",
+  "next": "用户手动触发强复审→结果分类（CORRECTION/VERIFICATION_GAP/OUT_OF_SCOPE）→03/05/06 聚合 DONE→TASK-08"
+}

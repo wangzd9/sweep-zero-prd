@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011212053-task09-commit-a60bb81",
+  "occurred_at": "2026-10-11T21:26:16+08:00",
+  "recorded_at": "2026-10-11T21:26:16+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "2号 t09 commit a60bb81 落地（3 文件 +187/-3 接线+test）+pytest 全量回归完成一轮+500 帧确定性复现（MODEL_UNAVAILABLE 如实报出）+row32/33 阳性补足在途；交付回执未到不核验不 OCR 不合入；main 0a8ca8a 不变；TASK-10 维持 WAITING",
+  "evidence": "wt-04a-t09 a60bb81；scratch/t09-real/*.json",
+  "next": "下轮核 receipts/TASK-09/attempt-1.md 交付回执→机械核验→串行 OCR→合入→09 DONE→派 TASK-10"
+}

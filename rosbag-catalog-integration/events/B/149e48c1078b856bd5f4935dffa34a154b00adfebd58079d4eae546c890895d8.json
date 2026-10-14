@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-180753-t07b-ocr-b2-done-b3-inflight-idle",
+  "occurred_at": "2026-10-12T18:17:55+08:00",
+  "recorded_at": "2026-10-12T18:17:55+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "attempt-1",
+  "status": "REVIEW_PENDING",
+  "summary": "无新派单/返修；07B f4bfcf2 交付冻结等审；协调者 OCR b1/b2 收口 0 findings、b3 在途；本侧 IDLE_WAITING；根/inbox sessions 分叉申报待协调者核对",
+  "evidence": "receipts/TASK-07B/attempt-1.md; reviews/TASK-07B/attempt-1/ocr-batches.md; scratch/t07b/ocr logs",
+  "next": "等 T07B OCR b3-b10+契约批收口→强审查判定→合入→TESTER 验证→07B DONE→07C；收返修按 attempt 续 wt-04a-t07b"
+}

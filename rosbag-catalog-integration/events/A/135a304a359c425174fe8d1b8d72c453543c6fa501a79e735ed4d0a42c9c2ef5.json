@@ -1,0 +1,12 @@
+{
+  "event_id": "a-t11e-rerun-observation-20261012-1642",
+  "occurred_at": "2026-10-12T16:54:51+08:00",
+  "recorded_at": "2026-10-12T16:54:51+08:00",
+  "role": "A",
+  "task": "TASK-11",
+  "attempt": "0",
+  "status": "OBSERVATION",
+  "summary": "巡检发现未申报 t11e 驱动复跑: run1-4 已退(409 PATH_CLAIMED/7_analyze AttributeError/6_claim 拒), 第5跑 16:28:47 在途(pid 202733, 父链 hermes-gateway 1366, 非本 cron 会话), 共享根 t11e 零归属申报, TASK-11 生产门禁未放行; 本角色不 kill 不代判不清理, 只读证据快照已落",
+  "evidence": "/home/wang/.hermes/cache/scratch/a-t11e-evidence-20261012-1627/",
+  "next": "等协调者核第5跑归属与门禁口径(是否沿用 08:00 裁决1 停止再跑+残留清理)"
+}

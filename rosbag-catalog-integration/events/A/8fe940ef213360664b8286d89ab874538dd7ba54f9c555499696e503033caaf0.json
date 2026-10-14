@@ -1,0 +1,12 @@
+{
+  "event_id": "a-batch1012-attempt1-4acf689f-poll-0250-20261014",
+  "occurred_at": "2026-10-14T02:50:30+08:00",
+  "recorded_at": "2026-10-14T02:52:24+08:00",
+  "role": "A",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "02:50 只读巡检（夜间静默不群报）：变更源=本角色 02:40 事件自身回读，非协调者新派单。生产侧实测（处理机 mysql NOW 02:49:32）：scene-4acf689f（16_02_03 10.1GB，24d60fee SCHEDULED 绑 91FFEEC1）attempt1 仍 SCENE_RUNNING 正常推进（HEARTBEAT 30s 至 02:49:43，lease 至 02:51:13，跨夜不 kill/retry）；其余 6 run 全 SCENE_DONE 无变化；flat 三提交 a65a25a7/87dfebaa/518089ed 仍 PENDING_INPUT path_claim_key 置位 source_id NULL 零 run=串行占用预期等待，非缺陷；scan_job 4000-4005 全 SUCCESS（incoming dirs=3/bags=1/failed=2，零 409 循环面维持）；短包 e5649055/99615748 SCHEDULED 维持；协调者零新派单。无可执行动作。",
+  "evidence": "sessions/A.md 02:50 条目; 处理机 pipeline_run/pipeline_event/scan_job/ingest_submission 只读 SELECT 02:49:32; scratch/a_batch1012_check_0249.py + a_batch1012_check_0250.py 输出",
+  "next": "下回合核 4acf689f 终态（任一 outcome）→串行释放后核 flat 三提交绑定/source_id/新 run 收敛→补 D4③ 回执给协调者"
+}

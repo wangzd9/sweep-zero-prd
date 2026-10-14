@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261012-071653-t11-e2e-run-failed-observation",
+  "occurred_at": "2026-10-12T07:19:29+08:00",
+  "recorded_at": "2026-10-12T07:19:29+08:00",
+  "role": "A",
+  "task": "TASK-11",
+  "attempt": "0",
+  "status": "OBSERVATION",
+  "summary": "scratch/t11 出现真实驱动运行 07:15（submission 201 后 1b_register FAIL 400 NAS directory does not exist /test/incoming/…，副本落位 /mnt/nas_backup/vla_dataset_builder_test/incoming/ 口径不一致；进程已退出；TASK-11 生产门禁未放行）；归属未明，供协调者核归属与处置，本角色不代跑不代判",
+  "evidence": "scratch/t11/t11-run.log; scratch/t11/t11-e2e.json",
+  "next": "等协调者核驱动归属与 TASK-11 门禁口径"
+}

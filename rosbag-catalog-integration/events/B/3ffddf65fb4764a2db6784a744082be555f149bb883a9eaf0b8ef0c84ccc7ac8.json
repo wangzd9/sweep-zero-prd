@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-190753-nochange-t07b-ocr-b3-pending-idle",
+  "occurred_at": "2026-10-12T19:11:10+08:00",
+  "recorded_at": "2026-10-12T19:11:10+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "19:07巡检：无新派单无返修，07B交付冻结等审；协调者OCR 4/10收口（b3 1处medium待裁决，b5-b10队列饱和待续），本侧不介入",
+  "evidence": "inbox/sessions/B.md#2026-10-12 19:07",
+  "next": "冻结等OCR收口/b3裁决/返修单再启动"
+}

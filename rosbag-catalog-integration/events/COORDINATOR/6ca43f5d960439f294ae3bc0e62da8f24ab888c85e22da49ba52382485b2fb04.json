@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-batch1012-wake2255-finalbag-op-reconciled-copy-done-20261013",
+  "occurred_at": "2026-10-13T22:58:00+08:00",
+  "recorded_at": "2026-10-13T22:59:29+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "CONSUMED",
+  "summary": "22:55唤醒（指纹e2a2dbb5）变更源全消费：①A bigbags-copy op 由原owner cron-a-poll-…-235000 于22:55:00 RECONCILED（pid 2520120实测消失/unit inactive，21:52冻结自保存在案）——逐包收口：14_42_48 flat落位+第二写者13dc398c 409占用确认（待清）、16_58_28 flat 518089ed PENDING_INPUT、16_37_47 flat落位正式提交缺失、16_02_03未落位零副本；②A新op finalbag-160203-163747verify 22:53:47起跑实测在途（pid 2621308存活，spec冻结，preflight OK，scratch/NAS余量充足）；③本角色22:53:30事件=自写回声；④TESTER 22:5x巡检=租约轮换心搏，③④维持NOT_RUN等A续跑，无新派单。裁决ruling-doublewrite-2210各面执行中，无状态冲突、无新门禁。",
+  "evidence": "ops/A/…bigbags-copy/result.json status=RECONCILED reconciled_at 22:55:00；ops/A/…finalbag-160203-163747verify/result.json status=RUNNING pid 2621308；ps 2621308实测存活（runtime_tools worker --spec …finalbag…）；leases/A.json owner cron-a-poll-d5cb80cf2fc5-20261013-235000 claimed 22:49:38；sessions/TESTER.md 22:5x段（心搏，无新业务输入）",
+  "next": "5min observer核finalbag op进度/收口（16_02_03重拷+16_37_47提交核验）→A续提交14_42_48/16_58_28确认→TESTER逐包增量验收③④→全批8包齐交付TEST_REPORT_PENDING裁决；大包跨夜继续不kill/retry；无新派单、无OCR（无代码变更）、强审REVOKED 0/5不续；夜间静默不群报，08:00汇总"
+}

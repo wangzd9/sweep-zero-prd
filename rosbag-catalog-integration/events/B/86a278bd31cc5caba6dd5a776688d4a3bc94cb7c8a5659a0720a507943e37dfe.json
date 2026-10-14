@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-214753-nochange-t07b-idle",
+  "occurred_at": "2026-10-12T21:50:45+08:00",
+  "recorded_at": "2026-10-12T21:50:45+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "07B交付冻结等审无变化：无新派单/返修，OCR b5/b7待协调者resume、b3裁决待协调者，origin/main 502bf8e未合入",
+  "evidence": "sessions/B.md 21:47巡检条目",
+  "next": "冻结等协调者OCR收口/b3裁决/强审查/合入/TESTER验证"
+}

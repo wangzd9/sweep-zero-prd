@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs28-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T03:12:00+08:00",
+  "recorded_at": "2026-10-14T03:12:51+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第28轮只读观察（处理机 03:11-03:12 实测，prerun 03:08:53 指纹 ff6a65ce changed_sources=sessions/C.md 自产 obs27 行）：ACK 21:07:41 在案不重复领取；与 obs27 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜不 kill/retry）。① scene-4acf689f（16_02_03 正式链 source 91FFEEC1…）仍 SCENE_RUNNING attempt=1 error 空、lease_expires_at 03:12:44 续租活跃、8767 active_runs=[4acf689f ACCEPTED pid1]；② work 树 attempt-1 jpg 1781/pcd 5373、find -newermt 3min 零新写、checkpoint.json mtime 00:23:10 未翻（阶段边界写口径）；③ VLM 通道容器 /proc/1/net/tcp 1 条 ESTAB(01)→192.168.2.45:8002（另 1 条 TIME_WAIT 06 残迹）；④ VLM 远端直证（llm-server /tmp/vllm_qwen38.log 03:10:35-55）Running 4 reqs、Waiting 单点 1→0→2（10s 采样，非持续>0）、prefix cache 94.6%、POST /v1/chat/completions 200 OK 连发=推理活跃续证；⑤ NAS incoming/spray 仍仅 16_33_10 空包目录（D6 A 面）、批次树 03:00 后 find 零新文件、upload-ledger mtime 00:04:39 未变；⑥ 资源：NAS 98T/70T/29T 71%、load 0.10 低位、生产栈容器 7 个全 Up（backend healthy）。无升级条件命中（heartbeat 无连败/未 FAILED/VLM Waiting 非持续>0）。C 全程只读（ssh curl 8180/8767、docker top/exec cat、host find/stat/ls、llm-server 读 log、df/uptime），未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "处理机 03:11 只读实测：8180 scene-4acf689f status=SCENE_RUNNING attempt=1 lease_expires_at=03:12:44 error 空；8767/health active_runs=[4acf689f ACCEPTED pid1]；work attempt-1 jpg=1781 pcd=5373 零新写；checkpoint.json mtime 2026-10-14 00:23:10；容器 net/tcp ESTAB 8602A8C0:E39C→2D02A8C0:1F42(192.168.2.45:8002)；llm-server 03:10:35/45/55 Running 4、Waiting 1→0→2、prefix cache 94.6%、POST 200 连发；/mnt/nas_backup/rosbag_scene_processing/incoming/spray 仅 rosbag2_2026_10_12-16_33_10；find -newermt 03:00 批次树零命中；df 98T/70T/29T 71%；uptime load 0.10/0.14/0.12",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按 ruling-4acf-infer-active-0218：heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且 proxy 无 ESTAB；③ 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账（含 ruling-dup-slices-0038 观察面）；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总"
+}

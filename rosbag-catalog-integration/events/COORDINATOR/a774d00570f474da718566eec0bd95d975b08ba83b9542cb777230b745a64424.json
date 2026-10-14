@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r132-t07b-r4-verified-ocr-started",
+  "occurred_at": "2026-10-13T07:28:46+08:00",
+  "recorded_at": "2026-10-13T07:28:46+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07B",
+  "attempt": "4",
+  "status": "REVIEW_PENDING",
+  "summary": "07B R4 交付 62620a3 机械核验全绿（12 passed/ruff/alembic 单头/零越界，越界申报口径接受），R4 增量 OCR r4-1 detached 起跑 pid 1416646 持 ocr.lock",
+  "evidence": "receipts/TASK-07B/attempt-4-r4.md; ~/.hermes/cache/scratch/t07b_r4_ocr/r4_incr_progress.txt",
+  "next": "OCR 收口零 CORRECTION 级→强审增量复审 pack（R3-1~4+R4-1/2）→TESTER post-r target 62620a3→07B 整链合入（先于 16A rebase 双头）"
+}

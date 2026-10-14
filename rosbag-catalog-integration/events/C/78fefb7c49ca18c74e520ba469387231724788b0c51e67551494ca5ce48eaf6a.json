@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs25-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T02:44:09+08:00",
+  "recorded_at": "2026-10-14T02:47:12+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第25轮只读观察（处理机 02:41-02:44 实测，接续 obs24 02:31；prerun 02:38:53 指纹 1e0617e7=obs24 事件自产+canonical 迁移，ACK 21:07:41 在案不重复领取）：与 obs24 零状态变化=**模型段完成信号仍未到，INFER 持续活跃**：① scene-4acf689f9a6a473da1fa2f2efc70（16_02_03 正式链）SCENE_RUNNING attempt=1 error 空、lease_expires_at 02:44:12→02:45:42 续租活跃、proxy 8767 active_runs=[4acf689f ACCEPTED pid1]；② work 树 attempt-1 jpg 1781/pcd 5373、-newermt -3min 双 0=零新写、checkpoint.json mtime 00:23:10 未翻；③ VLM 通道 3 条 ESTAB→192.168.2.45:8002（状态 01/06）、容器 pid 3495931 %CPU 20 TIME 01:16:16 非零；④ VLM 远端直证（a100-wzd 跳板 36.152.27.114 /tmp/vllm_qwen38.log 02:43:25-55）Running 3-4 reqs/Waiting 0（02:43:25 曾 Waiting:1 单点、非持续>0）、POST /v1/chat/completions 200 OK 连发、prefix cache 95.0%；⑤ 资源面：NAS 107T/75.9T/31.6T 71%、load 0.04 低位、incoming/spray 仅 16_33_10 空包（D6 scanner 拒绝持续=A 面）、flat 三提交 a65a25a7/87dfebaa/518089ed 仍无新绑定 run（串行占用属预期）。**无升级条件命中**。C 全程只读（ssh curl 8180/8767、find/stat/ls、docker top/exec cat、a100 跳板读 VLM 日志），未 kill/未删/未重启/未 retry/未改任何生产路径；大包跨夜继续不 kill/不 retry。",
+  "evidence": "处理机 02:41-02:44 只读实测：8180 GET scene-analysis-runs/scene-4acf689f9a6a473da1fa2f2efc70 status=SCENE_RUNNING attempt=1 lease_expires_at 02:44:12→02:45:42 error_message 空；8767/health active_runs=[4acf689f ACCEPTED pid1]；host work 树 attempt-1 find jpg=1781 pcd=5373（-newermt -3min 双 0）、checkpoint.json stat 2026-10-14 00:23:10.47；docker top 3376cd90f44e pid 3495931 %CPU 20 TIME 01:16:16；docker exec cat /proc/1/net/tcp ESTAB 3 条→2D02A8C0:1F42（192.168.2.45:8002）；a100-wzd 跳板 36.152.27.114 /tmp/vllm_qwen38.log（59MB 02:43 在写）02:43:25-55 Engine Running 3-4/Waiting 0-1（02:43:25 单点 1 后回 0）POST 200 OK×5+ prefix cache 95.0%；df -B1 /mnt/nas_backup 107451810578432/75888852361216/31562958217216 71%；uptime load 0.04/0.06/0.11；ls incoming/spray 仅 rosbag2_2026_10_12-16_33_10",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按 ruling-4acf-infer-active-0218=heartbeat 4 连败/run 翻 FAILED/VLM Waiting 持续>0 且 proxy 无 ESTAB/checkpoint 或八步翻 FAILED；③ 串行释放后 flat 三提交绑定新 run 按 run 核账（含 ruling-dup-slices-0038 观察面）；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总"
+}

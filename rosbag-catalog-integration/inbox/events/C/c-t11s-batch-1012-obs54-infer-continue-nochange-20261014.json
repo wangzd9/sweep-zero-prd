@@ -1,0 +1,16 @@
+{
+  "event_id": "c-t11s-batch-1012-obs54-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T07:11:00+08:00",
+  "recorded_at": "2026-10-14T07:14:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs53（07:03 落盘）后新一轮：prerun 指纹 55126321（wakeAgent=new_or_unacknowledged_change，changed_sources 空，用户恢复指令重发 attempt-1 入口；ACK 21:07:41 在案不重复领取）。恢复指令核心与既执行为同一单：只读观察、大包跨夜继续不 kill/retry。",
+  "summary": "C 第54轮只读观察（处理机/llm-server 07:11-07:14 实测）：与 obs53 零状态变化，scene-4acf689f（16_02_03 正式链）INFER 持续活跃，模型段完成信号未到（checkpoint final=null 未翻、jpg 1781/pcd 5373 与 obs34-53 同、find -newermt 30min 仅 checkpoint.json 系首轮相对时间窗口误报，stat 实测 mtime 2026-10-14 00:23:10.474817688 未变）。本轮核 8180 直连 404 为路径口径：正确端点 /api/v1/scene-analysis-runs/{id}（8180 与 18000 均通、返回一致），后续轮次按此口径。无升级条件命中。",
+  "evidence": "07:11-07:14 只读实测：① 8180/18000 /api/v1/scene-analysis-runs/scene-4acf689f… status=SCENE_RUNNING attempt=1 error_message 空 lease_owner=platform-local lease_expires_at=2026-10-14T07:12:30（07:11:02 查询时点 33s 后到期前已续，heartbeat 正常）、八步 DB 全 QUEUED（阶段推进翻口径与 obs26-53 一致）；② 8767/health ok active_runs=[scene-4acf689f ACCEPTED pid1]；③ proxy 宿主 pid 3495931 ELAPSED 10:48 TIME 01:19:35（obs53 01:19:29，+6s 持续非零）、LSTART 10月13 20:22 未重启；④ work 树 checkpoint.json stat mtime=2026-10-14 00:23:10.474817688 未翻、final=null、PRECHECK DONE 其余 PENDING、jpg=1781 pcd=5373 计数不变、find -newermt '30 minutes ago' 无文件（首轮 15min 相对窗口命中为时间基准误报已复核）；⑤ VLM 通道容器 /proc/1/net/tcp 192.168.2.45:8002（1F42）实测 1 ESTAB(state 01)+4 短命(06)=通道活跃；⑥ llm-server 直证 /tmp/vllm_qwen38.log 07:10:08-07:11:18 八点十秒采样 Running 1-3 reqs、Waiting 全 0、prefix 92.2-92.3%、MM 88.6%、POST /v1/chat/completions 全文件累计 183352（obs53 后 183245，继续增长）=推理活跃续证；⑦ incoming/spray 仍仅 16_33_10 空包目录（D6 A 面不变）；本批 8 包无新终态。**无升级条件命中**（heartbeat 无连败/run 未 FAILED/VLM Waiting 全 0 且 proxy 有 ESTAB）。C 全程只读（ssh curl 8180/18000/8767、ps/stat/find/ls、docker exec cat、llm-server 读 log），未 kill/未删/未重启/未 retry/未改任何生产路径；canonical sessions/C.md append 前末行换行已核验（计算/校验在前、共享文件最后写入），旧镜像 obs54 签名=0 断言。租约 owner C-cron-poll-20261014-070853-t11s-obs54（07:09:50 claim，token c62cb33eee3d415a8d348d0a38abb6af 整体 JSON 解析 len=32），本事件落盘后 release。",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint final 翻转/八步 DB 推进/SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按 ruling-4acf-infer-active-0218=heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且 proxy 无 ESTAB/checkpoint 或八步翻 FAILED；③ 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总。",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]",
+  "lease": "owner C-cron-poll-20261014-070853-t11s-obs54（07:09:50 claim，token c62cb33eee3d415a8d348d0a38abb6af 整体 JSON 解析 len=32）",
+  "source": "inbox/events/C/c-t11s-batch-1012-obs54-infer-continue-nochange-20261014.json"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-021753-task10-done-p0-closed",
+  "occurred_at": "2026-10-12T02:19:50+08:00",
+  "recorded_at": "2026-10-12T02:19:50+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "DONE",
+  "summary": "TASK-10 已 DONE、P0 停止派发；本侧交付面收口，IDLE_WAITING",
+  "evidence": "inbox/coordinator/TASK-10/e2e-reverify-v2-acceptance-decision.md",
+  "next": "空闲等待新派单或返修"
+}

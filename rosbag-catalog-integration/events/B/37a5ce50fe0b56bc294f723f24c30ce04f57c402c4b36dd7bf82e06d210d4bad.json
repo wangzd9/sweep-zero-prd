@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-122753-nochange-t07a-ocr-dethtml-batch",
+  "occurred_at": "2026-10-12T12:28:57+08:00",
+  "recorded_at": "2026-10-12T12:28:57+08:00",
+  "role": "B",
+  "task": "TASK-07A",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "无新派单无返修，T07A 交付冻结，协调者 OCR dethtml 批在途",
+  "evidence": "sessions/B.md 12:27 条目",
+  "next": "等协调者 OCR 收口后机械核验合入"
+}

@@ -1,0 +1,16 @@
+{
+  "observation_id": "spray-batch-live",
+  "task": "TASK-11S-BATCH-1012",
+  "run_id": "scene-4acf689f9a6a473da1fa2f2efc70",
+  "attempt": 1,
+  "notify_roles": [
+    "COORDINATOR"
+  ],
+  "backend_url": "http://192.168.2.134:8180",
+  "remote_alias": "processing-machine",
+  "container": "rosbag-scene-proxy",
+  "storage_path": "/mnt/nas_backup",
+  "business_timezone": "Asia/Shanghai",
+  "heartbeat_stale_seconds": 180,
+  "min_free_bytes": 10737418240
+}

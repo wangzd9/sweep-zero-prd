@@ -1,0 +1,17 @@
+# C 事件：12S-C 最终依赖装配核验短接续检查点
+- event_id: c-t12sc-finaldep-assembly-checkpoint-20261013
+- occurred_at: 2026-10-13T17:52:00+08:00
+- role: C
+- task: TASK-12S-C
+- attempt: attempt-1（前置冻结 92dcb52；本事件=最终依赖装配准备，非新开发）
+- status: WAITING_DEPENDENCIES（实质检查点已落盘，正式集成动作待依赖齐）
+- summary: 消费 17:45:32 用户纠正入口【20261013-spray】active-correction：保留 e152465/92dcb52 冻结身份，只整理原接线在最终依赖上的确切提交/冲突位置与已有核验命令。
+- evidence:
+  - 依赖实测: main 6c7d983 含 12S-A 77c395b（IN）；16B r2 e152465 NOT in main（r2 增量 OCR run 4492b7f6 b01 17:42:30+08 rc=0 AWAITING_DECISION=协调者裁决面）；12S-B S9 f76e2a9 在 wt-04a-t12sb 分支未合 main
+  - 冲突预演: 临时 worktree @92dcb52 merge --no-commit e152465 零冲突（scene_host_proxy.py 自动合并；92dcb52 spray 缺车辆块 :442 vs r2 R1-01 :375 附近不同行；merge-tree 亦干净）
+  - 守恒核: r2 reconcile_terminal/_confirm_terminal/ensure_running 8 处、orchestrator SPRAY_ADAPTER_KEY 2 处均命中
+  - 复测: pytest tests/test_scene_host_proxy.py tests/test_scene_spray_wiring.py -q = 38 passed（19.35s）exit 0；ruff check scene_host_proxy.py All checks passed（临时 worktree 合并态真实执行，PYTEST_DISABLE_PLUGIN_AUTOLOAD=1）
+  - 清理: merge --abort + worktree remove --force（PREP_CLEANED）；冻结树 wt-03b-t12sc@92dcb52 与 wt-03b-t16b@e152465 复核 HEAD 未变、porcelain 干净
+  - 事故记录: 临时 worktree 首建相对路径落入冻结树内已恢复（冻结树无损）；shell cwd 残留被删目录致 3 次 exit 126，workdir=/home/wang 恢复
+- next: 等协调者 r2 OCR 裁决→强审增量复审（只 R1-01~05，授权 6b2d83fb 剩 4/5，期限 2026-10-14 13:27:15）→TESTER 收口→合入 16B→12S-B S9 合入后领接线核验单（最终集成语义+proxy 受影响自测→固定 SHA 交 TESTER）
+- source: sessions/C.md 17:4x 条目

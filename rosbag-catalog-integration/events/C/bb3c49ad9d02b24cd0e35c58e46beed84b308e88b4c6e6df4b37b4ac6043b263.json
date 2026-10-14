@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-224353-nochange",
+  "occurred_at": "2026-10-11T22:46:34+08:00",
+  "recorded_at": "2026-10-11T22:46:34+08:00",
+  "role": "C",
+  "task": "none",
+  "attempt": "-",
+  "status": "NO_CHANGE",
+  "summary": "22:43 巡检零变化：22:41 后共享根零新增，inbox/3号 最新仍 10-10 00:58 已收口，无 C 新派单",
+  "evidence": "sessions/C.md 22:43 行",
+  "next": "保持空闲待派单，继续 5 分钟巡检"
+}

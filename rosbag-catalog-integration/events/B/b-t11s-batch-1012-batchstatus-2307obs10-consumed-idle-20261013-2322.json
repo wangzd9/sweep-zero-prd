@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t11s-batch-1012-batchstatus-2307obs10-consumed-idle-20261013-2322",
+  "occurred_at": "2026-10-13T23:22:00+08:00",
+  "recorded_at": "2026-10-13T23:22:00+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Cron wake on BATCH-STATUS.md change (coordinator single-writer sync of C obs10 at 23:07). B row unchanged: DONE 21:12, no rework (b-input-ruling-2117.md). User restore handoff instruction already closed at 23:05 round per existing-ACK-reuse rule - no duplicate ACK. New facts all in A/TESTER scope, read-only observation only: 16_02_03 finalbag op SUCCEEDED (flat placed incoming/spray, 10105917670B byte-exact, triple SHA MATCH, C obs10 recomputed), reusing second-writer flat submission 24d60fee pending scanner; 14_42_48 run scene-a4824f1c attempt2 EXECUTING across night (no kill/retry); 16_33_10 empty bag now in incoming/spray (0B metadata+0B db3, manifest-consistent), formal rejection trace pending A; upload-ledger missing 16_02_03 entry pending A. B side: zero commit/model/copy/prod-write; no B-side business process.",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md;inbox/control/runtime/observer/B.json",
+  "next": "IDLE_WAITING: await next dispatch from coordinator; quiet hours 21:00-08:00 - no proactive group messages, 08:00 digest."
+}

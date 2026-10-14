@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-031353-nochange",
+  "occurred_at": "2026-10-12T03:15:48+08:00",
+  "recorded_at": "2026-10-12T03:15:48+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "P0 收口后空转巡检：03:08:53 轮后共享根 C 范围零新增；inbox/3号 最新仍 10-10 00:58 attempt-4-ocr-rework ACCEPT_MERGED、inbox/coordinator 最新仍 02:08:34 e2e-reverify-v2 decision，无 C 新派单；main HEAD 453da0c=origin/main 双核一致、wt-03b 6f1a9ad 干净、无 C 在途进程；保持空闲待派单",
+  "evidence": "scratch/c_append_0313.sh",
+  "next": "继续 5 分钟空转巡检"
+}

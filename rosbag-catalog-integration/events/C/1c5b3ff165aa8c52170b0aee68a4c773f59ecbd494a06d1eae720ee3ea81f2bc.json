@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs60-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T08:07:00+08:00",
+  "recorded_at": "2026-10-14T08:07:25+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第60轮只读观察（处理机 08:05-08:07 实测）：与 obs59 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜不 kill/retry）。scene-4acf689f SCENE_RUNNING attempt=1 error 空 lease 08:07:33 续租活跃、8767 active_runs=[4acf689f ACCEPTED pid1]、pid 3495931 ELAPSED 11:43:23 未重启 TIME 01:20:14、work 树 checkpoint.json mtime 00:23:10 未翻 find 30min 零新写、VLM 08:04-08:05 八点采样 Running 2-4/Waiting 全 0/prefix 93.2-93.4%/gen 21.8-169.5 tok/s 推理活跃、incoming/spray 仅 16_33_10 空包（D6 A 面）、NAS 71% 不变。无升级条件命中。08:00 静默窗口结束转白天口径。",
+  "evidence": "ssh curl 8180 scene-analysis-runs/scene-4acf689f… status=SCENE_RUNNING lease_expires_at=2026-10-14T08:07:33 error_message 空；8767/health active_runs=[4acf689f ACCEPTED pid1]；ps -p 3495931 ELAPSED 11:43:23 TIME 01:20:14 RSS 18143792；checkpoint.json stat 2026-10-14 00:23:10.474817688；find -newermt 30min=0；llm-server /tmp/vllm_qwen38.log 08:04:48-08:05:58 Running 2/4/4/3/3/3/3/3 Waiting 全 0 prefix 93.2-93.4%；incoming/spray ls 仅 rosbag2_2026_10_12-16_33_10；df //192.168.2.77/public 98T/70T/29T 71%；canonical sessions/C.md 609 行 obs60 行在案、旧镜像 obs60 签名=0",
+  "next": "接续只读观察：模型段完成信号=checkpoint 翻面/八步 DB 推进/SCENE_DONE 即取证申报协调者；升级条件 heartbeat 4 连败/FAILED/VLM Waiting 持续>0；白天口径状态变化即时通报，无变化不报进度"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r158-t12sb-c02-closed-16findings-rework-dispatched",
+  "occurred_at": "2026-10-13T14:2x:00+08:00",
+  "recorded_at": "2026-10-13T14:2x:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "r158 巡检（prerun 指纹 cf202306）：12S-B 旧链 c02 收口 rc=0 14:16:32（session 96fa444e，7 文件 8 findings T1-T8，~642381 token 25m12s，chain {c01:0,c02:0} 全链 done，进程退出 ocr.lock 无 holder 实测）→协调者逐条只读代码核 wt-04a-t12sb@f62a29c，c01(S1-S8)+c02(T1-T8)=16 findings 全 CONFIRMED 误报 0（重点核 T1 precheck ldd 探针失败误报 ok=True fail-closed 破坏 MED / T7 pcd_io ASCII off-by-one 丢首强度值 MED / T4 references 四常量全仓零引用死代码）。一次最小返修单已派 B inbox/2号/TASK-12S-B/attempt-1-rework-dispatch.md（base f62a29c 续 commit @ wt-04a-t12sb 分支 b/task-12s-b-spray-adapter，16 条逐项 CORRECTION 级必改 LOW 级最小改或书面取舍，只动 spray 域，自测含定向矩阵，ACK 30min）。候选 PREPARED 包 bc32b979 维持封存（旧链 16 覆盖已齐无 reuse 需求）。收口链：B 返修交付→机械核验→返修增量 OCR（固定入口 ocr_runtime.py，--from f62a29c --to 新head）→TESTER 独立验证（B 快照另发通知 A=77c395b 不变）→合入→12S-B DONE→重算 12S-C；16B r1(0208a73..40ab818)与 12S-A(6fb42c4..77c395b)增量 OCR 排队其后均固定入口。强审只读：grant 6b2d83fb9 至 10-14 13:27:15，近 60min 0/5，本授权累计 0，在途 0，最近 a8febf1a SUCCEEDED（费用未知），本轮零新增。C 已 ACK 12S-C 前置单开工（14:1x，wt-03b-t12sc 待建），B 接本返修单后 12S-C 仍 WAITING（依赖 16B+12S-A+12S-B 未齐）。",
+  "evidence": "progress.txt tail(c02 DONE rc=0 14:16:32); c02.log 8 findings; ps/fuser 1897396/1926290/1926298 退出 ocr.lock 无 holder; wt-04a-t12sb 代码逐条核; inbox/2号/TASK-12S-B/attempt-1-rework-dispatch.md; reviews/TASK-16/16A-16B-ocr-batches.md r158 段; sessions/3号 C.md 14:1x 12S-C ACK; snapshot COORDINATOR.json fp cf202306",
+  "next": "B ACK 返修单→返修交付→机械核验→返修增量 OCR（固定入口）→TESTER 独立验证→合入 12S-B DONE；16B r1/12S-A 增量 OCR 固定入口排队；C 12S-C 编码推进观察"
+}

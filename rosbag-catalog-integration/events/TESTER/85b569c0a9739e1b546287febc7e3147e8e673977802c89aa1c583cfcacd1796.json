@@ -1,0 +1,12 @@
+{
+  "event_id": "20261011-183053-ocr-c1c2-r1-runner-missing",
+  "occurred_at": "2026-10-11T18:31:45+08:00",
+  "recorded_at": "2026-10-11T18:31:45+08:00",
+  "role": "TESTER",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "OBSERVATION",
+  "summary": "巡检核活在途 OCR C1C2-r1：wt-04a-t08c `ocr session list`=c56d992c 6/6 files failed、0 comments（v1 18:27 起跑 3 组 context canceled，v2 resume 18:29:21 后无 lock held/ocr-exit 日志）；ps 无 runner 进程（账载 pid 2618840 已不存在）、`inbox/ocr.lock` 0 字节无持有者、scratch c1c2-r1.log 末行 18:29:21 停留——v2 resume 疑未落地或被中断，OCR 实际状态存疑待协调者核实处置（TESTER 不代跑 OCR）",
+  "evidence": "/home/wang/.hermes/cache/scratch/t08c-ocr/c1c2-r1.log",
+  "next": "等协调者核实 C1C2-r1 OCR 状态并处置；TESTER 维持 IDLE 等独立验证派单"
+}

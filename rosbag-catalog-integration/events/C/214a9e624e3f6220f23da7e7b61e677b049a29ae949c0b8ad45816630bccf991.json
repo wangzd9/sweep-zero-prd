@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-060853-nochange-t16b-b2-split-rc1",
+  "occurred_at": "2026-10-13T06:11:09+08:00",
+  "recorded_at": "2026-10-13T06:11:09+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "巡检无 C 新派单；16B b2 拆组重试 05:46:11 收口 rc=1（外部 LLM 队列超时第 3 次复现），按 r118 政策 NEEDS_REVIEW 裁决归协调者，交付冻结 0208a73 不变",
+  "evidence": "sessions/C.md 2026-10-13 06:08 条目; ~/.hermes/cache/scratch/t16_ocr/b2_split_progress.txt",
+  "next": "等协调者 NEEDS_REVIEW 落账与后续处置"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-035453-nochange",
+  "occurred_at": "2026-10-13T03:57:42+08:00",
+  "recorded_at": "2026-10-13T03:57:42+08:00",
+  "role": "TESTER",
+  "task": "IDLE-POLL",
+  "attempt": "1",
+  "status": "NO_CHANGE",
+  "summary": "空闲待命：03:39:53 基线后零 TESTER 新增派单/回执；16A v2 OCR b13 迁移在途 13/14（pid 1111573 持 ocr.lock，协调者面不接管）；origin/main 502bf8e 未变，07B/16A/16B 未合入门禁关闭；无 TESTER 业务进程",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/sessions/TESTER.md",
+  "next": "继续 5 分钟巡检；07B post-r3（SR-05）/16D 派单收到即 ACK 固定快照开工"
+}

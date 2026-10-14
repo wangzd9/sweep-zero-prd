@@ -1,0 +1,239 @@
+diff --git a/app/domain/scene_config.py b/app/domain/scene_config.py
+index 6f49913..1436855 100644
+--- a/app/domain/scene_config.py
++++ b/app/domain/scene_config.py
+@@ -9,6 +9,7 @@ from __future__ import annotations
+ 
+ import hashlib
+ import json
++import math
+ import posixpath
+ from dataclasses import dataclass, field
+ from enum import Enum
+@@ -222,7 +223,9 @@ def _normalize_selections(scenes: Any) -> list[SceneSelection]:
+         version = item.get("capability_version")
+         if version is not None and (not isinstance(version, str) or not version.strip()):
+             raise SceneConfigError("INVALID_SCENES", f"scenes[{index}].capability_version 不能为空")
+-        parameters = item.get("parameters") or {}
++        parameters = item.get("parameters")
++        if parameters is None:
++            parameters = {}
+         if not isinstance(parameters, dict):
+             raise SceneConfigError("INVALID_SCENES", f"scenes[{index}].parameters 必须是对象")
+         selection = SceneSelection(
+@@ -245,7 +248,8 @@ def _validate_purposes(purposes: Any, *, explicit: bool) -> list[IngestPurpose]:
+     for item in purposes:
+         try:
+             purpose = IngestPurpose(item)
+-        except ValueError as exc:
++        except (TypeError, ValueError) as exc:
++            # TypeError：Python<=3.11 下不可哈希的元素（如 dict/list）会逃逸，统一收敛为 4xx
+             raise SceneConfigError("INVALID_PURPOSES", f"未知用途 {item!r}") from exc
+         if purpose not in normalized:
+             normalized.append(purpose)
+@@ -281,6 +285,9 @@ def _validate_parameters(
+             raise SceneConfigError("INVALID_PARAMETERS", f"场景 {scene_code} 参数 {name!r} 类型必须为 bool")
+         if spec.type in ("int", "float"):
+             numeric = float(value)  # 值已校验为 int/float 且非 bool，统一数值比较
++            if not math.isfinite(numeric):
++                # NaN/Inf 与上下限比较恒为 False 会静默通过；显式拒绝。
++                raise SceneConfigError("INVALID_PARAMETERS", f"场景 {scene_code} 参数 {name!r} 必须为有限数值")
+             if spec.minimum is not None and numeric < spec.minimum:
+                 raise SceneConfigError("INVALID_PARAMETERS", f"场景 {scene_code} 参数 {name!r} 小于下限 {spec.minimum}")
+             if spec.maximum is not None and numeric > spec.maximum:
+@@ -298,12 +305,17 @@ def _resolve_scene(
+     scene: SceneSelection,
+     profile: IngestProfile,
+     capabilities: CapabilityRead,
+-    selected_codes: set[str],
+-) -> ResolvedScene:
+-    if scene.scene_code in selected_codes:
+-        # 重复代码去重：同一提交内版本冲突必须显式拒绝，否则静默取先者。
+-        raise SceneConfigError("SCENE_VERSION_CONFLICT", f"场景 {scene.scene_code} 在提交中重复出现且版本不一致")
+-    selected_codes.add(scene.scene_code)
++    selected: dict[str, str | None],
++) -> ResolvedScene | None:
++    if scene.scene_code in selected:
++        # 重复代码：版本一致（含两者都未指定版本）时去重取先者（03A OCR 审查），
++        # 版本不一致必须显式拒绝。
++        if scene.capability_version != selected[scene.scene_code]:
++            raise SceneConfigError(
++                "SCENE_VERSION_CONFLICT", f"场景 {scene.scene_code} 在提交中重复出现且版本不一致"
++            )
++        return None
++    selected[scene.scene_code] = scene.capability_version
+ 
+     if scene.capability_version is not None:
+         description = capabilities.capability(scene.scene_code, scene.capability_version)
+@@ -400,9 +412,11 @@ def resolve_effective_config(
+                 if capabilities.enabled_capability(scene.scene_code) is None:
+                     return None
+         resolved: list[ResolvedScene] = []
+-        seen: set[str] = set()
++        seen: dict[str, str | None] = {}
+         for scene in raw_scenes:
+-            resolved.append(_resolve_scene(scene, profile, capabilities, seen))
++            item = _resolve_scene(scene, profile, capabilities, seen)
++            if item is not None:
++                resolved.append(item)
+     elif any(scene.scene_code for scene in raw_scenes):
+         # 仅 self_built 时提交任何场景选择视为配置错误。
+         raise SceneConfigError("PURPOSE_SCENE_MISMATCH", "用途仅 self_built 时不能携带 scenes/场景参数")
+diff --git a/app/schemas/scene_config.py b/app/schemas/scene_config.py
+index bf8c8e1..8906933 100644
+--- a/app/schemas/scene_config.py
++++ b/app/schemas/scene_config.py
+@@ -8,6 +8,7 @@
+ from __future__ import annotations
+ 
+ import json
++import math
+ from typing import Literal
+ 
+ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+@@ -50,6 +51,29 @@ class CapabilityParameterSchema(SceneConfigApiModel):
+     def _check_bounds(self) -> CapabilityParameterSchema:
+         if self.minimum is not None and self.maximum is not None and self.minimum > self.maximum:
+             raise ValueError(f"参数 {self.name} 的 minimum 不能大于 maximum")
++        # default 必须与声明的 type/范围/枚举一致：能力描述是配置冻结的输入，
++        # 不一致的描述会直接流入 EffectiveConfig 与 config_hash（03A OCR 审查）。
++        if self.default is not None:
++            if self.type == "int" and not (isinstance(self.default, int) and not isinstance(self.default, bool)):
++                raise ValueError(f"参数 {self.name} 的 default 必须是 int")
++            if self.type == "float" and not (
++                isinstance(self.default, int | float) and not isinstance(self.default, bool)
++            ):
++                raise ValueError(f"参数 {self.name} 的 default 必须是数值")
++            if self.type == "str" and not isinstance(self.default, str):
++                raise ValueError(f"参数 {self.name} 的 default 必须是字符串")
++            if self.type == "bool" and not isinstance(self.default, bool):
++                raise ValueError(f"参数 {self.name} 的 default 必须是布尔")
++            if self.type in ("int", "float"):
++                numeric = float(self.default)
++                if not math.isfinite(numeric):
++                    raise ValueError(f"参数 {self.name} 的 default 必须为有限数值")
++                if self.minimum is not None and numeric < self.minimum:
++                    raise ValueError(f"参数 {self.name} 的 default 低于 minimum")
++                if self.maximum is not None and numeric > self.maximum:
++                    raise ValueError(f"参数 {self.name} 的 default 超过 maximum")
++            if self.allowed_values is not None and self.default not in self.allowed_values:
++                raise ValueError(f"参数 {self.name} 的 default 不在 allowed_values 内")
+         return self
+ 
+ 
+@@ -199,6 +223,8 @@ class EffectiveConfigView(SceneConfigApiModel):
+                 for scene in self.scenes
+             ),
+             config_hash=self.config_hash,
++            # schema_version 双向保真：冻结快照往返不得漂移回当前常量（03A OCR 审查）。
++            schema_version=self.schema_version,
+         )
+ 
+ 
+diff --git a/tests/test_scene_config_resolution.py b/tests/test_scene_config_resolution.py
+index 2f3219c..f6960a7 100644
+--- a/tests/test_scene_config_resolution.py
++++ b/tests/test_scene_config_resolution.py
+@@ -304,3 +304,57 @@ def test_idempotency_key_length_limit():
+     with pytest.raises(SceneConfigError) as excinfo:
+         resolve_effective_config(profile, _registry(_slope_description()), selection)
+     assert excinfo.value.code == "INVALID_IDEMPOTENCY_KEY"
++
++
++# ---- 2026-10-08 OCR 审查回归（协调者合入修复） ----
++
++
++def test_identical_duplicate_scenes_are_deduped():
++    """同一场景重复提交且版本一致：去重取先者，不报版本冲突。"""
++    profile = _profile()
++    registry = _registry(_slope_description("slope-v1"))
++    selection = SubmissionSelection(
++        scenes=[
++            SceneSelection(scene_code="slope", capability_version="slope-v1", parameters={"segment_len": 20}),
++            SceneSelection(scene_code="slope", capability_version="slope-v1", parameters={"segment_len": 30}),
++        ]
++    )
++    config = resolve_effective_config(profile, registry, selection)
++    assert config is not None
++    assert [scene.scene_code for scene in config.scenes] == ["slope"]
++    assert config.scenes[0].parameters["segment_len"] == 20  # 取先者
++
++
++def test_purposes_reject_unhashable_item():
++    """不可哈希的用途元素（dict/list）必须收敛为 INVALID_PURPOSES，不逃逸 TypeError。"""
++    profile = _profile()
++    selection = SubmissionSelection(purposes=[{"scene_slice": 1}])  # type: ignore[list-item]
++    with pytest.raises(SceneConfigError) as excinfo:
++        resolve_effective_config(profile, _registry(_slope_description()), selection)
++    assert excinfo.value.code == "INVALID_PURPOSES"
++
++
++def test_non_finite_parameter_rejected():
++    """NaN/Inf 与上下限比较恒为 False，必须显式拒绝而不是静默进入冻结配置。"""
++    import math
++
++    profile = _profile()
++    registry = _registry(_slope_description())
++    selection = SubmissionSelection(
++        scenes=[SceneSelection(scene_code="slope", parameters={"segment_len": math.inf})]
++    )
++    with pytest.raises(SceneConfigError) as excinfo:
++        resolve_effective_config(profile, registry, selection)
++    assert excinfo.value.code == "INVALID_PARAMETERS"
++
++
++def test_scene_parameters_non_dict_rejected():
++    """parameters 为 falsy 非 dict（0/False/[]）时必须拒绝，不得静默强转空 dict。"""
++    profile = _profile()
++    registry = _registry(_slope_description())
++    selection = SubmissionSelection(
++        scenes=[SceneSelection(scene_code="slope", parameters=[])]  # type: ignore[dict-item]
++    )
++    with pytest.raises(SceneConfigError) as excinfo:
++        resolve_effective_config(profile, registry, selection)
++    assert excinfo.value.code == "INVALID_SCENES"
+diff --git a/tests/test_scene_config_schemas.py b/tests/test_scene_config_schemas.py
+index df66a83..5353a99 100644
+--- a/tests/test_scene_config_schemas.py
++++ b/tests/test_scene_config_schemas.py
+@@ -168,6 +168,40 @@ def test_effective_config_view_rejects_bad_hash():
+         )
+ 
+ 
++# ---- 2026-10-08 OCR 审查回归（协调者合入修复） ----
++
++
++def test_effective_config_view_schema_version_roundtrip():
++    """schema_version 双向保真：非当前版本的视图往返不得漂移回默认常量。"""
++    profile = IngestProfileSchema(
++        profile_id="scene-incoming",
++        version=1,
++        incoming_prefix="/test/incoming",
++        default_purposes=[IngestPurpose.SCENE_SLICE],
++        default_scenes=["slope"],
++    ).to_domain()
++    capability = CapabilityDescriptionSchema(**_capability_payload()).to_domain()
++    config = resolve_effective_config(profile, StaticCapabilityRegistry({"slope": (capability,)}))
++    assert config is not None
++    view = EffectiveConfigView.from_domain(config)
++    # 构造一个 schema_version 非当前常量的视图，验证 to_domain 不再丢弃它。
++    stale = view.model_copy(update={"schema_version": "scene-config-v0"})
++    restored = stale.to_domain()
++    assert restored.schema_version == "scene-config-v0"
++
++
++def test_capability_parameter_default_must_conform():
++    """能力描述 default 与声明 type/范围/枚举不一致时拒绝。"""
++    with pytest.raises(ValidationError, match="default"):
++        CapabilityParameterSchema(name="x", type="int", default="abc")
++    with pytest.raises(ValidationError, match="default"):
++        CapabilityParameterSchema(name="x", type="int", default=100, minimum=1, maximum=10)
++    with pytest.raises(ValidationError, match="default"):
++        CapabilityParameterSchema(name="x", type="str", default=123)
++    with pytest.raises(ValidationError, match="default"):
++        CapabilityParameterSchema(name="x", type="str", default="b", allowed_values=["a"])
++
++
+ def test_request_body_size_limit():
+     check_request_body_size(b"x" * MAX_REQUEST_BODY_BYTES)
+     with pytest.raises(ValueError):

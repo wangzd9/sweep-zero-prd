@@ -1,0 +1,10 @@
+- role: C
+- event_id: C-sessions-truncation-20261012-064054
+- task: -
+- attempt: -
+- status: INCIDENT_RECOVERED
+- summary: 06:40:54 sessions/C.md 被并发整文件重建覆盖，06:38 巡检条目丢失（事件文件幸存）；重建方 owner 未定位（ps 证据 scratch/c_poll_0642_ps_evidence.txt、当时 leases 无 C 在途 json）；06:38 条目已由并发会话恢复至 sessions 末行（line 381 len 1745 三核在案），恢复完整性=快照口径待协调者抽查；本轮两次修复/恢复脚本均 ABORT 未写盘，其滞留 lease 已同源 token release rc=0；无业务状态变化（06:38 轮结论 nochange）。
+- evidence: scratch/c_poll_0638_claim.py、scratch/c_poll_0642_restore.py、scratch/c_poll_0643_verify.py、scratch/c_poll_0642_ps_evidence.txt
+- next: 待协调者抽查恢复完整性；空闲待派单
+- recorded_at: 2026-10-12 06:45 +08:00
+- owner: C-cron-incident-20261012-064500

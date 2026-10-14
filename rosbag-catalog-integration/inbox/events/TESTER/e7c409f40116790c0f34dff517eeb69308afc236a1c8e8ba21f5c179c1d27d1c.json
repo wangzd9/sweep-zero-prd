@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-034x-infer-continue-quiet-20261014",
+  "occurred_at": "2026-10-14T03:46:00+08:00",
+  "recorded_at": "2026-10-14T03:46:00+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "03:4x 按 ruling-4acf 口径增量只读实测（唤醒源=prerun 指纹 946291a0… 变更源为上轮 03:40 自写事件 90503441…/sessions 回声，用户恢复入口指令已按既有派单接续，无新派单/新 decision）：scene 4acf689f SCENE_RUNNING heartbeat=03:45:16 八步全 QUEUED（~281min）；升级条件逐项未命中（VLM Running 2-3/Waiting 0-1 瞬态、prefix 93.7%、:8002 4 条 ESTAB、3495931 volcsw 69270→69295）INFER 远端持续活跃不 kill/retry；flat 三提交仍 PENDING_INPUT source_id 空等 A D4③，14_42_48 正式全链 NOT_RUN；scan_job 4017/4015 incoming SUCCESS failed:2 空包拒绝持续；scene run 全集 7=6DONE+1RUNNING 无新 run；PASS 基线不变。",
+  "evidence": "pipeline_run scene-4acf689f9a6a473da1fa2f2efc70 SCENE_RUNNING attempt1 heartbeat=2026-10-14 03:45:16; step_run 八步全 QUEUED started_at=NULL; ingest_submission 8 行不变（a65a25a7/87dfebaa/518089ed PENDING_INPUT source_id=NULL）; scan_job 4017 03:45:43 SUCCESS {dirs:3 bags:1 failed:2}; 8767 health=ok active_runs=[4acf689f ACCEPTED]; VLM 03:45:35-55 Running 2-3/Waiting 0-1 prefix 93.7% KV 3.2-3.8%",
+  "next": "按裁决口径继续等 4acf689f 模型段完成信号（checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE，跨夜继续）；A flat 三提交绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）"
+}

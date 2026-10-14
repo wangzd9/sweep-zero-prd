@@ -1,0 +1,12 @@
+{
+  "event_id": "a-batch1012-attempt1-ruling2338-d4-executed-20261014",
+  "occurred_at": "2026-10-14T00:39:00+08:00",
+  "recorded_at": "2026-10-14T00:39:00+08:00",
+  "role": "A",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "ruling-duprun-2338 D4 时序全链执行完毕（00:14–00:38，夜间静默不群报）。前提解锁实测：3 dup run 全终态+lease 全 NULL（a4824f1c 23:54:41 SUCCESS / eb4397c3 00:01:30 NOT_APPLICABLE / 24ab78bb 00:07:46 NOT_APPLICABLE，outcome 与 B 定性一致零模型）。执行：①备份 3 条 date-grouped submission 全列→删除（删前断言 SCHEDULED+claim NULL+run 全 SCENE_DONE，post 零残留）；②NAS ready/spray/20261012/（14G，10 文件逐文件 SHA 留证）同盘 rename 移入 .upload-staging/d4-dategrouped-delete-20261014/（非 rm）——删前 flat 7 包完好断言 + dated/flat 四包逐包字节全 MATCH（14_42_48 724637738 / 16_00_13 89664966 / 16_37_47 7321525005 / 16_58_28 6794992397），post flat 七包文件数完好；incoming/spray/20261012/ 残留=absent。③释放核验：scanner 409 recovering 16_00_13 循环停止（删除后窗口零新 409 行，仅空包 16_33_10 拒绝行持续=既定拒绝路径）。A flat 三提交（a65a25a7/87dfebaa/518089ed）仍 PENDING_INPUT 未绑定——scanner 绑定排队，4acf689f（16_02_03 10.1GB）SCENE_RUNNING 心跳 30s 正常推进（00:36:58），跨夜不 kill/retry；SCENE_EXEC_HOST 串行释放后应依次收敛，下回合核。暂存目录 .upload-staging/d4-dategrouped-delete-20261014/ 保留待协调者/TESTER 处置（14G，NAS 余量充足不紧急）。",
+  "evidence": "receipts/TASK-11S-BATCH-1012/d4-dategrouped-subs-backup-0016.json; receipts/TASK-11S-BATCH-1012/d4-dategrouped-subs-delete-0017.json; receipts/TASK-11S-BATCH-1012/d4-nas-delete-evidence-0021.json; 处理机 scanner docker logs 00:28/00:33/00:36 窗口（409 停/绑定行）+ DB pipeline_run/ingest_submission 三时点只读实测",
+  "next": "下回合：核 A flat 三提交绑定推进（SCENE_EXEC_HOST 4acf689f 终态后串行释放）与 4acf689f 跨夜推进；暂存目录处置待协调者口径；TESTER 增量验收面（D4 claim 释放对账）已具备证据。"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t12sc-a1-delivered-20261013",
+  "occurred_at": "2026-10-13T15:46:34+08:00",
+  "recorded_at": "2026-10-13T15:46:34+08:00",
+  "role": "C",
+  "task": "TASK-12S-C",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "12S-C attempt-1 水雾正式接线前置开发交付冻结（待接线核验）：head 92dcb52 @ wt-03b-t12sc；消费基线 40ab818 链+merge main(16A)+固定SHA import 12S-A(77c395b)/12S-B(f62a29c) byte-identical；本单真实改动 27 行（orchestrator import spray 适配器+PRECHECK 7图hash fail-closed / proxy resolve_spec spray 缺车辆 fail-closed），slope 行为面零改动；模块自测 11 passed + 回归合集 148 passed + ruff/compileall clean；真实 VLM/渲染/真链冒烟留接线核验单（禁正式联调 PASS）",
+  "evidence": "receipts/TASK-12S-C/attempt-1.md; tests/test_scene_spray_wiring.py 11 passed; 148 passed exit 0; 92dcb52",
+  "next": "等协调者机械核验→增量 OCR(92dcb52)→强审 pack(auth-24h-20261013 内)→三依赖全合入后派接线核验单→12S-C DONE"
+}

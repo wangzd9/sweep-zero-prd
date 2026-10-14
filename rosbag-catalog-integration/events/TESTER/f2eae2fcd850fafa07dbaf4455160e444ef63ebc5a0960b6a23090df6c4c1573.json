@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-004453-idle-d2-receipt",
+  "occurred_at": "2026-10-12T00:48:06+08:00",
+  "recorded_at": "2026-10-12T00:48:06+08:00",
+  "role": "TESTER",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "巡检：无新 TESTER 派单；t10-defect1 已合入 main 277e40f（协调者）；2号 t10-defect2 d4719f6 回执 REVIEW_PENDING 00:47 落盘，待协调者核验",
+  "evidence": "sessions/TESTER.md",
+  "next": "等 defect2 核验合入后 E2E 复跑派单"
+}

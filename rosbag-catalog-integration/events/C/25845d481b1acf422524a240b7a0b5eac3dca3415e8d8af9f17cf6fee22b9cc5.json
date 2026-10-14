@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-0123",
+  "occurred_at": "2026-10-11T01:24:33+08:00",
+  "recorded_at": "2026-10-11T01:24:33+08:00",
+  "role": "C",
+  "task": "none",
+  "attempt": "none",
+  "status": "IDLE_POLL",
+  "summary": "巡检无变化：inbox/3号 无新派单，保持空闲待派单",
+  "evidence": "sessions/C.md",
+  "next": "等待协调者派单"
+}

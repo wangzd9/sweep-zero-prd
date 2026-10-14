@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-181353-t08c1-commit-nochange",
+  "occurred_at": "2026-10-11T18:15:35+08:00",
+  "recorded_at": "2026-10-11T18:15:35+08:00",
+  "role": "C",
+  "task": "TASK-08",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "t08c-1 commit bf48a45 落地（无回执，2号范围在途）；C 无新派单保持空闲",
+  "evidence": "/home/wang/.hermes/cache/scratch/c_poll_1813_evidence.txt",
+  "next": "继续 5 分钟巡检；等 2号 t08c-1 回执与协调者验收"
+}

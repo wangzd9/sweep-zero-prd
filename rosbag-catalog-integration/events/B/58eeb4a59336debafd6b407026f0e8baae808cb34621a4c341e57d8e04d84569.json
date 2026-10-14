@@ -1,0 +1,12 @@
+{
+  "event_id": "b-delivery-20261012-111800-task07a-attempt1-review-pending",
+  "occurred_at": "2026-10-12T11:22:05+08:00",
+  "recorded_at": "2026-10-12T11:22:05+08:00",
+  "role": "B",
+  "task": "TASK-07A",
+  "attempt": "attempt-1",
+  "status": "DELIVERED_REVIEW_PENDING",
+  "summary": "TASK-07A attempt-1 冻结交付 REVIEW_PENDING：head f94d006（base 453da0c，单 commit 11 文件 +905/-30，分支 scene/task-07a-visibility-lineage @ wt-04a-t07a，worktree 洁净，.venv 软链已删）。落盘 receipts/TASK-07A/attempt-1.md + reports/TASK-07A/attempt-1.md。自测：定向 6 passed、过滤组 328 passed、全量 849 passed/10 skipped/3 failed（test_devflow 沙箱=worktree 环境问题，主工作区同文件 24 passed 非回归）、ruff 绿、页面实测自包含 uvicorn 12/12 段 OK。",
+  "evidence": "越界申报：共享 real 栈有 1 RUNNING+3 NVIDIA_DONE 在途，local_stack.sh up 会 restart 两个宿主代理（打断活动 run 风险），改自包含 uvicorn 实例口径（独立端口+临时 SQLite+场景夹具），覆盖派单 2.5 三项。待核对：派单 2.3「角色 bag_role 独立筛选」未做（三视图 tab 覆盖原始/切片维度、all+数据类型覆盖自建维度），未改契约，等协调者裁决。",
+  "next": "冻结等协调者机械核验→串行 OCR→合入→TESTER 独立验证；空闲只读巡检，不占第二开发任务，不扩需求，不碰生产。"
+}

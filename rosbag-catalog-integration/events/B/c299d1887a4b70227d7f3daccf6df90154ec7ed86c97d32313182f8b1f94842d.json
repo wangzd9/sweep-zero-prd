@@ -1,0 +1,12 @@
+{
+  "event_id": "b-report-20261012-213038-nochange-t07b-ocr-b9b10-done-idle",
+  "occurred_at": "2026-10-12T21:30:38+08:00",
+  "recorded_at": "2026-10-12T21:35:37+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "T07B 交付冻结等审；r95 detached OCR b10 0 findings、b9 1 low+round_failed 待核对，b5/b7 待低负载 resume，无新派单/返修",
+  "evidence": "sessions/B.md 21:30 条目；scratch/t07b/ocr/remaining_progress.txt（r95 done 21:26:34）；reviews/TASK-07B/attempt-1/ocr-batches.md r100",
+  "next": "等协调者 b5/b7 resume+b9 收口核对+契约批+b3 裁决→强审查判定（期限 2026-10-13 11:33:12）→合入→TESTER→07B DONE→派 07C/16C"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-070553-r132-b-r4-inflight",
+  "occurred_at": "2026-10-13T07:09:30+08:00",
+  "recorded_at": "2026-10-13T07:09:30+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07B",
+  "attempt": "4",
+  "status": "RUNNING",
+  "summary": "r132 巡检：B R4 开发在途（迁移单文件 07:00:40 写入，diff +18/-2，commit 未落），零业务状态变化，不催单不接管",
+  "evidence": "sessions/COORDINATOR.md r132 段; wt-04a-t07b HEAD 4baf79f M alembic/versions/20261012_01_scene_manual.py",
+  "next": "r133+ 核 B R4 交付后机械核验+增量 OCR+强审复审"
+}

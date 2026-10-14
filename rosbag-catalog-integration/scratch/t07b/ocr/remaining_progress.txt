@@ -1,0 +1,53 @@
+== r95 detached started 2026-10-12 20:02:16 +0800 pid=464164 files=6 base=502bf8e head=f4bfcf2 ==
+FILE=app/services/scene_manual_revision_service.py RC=1 SECONDS=1800
+[ocr] Summary: 1 file(s) reviewed, 0 comment(s), ~1186534 token(s) used (input: ~1096951, output: ~89583), 30m0s elapsed
+[ocr] Session: 81a66282-6ab7-4a78-a3d5-f309033d8dde
+Review failed: 0 finding(s); 1 of 1 selected item(s) failed.
+LLM retry report summary: 2 of 62 requests affected -- 1 request failed, 1 request cancelled
+Core review (1 request):
+- app/services/scene_manual_revision_service.py: timed out -> failed
+Context compaction (1 request):
+- app/services/scene_manual_revision_service.py: cancelled
+Per-attempt detail: --format json (retry_report).
+[ocr] usage on failure: 1 file(s), 1096951 input + 89583 output = 1186534 total tokens, 109 tool calls, elapsed 30m0s, budget_exceeded=false, session 81a66282-6ab7-4a78-a3d5-f309033d8dde
+[ocr] Session: 81a66282-6ab7-4a78-a3d5-f309033d8dde (retry with: --resume 81a66282-6ab7-4a78-a3d5-f309033d8dde)
+Error: review failed: all 1 file review(s) failed — check your LLM configuration and API key
+FILE=app/static/bag-detail.css RC=0 SECONDS=79
+[ocr] Summary: 1 file(s) reviewed, 0 comment(s), ~32215 token(s) used (input: ~29575, output: ~2640), 1m19s elapsed
+[ocr] Session: c010afa4-105c-4b4e-83c5-f71ae8c21c08
+Review complete: 0 finding(s) across 1 selected item(s).
+FILE=app/static/bag-search.css RC=1 SECONDS=250
+[ocr] Summary: 1 file(s) reviewed, 0 comment(s), ~109893 token(s) used (input: ~102854, output: ~7039), 4m10s elapsed
+[ocr] Session: daa45a1c-e3d8-4af1-97b2-8ce2585bed95
+Review failed: 0 finding(s); 1 of 1 selected item(s) failed.
+[ocr] usage on failure: 1 file(s), 102854 input + 7039 output = 109893 total tokens, 14 tool calls, elapsed 4m10s, budget_exceeded=false, session daa45a1c-e3d8-4af1-97b2-8ce2585bed95
+[ocr] Session: daa45a1c-e3d8-4af1-97b2-8ce2585bed95 (retry with: --resume daa45a1c-e3d8-4af1-97b2-8ce2585bed95)
+Error: review failed: all 1 file review(s) failed — check your LLM configuration and API key
+FILE=app/templates/bags.html RC=0 SECONDS=823
+[ocr] Summary: 1 file(s) reviewed, 1 comment(s), ~323664 token(s) used (input: ~308094, output: ~15570), 13m44s elapsed
+[ocr] Session: 71c2370c-c0ab-4eaa-90b3-e218ac546207
+Review complete: 1 finding(s) across 1 selected item(s).
+─── app/templates/bags.html:226-226 ───
+[maintainability · low] 两个小问题：1) 分支 `'failed' if bag.availability == 'WITHDRAWN' else 'failed'`
+两个结果相同，是冗余的，会让人误以为 WITHDRAWN 有独立的样式分支，建议简化为 `else 'failed'`；2) 非 WITHDRAWN 的切片行会渲染出空的 `title=""`
+属性。功能正确性没有问题（WITHDRAWN 显示“已下架”红标并带 tooltip，测试已覆盖 all 视图断言）。
+- <td data-label="状态">{% if sc.get('_role') == 'slice' and bag.availability %}<span class="status {{ 'done' if bag.availability == 'AVAILABLE' else 'queued' if bag.availability == 'PENDING' else 'failed' if bag.availability == 'WITHDRAWN' else 'failed' }}" title="{{ '人工下架：模型原结果保留，退出默认可用检索（all 视图可见）' if bag.availability == 'WITHDRAWN' else '' }}">{{ '已下架' if bag.availability == 'WITHDRAWN' else bag.availability }}</span>{% else %}<span class="status {{ ('done' if nv and nv.pipeline_status in ['NVIDIA_DONE','PUBLISHED'] else 'queued' if nv and nv.pipeline_status == 'NVIDIA_QUEUE' else 'running' if nv and nv.pipeline_status == 'RUNNING' else 'failed' if nv else (bag.status|lower)) }}">{{ nv.pipeline_status_zh if nv else bag.status }}</span>{% endif %}</td>
++ <td data-label="状态">{% if sc.get('_role') == 'slice' and bag.availability %}{% set wd = bag.availability == 'WITHDRAWN' %}<span class="status {{ 'done' if bag.availability == 'AVAILABLE' else 'queued' if bag.availability == 'PENDING' else 'failed' }}" {% if wd %}title="人工下架：模型原结果保留，退出默认可用检索（all 视图可见）"{% endif %}>{{ '已下架' if wd else bag.availability }}</span>{% else %}
+FILE=app/templates/detail.html RC=0 SECONDS=1800
+─── app/templates/detail.html:52-52 ───
+[bug · low] corrected_label 下拉默认项是空值“选择标签”且未加 `required`，而同表的 原因/操作者 都标了
+`required`。用户不选标签直接提交会以空串打到服务，触发 422（corrected_label invalid）并回显错误，而非表单层拦截。建议给该 select 加 `required`
+以与其余必填项一致、避免无效的 422 往返。
+[ocr] WARNING [review_round_failed] app/templates/detail.html: round 2: LLM completion error: caller deadline exceeded: context deadline exceeded
+LLM retry report summary: 3 of 46 requests affected -- 1 request failed, 2 requests cancelled
+Core review (1 request):
+- app/templates/detail.html: timed out -> failed
+Context compaction (2 requests):
+- app/templates/detail.html: cancelled
+- app/templates/detail.html: cancelled
+Per-attempt detail: --format json (retry_report).
+FILE=app/web/bags.py RC=0 SECONDS=304
+[ocr] Summary: 1 file(s) reviewed, 0 comment(s), ~97161 token(s) used (input: ~85237, output: ~11924), 5m5s elapsed
+[ocr] Session: 0dd6c985-0996-42f8-a397-569438019d15
+Review complete: 0 finding(s) across 1 selected item(s).
+== r95 detached done 2026-10-12 21:26:34 +0800 ==

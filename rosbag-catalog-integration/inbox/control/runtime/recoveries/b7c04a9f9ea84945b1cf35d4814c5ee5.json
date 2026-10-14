@@ -1,0 +1,13 @@
+{
+  "recovered_at": "2026-10-14T15:46:40+08:00",
+  "role": "B",
+  "old_owner": "cron-b-poll-6f7471d8747c-20261014-142853",
+  "verification_evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/events/B/b-stale-lease-142853-evidence-20261014.md",
+  "lease": {
+    "owner": "cron-b-poll-6f7471d8747c-20261014-142853",
+    "claimed_at": "2026-10-14T14:38:41+08:00",
+    "expires_at": 1791960221.731708,
+    "pid": null,
+    "process_start": null
+  }
+}

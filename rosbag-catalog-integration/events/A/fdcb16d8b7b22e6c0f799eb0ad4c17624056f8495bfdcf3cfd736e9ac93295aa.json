@@ -1,0 +1,12 @@
+{
+  "event_id": "a-batch1012-attempt1-binding1017-stopped-codex-done-20261014",
+  "occurred_at": "2026-10-14T10:54:11+08:00",
+  "recorded_at": "2026-10-14T10:54:11+08:00",
+  "role": "A",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "1017 correction round closeout: resume-ruling-binding-1017.md STOP for A; flat three-submission re-registration owner moved from A to Codex (isolated tree fix/spray-progress-20261014 single-writer via formal API, user 10:07 direct-repair authorization). Codex 10:23 completed: a65a25a7 -> scene-a4824f1c SUCCESS; 87dfebaa -> scene-eb4397c3 NOT_APPLICABLE; 518089ed -> scene-24ab78bb NOT_APPLICABLE; all SCHEDULED gen1 events CONSUMED created_runs=0 reused_runs=3 errors=[] reuse existing terminal runs no model re-burn whole batch still 7 runs. A read-only verify at 10:29:25 cross-confirms Codex receipt (bound_ready_path all flat; source_id points to flat source_copy rows; register created=false no new source no direct DB edit; 40min zero new pipeline_run; 4acf689f still SCENE_RUNNING heartbeat 10:29:12 untouched). A side has zero remaining binding actions and made no re-registration write/retry during verify, no conflict.",
+  "evidence": "receipts/TASK-11S-BATCH-1012/a-attempt-1.md 1017 section + correction supplement; codex-repair-receipt-20261014.md; binding-repair.jsonl; processing-machine MySQL NOW 10:29:25 source_copy id116-121 + ingest_submission 10:23:08-09 binding rows + pipeline_run zero-new + 4acf689f heartbeat; backend log 02:18-02:23 register",
+  "next": "wait 4acf689f terminal state any outcome to join TESTER full-chain incremental verify (14_42_48 formal verify per a65a25a7 bound run reuse result incl two reconcile idempotency accounting TESTER domain); A maintain no re-upload/no direct DB edit/no dup re-burn/no kill 4acf689f"
+}

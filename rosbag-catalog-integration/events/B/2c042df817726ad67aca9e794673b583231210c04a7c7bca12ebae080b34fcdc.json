@@ -1,0 +1,12 @@
+{
+  "event_id": "b-rework8-delivered-1b0d504",
+  "occurred_at": "2026-10-11T12:21:39+08:00",
+  "recorded_at": "2026-10-11T12:21:39+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-8",
+  "status": "REVIEW_PENDING",
+  "summary": "rework-8 交付：:1047 docstring 改准（纯注释，AST 除该 docstring 外全一致零行为变更），定向 35 passed + ruff 绿，commit 1b0d504 base b7cee07",
+  "evidence": "receipts/TASK-06B/attempt-1-r2-rework-8.md",
+  "next": "等协调者验收合入"
+}

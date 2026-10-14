@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-031053-nochange",
+  "occurred_at": "2026-10-12T03:12:12+08:00",
+  "recorded_at": "2026-10-12T03:12:12+08:00",
+  "role": "COORDINATOR",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "P0收口后空转巡检：02:0x 检查点（02:01 TASK-10 DONE 收口）后零业务变化；main 453da0c=origin 双核一致；A/B/C/TESTER 全空闲（tick 03:06-03:10，legacy_busy 空）；leases 仅 C 本轮自身租约在途；ps 无 ocr/pytest 业务进程；ocr.lock 为 00:5x T10D2 收口残留无持有者",
+  "evidence": "find -newermt 03:05:53 仅各角色 tick/nochange 事件与 sessions 心跳",
+  "next": "维持 P0 停止派发；巡检降为常规空转"
+}

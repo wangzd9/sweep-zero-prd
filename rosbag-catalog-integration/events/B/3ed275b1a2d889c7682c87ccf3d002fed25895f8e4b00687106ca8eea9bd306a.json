@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-010253-nochange-t07b-r2-ocr-bags-py-batch-inflight-idle",
+  "occurred_at": "2026-10-13T01:05:19+08:00",
+  "recorded_at": "2026-10-13T01:05:19+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "2-r2",
+  "status": "REVIEW_PENDING",
+  "summary": "attempt-2-r2 交付冻结无变化；协调者 r105 增量 OCR bags.py 批 00:58 起跑在途；无新派单",
+  "evidence": "sessions/B.md; reviews/TASK-07B/attempt-2-r2/ocr-batches.md",
+  "next": "等协调者 r105 全批收口+机械核验+强审查 pack(授权期至 2026-10-13 11:33:12)后合入"
+}

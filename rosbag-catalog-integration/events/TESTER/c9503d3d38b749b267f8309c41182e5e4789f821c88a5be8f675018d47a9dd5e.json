@@ -1,0 +1,12 @@
+{
+  "event_id": "20261010-2147-r2final-attempt3-delivered",
+  "occurred_at": "2026-10-10T21:49:18+08:00",
+  "recorded_at": "2026-10-10T21:49:18+08:00",
+  "role": "TESTER",
+  "task": "TASK-06",
+  "attempt": "3",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "缺陷3 reconcile 幂等二次复测 attempt-3 PASS（真 MySQL 8.4.11：t_r2app3 31 passed RC=0；t_dbg6 探针 reconcile 2 次均 200 无 StaleDataError，updated_at 幂等重放未推进）；被测 main 5f0124b",
+  "evidence": "reports/TASK-06/r2-final-mysql-e2e-attempt-3.md; test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-3.md",
+  "next": "等协调者验收解锁 06 聚合最后一道业务门禁"
+}

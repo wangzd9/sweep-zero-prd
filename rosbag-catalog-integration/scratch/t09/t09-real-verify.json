@@ -1,0 +1,209 @@
+{
+ "endpoint": "http://192.168.2.45:8002/v1/chat/completions",
+ "model": "完整路径 qwen3.8-27b-fp8（接线默认）",
+ "frames_per_sample_bound": 20,
+ "samples": [
+  {
+   "tag": "row19",
+   "bag": "/mnt/nas_backup/data_slice/1165414093/slope/1165414093_slope_20260818_105105_105120",
+   "expect": "SUCCESS 非空可发布区间",
+   "latency_s": 115.9,
+   "outcome": "SUCCESS",
+   "segments": [
+    {
+     "label": "slope",
+     "start_ns": "1787021465142223739",
+     "end_ns": "1787021479550464104",
+     "duration_ns": "14408240365",
+     "publish_target": true,
+     "slice_key": "slope:1787021465142223739:1787021479550464104",
+     "mapping_basis": "header_stamp_ns",
+     "evidence_ref": "frame_log#0"
+    }
+   ],
+   "frames_in_log": 14,
+   "label_counts": {
+    "slope": 11,
+    "flat": 3
+   },
+   "mapping_basis": [
+    "header_stamp_ns"
+   ],
+   "error_code": null,
+   "error_detail": null,
+   "evidence": [
+    "SLOPE_FRAME_LOG",
+    "SLOPE_TOPIC"
+   ]
+  },
+  {
+   "tag": "row20",
+   "bag": "/mnt/nas_backup/data_slice/1165414093/slope/1165414093_slope_20260818_105117_105132",
+   "expect": "SUCCESS 非空可发布区间",
+   "latency_s": 127.5,
+   "outcome": null,
+   "segments": [],
+   "frames_in_log": null,
+   "label_counts": null,
+   "mapping_basis": null,
+   "error_code": "MODEL_UNAVAILABLE",
+   "error_detail": "MODEL_UNAVAILABLE: 第 13 帧模型服务异常：帧 1787021491199936487 模型请求失败：HTTPError: 500 Server Error: Internal Server Error for url: http://192.168.2.45:8002/v1/chat/completions"
+  },
+  {
+   "tag": "row21",
+   "bag": "/mnt/nas_backup/data_slice/1165414093/slope/1165414093_slope_20260818_105129_105148",
+   "expect": "SUCCESS 非空可发布区间",
+   "latency_s": 52.3,
+   "outcome": null,
+   "segments": [],
+   "frames_in_log": null,
+   "label_counts": null,
+   "mapping_basis": null,
+   "error_code": "MODEL_UNAVAILABLE",
+   "error_detail": "MODEL_UNAVAILABLE: 第 2 帧模型服务异常：帧 1787021491199936487 模型请求失败：HTTPError: 500 Server Error: Internal Server Error for url: http://192.168.2.45:8002/v1/chat/completions"
+  },
+  {
+   "tag": "row22",
+   "bag": "/mnt/nas_backup/data_slice/1165414093/flat/1165414093_flat_20260818_105143_105201",
+   "expect": "NO_MATCH（flat-only 证据，不发布）",
+   "latency_s": 64.6,
+   "outcome": "NO_MATCH",
+   "segments": [
+    {
+     "label": "flat",
+     "start_ns": "1787021503080649095",
+     "end_ns": "1787021515613228590",
+     "duration_ns": "12532579495",
+     "publish_target": false,
+     "slice_key": "flat:1787021503080649095:1787021515613228590",
+     "mapping_basis": "header_stamp_ns",
+     "evidence_ref": "frame_log#0"
+    }
+   ],
+   "frames_in_log": 13,
+   "label_counts": {
+    "slope": 1,
+    "flat": 12
+   },
+   "mapping_basis": [
+    "header_stamp_ns"
+   ],
+   "error_code": null,
+   "error_detail": null,
+   "evidence": [
+    "SLOPE_FRAME_LOG",
+    "SLOPE_TOPIC"
+   ]
+  },
+  {
+   "tag": "row23",
+   "bag": "/mnt/nas_backup/data_slice/1165414093/flat/1165414093_flat_20260818_105158_105213",
+   "expect": "NO_MATCH（flat-only 证据，不发布）",
+   "latency_s": 40.2,
+   "outcome": "NO_MATCH",
+   "segments": [
+    {
+     "label": "flat",
+     "start_ns": "1787021522692828052",
+     "end_ns": "1787021531988788254",
+     "duration_ns": "9295960202",
+     "publish_target": false,
+     "slice_key": "flat:1787021522692828052:1787021531988788254",
+     "mapping_basis": "header_stamp_ns",
+     "evidence_ref": "frame_log#0"
+    }
+   ],
+   "frames_in_log": 9,
+   "label_counts": {
+    "flat": 9
+   },
+   "mapping_basis": [
+    "header_stamp_ns"
+   ],
+   "error_code": null,
+   "error_detail": null,
+   "evidence": [
+    "SLOPE_FRAME_LOG",
+    "SLOPE_TOPIC"
+   ]
+  },
+  {
+   "tag": "boundary-unreachable",
+   "bag": "/mnt/nas_backup/data_slice/1165414093/slope/1165414093_slope_20260818_105105_105120",
+   "expect": "FAILED/MODEL_UNAVAILABLE 如实报出，不伪装 NO_MATCH",
+   "latency_s": 22.8,
+   "outcome": null,
+   "segments": [],
+   "frames_in_log": null,
+   "label_counts": null,
+   "mapping_basis": null,
+   "error_code": "MODEL_UNAVAILABLE",
+   "error_detail": "MODEL_UNAVAILABLE: 第 0 帧模型服务异常：帧 1787021465142223739 模型请求失败：ConnectionError: HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Co"
+  }
+ ],
+ "time_mapping": {
+  "probe_cases": [
+   {
+    "bag_label": "slope",
+    "storage_ns": 1787021465225134640,
+    "header_ns": 1787021465142223739,
+    "storage_minus_header_ns": 82910901
+   },
+   {
+    "bag_label": "slope",
+    "storage_ns": 1787021465225134640,
+    "header_ns": 1787021465142223739,
+    "storage_minus_header_ns": 82910901
+   },
+   {
+    "bag_label": "slope",
+    "storage_ns": 1787021465225134640,
+    "header_ns": 1787021465142223739,
+    "storage_minus_header_ns": 82910901
+   },
+   {
+    "bag_label": "slope",
+    "storage_ns": 1787021465495568358,
+    "header_ns": 1787021465409336522,
+    "storage_minus_header_ns": 86231836
+   },
+   {
+    "bag_label": "slope",
+    "storage_ns": 1787021465495568358,
+    "header_ns": 1787021465409336522,
+    "storage_minus_header_ns": 86231836
+   },
+   {
+    "bag_label": "slope",
+    "storage_ns": 1787021465495568358,
+    "header_ns": 1787021465409336522,
+    "storage_minus_header_ns": 86231836
+   },
+   {
+    "bag_label": "flat",
+    "storage_ns": 1787021503140449532,
+    "header_ns": 1787021503080649095,
+    "storage_minus_header_ns": 59800437
+   },
+   {
+    "bag_label": "flat",
+    "storage_ns": 1787021503140449532,
+    "header_ns": 1787021503080649095,
+    "storage_minus_header_ns": 59800437
+   },
+   {
+    "bag_label": "flat",
+    "storage_ns": 1787021503140449532,
+    "header_ns": 1787021503080649095,
+    "storage_minus_header_ns": 59800437
+   }
+  ],
+  "csv_declared_vs_first_frame": {
+   "row19": {
+    "csv_start_s": 1787021465,
+    "first_frame_storage_ns": 1787021465225134640,
+    "delta_ns": 225134640
+   }
+  }
+ }
+}

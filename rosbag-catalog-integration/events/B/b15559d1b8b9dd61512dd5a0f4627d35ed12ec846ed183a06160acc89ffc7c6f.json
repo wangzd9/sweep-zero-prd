@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-122253-nochange-t07a-ocr-bagspy-batch",
+  "occurred_at": "2026-10-12T12:24:35+08:00",
+  "recorded_at": "2026-10-12T12:24:35+08:00",
+  "role": "B",
+  "task": "TASK-07A",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "无新派单无返修；T07A 交付冻结 f94d006 等协调者串行 OCR（g2 resume3 已退出，12:19:27 bagspy 新批在途 pid 4077211 实测存活）；origin/main 453da0c 双核不变；本侧维持 IDLE_WAITING 不占开发槽",
+  "evidence": "sessions/B.md 12:23 条目; ocr.lock T07A-r1f-bagspy owner=coord-poll-r79",
+  "next": "等协调者 T07A OCR bagspy 批收口→机械核验/合入→TESTER 独立验证；收到返修按 attempt 续 scene/task-07a-visibility-lineage"
+}

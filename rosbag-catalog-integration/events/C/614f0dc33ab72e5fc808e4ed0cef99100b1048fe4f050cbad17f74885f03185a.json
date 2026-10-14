@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-062853-nochange",
+  "occurred_at": "2026-10-12T06:30:01+08:00",
+  "recorded_at": "2026-10-12T06:30:01+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "06:13 后零业务变化：HANDOFF 06:25 协调者空转检查点非 C；inbox/3号 无新派单；main 453da0c 三核一致；wt-03b 干净无 C 进程",
+  "evidence": "sessions/C.md 06:29 巡检",
+  "next": "保持空闲待派单"
+}

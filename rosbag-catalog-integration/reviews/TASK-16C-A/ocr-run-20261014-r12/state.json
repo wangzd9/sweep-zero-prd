@@ -1,0 +1,23 @@
+{
+  "state": "RUNNING",
+  "updated_at": "2026-10-14T10:12:10.869179+00:00",
+  "pid": 3994474,
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/coordinator-ocr-66ca40d3ffa4405288e5e764d0b97a95.service",
+  "run_id": "66ca40d3ffa4405288e5e764d0b97a95",
+  "unit": "coordinator-ocr-66ca40d3ffa4405288e5e764d0b97a95.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "app/services/bag_search_service.py"
+      ],
+      "state": "RUNNING",
+      "started_at": "2026-10-14T10:00:26.751048+00:00",
+      "pid": 3994544,
+      "process_start_ticks": "37228870",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-01-t16ca/180c9e8b-1b4b-4564-8f29-21d7ec0ea0e3.jsonl",
+      "session_mtime": 1791972706.090041
+    }
+  ],
+  "gate_decision": "NOT_EVALUATED"
+}

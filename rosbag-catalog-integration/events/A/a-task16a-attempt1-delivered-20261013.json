@@ -1,0 +1,16 @@
+{
+ "event_id": "a-task16a-attempt1-delivered-20261013",
+ "role": "A",
+ "task": "TASK-16A",
+ "attempt": 1,
+ "status": "DELIVERED_REVIEW_PENDING",
+ "ts": "2026-10-13T01:24:00+08:00",
+ "summary": "TASK-16A attempt-1 场景接收隔离（v0.4 最小闭环·第一刀，8 交付面）冻结交付。链 c2018dd → 79f6889（基础层：三根配置契约 fail-closed、Scanner RootContext 双根/paths/clients/backend root_id、scene_intake 身份防线纯函数、requests schema、compose 透传）→ c30f048（模型/迁移 intake_root_id+server_default、intake_snapshot_json、ingest 入口 root 隔离/bind/seed_scene_isolated_profile、source_service register 接线防线、bootstrap 种子、双根 runner 收尾、tests）。验证：全量 pytest 869 passed/10 skipped（3 个 test_devflow worktree 固有问题 base 同失败非本单）；新增自测 19 passed；ruff 本单 0 新增违规；真 MySQL 8.4 隔离库迁移 upgrade→DDL 核对→downgrade→re-upgrade 全通过（发现并修 1 处 STRICT 坑：intake_root_id 需 server_default，SQLite 遮不住）；本地 real 栈双根冒烟（隔离 compose 栈、不碰主栈含 RUNNING mock run）全断言通过——场景袋→scene-isolated 入口 SCHEDULED+intake_snapshot(root_id=scene)+零 Phase0 run，旧袋→default 入口+恰好 1 个 SELF_BUILT_BAG run，两条 journal 独立带 root_id，两根 ScanJob 各一条。越界申报：无（07B 冻结文件集零触碰、未改生产 compose 实际值、未部署、未操作生产数据）。06B 已承载发布侧受控核对本单不动（声明契约点）。",
+ "evidence": [
+  "receipts/TASK-16A/attempt-1.md",
+  "reports/TASK-16A/attempt-1.md",
+  "inbox/1号/TASK-16A/attempt-1-ack.md",
+  "worktree a/task-16a-scene-intake@wt-01-t16a：base c2018dd → head c30f048"
+ ],
+ "next": "REVIEW_PENDING 非通过。待协调者 OCR/契约审核 + TESTER 独立验证 + 07B 合入顺序对迁移链位置裁决（down_revision=20261009_02_ingest_frozen，若 07B(20261012_01_scene_manual)先入需 rebase 到其链后）。本角色开发槽在途=等待审查，不占第二单，空闲只读巡检。"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-014853-nochange",
+  "occurred_at": "2026-10-12T01:50:51+08:00",
+  "recorded_at": "2026-10-12T01:50:51+08:00",
+  "role": "C",
+  "task": "TASK-03B",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "C 空闲待派单：01:43 后仅 2号 t10-defect3 交付回执 0943885 REVIEW_PENDING（非 C 范围），无 C 新派单",
+  "evidence": "receipts/TASK-10/t10-defect3-publish-bounds.md",
+  "next": "继续 5 分钟巡检，等 2号 t10-defect3 收口链或新派单"
+}

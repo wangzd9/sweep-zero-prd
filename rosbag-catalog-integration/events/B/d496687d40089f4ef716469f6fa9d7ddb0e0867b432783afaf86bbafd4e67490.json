@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-090753-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T09:09:56+08:00",
+  "recorded_at": "2026-10-12T09:09:56+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "巡检无变化：无新派单/返修，main 453da0c 双核不变，T11 生产门禁未放行",
+  "evidence": "sessions/B.md",
+  "next": "继续按需巡检"
+}

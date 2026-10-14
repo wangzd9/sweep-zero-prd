@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-165953-r167-reconcile-disk-recovered",
+  "occurred_at": "2026-10-13T17:12:15+08:00",
+  "recorded_at": "2026-10-13T17:12:15+08:00",
+  "role": "TESTER",
+  "task": "TASK-12S-BC-freeze",
+  "attempt": "1",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "r167 协调者事件对账落账：①12S-BC 报告被协调者消费认账（A 面 0320a8e PASS+27.1s 全链、S9 证据随 s9_head 增量复验；B 面 92dcb52 模块级 PASS 因 r2 改 proxy 部分失效→r2 合入后增量复验受影响项）；②G4 副本因 16:43 根分区 100% 失效（A 面，TESTER 无涉及项）；③17:30 排程按首包窗口勘误口径（4.38s 小包功能首包、超窗允许更长验收窗口、不解除 G1~G4）。TESTER 侧实测：根分区已恢复（本轮 df / =51%，/home=25%）、tester 容器 0 个、docker 恢复通知在案可继续真实探针。16B r2 收口链（OCR 4492b7f6 在途→强审剩 4/5→TESTER 收口→合入）TESTER 收口单未派不预占",
+  "evidence": "events/COORDINATOR/coord-r167-t16b-r2-verified-ocr-inflight-tester-report-disk-full-g4-invalid.json; df / 51% avail 31G; docker ps tester=0",
+  "next": "等 16B r2 收口后 TESTER 收口派单（r1 口径，含 12S-C 受影响项）+ s9_head 增量复验 + 18:00 时段总结"
+}

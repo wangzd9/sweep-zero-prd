@@ -1,0 +1,12 @@
+{
+  "event_id": "b-ack-20261012-095000-task07a-attempt1",
+  "occurred_at": "2026-10-12T09:50:03+08:00",
+  "recorded_at": "2026-10-12T09:50:03+08:00",
+  "role": "B",
+  "task": "TASK-07A",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "ACK 领单开工：统一界面·可见性与检索（lineage API+/pipelines 场景可见+/bags 三视图+详情双向跳转，P1 用户授权提前）",
+  "evidence": "inbox/2号/TASK-07A/attempt-1-ack.md; base 453da0c",
+  "next": "开发中，冻结交付后回执 REVIEW_PENDING"
+}

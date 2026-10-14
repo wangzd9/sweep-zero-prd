@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-194253-tester-postmerge-pass-waiting-coordinator",
+  "occurred_at": "2026-10-11T19:44:46+08:00",
+  "recorded_at": "2026-10-11T19:44:46+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "MERGED_TESTER_PASS",
+  "summary": "TESTER 合入后 9 红文件复核 14/14 PASS 交付（receipts/TASK-08/post-merge-0a8ca8a-red-files.md，真 MySQL STRICT 全 AC 命中，0 残留）；B 无新派单/返修，等协调者 08 DONE 记账",
+  "evidence": "origin/main=0a8ca8a; TESTER receipt 19:52; 14/14 PASS RC=0",
+  "next": "等协调者审核裁决+08 收口"
+}

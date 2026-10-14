@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t10-reverify-20261012-0201-delivered-pass",
+  "occurred_at": "2026-10-12T02:05:09+08:00",
+  "recorded_at": "2026-10-12T02:05:09+08:00",
+  "role": "TESTER",
+  "task": "TASK-10",
+  "attempt": "2",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "e2e-reverify-v2 attempt-2 PASS：main 453da0c 全链（analyze SUCCESS/offset 100381744 非None/发布/results 200/complete-scene 200 switched current 可置AVAILABLE/子包200+sqlite可打开/原包独立复测ALL_UNCHANGED 7-7），零业务改动，VLM 累计2袋",
+  "evidence": "test-receipts/TEST-TASK10-e2e-reverify/attempt-2.md",
+  "next": "待协调者判 TASK-10 DONE（P0 收口）"
+}

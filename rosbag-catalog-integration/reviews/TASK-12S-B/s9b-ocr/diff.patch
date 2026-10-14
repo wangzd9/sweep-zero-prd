@@ -1,0 +1,1929 @@
+diff --git a/app/scene/spray/adapter.py b/app/scene/spray/adapter.py
+index 4d51c58..506318d 100644
+--- a/app/scene/spray/adapter.py
++++ b/app/scene/spray/adapter.py
+@@ -41,8 +41,8 @@ from app.scene.spray.model import (
+     prompt_hashes,
+ )
+ from app.scene.spray.pcd_io import parse_binary_pcd_header
+-from app.scene.spray.precheck import run_precheck
+-from app.scene.spray.references import ReferenceError, ordered_ref_bytes, verify_references
++from app.scene.spray.precheck import resolve_decoder_path, run_precheck
++from app.scene.spray.references import SOURCE_COMMIT, ReferenceError, ordered_ref_bytes, verify_references
+ from app.scene.spray.time_map import MAPPING_BAG_STORAGE
+ from app.scene.types import (
+     AnalysisOutput,
+@@ -95,6 +95,14 @@ class SprayAdapter(SceneAdapter):
+             return ApplicabilityVerdict(applicable=False, reason=f"bag 不可读：{exc}")
+         route = self._resolve_route(request, topics)
+         if route not in _ROUTE_TOPIC:
++            # auto 解析失败（packet/pointcloud 双缺 topic）归入缺 topic 的 NOT_APPLICABLE 口径，
++            # 不误报"未知路线"（S8）
++            if route == "auto":
++                reason = (
++                    f"缺少水雾输入 topic（{PACKET_TOPIC} / {POINTCLOUD_TOPIC} 均无；"
++                    f"实际 {[t for t in topics]}）"
++                )
++                return ApplicabilityVerdict(applicable=False, reason=reason)
+             return ApplicabilityVerdict(applicable=False, reason=f"未知路线 {route!r}（应为 packet/pointcloud/auto）")
+         needed = _ROUTE_TOPIC[route]
+         if needed not in topics:
+@@ -112,8 +120,10 @@ class SprayAdapter(SceneAdapter):
+     def analyze(self, request: SceneRunRequest) -> AnalysisOutput:
+         bag_dir = Path(request.source_path)
+         work_dir = Path(request.work_dir)
+-        if work_dir.exists() and not work_dir.is_absolute():
+-            raise SceneAdapterError("WORK_DIR_INVALID", "work_dir 必须是受控绝对路径")
++        # 相对路径守卫必须在 mkdir 之前无条件拒绝（S2）：
++        # 旧守卫只在"已存在"时触发，新相对路径会穿透守卫落到进程 CWD
++        if not work_dir.is_absolute():
++            raise SceneAdapterError("WORK_DIR_INVALID", f"work_dir 必须是受控绝对路径（拒绝相对路径 {work_dir}）")
+         work_dir.mkdir(parents=True, exist_ok=True)
+ 
+         topics = {t.name: t for t in read_topics(bag_dir)}
+@@ -172,7 +182,11 @@ class SprayAdapter(SceneAdapter):
+         ref_bytes = ordered_ref_bytes(refs)
+         cache = SprayResultCache(work_dir)
+         cache_key = self._build_cache_key(request, refs, selected, client)
+-        cached = cache.hit(cache_key, expected_frame_count=len(rendered_frames))
++        # S1：模型面必须用 report.valid_frames——rendered_frames 含已被 500KiB 过滤
++        # 删除的帧（account_frame 对 <500KiB 已 unlink，rendered 计数仍保留），直接
++        # read_bytes() 会 FileNotFoundError 整 run ADAPTER_ERROR，且小图喂入模型违背设计
++        model_frames = list(report.valid_frames)
++        cached = cache.hit(cache_key, expected_frame_count=len(model_frames))
+         labels: list[str] = []
+         verdicts: list[dict] = []
+         pass_stats: list[dict] = []
+@@ -183,7 +197,7 @@ class SprayAdapter(SceneAdapter):
+                 verdicts.append(r)
+             pass_stats = []  # bytes 统计来自首次执行（render_log 注明 cache_reused）
+         else:
+-            for i, (storage_ns, jpg) in enumerate(rendered_frames):
++            for i, (storage_ns, jpg) in enumerate(model_frames):
+                 if i % _CANCEL_CHECK_EVERY == 0 and request.cancellation.is_cancelled():
+                     raise SceneAdapterError("CANCELLED", f"模型第 {i} 帧前收到取消信号，停止写入")
+                 frame_stats: list = []
+@@ -217,9 +231,9 @@ class SprayAdapter(SceneAdapter):
+                 )
+             cache.save(digest=cache_key, results=verdicts)
+ 
+-        # 缓存命中时 verdicts 来自文件（自带 storage_ns）；未命中时与 rendered_frames 逐帧对齐
++        # 缓存命中时 verdicts 来自文件（自带 storage_ns）；未命中时与 model_frames 逐帧对齐（S1）
+         if cached is None:
+-            model_storage_ns = [ns for ns, _ in rendered_frames]
++            model_storage_ns = [ns for ns, _ in model_frames]
+         else:
+             model_storage_ns = [int(v["storage_ns"]) for v in verdicts]
+ 
+@@ -298,23 +312,27 @@ class SprayAdapter(SceneAdapter):
+         try:
+             if route == "packet":
+                 if self._decoder_path is None:
+-                    # 生产路径：decoder 在处理机，本单服务端只做预检与路径封装
++                    # 生产路径：decoder 由受控 env 提供（T2 口径，precheck.resolve_decoder_path）
+                     from app.scene.spray.precheck import check_decoder
+ 
+                     dec = check_decoder()
+                     if not dec.ok:
+                         raise DecodeError(dec.reason, dec.detail)
+-                    decoder = "/home/wang/work/ros2_slice/utils/packet2pointcloud"
++                    decoder = str(resolve_decoder_path())
+                 else:
+                     decoder = str(self._decoder_path)
+                 return spray_decode.decode_packet_route(bag_dir, work_dir, decoder, cancel_check=_cancel)
+             if route == "pointcloud":
+-                return spray_decode.decode_pointcloud_route(bag_dir, work_dir, require_intensity=True)
++                return spray_decode.decode_pointcloud_route(
++                    bag_dir, work_dir, require_intensity=True, cancel_check=_cancel
++                )
+             raise DecodeError("ROUTE_INVALID", f"未知路线 {route!r}")
+         except DecodeError as exc:
+             raise SceneAdapterError(exc.code, exc.detail) from exc
+ 
+     def _render_one(self, fr: SprayFrame, out_jpg: Path) -> bool:
++        # S5：两路线解码均恒填 pcd_path（packet 写 PCD 文件、pointcloud 转写 PCD 统一渲染面）
++        # pcd_path=None 为死分支，保留 False 口径但注明不变式
+         if fr.pcd_path is None:
+             return False
+         try:
+@@ -386,7 +404,11 @@ class SprayAdapter(SceneAdapter):
+             "model_storage_ns": list(model_storage_ns),
+             "pass_stats": pass_stats,
+             "prompt_hashes": prompt_hashes(),
+-            "refs": {"ordered_hash": refs.ordered_hash, "total_bytes": refs.total_bytes, "source_commit": "be23177…"},
++            "refs": {
++                "ordered_hash": refs.ordered_hash,
++                "total_bytes": refs.total_bytes,
++                "source_commit": SOURCE_COMMIT,
++            },
+             "cache_reused": cache_reused,
+             "capability_version": request.capability.capability_version,
+             "rules_revision": request.capability.rules_revision,
+diff --git a/app/scene/spray/decode.py b/app/scene/spray/decode.py
+index 6001add..c9925f8 100644
+--- a/app/scene/spray/decode.py
++++ b/app/scene/spray/decode.py
+@@ -16,7 +16,9 @@ decoder 只输出 ms 截断 PCD 文件名时，按消息序号建立确定映射
+ 
+ from __future__ import annotations
+ 
++import json
+ import os
++import sqlite3
+ import struct
+ import subprocess
+ from dataclasses import dataclass
+@@ -48,6 +50,28 @@ class DecodeError(Exception):
+         super().__init__(f"{code}: {self.detail}" if detail else code)
+ 
+ 
++@dataclass(frozen=True)
++class ScanFrameMapping:
++    """packet 路线一帧（scan）的可追溯映射（S9，SPRAY-INTEGRATION §3 帧映射契约）。
++
++    一帧 = 以 `is_last_scan=true` 的 SeyondScan 结束消息为边界的一段 scan。
++    字段：
++    - scan_end_storage_ns：帧源时间 = scan 结束消息的整数 storage_ns（**不得** ms×1e6 伪造）
++    - scan_end_message_id / scan_end_db3：帧边界消息身份（可追溯证据）
++    - first_message_id / first_db3：该帧首个参与消息（跨 DB3 拼接时与边界不同库）
++    - packet_count：scan 结束消息 CDR 里声明的 packet 数（完整性证据）
++    - scan_timestamp_f64：scan 结束消息自带 float64 timestamp（对照用，非源 ns 口径）
++    """
++
++    scan_end_storage_ns: int
++    scan_end_message_id: int
++    scan_end_db3: str
++    first_message_id: int
++    first_db3: str
++    packet_count: int
++    scan_timestamp_f64: float
++
++
+ @dataclass(frozen=True)
+ class SprayFrame:
+     """一帧源时间 + 解码产物（PCD 路径或点云数组）。"""
+@@ -57,6 +81,8 @@ class SprayFrame:
+     points: tuple[tuple[float, float, float], ...] | None = None
+     intensity: tuple[float, ...] | None = None
+     route: str = ""
++    # S9：packet 路线帧→scan 可追溯映射（pointcloud 路线 1:1，无此项）
++    scan_mapping: ScanFrameMapping | None = None
+ 
+ 
+ # ---------------------------------------------------------------------------
+@@ -65,12 +91,29 @@ class SprayFrame:
+ 
+ # intensity 字段按 datatype 的 struct 小端格式（默认 FLOAT32）
+ _INTENSITY_FMT = {1: "<b", 2: "<B", 3: "<h", 4: "<H", 5: "<i", 6: "<I", 7: "<f", 8: "<d"}
++# PointField datatype → 字节大小（S3 布局守卫用）
++_P2_DT_SIZE = {1: 1, 2: 1, 3: 2, 4: 2, 5: 4, 6: 4, 7: 4, 8: 8}
+ 
+ 
+ def _p2_align4(pos: int, base: int) -> int:
+     return pos + (4 - (pos - base)) % 4
+ 
+ 
++def _p2_read(data: bytes, pos: int, fmt: str, order: str) -> tuple:
++    """越界守卫的 struct 读（S3，参照 slope cdr._read_struct 口径）：截断 → P2_TRUNCATED。"""
++    f = f"{order}{fmt}"
++    size = struct.calcsize(f)
++    if pos + size > len(data):
++        raise DecodeError("P2_TRUNCATED", f"PointCloud2 截断：读 {fmt!r} 需 {size}B @ {pos}，剩 {len(data) - pos}")
++    return struct.unpack_from(f, data, pos)
++
++
++def _p2_read_byte(data: bytes, pos: int) -> int:
++    if pos >= len(data):
++        raise DecodeError("P2_TRUNCATED", f"PointCloud2 截断：读 byte @ {pos}，剩 {len(data) - pos}")
++    return data[pos]
++
++
+ def parse_pointcloud2(
+     data: bytes, *, require_intensity: bool = True
+ ) -> tuple[list[tuple[float, float, float]], list[float] | None]:
+@@ -87,51 +130,52 @@ def parse_pointcloud2(
+         base = 4
+     pos = base
+     # header (std_msgs/Header): Time(sec i, nanosec I) + frame_id string
++    # S3：全部 struct/byte 读走越界守卫（截断/畸形 → P2_TRUNCATED，不抛 struct.error/IndexError）
+     pos = _p2_align4(pos, base)
+-    sec, nanosec = struct.unpack_from(f"{order}iI", data, pos)
++    sec, nanosec = _p2_read(data, pos, "iI", order)
+     pos += 8
+     pos = _p2_align4(pos, base)
+-    (str_len,) = struct.unpack_from(f"{order}I", data, pos)
++    (str_len,) = _p2_read(data, pos, "I", order)
+     pos += 4
+     if pos + str_len > len(data):
+         raise DecodeError("P2_TRUNCATED", "PointCloud2 header frame_id 越界")
+     pos += str_len
+     # height/width (uint32 each)
+     pos = _p2_align4(pos, base)
+-    height, width = struct.unpack_from(f"{order}II", data, pos)
++    height, width = _p2_read(data, pos, "II", order)
+     pos += 8
+     # fields: sequence<PointField>
+     pos = _p2_align4(pos, base)
+-    (nfields,) = struct.unpack_from(f"{order}I", data, pos)
++    (nfields,) = _p2_read(data, pos, "I", order)
+     pos += 4
+     fields: list[tuple[str, int, int, int]] = []  # (name, offset, datatype, count)
+     for _ in range(nfields):
+         pos = _p2_align4(pos, base)
+-        (fname_len,) = struct.unpack_from(f"{order}I", data, pos)
++        (fname_len,) = _p2_read(data, pos, "I", order)
+         pos += 4
+         if pos + fname_len > len(data):
+             raise DecodeError("P2_TRUNCATED", "PointCloud2 field name 越界")
+         fname = data[pos : pos + fname_len].rstrip(b"\x00").decode("utf-8", "replace")
+         pos += fname_len
+         # PointField: name(str) offset(uint32) datatype(uint8) count(uint8)
+-        (f_off,) = struct.unpack_from(f"{order}I", data, pos)
++        (f_off,) = _p2_read(data, pos, "I", order)
+         pos += 4
+-        f_dt = data[pos]
+-        f_cnt = data[pos + 1]
++        f_dt = _p2_read_byte(data, pos)
++        f_cnt = _p2_read_byte(data, pos + 1)
+         pos += 2
+         fields.append((fname, f_off, f_dt, f_cnt if f_cnt > 0 else 1))
+     # is_bigendian(uint8) + point_step(uint32)
+-    is_be = data[pos]
++    is_be = _p2_read_byte(data, pos)
+     pos += 1
+     pos = _p2_align4(pos, base)
+-    (point_step,) = struct.unpack_from(f"{order}I", data, pos)
++    (point_step,) = _p2_read(data, pos, "I", order)
+     pos += 4
+     # row_step(uint32)
+-    (row_step,) = struct.unpack_from(f"{order}I", data, pos)
++    (row_step,) = _p2_read(data, pos, "I", order)
+     pos += 4
+     # data: sequence<uint8>
+     pos = _p2_align4(pos, base)
+-    (data_len,) = struct.unpack_from(f"{order}I", data, pos)
++    (data_len,) = _p2_read(data, pos, "I", order)
+     pos += 4
+     if pos + data_len > len(data):
+         raise DecodeError("P2_TRUNCATED", f"PointCloud2 data 越界：需 {data_len} 剩 {len(data) - pos}")
+@@ -146,6 +190,16 @@ def parse_pointcloud2(
+     has_intensity = "intensity" in by_name
+     if require_intensity and not has_intensity:
+         raise DecodeError("P2_NO_INTENSITY", "PointCloud2 缺 intensity 字段，不能默默换渲染配色（SPRAY §2）")
++    # S3：point_step 非正或字段 offset 越出点步长 → 布局非法（防逐点读越界）
++    if point_step <= 0:
++        raise DecodeError("P2_LAYOUT", f"PointCloud2 point_step 非法：{point_step}")
++    for _n, _off, _dt, _c in fields:
++        _fsize = _P2_DT_SIZE.get(_dt, 4)  # datatype → 字节（未知按 FLOAT32 保守口径）
++        if _off + _fsize > point_step:
++            raise DecodeError(
++                "P2_LAYOUT",
++                f"PointCloud2 字段 {_n} offset={_off} size={_fsize} 越出 point_step={point_step}",
++            )
+     fmt = "<" if not is_be else ">"
+     n = int(height * width)
+     if n <= 0:
+@@ -161,6 +215,7 @@ def parse_pointcloud2(
+     if has_intensity:
+         oi = by_name["intensity"][1]
+         i_fmt = _INTENSITY_FMT.get(by_name["intensity"][2], "<f")
++    i_size = struct.calcsize(i_fmt)
+     for k in range(n):
+         base_off = k * point_step
+         x = struct.unpack_from(f"{fmt}f", blob, base_off + ox)[0]
+@@ -169,21 +224,134 @@ def parse_pointcloud2(
+         # 非有限点（NaN/inf）跳过计数，但保留位置（对照实现按索引上色）
+         points.append((x, y, z))
+         if intensities is not None and oi is not None:
++            if base_off + oi + i_size > len(blob):
++                # S3：blob 长度检查基于 n*point_step 不含字段 size 余量，越界同样拒绝
++                raise DecodeError("P2_TRUNCATED", f"PointCloud2 intensity @ 点 {k} 越界")
+             v = struct.unpack_from(i_fmt, blob, base_off + oi)[0]
+             intensities.append(float(v))
+     return points, intensities
+ 
+ 
+ # ---------------------------------------------------------------------------
+-# packet 路线：packet2pointcloud 子进程 + 源 ns 序号映射
++# packet 路线：SeyondScan CDR 帧边界 + packet2pointcloud 子进程 + scan 映射
+ # ---------------------------------------------------------------------------
+ 
+ 
+ def _sorted_ms_pcds(out_dir: Path) -> list[Path]:
+-    """decoder 输出的 PCD（ms 截断命名），按文件名升序（= 源消息序号）。"""
++    """decoder 输出的 PCD（ms 截断命名），按文件名升序（= scan 序）。"""
+     return sorted(p for p in out_dir.iterdir() if p.suffix in _MS_PCD_SUFFIX and p.is_file())
+ 
+ 
++@dataclass
++class _FrontMidMsg:
++    db3: str
++    message_id: int
++    storage_ns: int
++    data: bytes
++
++
++def _read_front_mid(bag_dir: Path) -> list[_FrontMidMsg]:
++    """只读读取 front_mid 全部消息（含 message_id 与来源 db3），全局 (storage_ns, id) 升序。
++
++    不复用 slope.bag_io.read_messages：它丢弃 message_id 与 db3 归属，无法支撑
++    S9 的可追溯帧映射；且本读取器限 front_mid 单 topic，语义自足。read-only 打开。
++    """
++    from app.scene.slope.bag_io import find_db3_files
++
++    all_msgs: list[_FrontMidMsg] = []
++    for path in find_db3_files(bag_dir):
++        try:
++            conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
++        except sqlite3.Error as exc:
++            raise DecodeError("BAG_READ_FAILED", f"无法只读打开 {path.name}：{exc}") from exc
++        try:
++            tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
++            if "messages" not in tables or "topics" not in tables:
++                continue  # 无 messages/topics 的库跳过（与其他 topic 无关）
++            tids = {r[0] for r in conn.execute("SELECT id FROM topics WHERE name = ?", (PACKET_TOPIC,))}
++            if not tids:
++                continue
++            placeholders = ",".join("?" * len(tids))
++            rows = conn.execute(
++                f"SELECT id, timestamp, data FROM messages WHERE topic_id IN ({placeholders}) ORDER BY timestamp, id",
++                tuple(tids),
++            ).fetchall()
++        finally:
++            conn.close()
++        for mid, ts, data in rows:
++            all_msgs.append(_FrontMidMsg(db3=path.name, message_id=int(mid), storage_ns=int(ts), data=data))
++    all_msgs.sort(key=lambda m: (m.storage_ns, m.message_id))
++    return all_msgs
++
++
++def _seyondscan_is_last(data: bytes) -> bool:
++    """解析 SeyondScan CDR 的 is_last_scan（u8，@base+12）。只读该字段，不展开 packet 体。
++
++    封装头：CDR_LE `00 01 00 00`→base 4 / CDR_BE `00 00 01 00`→base 4；无封装 base 0。
++    布局（SPRAY-INTEGRATION 接口）：f64 timestamp@base+0 / u32 size@base+8 / u8 is_last@base+12。
++    长度不足以定位该字段 → False（残缺消息，由上层完整性守卫拒绝）。
++    """
++    base = 0
++    if len(data) >= 4 and data[:4] == b"\x00\x01\x00\x00":
++        base = 4
++    elif len(data) >= 4 and data[:4] == b"\x00\x00\x01\x00":
++        base = 4
++    off = base + 12
++    if len(data) <= off:
++        return False
++    return data[off] != 0
++
++
++def _seyondscan_head(data: bytes) -> tuple[float, int]:
++    """读 scan 结束消息的 (scan_timestamp_f64, packet_count)。
++
++    packet_count = SeyondPacket[] sequence 长度（u32 @ base+16）。缺字段 → (0.0, 0)。
++    """
++    base = 4 if (len(data) >= 4 and data[:4] in (b"\x00\x01\x00\x00", b"\x00\x00\x01\x00")) else 0
++    order = "<" if base == 0 or data[:4] != b"\x00\x00\x01\x00" else ">"
++    ts = 0.0
++    if len(data) >= base + 8:
++        ts = struct.unpack_from(f"{order}d", data, base)[0]
++    pkt = 0
++    if len(data) >= base + 20:
++        pkt = struct.unpack_from(f"{order}I", data, base + 16)[0]
++    return ts, pkt
++
++
++def _build_scan_frames(msgs: list[_FrontMidMsg]) -> tuple[list[ScanFrameMapping], int]:
++    """以 is_last_scan 消息为帧边界，把 front_mid 消息序列切成 scan 帧。
++
++    返回 (frames, tail_truncated_count)：
++    - 第 k 帧 = 上一个 scan 结束（或序列头）之后到第 k 个 is_last_scan 消息为止；
++    - 帧源 ns = 该 scan 结束消息的整数 storage_ns（不近似）；
++    - 帧首 message = 上一边界后的第一条（跨 DB3 拼接时 first_db3 与 end_db3 可不同）；
++    - tail_truncated_count = 最后一个 scan 结束之后的非空消息数（尾部无 is_last 的残缺
++      scan：作证据，不计入可发布帧，不静默丢弃也不冒充）。
++    无 is_last_scan 消息 → ( [], len(msgs) )（首尾均不完整，上层按 DECODE_FAILED 拒绝）。
++    """
++    scan_end_idx = [i for i, m in enumerate(msgs) if _seyondscan_is_last(m.data)]
++    if not scan_end_idx:
++        return [], len(msgs)
++    frames: list[ScanFrameMapping] = []
++    for k, end_i in enumerate(scan_end_idx):
++        first_i = scan_end_idx[k - 1] + 1 if k > 0 else 0
++        end = msgs[end_i]
++        ts, pkt = _seyondscan_head(end.data)
++        frames.append(
++            ScanFrameMapping(
++                scan_end_storage_ns=end.storage_ns,
++                scan_end_message_id=end.message_id,
++                scan_end_db3=end.db3,
++                first_message_id=msgs[first_i].message_id,
++                first_db3=msgs[first_i].db3,
++                packet_count=pkt,
++                scan_timestamp_f64=ts,
++            )
++        )
++    tail = len(msgs) - (scan_end_idx[-1] + 1)
++    return frames, max(0, tail)
++
++
+ def decode_packet_route(
+     bag_dir: Path,
+     work_dir: Path,
+@@ -191,12 +359,18 @@ def decode_packet_route(
+     *,
+     cancel_check=None,
+ ) -> list[SprayFrame]:
+-    """packet 路线：调 packet2pointcloud 逐 db3 → PCD 目录，映射源 db3 存储 ns。
+-
+-    - 检查子进程 returncode（非 0 → DECODER_FAILED，对照实现未检查 returncode 的缺陷）；
+-    - 无 PCD 输出 → DECODE_FAILED（decoder 空输出，不冒充无命中）；
+-    - 源 ns 映射：read_messages(PACKET_TOPIC) 的存储 ns 升序 = PCD 序号序；
+-      序号数不一致或出现重复/歧义 → DECODE_FAILED（不冒充 ms×1e6）。
++    """packet 路线：调 packet2pointcloud 逐 db3 → PCD 目录，按 **scan（is_last_scan）** 映射源 ns。
++
++    S9 帧映射契约（替换旧的 `len(pc_ds) != len(src_msgs)` 错误断言）：
++    - **帧边界**：一帧 = 以 `is_last_scan=true` 的 scan 结束消息为边界；decoder 每 scan 出一个
++      PCD，故 **PCD 数必须等于 scan 结束数**（真实包 1184 消息 / 44 scan / 44 PCD）。
++      旧契约拿 PCD 数对齐全部消息数（44≠1184），一切真实有效包必 DECODE_FAILED——已修正。
++    - **源 ns 口径**：帧源时间 = 该 scan 结束消息的整数 storage_ns（**不得** ms 文件名×1e6 伪造）。
++    - **可追溯**：每帧记录 scan 结束/首条消息的 db3、message_id、packet_count（跨 DB3 拼接时
++      first_db3 与 scan_end_db3 可不同，据此识别拼接）。
++    - **完整性**：尾部无 is_last 的残缺 scan 作证据（tail_truncated）不发布；无 scan 结束、
++      PCD 数与 scan 数不一致、PCD 头非法 → DECODE_FAILED，不猜测不静默丢弃。
++    - 检查子进程 returncode（非 0 → DECODER_FAILED）。
+     """
+     bag_dir = Path(bag_dir)
+     work_dir = Path(work_dir)
+@@ -205,20 +379,27 @@ def decode_packet_route(
+         raise DecodeError("DECODER_UNAVAILABLE", f"packet2pointcloud 缺失：{decoder}（型号/依赖处理机安装）")
+     if not os.access(decoder, os.X_OK):
+         raise DecodeError("DECODER_UNAVAILABLE", f"packet2pointcloud 不可执行：{decoder}")
+-    # 源消息存储 ns 升序（bag_io 多库合并升序）
++    # 源消息（含 message_id/db3，全局 (storage_ns,id) 升序）
+     try:
+-        src_msgs = read_messages(bag_dir, topic=PACKET_TOPIC)
+-    except BagIoError as exc:
+-        raise DecodeError("BAG_READ_FAILED", str(exc)) from exc
++        src_msgs = _read_front_mid(bag_dir)
++    except DecodeError:
++        raise
+     if not src_msgs:
+         raise DecodeError("DECODE_FAILED", f"{PACKET_TOPIC} 无消息")
++    # scan 帧边界（在 decoder 之前算，映射与 PCD 数对齐用）
++    scan_frames, tail_truncated = _build_scan_frames(src_msgs)
++    if not scan_frames:
++        raise DecodeError(
++            "DECODE_FAILED",
++            f"{PACKET_TOPIC} {len(src_msgs)} 条消息无 is_last_scan 帧边界（首尾均不完整，拒绝冒充）",
++        )
+     pcd_dir = work_dir / "pcd"
+     pcd_dir.mkdir(parents=True, exist_ok=True)
+     from app.scene.slope.bag_io import find_db3_files
+ 
+     try:
+         db3s = find_db3_files(bag_dir)
+-    except BagIoError as exc:
++    except Exception as exc:  # BagIoError
+         raise DecodeError("BAG_READ_FAILED", str(exc)) from exc
+     for db3 in db3s:
+         if cancel_check is not None and cancel_check():
+@@ -234,24 +415,44 @@ def decode_packet_route(
+             raise DecodeError("DECODER_FAILED", f"packet2pointcloud rc={proc.returncode} {db3.name}：{tail}")
+     pc_ds = _sorted_ms_pcds(pcd_dir)
+     if not pc_ds:
+-        raise DecodeError("DECODE_FAILED", f"decoder 无 PCD 输出（{len(src_msgs)} 条源消息）")
+-    if len(pc_ds) != len(src_msgs):
++        raise DecodeError("DECODE_FAILED", f"decoder 无 PCD 输出（{len(scan_frames)} 个 scan）")
++    # S9 核心契约：PCD 数必须等于 scan 结束数（decoder 每 scan 出一帧）
++    if len(pc_ds) != len(scan_frames):
+         raise DecodeError(
+             "DECODE_FAILED",
+-            f"PCD 数 {len(pc_ds)} != 源消息数 {len(src_msgs)}，序号映射歧义（重复/缺失），拒绝冒充",
++            f"PCD 数 {len(pc_ds)} != scan 结束数 {len(scan_frames)}"
++            f"（{len(src_msgs)} 消息，尾部残缺 {tail_truncated}），帧映射歧义，拒绝冒充",
+         )
+-    # 逐序号映射源存储 ns（升序）；同一 ns 多次出现不歧义（帧序号唯一）
+     frames: list[SprayFrame] = []
+     for idx, pcd in enumerate(pc_ds):
+         try:
+             parse_binary_pcd_header(pcd)  # 头合法性（可解码），无 intensity 不在此拒（渲染层判）
+         except PcdError as exc:
+             raise DecodeError("DECODE_FAILED", f"PCD 头非法 {pcd.name}：{exc}") from exc
+-        frames.append(SprayFrame(storage_ns=src_msgs[idx].timestamp_ns, pcd_path=pcd, route=ROUTE_PACKET))
++        smap = scan_frames[idx]
++        frames.append(
++            SprayFrame(
++                storage_ns=smap.scan_end_storage_ns,
++                pcd_path=pcd,
++                route=ROUTE_PACKET,
++                scan_mapping=smap,
++            )
++        )
++    # 尾部残缺 scan 证据：写入 work_dir（不静默丢弃；不进入可发布帧列表）
++    if tail_truncated > 0:
++        (work_dir / "tail_truncated.json").write_text(
++            json.dumps(
++                {"tail_truncated_messages": tail_truncated, "note": "最后一个 is_last_scan 之后的残缺 scan，未发布"},
++                ensure_ascii=False,
++            ),
++            encoding="utf-8",
++        )
+     return frames
+ 
+ 
+-def decode_pointcloud_route(bag_dir: Path, work_dir: Path, *, require_intensity: bool = True) -> list[SprayFrame]:
++def decode_pointcloud_route(
++    bag_dir: Path, work_dir: Path, *, require_intensity: bool = True, cancel_check=None
++) -> list[SprayFrame]:
+     """pointcloud 路线：纯 stdlib 解析 PointCloud2 → 写 PCD（统一下游渲染面）。"""
+     bag_dir = Path(bag_dir)
+     work_dir = Path(work_dir)
+@@ -265,7 +466,18 @@ def decode_pointcloud_route(bag_dir: Path, work_dir: Path, *, require_intensity:
+     pcd_dir.mkdir(parents=True, exist_ok=True)
+     frames: list[SprayFrame] = []
+     for idx, m in enumerate(src_msgs):
+-        points, intensities = parse_pointcloud2(m.data, require_intensity=require_intensity)
++        # S6：解码循环透传取消信号（与 packet 路线对齐）
++        if cancel_check is not None and cancel_check():
++            raise DecodeError("CANCELLED", f"pointcloud 解码第 {idx} 帧前收到取消信号")
++        try:
++            points, intensities = parse_pointcloud2(m.data, require_intensity=require_intensity)
++        except DecodeError as exc:
++            # S3：逐帧解析失败收敛 DecodeError（契约"存在但解不出有效帧=DECODE_FAILED"，
++            # 保留原 code/detail 作上下文）
++            raise DecodeError(
++                "DECODE_FAILED",
++                f"第 {idx} 帧 PointCloud2 解析失败（{exc.code}）：{exc.detail}（storage_ns={m.timestamp_ns}）",
++            ) from exc
+         pcd = build_binary_pcd(pcd_dir / f"frame_{idx:06d}.pcd", points, intensities)
+         frames.append(
+             SprayFrame(
+@@ -276,4 +488,4 @@ def decode_pointcloud_route(bag_dir: Path, work_dir: Path, *, require_intensity:
+                 route=ROUTE_POINTCLOUD,
+             )
+         )
+-    return frames
+\ No newline at end of file
++    return frames
+diff --git a/app/scene/spray/pcd_io.py b/app/scene/spray/pcd_io.py
+index 88dab5d..ae29727 100644
+--- a/app/scene/spray/pcd_io.py
++++ b/app/scene/spray/pcd_io.py
+@@ -21,6 +21,21 @@ class PcdError(Exception):
+     """PCD 头解析/格式非法。"""
+ 
+ 
++def _pcd_int(value: str, what: str, name: str) -> int:
++    """T5：头部数值 token 解析统一收敛 PcdError（非数值不再抛未捕 ValueError）。"""
++    try:
++        return int(value)
++    except ValueError as exc:
++        raise PcdError(f"PCD 头 {what} 非数值 {value!r}：{name}") from exc
++
++
++def _pcd_field_parts(parts: list[str], what: str, name: str) -> list[str]:
++    """T5：字段行第二个 token 缺失不再抛未捕 IndexError。"""
++    if len(parts) < 2:
++        raise PcdError(f"PCD 头 {what} 行缺值：{name}")
++    return parts[1:]
++
++
+ @dataclass(frozen=True)
+ class PcdHeader:
+     """binary PCD 头部关键字段。"""
+@@ -60,6 +75,7 @@ def parse_binary_pcd_header(path: Path | str) -> PcdHeader:
+     sizes: list[int] = []
+     types: list[str] = []
+     counts: list[int] = []
++    count_line_seen = False  # T6①：COUNT 行可选（PCD 规范缺省=全 1）
+     width = height = points = 0
+     data_format = ""
+     data_line_pos = -1
+@@ -70,28 +86,33 @@ def parse_binary_pcd_header(path: Path | str) -> PcdHeader:
+             continue
+         key = parts[0].upper()
+         if key == "FIELDS":
+-            fields = parts[1:]
++            fields = _pcd_field_parts(parts, "FIELDS", p.name)
+         elif key == "SIZE":
+-            sizes = [int(x) for x in parts[1:]]
++            sizes = [_pcd_int(x, "SIZE", p.name) for x in _pcd_field_parts(parts, "SIZE", p.name)]
+         elif key == "TYPE":
+-            types = parts[1:]
++            types = _pcd_field_parts(parts, "TYPE", p.name)
+         elif key == "COUNT":
+-            counts = [int(x) for x in parts[1:]]
++            count_line_seen = True
++            counts = [_pcd_int(x, "COUNT", p.name) for x in _pcd_field_parts(parts, "COUNT", p.name)]
+         elif key == "WIDTH":
+-            width = int(parts[1])
++            width = _pcd_int(_pcd_field_parts(parts, "WIDTH", p.name)[0], "WIDTH", p.name)
+         elif key == "HEIGHT":
+-            height = int(parts[1])
++            height = _pcd_int(_pcd_field_parts(parts, "HEIGHT", p.name)[0], "HEIGHT", p.name)
+         elif key == "POINTS":
+-            points = int(parts[1])
++            points = _pcd_int(_pcd_field_parts(parts, "POINTS", p.name)[0], "POINTS", p.name)
+         elif key == "DATA":
+-            data_format = parts[1].lower()
++            data_format = parts[1].lower() if len(parts) > 1 else ""
+             data_line_pos = i
+             break
+     if data_line_pos < 0 or not fields or not sizes or not types:
+         raise PcdError(f"PCD 头缺失关键字段：{p.name}")
+-    if data_format not in {"binary", "ascii", "binary_compressed"}:
+-        raise PcdError(f"PCD DATA 格式不支持：{data_format!r}（仅 binary/ascii）")
+-    # DATA 段起点 = DATA 行之后一行的行首偏移
++    # T6②：compressed 在 header 层即报不支持——read_intensity 只处理 binary/ascii，
++    # 过 header 检后 intensity 抽取会报误导性错误
++    if data_format not in {"binary", "ascii"}:
++        raise PcdError(f"PCD DATA 格式不支持：{data_format!r}（仅 binary/ascii；binary_compressed 不支持）")
++    # T6①：COUNT 行缺失时按 PCD 规范默认全 1（不再误报长度不一致）
++    if not count_line_seen:
++        counts = [1] * len(fields)
+     data_start = sum(len(ln) + 1 for ln in lines[: data_line_pos + 1])
+     if len(sizes) != len(fields) or len(counts) != len(fields):
+         raise PcdError(f"PCD FIELDS/SIZE/COUNT 长度不一致：{p.name}")
+@@ -117,14 +138,21 @@ def read_intensity(path: Path | str) -> list[float]:
+         p = Path(path)
+         vals: list[float] = []
+         idx = header.fields.index("intensity")
+-        head_lines = p.read_bytes()[: header.data_start].decode("utf-8", errors="ignore").split("\n")
++        # T7：旧口径 raw[:data_start].split("\n") 尾随 \n 多一个空元素 → len 比实际
++        # 头行数多 1、多跳一行、静默丢弃首条 ASCII 数据。头行数 = data_start 前
++        # 换行符个数（不受头内空行/尾随 \n 影响）。
++        raw_head = p.read_bytes()[: header.data_start]
++        head_row_count = raw_head.count(b"\n")
+         with p.open("r", encoding="utf-8") as f:
+-            for _ in range(len(head_lines)):
++            for _ in range(head_row_count):
+                 f.readline()
+             for line in f:
+                 parts = line.split()
+                 if len(parts) > idx:
+-                    vals.append(float(parts[idx]))
++                    try:
++                        vals.append(float(parts[idx]))
++                    except ValueError:
++                        continue  # 非数值数据行（尾随垃圾/空行）不计入强度序列
+         return vals
+     if header.data_format != "binary":
+         raise PcdError(f"PCD 格式不支持 intensity 抽取：{header.data_format}")
+diff --git a/app/scene/spray/precheck.py b/app/scene/spray/precheck.py
+index 4851e26..df4c81d 100644
+--- a/app/scene/spray/precheck.py
++++ b/app/scene/spray/precheck.py
+@@ -85,8 +85,15 @@ def check_references() -> PrecheckResult:
+     try:
+         v = verify_references(REFERENCES)
+     except ReferenceError as exc:
++        # T3：按实际 reason 前缀传播（UNDECODABLE→MISMATCH→MISSING 优先级），
++        # 不再把 REFERENCE_UNDECODABLE（字节/hash 对但非 JPEG）误标成 REFERENCE_MISMATCH
+         msg = str(exc)
+-        reason = "REFERENCE_MISSING" if "REFERENCE_MISSING" in msg else "REFERENCE_MISMATCH"
++        if "REFERENCE_UNDECODABLE" in msg:
++            reason = "REFERENCE_UNDECODABLE"
++        elif "REFERENCE_MISMATCH" in msg:
++            reason = "REFERENCE_MISMATCH"
++        else:
++            reason = "REFERENCE_MISSING"
+         return PrecheckResult(ok=False, reason=reason, detail=msg)
+     except Exception as exc:
+         return PrecheckResult(ok=False, reason="REFERENCE_ERROR", detail=str(exc))
+@@ -94,26 +101,55 @@ def check_references() -> PrecheckResult:
+     return PrecheckResult(ok=True, detail=detail)
+ 
+ 
+-def _ldd_missing_libs(executable: Path) -> list[str]:
+-    """对 decoder 做 ldd，返回缺失（not found）的关键共享库族。"""
++# decoder 受控路径 env（T2，对齐 references.reference_dir 的 SPRAY_REFERENCE_DIR 口径）
++SPRAY_DECODER_PATH_ENV = "SPRAY_DECODER_PATH"
++
++
++def resolve_decoder_path() -> Path:
++    """decoder 路径由 env SPRAY_DECODER_PATH 受控提供；未配置抛 FileNotFoundError
++    （调用方按 DECODER_UNAVAILABLE 处理）——不再硬编码机器路径。"""
++    raw = os.getenv(SPRAY_DECODER_PATH_ENV, "").strip()
++    if not raw:
++        raise FileNotFoundError(f"{SPRAY_DECODER_PATH_ENV} 未配置（decoder 路径受控 env 缺失）")
++    return Path(raw)
++
++
++def _ldd_missing_libs(executable: Path) -> tuple[list[str] | None, str | None]:
++    """对 decoder 做 ldd，返回 (缺失库列表, 探针失败信息)。
++
++    T1：探针自身失败（OSError/TimeoutExpired/非零返回）时返回 (None, detail)——
++    调用方必须报 unavailable，不宣称库在位（fail-closed）。
++    """
+     try:
+         proc = subprocess.run(["ldd", str(executable)], capture_output=True, text=True, timeout=30)
+     except (OSError, subprocess.TimeoutExpired) as exc:
+-        return [f"ldd 失败：{exc}"]
++        return None, f"ldd 探针失败：{exc}"
++    if proc.returncode != 0:
++        tail = (proc.stderr or proc.stdout or "").strip()[-200:]
++        return None, f"ldd 返回 {proc.returncode}：{tail}"
+     missing = [ln.strip() for ln in (proc.stdout or "").splitlines() if "not found" in ln]
+-    return missing
++    return missing, None
+ 
+ 
+ def check_decoder(decoder_path: str | Path | None = None) -> PrecheckResult:
+     """decoder 预检：文件存在 + 可执行 + 关键共享库（libseyond/rclcpp/pcl）。"""
+-    default = Path("/home/wang/work/ros2_slice/utils/packet2pointcloud")
+-    exe = Path(decoder_path) if decoder_path else default
++    if decoder_path is not None:
++        exe = Path(decoder_path)
++    else:
++        try:
++            exe = resolve_decoder_path()
++        except FileNotFoundError as exc:
++            # T2：未配置受控路径 = 明确 DECODER_UNAVAILABLE（不宣称缺失机器路径）
++            return PrecheckResult(ok=False, reason="DECODER_UNAVAILABLE", detail=str(exc))
+     if not exe.is_file():
+         detail = f"packet2pointcloud 缺失：{exe}（型号/依赖处理机安装）"
+         return PrecheckResult(ok=False, reason="DECODER_UNAVAILABLE", detail=detail)
+     if not os.access(exe, os.X_OK):
+         return PrecheckResult(ok=False, reason="DECODER_UNAVAILABLE", detail=f"不可执行：{exe}")
+-    missing = _ldd_missing_libs(exe)
++    missing, probe_error = _ldd_missing_libs(exe)
++    # T1：ldd 探针失败 → 依赖状态未知，必须报 unavailable，不宣称"关键共享库在位"
++    if missing is None:
++        return PrecheckResult(ok=False, reason="DECODER_DEPS_UNKNOWN", detail=f"decoder 依赖状态未知（{probe_error}）")
+     missing_families = sorted({m.split(".so")[0] for m in missing})
+     required_missing = [fam for fam in _DECODER_REQUIRED_LIBS if any(fam in mf for mf in missing_families)]
+     if required_missing:
+diff --git a/app/scene/spray/references.py b/app/scene/spray/references.py
+index c7ac54b..f6d4c5a 100644
+--- a/app/scene/spray/references.py
++++ b/app/scene/spray/references.py
+@@ -19,9 +19,8 @@ from pathlib import Path
+ 
+ SOURCE_COMMIT = "be23177eca685b5f0f75160ca82503beeb63147d"
+ 
+-REF_ORDER = (1, 2, 3, 4, 5, 6, 7)
+-NORMAL_ORDERS = frozenset({1, 2, 3, 4})
+-ABNORMAL_ORDERS = frozenset({5, 6, 7})
++# T4：REF_ORDER/NORMAL_ORDERS/ABNORMAL_ORDERS 曾为全仓零引用死代码，已删；
++# 正常/异常分类以 REFERENCES 各条 class 字段为单一来源。
+ 
+ # 永久清单（对照 SPRAY-REFERENCES.json 逐图冻结）
+ REFERENCES: tuple[dict, ...] = (
+diff --git a/app/scene/spray/render.py b/app/scene/spray/render.py
+index 0066d0c..352bcb2 100644
+--- a/app/scene/spray/render.py
++++ b/app/scene/spray/render.py
+@@ -160,13 +160,20 @@ def render_pcd_to_jpg(pcd_path: Path, output_path: Path) -> bool:
+             return False
+         intensity = None
+         try:
+-            intensity = read_intensity(pcd_path)
++            _full = read_intensity(pcd_path)
++            # S4：read_intensity 返回**全点序列**（len=n），与 cropped（ROI mask 子集）
++            # 直接比长度几乎恒 False → cloud.colors 从不设置、强度判别失效。
++            # 先应用同一 ROI mask 再上色（长度不齐=无法对齐，跳过上色不猜）。
++            if _full is not None and len(_full) == len(points):
++                intensity = np.asarray(_full, dtype=float)[mask]
++            elif _full is not None:
++                intensity = None
+         except Exception:
+             intensity = None
+         cloud = o3d.geometry.PointCloud()
+         cloud.points = o3d.utility.Vector3dVector(cropped)
+         if intensity is not None and len(intensity) == len(cropped):
+-            cloud.colors = o3d.utility.Vector3dVector(_intensity_color(np.asarray(intensity, dtype=float)))
++            cloud.colors = o3d.utility.Vector3dVector(_intensity_color(intensity))
+         try:
+             renderer = o3d.visualization.rendering.OffscreenRenderer(RENDER_WIDTH, RENDER_HEIGHT)
+         except TypeError:
+@@ -200,28 +207,30 @@ def render_pcd_to_jpg(pcd_path: Path, output_path: Path) -> bool:
+ 
+ 
+ def _intensity_color(values: Any) -> Any:
+-    """对照实现 intensity_to_color_custom（深红→红→黄→绿→蓝，归一 [0,1]）。"""
++    """对照实现 intensity_to_color_custom（深红→红→黄→绿→蓝，归一 [0,1]）。
++
++    S7：原逐点 Python for 循环在渲染热路径上每帧 O(n) 解释执行；
++    改 np.select 分箱向量化（颜色分段逻辑逐点等价，不改配色口径）。
++    """
+     import numpy as np
+ 
+-    i_min = float(np.min(values)) if len(values) else 0.0
+-    i_max = float(np.max(values)) if len(values) else 0.0
++    values = np.asarray(values, dtype=float)
++    i_min = float(values.min()) if len(values) else 0.0
++    i_max = float(values.max()) if len(values) else 0.0
+     if i_max - i_min > 1e-6:
+         normalized = (values - i_min) / (i_max - i_min)
+     else:
+         normalized = np.zeros_like(values)
+-    n = len(normalized)
+-    colors = np.zeros((n, 3))
+-    for i, val in enumerate(normalized):
+-        if val < 0.25:
+-            t = val / 0.25
+-            colors[i] = [0.5 + 0.5 * t, 0.0, 0.0]
+-        elif val < 0.5:
+-            t = (val - 0.25) / 0.25
+-            colors[i] = [1.0, t, 0.0]
+-        elif val < 0.75:
+-            t = (val - 0.5) / 0.25
+-            colors[i] = [1.0 - t, 1.0, 0.0]
+-        else:
+-            t = (val - 0.75) / 0.25
+-            colors[i] = [0.0, 1.0 - t, t]
+-    return colors
+\ No newline at end of file
++    # 分段边界（<0.25 / <0.5 / <0.75 / >=0.75），与旧逐点分支逐点等价
++    cond1 = normalized < 0.25
++    cond2 = normalized < 0.5
++    cond3 = normalized < 0.75
++    # 逐段 t（np.select 的 choices 必须用本段公式，否则跨段引用错误 t）
++    t1 = normalized / 0.25
++    t2 = (normalized - 0.25) / 0.25
++    t3 = (normalized - 0.5) / 0.25
++    t4 = (normalized - 0.75) / 0.25
++    r = np.select([cond1, cond2, cond3], [0.5 + 0.5 * t1, 1.0, 1.0 - t3], default=0.0)
++    g = np.select([cond1, cond2, cond3], [0.0, t2, 1.0], default=1.0 - t4)
++    b = np.select([cond1, cond2, cond3], [0.0, 0.0, 0.0], default=t4)
++    return np.stack([r, g, b], axis=1)
+\ No newline at end of file
+diff --git a/app/scene/spray/time_map.py b/app/scene/spray/time_map.py
+index 8481fb4..1646a0e 100644
+--- a/app/scene/spray/time_map.py
++++ b/app/scene/spray/time_map.py
+@@ -58,12 +58,19 @@ def resolve_storage_ns(
+     target_hi = file_ms * 1_000_000 + window_ns
+     hits = [c for c in candidates_ns if target_lo <= c <= target_hi]
+     if len(hits) == 0:
+-        # 放宽到最近候选，但要求唯一最近且距离 < 50ms（防止跨帧误配）
+-        nearest = min(candidates_ns, key=lambda c: abs(c - file_ms * 1_000_000))
+-        dist = abs(nearest - file_ms * 1_000_000)
+-        if dist >= 50_000_000:
+-            raise ValueError(f"ms 文件名与候选源时间最近距离 {dist // 1_000_000}ms 过远，拒绝映射")
+-        hits = [nearest]
++        # 放宽到最近候选，但要求**唯一最近**且距离 < 50ms（防止跨帧误配）
++        target_ns = file_ms * 1_000_000
++        best_dist = min(abs(c - target_ns) for c in candidates_ns)
++        ties = [c for c in candidates_ns if abs(c - target_ns) == best_dist]
++        if len(ties) > 1:
++            # T8：等距双候选（如 t±25ms）时 min 取首个会让 hits 恒 len 1、
++            # "唯一最近"歧义拒绝永不触发，违背防误配意图 → 显式唯一性检查必须拒绝
++            raise ValueError(
++                f"ms 文件名 {file_ms} 最近候选 {len(ties)} 个等距（dist={best_dist // 1_000_000}ms），tie 拒绝"
++            )
++        if best_dist >= 50_000_000:
++            raise ValueError(f"ms 文件名与候选源时间最近距离 {best_dist // 1_000_000}ms 过远，拒绝映射")
++        hits = [ties[0]]
+     if len(hits) > 1:
+         raise ValueError(f"ms 文件名 {file_ms} 命中 {len(hits)} 个候选源时间，歧义拒绝")
+     return SprayFrameTime(storage_ns=hits[0], basis=MAPPING_BAG_STORAGE, inferred=len(candidates_ns) > 1)
+diff --git a/tests/test_spray_adapter.py b/tests/test_spray_adapter.py
+index 0c61654..9344182 100644
+--- a/tests/test_spray_adapter.py
++++ b/tests/test_spray_adapter.py
+@@ -90,23 +90,76 @@ def _msg(topic: str, mtype: str, ts: int, payload: bytes) -> tuple:
+     return (topic, mtype, ts, payload)
+ 
+ 
++def build_seyondscan_cdr(
++    *,
++    is_last: bool = False,
++    timestamp: float = 0.0,
++    packet_count: int = 1,
++    encap: bytes = b"\x00\x01\x00\x00",
++) -> bytes:
++    """合成 SeyondScan CDR（布局锚定真实采集包，SPRAY-INTEGRATION 接口）：
++
++    encap(4B) | f64 timestamp@4 | u32 size@12 | u8 is_last_scan@16 | u32 packets_len@20 | packets 体
++    （packets 体为 packet_count 个占位 SeyondPacket，仅长度字段参与契约，内容无意义）
++    """
++    return (
++        encap
++        + struct.pack("<d", timestamp)
++        + struct.pack("<I", packet_count)
++        + struct.pack("<B", 1 if is_last else 0)
++        + struct.pack("<I", packet_count)
++        + b"\x00" * (packet_count * 4)
++    )
++
++
+ def build_packet_bag(tmp: Path, n: int, topic: str = PACKET_TOPIC) -> Path:
++    """单库 packet bag：n 个 SeyondScan（n==1 时为单一 scan 结束帧，否则无 is_last）。"""
+     bag = tmp / "pk_bag"
+-    msgs = [topic, None, None, None]
+     msgs = []
+     for i in range(n):
+-        msgs.append(_msg(topic, PACKET_TYPE, BASE_TS + i * NANO, b"\x00" * 32))
++        last = n == 1  # 保留旧语义：1 消息=1 完整 scan；n>1 无边界（S9 矩阵另测）
++        msgs.append(_msg(topic, PACKET_TYPE, BASE_TS + i * NANO, build_seyondscan_cdr(is_last=last)))
+     build_single_db3(bag / "r.db3", msgs)
+     return bag
+ 
+ 
+-def build_packet_multi(tmp: Path, n: int, topic: str = PACKET_TOPIC) -> Path:
+-    bag = tmp / "pk_multi"
+-    mid = n // 2
+-    m0 = [_msg(topic, PACKET_TYPE, BASE_TS + i * NANO, b"\x00" * 32) for i in range(mid)]
+-    m1 = [_msg(topic, PACKET_TYPE, BASE_TS + (mid + i) * NANO, b"\x00" * 32) for i in range(n - mid)]
+-    build_single_db3(bag / "part0.db3", m0)
+-    build_single_db3(bag / "part1.db3", m1)
++def build_packet_scans_bag(tmp: Path, scans: list[int], topic: str = PACKET_TOPIC, *, multi: bool = False) -> Path:
++    """按 scan 分组构造 packet bag：scans[k] = 第 k 个 scan 的 message 数（末条 is_last=true）。
++
++    multi=True 时按 scan 边界拆两个 db3（跨库拼接场景）。
++    """
++    bag = tmp / ("pk_scans" if not multi else "pk_scans_m")
++    msgs_all: list[tuple] = []
++    for k, cnt in enumerate(scans):
++        for j in range(cnt):
++            ts = BASE_TS + (k * 100 + j) * NANO
++            last = j == cnt - 1
++            msgs_all.append(
++                _msg(topic, PACKET_TYPE, ts, build_seyondscan_cdr(is_last=last, timestamp=float(ts // NANO)))
++            )
++    if not multi:
++        build_single_db3(bag / "r.db3", msgs_all)
++    else:
++        # 在 scan 中间切库（按消息序）：前 split 条入 part0，其余入 part1，
++        # 使至少一个 scan 的 is_last 结束消息落在 part1（first_db3 != scan_end_db3，跨库拼接场景）
++        split = 4  # [3,3,3,3]：msg3,4 属 scan1 在 part0，msg5(scan1 末/is_last) 在 part1
++        build_single_db3(bag / "part0.db3", msgs_all[:split])
++        build_single_db3(bag / "part1.db3", msgs_all[split:])
++    return bag
++
++
++def build_packet_scans_tail_bag(tmp: Path, scans: list[int], tail: int, topic: str = PACKET_TOPIC) -> Path:
++    """scans 个完整 scan + 尾部 tail 条非 is_last 消息（尾部残缺场景）。"""
++    bag = tmp / "pk_tail"
++    msgs = []
++    for k, cnt in enumerate(scans):
++        for j in range(cnt):
++            ts = BASE_TS + (k * 100 + j) * NANO
++            msgs.append(_msg(topic, PACKET_TYPE, ts, build_seyondscan_cdr(is_last=(j == cnt - 1))))
++    for j in range(tail):
++        ts = BASE_TS + (len(scans) * 100 + j) * NANO
++        msgs.append(_msg(topic, PACKET_TYPE, ts, build_seyondscan_cdr(is_last=False)))
++    build_single_db3(bag / "r.db3", msgs)
+     return bag
+ 
+ 
+@@ -704,33 +757,60 @@ class TestApplicability:
+ 
+ 
+ def _write_fake_decoder(path: Path, mode: str) -> Path:
++    """fake packet2pointcloud：
++    - ok：读 argv[1] 单库 front_mid，每个 is_last_scan 消息出一个 `frame-{storage_ns}.pcd`
++      （storage_ns 全局唯一 → 跨 db3 文件名升序 = scan 序，贴近真实 decoder 按时间命名）。
++    - rc：stderr + exit 3（子进程失败）。
++    - count_mismatch：固定出 5 个 PCD（与 scan 数无关 → 触发 S9 数不一致守卫）。
++    """
+     shebang = "#!/usr/bin/env python3\n"
+-    pcd_write = (
+-        "def _w(p):\n"
+-        "    p.write_text('# .PCD v0.7\\nVERSION 0.7\\nFIELDS x y z intensity\\nSIZE 4 4 4 4\\n"
++    header = (
++        "'# .PCD v0.7\\nVERSION 0.7\\nFIELDS x y z intensity\\nSIZE 4 4 4 4\\n"
+         "TYPE F F F F\\nCOUNT 1 1 1 1\\nWIDTH 1\\nHEIGHT 1\\nVIEWPOINT 0 0 0 1 0 0 0\\n"
+-        "POINTS 1\\nDATA binary\\n', encoding='ascii')\n"
++        "POINTS 1\\nDATA binary\\n'"
++    )
++    ok_body = (
++        "import sys, sqlite3\n"
++        "from pathlib import Path\n"
++        f"HDR={header}\n"
++        "def _w(p):\n"
++        "    p.write_text(HDR, encoding='ascii')\n"
+         "    with p.open('ab') as f: f.write(b'\\x00'*16)\n"
++        "db3=sys.argv[1]; out=Path(sys.argv[3]); out.mkdir(parents=True, exist_ok=True)\n"
++        "topic=sys.argv[2]\n"
++        "conn=sqlite3.connect('file:'+db3+'?mode=ro', uri=True)\n"
++        "tids=[r[0] for r in conn.execute('SELECT id FROM topics WHERE name=?',(topic,))]\n"
++        "rows=[]\n"
++        "if tids:\n"
++        "    ph=','.join('?'*len(tids))\n"
++        "    rows=conn.execute('SELECT id,timestamp,data FROM messages "
++        "WHERE topic_id IN ('+ph+') ORDER BY timestamp,id',tuple(tids)).fetchall()\n"
++        "for mid,ts,data in rows:\n"
++        "    base=4 if len(data)>=4 and data[:4] in (b'\\x00\\x01\\x00\\x00',b'\\x00\\x00\\x01\\x00') else 0\n"
++        "    if len(data)>base+12 and data[base+12]:\n"
++        "        _w(out/(f'frame-{ts}.pcd'))\n"
+     )
+     if mode == "ok":
+-        body = shebang + "import sys\nfrom pathlib import Path\n" + pcd_write + (
+-            "out = Path(sys.argv[3]); out.mkdir(parents=True, exist_ok=True)\n"
+-            "for i in range(12):\n"
+-            "    _w(out / f'frame-{1700000000000+i:013d}.pcd')\n"
+-        )
++        body = shebang + ok_body
+     elif mode == "rc":
+         body = shebang + "import sys\nsys.stderr.write('decoder boom')\nsys.exit(3)\n"
+     elif mode == "count_mismatch":
+-        body = shebang + "import sys\nfrom pathlib import Path\n" + pcd_write + (
+-            "out = Path(sys.argv[3]); out.mkdir(parents=True, exist_ok=True)\n"
+-            "for i in range(5):\n"
+-            "    _w(out / f'frame-{1700000000000+i:013d}.pcd')\n"
++        body = (
++            shebang + "import sys\nfrom pathlib import Path\n" + f"HDR={header}\n" + "def _w(p):\n"
++            "    p.write_text(HDR, encoding='ascii')\n"
++            "    with p.open('ab') as f: f.write(b'\\x00'*16)\n"
++            + "out=Path(sys.argv[3]); out.mkdir(parents=True, exist_ok=True)\n"
++            + "for i in range(5):\n"
++            + "    _w(out/f'frame-{1700000000000+i}.pcd')\n"
+         )
+     path.write_text(body, encoding="utf-8")
+     path.chmod(0o755)
+     return path
+ 
+ 
++REAL_SMALL_BAG = Path("/home/wang/下载/1012/rosbag2_2026_10_12-15_58_23")
++
++
+ class TestPacketDecode:
+     def test_decoder_missing_unavailable(self, tmp_path):
+         from app.scene.spray.decode import DecodeError, decode_packet_route
+@@ -743,32 +823,100 @@ class TestPacketDecode:
+     def test_decoder_nonzero_rc_failed(self, tmp_path):
+         from app.scene.spray.decode import DecodeError, decode_packet_route
+ 
+-        bag = build_packet_bag(tmp_path, 3)
++        bag = build_packet_scans_bag(tmp_path, [3, 3])
+         dec = _write_fake_decoder(tmp_path / "dec.py", "rc")
+         with pytest.raises(DecodeError) as ei:
+             decode_packet_route(bag, tmp_path / "w", dec)
+         assert ei.value.code == "DECODER_FAILED"
+ 
+-    def test_decoder_count_mismatch_failed(self, tmp_path):
++    def test_decoder_pcd_count_mismatch_scan_failed(self, tmp_path):
++        # S9：3 个 scan，decoder 固定出 5 PCD → PCD 数 != scan 数 → DECODE_FAILED（不再用全部消息数对齐）
+         from app.scene.spray.decode import DecodeError, decode_packet_route
+ 
+-        bag = build_packet_bag(tmp_path, 12)  # 12 源消息，decoder 只出 5 PCD → 序号歧义
+-        dec = _write_fake_decoder(tmp_path / "dec.py", "count_mismatch")
++        bag = build_packet_scans_bag(tmp_path, [3, 3, 3])  # 9 消息 / 3 scan
++        dec = _write_fake_decoder(tmp_path / "dec.py", "count_mismatch")  # 出 5
+         with pytest.raises(DecodeError) as ei:
+             decode_packet_route(bag, tmp_path / "w", dec)
+         assert ei.value.code == "DECODE_FAILED"
++        assert "scan" in ei.value.detail
+ 
+-    def test_decoder_success_maps_storage_ns(self, tmp_path):
++    def test_decoder_success_maps_scan_not_message(self, tmp_path):
++        # S9 核心：9 消息 / 3 scan / 3 PCD → 3 帧，storage_ns = 各 scan 末条（升序），非消息数
+         from app.scene.spray.decode import decode_packet_route
+ 
+-        bag = build_packet_bag(tmp_path, 12)  # 12 源消息，decoder 出 12 PCD → 序号映射
++        bag = build_packet_scans_bag(tmp_path, [3, 3, 3])
+         dec = _write_fake_decoder(tmp_path / "dec.py", "ok")
+         frames = decode_packet_route(bag, tmp_path / "w", dec)
+-        assert len(frames) == 12
++        assert len(frames) == 3  # 3 scan，不是 9 消息
+         ns = [f.storage_ns for f in frames]
+-        assert ns == sorted(ns)  # 源 storage ns 升序
+-        assert all(f.pcd_path is not None and f.pcd_path.exists() for f in frames)
+-        assert all(f.route == "packet" for f in frames)
++        assert ns == sorted(ns)
++        # 每帧都有可追溯 scan mapping
++        for f in frames:
++            assert f.route == "packet"
++            assert f.scan_mapping is not None
++            assert f.storage_ns == f.scan_mapping.scan_end_storage_ns
++            assert f.scan_mapping.first_message_id <= f.scan_mapping.scan_end_message_id
++            assert f.pcd_path is not None and f.pcd_path.exists()
++
++    def test_no_is_last_scan_rejected(self, tmp_path):
++        # 完整性：n>1 全 is_last=False（首尾均不完整）→ DECODE_FAILED（拒绝冒充）
++        from app.scene.spray.decode import DecodeError, decode_packet_route
++
++        bag = build_packet_bag(tmp_path, 5)  # 5 消息无 is_last 边界
++        dec = _write_fake_decoder(tmp_path / "dec.py", "ok")
++        with pytest.raises(DecodeError) as ei:
++            decode_packet_route(bag, tmp_path / "w", dec)
++        assert ei.value.code == "DECODE_FAILED"
++        assert "is_last_scan" in ei.value.detail
++
++    def test_tail_truncated_emitted_as_evidence(self, tmp_path):
++        # 完整性：3 完整 scan + 尾部 2 条非 is_last → 3 帧发布 + 尾部残缺证据文件
++        from app.scene.spray.decode import decode_packet_route
++
++        work = tmp_path / "w"
++        bag = build_packet_scans_tail_bag(tmp_path, [3, 3, 3], tail=2)
++        dec = _write_fake_decoder(tmp_path / "dec.py", "ok")
++        frames = decode_packet_route(bag, work, dec)
++        assert len(frames) == 3  # 尾部残缺不算帧
++        ev = work / "tail_truncated.json"
++        assert ev.exists()
++        import json as _json
++
++        assert _json.loads(ev.read_text(encoding="utf-8"))["tail_truncated_messages"] == 2
++
++    def test_multi_db3_scan_mapping_traceable(self, tmp_path):
++        # 跨 DB3 拼接：4 scan 拆两库 → 4 帧；跨库 scan 的 first_db3 != scan_end_db3 可识别
++        from app.scene.spray.decode import decode_packet_route
++
++        bag = build_packet_scans_bag(tmp_path, [3, 3, 3, 3], multi=True)
++        dec = _write_fake_decoder(tmp_path / "dec.py", "ok")
++        frames = decode_packet_route(bag, tmp_path / "w", dec)
++        assert len(frames) == 4
++        dbs = {f.scan_mapping.scan_end_db3 for f in frames}
++        assert len(dbs) == 2  # 用了两个 db3
++        # 至少存在跨库拼接的帧（first_db3 与 end_db3 不同）
++        cross = [f for f in frames if f.scan_mapping.first_db3 != f.scan_mapping.scan_end_db3]
++        assert cross, "跨库 scan 边界应可追溯（first_db3 != scan_end_db3）"
++
++    @pytest.mark.skipif(not REAL_SMALL_BAG.exists(), reason="真实小包不在本机（只读锚定）")
++    def test_real_bag_1184_to_44_mapping(self, tmp_path):
++        # S9 真实锚定：1184 消息 / 44 scan / 44 PCD → 44 帧，首末 scan 身份与独立 CDR 解析一致
++        from app.scene.spray.decode import _read_front_mid, decode_packet_route
++
++        dec = _write_fake_decoder(tmp_path / "dec.py", "ok")
++        frames = decode_packet_route(REAL_SMALL_BAG, tmp_path / "w", dec)
++        assert len(frames) == 44
++        # 独立用 _read_front_mid 复算首末 scan 结束消息身份，与帧 mapping 对齐
++        msgs = _read_front_mid(REAL_SMALL_BAG)
++        assert len(msgs) == 1184
++        assert frames[0].scan_mapping.scan_end_message_id == 4
++        assert frames[0].storage_ns == 1791791903804001823  # 首 scan 结束 storage_ns
++        assert frames[-1].scan_mapping.scan_end_message_id == 2285
++        assert frames[-1].storage_ns == 1791791908105918599  # 末 scan 结束 storage_ns
++        # 所有帧 ns 升序且等于各自 scan 结束消息 storage_ns（非 ms×1e6）
++        ns = [f.storage_ns for f in frames]
++        assert ns == sorted(ns)
++        assert len(set(ns)) == 44  # 无重复
+ 
+ 
+ # ===========================================================================
+@@ -946,7 +1094,7 @@ class TestMultiAndOrder:
+         from app.scene.slope.bag_io import read_messages
+         from app.scene.spray.decode import PACKET_TOPIC
+ 
+-        bag = build_packet_multi(tmp_path, 10)
++        bag = build_packet_scans_bag(tmp_path, [3, 3, 3, 3], multi=True)  # 12 消息拆两库
+         msgs = read_messages(bag, topic=PACKET_TOPIC)
+-        assert len(msgs) == 10
+-        assert [m.timestamp_ns for m in msgs] == sorted(m.timestamp_ns for m in msgs)
+\ No newline at end of file
++        assert len(msgs) == 12
++        assert [m.timestamp_ns for m in msgs] == sorted(m.timestamp_ns for m in msgs)
+diff --git a/tests/test_spray_rework_16s.py b/tests/test_spray_rework_16s.py
+new file mode 100644
+index 0000000..418da9b
+--- /dev/null
++++ b/tests/test_spray_rework_16s.py
+@@ -0,0 +1,756 @@
++"""TASK-12S-B attempt-1-rework 定向用例（S1–S8 / T1–T8，对照返修派单 §二）。
++
++真实渲染/VLM 仍 NOT_RUN（依赖缺失口径不变）；本套用确定性替身验证返修行为：
++S1 模型面只吃 valid_frames（小图删除后不炸）；S2 相对 work_dir 无条件拒绝；
++S3 截断/畸形 P2 收敛 DecodeError；S4 intensity 先应用 ROI mask 再上色；
++S5 pcd_path=None 死分支口径；S6 pointcloud 路线取消透传；S7 向量化与逐点等价；
++S8 auto 双缺 topic 归入缺 topic 口径；T1 ldd 探针失败报 unavailable；
++T2 decoder 路径 env 受控；T3 reference 错误码按前缀传播；
++T5/T6 畸形 header 矩阵收敛 PcdError/COUNT 缺省/compressed 拒绝；
++T7 ASCII 强度首值不丢；T8 最近候选 tie 拒绝。
++"""
++
++from __future__ import annotations
++
++import struct
++import sys
++from pathlib import Path
++
++import pytest
++
++sys.path.insert(0, str(Path(__file__).parent))
++from scene_fixture import build_single_db3  # noqa: E402
++from test_spray_adapter import (  # noqa: E402
++    BASE_TS,
++    NANO,
++    POINT_TOPIC,
++    POINT_TYPE,
++    DeterministicModel,
++    _msg,
++    build_other_topics_bag,
++    build_packet_bag,
++    build_pointcloud2_cdr,
++    build_pointcloud_bag,
++    make_request,
++    patch_refs,
++)
++
++MS = 1_000_000
++
++
++# ---------------------------------------------------------------------------
++# helpers
++# ---------------------------------------------------------------------------
++
++
++def _ascii_pcd(path: Path, n: int, inten: list[float]) -> Path:
++    lines = [
++        "# .PCD v0.7 - Point Cloud Data file format",
++        "VERSION 0.7",
++        "FIELDS x y z intensity",
++        "SIZE 4 4 4 4",
++        "TYPE F F F F",
++        "COUNT 1 1 1 1",
++        f"WIDTH {n}",
++        "HEIGHT 1",
++        "VIEWPOINT 0 0 0 1 0 0 0",
++        f"POINTS {n}",
++        "DATA ascii",
++    ]
++    body = "".join(f"{0.1 * k} {0.2 * k} {0.3 * k} {v}\n" for k, v in enumerate(inten))
++    path.write_text("\n".join(lines) + "\n" + body, encoding="ascii")
++    return path
++
++
++def _raw_pcd(path: Path, text: str) -> Path:
++    path.write_text(text, encoding="ascii")
++    return path
++
++
++# ===========================================================================
++# S1：小图删除后 run 不炸，模型只吃 valid_frames
++# ===========================================================================
++
++
++class TestS1:
++    def test_small_image_filter_model_only_valid(self, tmp_path, monkeypatch):
++        """7 选中帧 → 第 0 帧渲染成 <500KiB 小图（被 account_frame 删除）→
++        run 不炸，模型面 = valid_frames（6 帧），不含已删除小图（S1）。"""
++        import json
++
++        from app.scene.spray.adapter import SprayAdapter
++
++        patch_refs(monkeypatch)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        req = make_request(bag, tmp_path / "w")
++        rendered = []
++
++        def fake_render_one(self, fr, out_jpg) -> bool:
++            out_jpg.parent.mkdir(parents=True, exist_ok=True)
++            if len(rendered) == 0:  # 第一个选中帧 → 100B 小图（被过滤删除）
++                out_jpg.write_bytes(b"\x00" * 100)
++            else:  # 其余 6 帧 → 600KiB 大图
++                out_jpg.write_bytes(b"\xff\xd8\xff\xe0" + b"\x00" * (600 * 1024 - 4))
++            rendered.append(out_jpg.name)
++            return True
++
++        monkeypatch.setattr(SprayAdapter, "_render_one", fake_render_one)
++        model = DeterministicModel()
++        out = SprayAdapter(model_client=model).analyze(req)
++        log = json.loads((tmp_path / "w" / "render_log.json").read_text(encoding="utf-8"))
++        assert out.outcome in {"SUCCESS", "NO_MATCH"}
++        assert len(rendered) == 7  # 渲染面 7 帧（含被过滤那帧）
++        assert log["preprocessing"]["filtered_small"] == 1
++        assert log["preprocessing"]["valid_frame_count"] == 6
++        assert len(log["model_storage_ns"]) == 6  # 模型面 = valid_frames（不是 7）
++        assert len(model._calls) == 6  # 模型只吃 6 帧，未喂已删除小图
++
++    def test_all_small_frames_insufficient_failed(self, tmp_path, monkeypatch):
++        # 全部渲染成小图 → finalize RENDER_INSUFFICIENT（模型面 0 帧，不喂模型不炸）
++        from app.scene.spray.adapter import SprayAdapter
++
++        patch_refs(monkeypatch)
++
++        def small_fake(self, fr, out_jpg) -> bool:
++            out_jpg.parent.mkdir(parents=True, exist_ok=True)
++            out_jpg.write_bytes(b"\x00" * 10)
++            return True
++
++        monkeypatch.setattr(SprayAdapter, "_render_one", small_fake)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        req = make_request(bag, tmp_path / "w")
++        with pytest.raises(Exception) as ei:
++            SprayAdapter(model_client=DeterministicModel()).analyze(req)
++        assert "RENDER_INSUFFICIENT" in str(ei.value)
++
++
++# ===========================================================================
++# S2：相对 work_dir 无条件拒绝（mkdir 之前）
++# ===========================================================================
++
++
++class TestS2:
++    def test_relative_work_dir_rejected_before_mkdir(self, tmp_path, monkeypatch, capsys):
++        from app.scene.spray.adapter import SprayAdapter
++
++        patch_refs(monkeypatch)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 5)
++        req = make_request(bag, Path("spray_rel_work"))  # 相对路径
++        with pytest.raises(Exception) as ei:
++            SprayAdapter(model_client=DeterministicModel()).analyze(req)
++        assert "WORK_DIR_INVALID" in str(ei.value)
++        assert not Path("spray_rel_work").exists()  # 守卫在 mkdir 之前，未创建目录
++
++
++# ===========================================================================
++# S3：截断/畸形 PointCloud2 全部收敛 DecodeError
++# ===========================================================================
++
++
++class TestS3:
++    def test_truncated_blob_decode_failed(self):
++        from app.scene.spray.decode import DecodeError, parse_pointcloud2
++
++        full = build_pointcloud2_cdr(1, 2, [(1.5, -2.5, 3.25, 0.75)] * 3)
++        with pytest.raises(DecodeError) as ei:
++            parse_pointcloud2(full[:-8], require_intensity=True)  # 截掉 blob 尾部
++        assert ei.value.code == "P2_TRUNCATED"
++
++    def test_truncated_fields_decode_failed(self):
++        from app.scene.spray.decode import DecodeError, parse_pointcloud2
++
++        full = build_pointcloud2_cdr(1, 2, [(1.5, -2.5, 3.25, 0.75)])
++        with pytest.raises(DecodeError) as ei:
++            parse_pointcloud2(full[: len(full) - 30], require_intensity=True)  # 截字段区
++        assert ei.value.code in {"P2_TRUNCATED", "P2_LAYOUT"}
++
++    def test_invalid_point_step_rejected(self):
++        from app.scene.spray.decode import DecodeError, parse_pointcloud2
++
++        full = bytearray(build_pointcloud2_cdr(1, 2, [(1.5, -2.5, 3.25, 0.75)]))
++        # 定位 point_step 字段（封装头后 body：height,width 之后 nfields… 直接改尾部三元组）
++        # 尾部 III = (point_step, row_step, data_len)；把 point_step 改 0
++        i = full.rfind(struct.pack("<III", 16, 16, 16))
++        assert i > 0, "fixture 尾部三元组定位失败"
++        full[i : i + 12] = struct.pack("<III", 0, 16, 16)
++        with pytest.raises(DecodeError) as ei:
++            parse_pointcloud2(bytes(full), require_intensity=True)
++        assert ei.value.code == "P2_LAYOUT"
++
++    def test_field_offset_beyond_point_step_rejected(self):
++        from app.scene.spray.decode import DecodeError, parse_pointcloud2
++
++        full = bytearray(build_pointcloud2_cdr(1, 2, [(1.5, -2.5, 3.25, 0.75)]))
++        # intensity 字段 offset=12 → 改成 100（越出 point_step=16）
++        j = full.find(struct.pack("<IBB", 12, 7, 1))
++        assert j > 0
++        full[j : j + 6] = struct.pack("<IBB", 100, 7, 1)
++        with pytest.raises(DecodeError) as ei:
++            parse_pointcloud2(bytes(full), require_intensity=True)
++        assert ei.value.code == "P2_LAYOUT"
++
++    def test_route_level_convergence_decode_failed(self, tmp_path, monkeypatch):
++        # 路线层：截断消息 → DECODE_FAILED（adapter._decode 口径收敛）
++        from app.scene.spray.decode import decode_pointcloud_route
++
++        bag = tmp_path / "trunc_bag"
++        good = _msg(POINT_TOPIC, POINT_TYPE, BASE_TS, build_pointcloud2_cdr(1, 2, [(1.0, 1.0, 1.0, 0.5)]))
++        bad = _msg(POINT_TOPIC, POINT_TYPE, BASE_TS + NANO, build_pointcloud2_cdr(2, 3, [(1.0, 1.0, 1.0, 0.5)])[:-8])
++        build_single_db3(bag / "r.db3", [good, bad])
++        with pytest.raises(Exception) as ei:
++            decode_pointcloud_route(bag, tmp_path / "w")
++        assert "DECODE_FAILED" in str(ei.value)
++
++
++# ===========================================================================
++# S4：intensity 上色先应用同一 ROI mask（长度=cropped）
++# ===========================================================================
++
++
++class TestS4:
++    def test_masked_intensity_len_equals_cropped(self, tmp_path):
++        import numpy as np
++
++        from app.scene.spray.pcd_io import build_binary_pcd
++        from app.scene.spray.render import ROI_X, ROI_Y, _intensity_color
++
++        # 20 点：12 点在 ROI 内、8 点在外；intensity 与全点一一对应
++        pts = []
++        for k in range(12):
++            pts.append((0.0 + 0.1 * k, 0.0 + 0.1 * k, 1.0, 10.0 + k))  # ROI 内
++        for k in range(8):
++            pts.append((100.0, 100.0, 1.0, 100.0 + k))  # ROI 外
++        p = build_binary_pcd(
++            tmp_path / "a.pcd",
++            [(x, y, z) for (x, y, z, _i) in pts],
++            [i for (_, _, _, i) in pts],
++        )
++        points = np.asarray([(x, y, z) for (x, y, z, _i) in pts])
++        mask = (
++            (points[:, 0] > ROI_X[0])
++            & (points[:, 0] < ROI_X[1])
++            & (points[:, 1] > ROI_Y[0])
++            & (points[:, 1] < ROI_Y[1])
++        )
++        from app.scene.spray.pcd_io import read_intensity
++
++        full = read_intensity(p)
++        assert len(full) == len(points)  # 旧 bug 前提：全点序列
++        masked = np.asarray(full, dtype=float)[mask]
++        assert len(masked) == int(mask.sum())  # S4 修复口径：先 mask 再上色
++        colors = _intensity_color(masked)
++        assert colors.shape == (int(mask.sum()), 3)
++        # 上色值与全点序列逐点等价的 masked 子集一致
++        assert np.allclose(colors[:, 0].tolist(), _intensity_color_legacy(masked)[:, 0])
++
++    def test_render_pcd_masks_intensity_before_color(self, tmp_path, monkeypatch):
++        """render_pcd_to_jpg 内部口径：_intensity_color 入参长度必须 = cropped（不是全点 n）。
++
++        开发机无 open3d/EGL（真实渲染 NOT_RUN 口径）——本用例注入最小 open3d stub，
++        让执行走到上色行（真实代码+真实 numpy），在 OffscreenRenderer 处按
++        RENDER_UNAVAILABLE 中止；stub 只替代不可用的渲染后端，不替代被测逻辑。
++        """
++        import struct
++        import sys
++        import types
++
++        import numpy as np
++
++        from app.scene.spray import render as R
++        from app.scene.spray.pcd_io import build_binary_pcd, parse_binary_pcd_header
++
++        pts_in = [(0.5 * i, 0.2 * i, 1.0) for i in range(6)]
++        pts_out = [(50.0, 50.0, 1.0)] * 4
++        pts = pts_in + pts_out
++        inten = [float(i) for i in range(len(pts))]
++        p = build_binary_pcd(tmp_path / "a.pcd", pts, inten)
++
++        def _read_pts(path):
++            h = parse_binary_pcd_header(path)
++            raw = Path(path).read_bytes()
++            n = h.points if h.points > 0 else h.width
++            step = h.point_step
++            offs = {}
++            o = 0
++            for name, sz in zip(h.fields, h.sizes):
++                offs[name] = o
++                o += sz
++            arr = np.zeros((n, 3), dtype=float)
++            for k in range(n):
++                b = h.data_start + k * step
++                arr[k] = [
++                    struct.unpack_from("<f", raw, b + offs["x"])[0],
++                    struct.unpack_from("<f", raw, b + offs["y"])[0],
++                    struct.unpack_from("<f", raw, b + offs["z"])[0],
++                ]
++            return arr
++
++        class _FakePCD:
++            def __init__(self, arr):
++                self.points = arr
++
++        class _FakeRenderer:
++            def __init__(self, *a, **k):
++                raise RuntimeError("no EGL (stub)")
++
++        fake_io = types.ModuleType("open3d.io")
++        fake_io.read_point_cloud = lambda path: _FakePCD(_read_pts(path))
++        fake_util = types.ModuleType("open3d.utility")
++        fake_util.Vector3dVector = lambda arr: list(arr)
++        fake_geom = types.ModuleType("open3d.geometry")
++        fake_geom.PointCloud = type("PointCloud", (), {})
++        fake_vis = types.ModuleType("open3d.visualization")
++        fake_rendering = types.ModuleType("open3d.visualization.rendering")
++        fake_rendering.OffscreenRenderer = _FakeRenderer
++        fake_vis.rendering = fake_rendering
++        fake = types.ModuleType("open3d")
++        fake.io = fake_io
++        fake.utility = fake_util
++        fake.geometry = fake_geom
++        fake.visualization = fake_vis
++        monkeypatch.setitem(sys.modules, "open3d", fake)
++
++        seen = {}
++
++        def spy_color(values):
++            seen["values"] = np.asarray(values, dtype=float)
++            return np.zeros((len(values), 3))
++
++        monkeypatch.setattr(R, "_intensity_color", spy_color)
++        try:
++            R.render_pcd_to_jpg(p, tmp_path / "o.jpg")
++            raise AssertionError("预期 RENDER_UNAVAILABLE（stub 渲染后端）")
++        except R.RenderError as ei:
++            assert ei.code == "RENDER_UNAVAILABLE"
++        assert seen.get("values") is not None, "上色路径未被执行（S4 验证点缺失）"
++        assert len(seen["values"]) == 6, f"intensity 未按 ROI mask 上色（len={len(seen['values'])}）"
++        # 值 = 全点序列 [0..9] 的 ROI 内子集 [0..5]
++        assert seen["values"].tolist() == [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
++
++
++def _intensity_color_legacy(values):
++    """旧逐点循环参照实现（验证向量化等价）。"""
++    import numpy as np
++
++    i_min = float(np.min(values)) if len(values) else 0.0
++    i_max = float(np.max(values)) if len(values) else 0.0
++    normalized = (values - i_min) / (i_max - i_min) if i_max - i_min > 1e-6 else np.zeros_like(values)
++    n = len(normalized)
++    colors = np.zeros((n, 3))
++    for i, val in enumerate(normalized):
++        if val < 0.25:
++            t = val / 0.25
++            colors[i] = [0.5 + 0.5 * t, 0.0, 0.0]
++        elif val < 0.5:
++            t = (val - 0.25) / 0.25
++            colors[i] = [1.0, t, 0.0]
++        elif val < 0.75:
++            t = (val - 0.5) / 0.25
++            colors[i] = [1.0 - t, 1.0, 0.0]
++        else:
++            t = (val - 0.75) / 0.25
++            colors[i] = [0.0, 1.0 - t, t]
++    return colors
++
++
++# ===========================================================================
++# S5：pcd_path=None 死分支口径（不变式注明）
++# ===========================================================================
++
++
++class TestS5:
++    def test_none_pcd_path_returns_false(self, monkeypatch):
++        from app.scene.spray.adapter import SprayAdapter
++        from app.scene.spray.decode import SprayFrame
++
++        ad = SprayAdapter()
++        assert ad._render_one(SprayFrame(storage_ns=BASE_TS, pcd_path=None), Path("/tmp/x.jpg")) is False
++
++
++# ===========================================================================
++# S6：pointcloud 路线解码循环透传取消
++# ===========================================================================
++
++
++class TestS6:
++    def test_pointcloud_route_cancel(self, tmp_path):
++        from app.scene.spray.decode import DecodeError, decode_pointcloud_route
++
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 12)
++        with pytest.raises(DecodeError) as ei:
++            decode_pointcloud_route(bag, tmp_path / "w", cancel_check=lambda: True)
++        assert ei.value.code == "CANCELLED"
++
++    def test_pointcloud_route_no_cancel_ok(self, tmp_path):
++        from app.scene.spray.decode import decode_pointcloud_route
++
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 12)
++        frames = decode_pointcloud_route(bag, tmp_path / "w", cancel_check=lambda: False)
++        assert len(frames) == 12
++
++
++# ===========================================================================
++# S7：向量化配色与逐点等价
++# ===========================================================================
++
++
++class TestS7:
++    def test_vectorized_matches_legacy_pointwise(self):
++        import numpy as np
++
++        from app.scene.spray.render import _intensity_color
++
++        rng = np.random.default_rng(42)
++        for trial in range(5):
++            vals = rng.random(1000) * 10
++            new = _intensity_color(vals)
++            old = _intensity_color_legacy(vals)
++            assert np.allclose(new, old, atol=1e-12), f"trial {trial} 向量化与逐点不等价"
++
++    def test_constant_values(self):
++        import numpy as np
++
++        from app.scene.spray.render import _intensity_color
++
++        new = _intensity_color(np.full(10, 3.0))
++        old = _intensity_color_legacy(np.full(10, 3.0))
++        assert np.allclose(new, old, atol=1e-12)
++
++
++# ===========================================================================
++# S8：auto + 双缺 topic → 缺 topic 口径（不误报未知路线）
++# ===========================================================================
++
++
++class TestS8:
++    def test_auto_missing_both_topics_reason(self, tmp_path):
++        from app.scene.spray.adapter import SprayAdapter
++
++        bag = build_other_topics_bag(tmp_path)
++        req = make_request(bag, tmp_path / "w", params={"route": "auto"})
++        v = SprayAdapter().check_applicability(req)
++        assert v.applicable is False
++        assert "未知路线" not in v.reason
++        assert "缺少水雾输入 topic" in v.reason
++
++    def test_explicit_unknown_route_still_reported(self, tmp_path):
++        from app.scene.spray.adapter import SprayAdapter
++
++        bag = build_packet_bag(tmp_path, 3)
++        req = make_request(bag, tmp_path / "w", params={"route": "laser"})
++        v = SprayAdapter().check_applicability(req)
++        assert v.applicable is False
++        assert "未知路线" in v.reason
++
++
++# ===========================================================================
++# T1：ldd 探针失败 → DECODER_DEPS_UNKNOWN（fail-closed，不宣称在位）
++# ===========================================================================
++
++
++class TestT1:
++    def test_ldd_probe_failure_reports_unknown(self, tmp_path, monkeypatch):
++        import app.scene.spray.precheck as P
++
++        exe = tmp_path / "decoder"
++        exe.write_text("#!/bin/sh\n", encoding="ascii")
++        exe.chmod(0o755)
++
++        def boom(*a, **k):
++            raise OSError("ldd not executable")
++
++        monkeypatch.setattr(P.subprocess, "run", boom)
++        r = P.check_decoder(exe)
++        assert r.ok is False
++        assert r.reason == "DECODER_DEPS_UNKNOWN"
++
++    def test_ldd_nonzero_rc_reports_unknown(self, tmp_path, monkeypatch):
++        import app.scene.spray.precheck as P
++
++        exe = tmp_path / "decoder"
++        exe.write_text("#!/bin/sh\n", encoding="ascii")
++        exe.chmod(0o755)
++
++        class FakeProc:
++            returncode = 127
++            stdout = ""
++            stderr = "ldd: no such file"
++
++        monkeypatch.setattr(P.subprocess, "run", lambda *a, **k: FakeProc())
++        r = P.check_decoder(exe)
++        assert r.ok is False
++        assert r.reason == "DECODER_DEPS_UNKNOWN"
++
++    def test_ldd_missing_libs_still_reported(self, tmp_path, monkeypatch):
++        import app.scene.spray.precheck as P
++
++        exe = tmp_path / "decoder"
++        exe.write_text("#!/bin/sh\n", encoding="ascii")
++        exe.chmod(0o755)
++
++        class FakeProc:
++            returncode = 0
++            stdout = "libseyond.so => not found\nlibm.so.6 => /lib/libm.so.6\n"
++            stderr = ""
++
++        monkeypatch.setattr(P.subprocess, "run", lambda *a, **k: FakeProc())
++        r = P.check_decoder(exe)
++        assert r.ok is False
++        assert r.reason == "DECODER_DEPS_MISSING"
++
++
++# ===========================================================================
++# T2：decoder 路径 env 受控（未配置 = DECODER_UNAVAILABLE，不硬编码机器路径）
++# ===========================================================================
++
++
++class TestT2:
++    def test_unset_env_reports_unavailable(self, monkeypatch):
++        import app.scene.spray.precheck as P
++
++        monkeypatch.delenv(P.SPRAY_DECODER_PATH_ENV, raising=False)
++        r = P.check_decoder()
++        assert r.ok is False
++        assert r.reason == "DECODER_UNAVAILABLE"
++        assert P.SPRAY_DECODER_PATH_ENV in r.detail
++
++    def test_env_points_to_missing_file(self, tmp_path, monkeypatch):
++        import app.scene.spray.precheck as P
++
++        monkeypatch.setenv(P.SPRAY_DECODER_PATH_ENV, str(tmp_path / "nope"))
++        r = P.check_decoder()
++        assert r.ok is False
++        assert r.reason == "DECODER_UNAVAILABLE"
++
++    def test_resolve_raises_when_unset(self, monkeypatch):
++        import app.scene.spray.precheck as P
++
++        monkeypatch.delenv(P.SPRAY_DECODER_PATH_ENV, raising=False)
++        with pytest.raises(FileNotFoundError):
++            P.resolve_decoder_path()
++
++    def test_adapter_packet_route_no_env_unavailable(self, tmp_path, monkeypatch):
++        # adapter 面：decoder_path 未注入且 env 未配置 → DECODER_UNAVAILABLE（不再默认机器路径）
++        import app.scene.spray.adapter as A
++
++        monkeypatch.delenv("SPRAY_DECODER_PATH", raising=False)
++        patch_refs(monkeypatch)
++        bag = build_packet_bag(tmp_path, 12)
++        req = make_request(bag, tmp_path / "w")
++        with pytest.raises(Exception) as ei:
++            A.SprayAdapter(model_client=DeterministicModel()).analyze(req)
++        assert "DECODER_UNAVAILABLE" in str(ei.value)
++
++
++# ===========================================================================
++# T3：reference 错误码按前缀传播
++# ===========================================================================
++
++
++class TestT3:
++    def test_undecodable_propagates(self, tmp_path, monkeypatch):
++        import app.scene.spray.precheck as P
++        from app.scene.spray.references import REFERENCES
++
++        spec = dict(REFERENCES[0])
++        p = tmp_path / spec["name"]
++        p.write_bytes(b"\x00" * spec["bytes"])  # bytes 对但非 JPEG（hash 必不符在前——
++        # 用 hash 相符的口径：先让 verify 走到 magic 检查需 hash/bytes 都对。
++        # 直接 monkeypatch verify 抛 REFERENCE_UNDECODABLE 验证分类口径
++        def fake_verify(refs=None, directory=None):
++            from app.scene.spray.references import ReferenceError
++
++            raise ReferenceError(f"REFERENCE_UNDECODABLE: 参考图{spec['order']} 非 JPEG 可解码 {spec['name']}")
++
++        monkeypatch.setattr(P, "verify_references", fake_verify)
++        r = P.check_references()
++        assert r.ok is False
++        assert r.reason == "REFERENCE_UNDECODABLE"
++
++    def test_mismatch_still_mismatch(self, monkeypatch):
++        import app.scene.spray.precheck as P
++
++        def fake_verify(refs=None, directory=None):
++            from app.scene.spray.references import ReferenceError
++
++            raise ReferenceError("REFERENCE_MISMATCH: 参考图1 sha256 不符")
++
++        monkeypatch.setattr(P, "verify_references", fake_verify)
++        r = P.check_references()
++        assert r.reason == "REFERENCE_MISMATCH"
++
++    def test_missing_still_missing(self, monkeypatch):
++        import app.scene.spray.precheck as P
++
++        def fake_verify(refs=None, directory=None):
++            from app.scene.spray.references import ReferenceError
++
++            raise ReferenceError("REFERENCE_MISSING: SPRAY_REFERENCE_DIR 未配置")
++
++        monkeypatch.setattr(P, "verify_references", fake_verify)
++        r = P.check_references()
++        assert r.reason == "REFERENCE_MISSING"
++
++
++# ===========================================================================
++# T4：死代码已删，adapter 消费 SOURCE_COMMIT（单一来源）
++# ===========================================================================
++
++
++class TestT4:
++    def test_dead_constants_removed(self):
++        import app.scene.spray.references as R
++
++        assert not hasattr(R, "REF_ORDER")
++        assert not hasattr(R, "NORMAL_ORDERS")
++        assert not hasattr(R, "ABNORMAL_ORDERS")
++        assert R.SOURCE_COMMIT.startswith("be23177")
++
++    def test_render_log_uses_source_commit_constant(self, tmp_path, monkeypatch):
++        import json
++
++        from app.scene.spray.adapter import SprayAdapter
++        from app.scene.spray.references import SOURCE_COMMIT
++
++        patch_refs(monkeypatch)
++
++        def fake_render_one(self, fr, out_jpg) -> bool:
++            out_jpg.parent.mkdir(parents=True, exist_ok=True)
++            out_jpg.write_bytes(b"\xff\xd8\xff\xe0" + b"\x00" * (600 * 1024 - 4))
++            return True
++
++        monkeypatch.setattr(SprayAdapter, "_render_one", fake_render_one)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        SprayAdapter(model_client=DeterministicModel()).analyze(make_request(bag, tmp_path / "w"))
++        log = json.loads((tmp_path / "w" / "render_log.json").read_text(encoding="utf-8"))
++        assert log["refs"]["source_commit"] == SOURCE_COMMIT
++
++
++# ===========================================================================
++# T5/T6：PCD header 畸形矩阵
++# ===========================================================================
++
++
++class TestT5T6:
++    def test_non_numeric_size_rejected(self, tmp_path):
++        from app.scene.spray.pcd_io import PcdError, parse_binary_pcd_header
++
++        p = _raw_pcd(
++            tmp_path / "a.pcd",
++            "FIELDS x y z\nSIZE 4 4 foo\nTYPE F F F\nWIDTH 1\nHEIGHT 1\nPOINTS 1\nDATA binary\n",
++        )
++        with pytest.raises(PcdError):
++            parse_binary_pcd_header(p)
++
++    def test_width_missing_token_rejected(self, tmp_path):
++        from app.scene.spray.pcd_io import PcdError, parse_binary_pcd_header
++
++        p = _raw_pcd(
++            tmp_path / "b.pcd",
++            "FIELDS x y z\nSIZE 4 4 4\nTYPE F F F\nWIDTH\nPOINTS 1\nDATA binary\n",
++        )
++        with pytest.raises(PcdError):
++            parse_binary_pcd_header(p)
++
++    def test_non_numeric_points_rejected(self, tmp_path):
++        from app.scene.spray.pcd_io import PcdError, parse_binary_pcd_header
++
++        p = _raw_pcd(
++            tmp_path / "c.pcd",
++            "FIELDS x y z\nSIZE 4 4 4\nTYPE F F F\nWIDTH 1\nHEIGHT 1\nPOINTS abc\nDATA binary\n",
++        )
++        with pytest.raises(PcdError):
++            parse_binary_pcd_header(p)
++
++    def test_compressed_rejected_at_header_layer(self, tmp_path):
++        from app.scene.spray.pcd_io import PcdError, parse_binary_pcd_header
++
++        p = _raw_pcd(
++            tmp_path / "d.pcd",
++            "FIELDS x y z intensity\nSIZE 4 4 4 4\nTYPE F F F F\nCOUNT 1 1 1 1\n"
++            "WIDTH 1\nHEIGHT 1\nPOINTS 1\nDATA binary_compressed\n",
++        )
++        with pytest.raises(PcdError) as ei:
++            parse_binary_pcd_header(p)
++        assert "binary_compressed" in str(ei.value)
++
++    def test_count_line_optional_defaults_to_one(self, tmp_path):
++        from app.scene.spray.pcd_io import parse_binary_pcd_header
++
++        p = tmp_path / "e.pcd"
++        header = (
++            "FIELDS x y z intensity\nSIZE 4 4 4 4\nTYPE F F F F\n"  # 无 COUNT 行
++            "WIDTH 2\nHEIGHT 1\nPOINTS 2\nDATA binary\n"
++        )
++        p.write_bytes(header.encode("ascii") + b"\x00" * 32)  # binary 体占位
++        h = parse_binary_pcd_header(p)
++        assert h.counts == (1, 1, 1, 1)  # PCD 规范：COUNT 缺省=全 1（不再误报长度不一致）
++
++    def test_count_length_mismatch_still_rejected(self, tmp_path):
++        from app.scene.spray.pcd_io import PcdError, parse_binary_pcd_header
++
++        p = _raw_pcd(
++            tmp_path / "f.pcd",
++            "FIELDS x y z\nSIZE 4 4 4\nTYPE F F F\nCOUNT 1 1\nWIDTH 1\nHEIGHT 1\nPOINTS 1\nDATA binary\n",
++        )
++        with pytest.raises(PcdError):
++            parse_binary_pcd_header(p)
++
++
++# ===========================================================================
++# T7：ASCII intensity 首值不丢
++# ===========================================================================
++
++
++class TestT7:
++    def test_ascii_first_value_preserved(self, tmp_path):
++        from app.scene.spray.pcd_io import read_intensity
++
++        inten = [0.11, 0.22, 0.33, 0.44]
++        p = _ascii_pcd(tmp_path / "a.pcd", len(inten), inten)
++        vals = read_intensity(p)
++        assert len(vals) == len(inten)
++        assert abs(vals[0] - 0.11) < 1e-9, f"首条 ASCII 数据被丢弃（vals={vals}）"
++        assert vals == pytest.approx(inten)
++
++    def test_ascii_with_blank_header_line(self, tmp_path):
++        # 头内含空行：rfind 口径下首值仍不丢
++        from app.scene.spray.pcd_io import read_intensity
++
++        text = (
++            "# hdr\n\nFIELDS x y z intensity\nSIZE 4 4 4 4\nTYPE F F F F\nCOUNT 1 1 1 1\n"
++            "WIDTH 2\nHEIGHT 1\nPOINTS 2\nDATA ascii\n0.1 0.2 0.3 0.55\n1.1 1.2 1.3 0.77\n"
++        )
++        p = tmp_path / "b.pcd"
++        p.write_text(text, encoding="ascii")
++        vals = read_intensity(p)
++        assert vals == pytest.approx([0.55, 0.77])
++
++
++# ===========================================================================
++# T8：最近候选 tie 必须拒绝
++# ===========================================================================
++
++
++class TestT8:
++    def test_equidistant_tie_rejected(self):
++        from app.scene.spray.time_map import resolve_storage_ns
++
++        # t=1000ms，候选 975ms 与 1025ms（t±25ms，等距，均在 ±1ms 窗口外）→ tie 拒绝
++        with pytest.raises(ValueError) as ei:
++            resolve_storage_ns(1000, [975_000_000, 1_025_000_000])
++        assert "tie" in str(ei.value).lower() or "等距" in str(ei.value)
++
++    def test_unique_nearest_within_50ms_ok(self):
++        from app.scene.spray.time_map import resolve_storage_ns
++
++        # 最近候选 1025ms（25ms < 50ms 且唯一）→ 命中
++        r = resolve_storage_ns(1000, [1_025_000_000, 900_000_000])
++        assert r.storage_ns == 1_025_000_000
++        assert r.inferred is True
++
++    def test_too_far_still_rejected(self):
++        from app.scene.spray.time_map import resolve_storage_ns
++
++        with pytest.raises(ValueError):
++            resolve_storage_ns(1000, [1_060_000_000])  # 60ms 过远
+\ No newline at end of file

@@ -1,0 +1,27 @@
+{
+  "event_id": "c-poll-20261012-181853-nochange",
+  "role": "C",
+  "occurred_at": "2026-10-12T18:20:40+08:00",
+  "status": "NO_CHANGE",
+  "preflight_checked_at": "2026-10-12T18:18:53+08:00",
+  "summary": "18:15 后 C 范围零新增，无 C 新派单；共享根 18:15 后仅 PRD.md/DESIGN.md v0.4 契约刷新（协调者/规划者范围，无面向 3号 派单/ACK）",
+  "facts": {
+    "inbox_3号_new": [],
+    "inbox_coordinator_new": [],
+    "shared_root_new_excl": [
+      "PRD.md 18:17:18",
+      "DESIGN.md 18:18:29"
+    ],
+    "prd_design_note": "v0.4 契约文档更新，grep 无 执行者C/3号 字样，不启动不开发",
+    "handoff": "mtime 17:19:49 = 前条已核 r91 检查点落盘，协调者范围",
+    "main_local": "30e55a3",
+    "main_origin": "502bf8e",
+    "wt_03b": "6f1a9ad feature/scene-03b-ocr-rework clean",
+    "ps_c_business": 0,
+    "leases_inflight": [
+      "COORDINATOR.json owner cron-coord-poll-…-172553-r92 expired~50min pid=null 观察申报不接管"
+    ],
+    "idle_gate": "保持空闲待派单：07B 在 2号 待验收 / MN 专项 UNBOUND / TASK-11 PRODUCTION BLOCKED"
+  },
+  "evidence": "sessions/C.md 2026-10-12 18:20 条目（451 行，干跑临时 TARGET 核验通过）"
+}

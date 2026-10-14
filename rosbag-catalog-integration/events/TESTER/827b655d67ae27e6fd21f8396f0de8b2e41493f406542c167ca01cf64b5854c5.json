@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-061953-nochange",
+  "occurred_at": "2026-10-13T06:21:23+08:00",
+  "recorded_at": "2026-10-13T06:21:23+08:00",
+  "role": "TESTER",
+  "task": "TASK-07B",
+  "attempt": "r3-ocr",
+  "status": "IDLE",
+  "summary": "巡检：无 TESTER 新派单；origin/main 502bf8e 未变 07B R3 未合入门禁关闭；07B R3 增量 OCR 06:11 起跑在途；07B-post-r3(SR-05) 未发不预占",
+  "evidence": "inbox/sessions/TESTER.md",
+  "next": "继续5分钟巡检"
+}

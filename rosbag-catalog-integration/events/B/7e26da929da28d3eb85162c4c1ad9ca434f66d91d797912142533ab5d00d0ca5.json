@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-185753-t07b-ocr-b3-2findings-b6-cancelled-idle",
+  "occurred_at": "2026-10-12T19:04:16+08:00",
+  "recorded_at": "2026-10-12T19:04:16+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "07B交付冻结等审;协调者OCR b3收口2 findings(medium),b6 cancelled可resume,b5疑中断;本侧只读无新派单",
+  "evidence": "inbox/events/B/b-poll-20261012-185753-t07b-ocr-b3-2findings-b6-cancelled-idle.md",
+  "next": "等协调者OCR收口与b3 findings裁决;收问题ID返修单按attempt续scene/task-07b-manual-revision-withdraw"
+}

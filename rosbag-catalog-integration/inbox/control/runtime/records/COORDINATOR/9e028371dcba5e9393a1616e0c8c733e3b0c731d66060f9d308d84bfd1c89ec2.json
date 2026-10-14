@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "input_sha256": "532491605d87394ddd1b28265aa88f57416f33b3ee549599e50a2657af95b7b7",
+  "record": {
+    "event_id": "COORDINATOR:t16ca-integration-contract-correction-dispatch-20261014",
+    "kind": "business",
+    "task": "TASK-16C-A",
+    "attempt": "attempt-1",
+    "status": "REWORK_DISPATCHED",
+    "summary": "A 续 commit 563a91a 机械核验后做集成契约核验：wt-coord-intcheck-16c（seed+A563a91a+Be399daf 零冲突合并）复跑 test_web.py 39 passed+2 failed——1 为 seed 固有环境性（口径在案），1 为 line 364/366 旧 tab 断言失配（B 叶 e399daf 改名「切片/全部」连带，原转派单只列 366 一处=范围漏项，A 按不自行扩面口径执行无误）。勘误续单 inbox/1号/TASK-16C-A/shared-test-assert-transfer-correction-20261014.md（仅 2 行断言，续 563a91a）已派。B 面 11 用例+07A+ui_minimal+A 查询面合跑 52 passed 全绿。A 叶状态=已交付+勘误返修在途，OCR 待最终 head。",
+    "evidence": "wt-coord-intcheck-16c pytest 复跑输出（2 failed 断言行号）；git show e399daf bags.html tab 改名 diff；A 树 test_web.py line 364/366 断言；git show 563a91a 单文件单行核验",
+    "next": "A 勘误续 commit 冻结后集成候选重建；A 叶 OCR 仍被工具链版本门禁阻塞（见版本门禁事件）",
+    "occurrence": {
+      "kind": "now"
+    },
+    "schema_version": 1,
+    "role": "COORDINATOR",
+    "recorded_at": "2026-10-14T13:22:22+08:00",
+    "occurred_at": "2026-10-14T13:22:22+08:00",
+    "time_source": {
+      "kind": "script_now"
+    }
+  },
+  "complete": true,
+  "session": "sessions/COORDINATOR.md"
+}

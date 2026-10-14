@@ -1,0 +1,111 @@
+{
+  "at": "2026-10-14T10:49:21+08:00",
+  "entry": "inbox/control/POST-SPRAY-CLOSEOUT-20261014.md",
+  "roles": {
+    "COORDINATOR": {
+      "poll_id": "14ae4556629a",
+      "enabled": true,
+      "reports": [
+        {
+          "id": "99bb6c6cacc6",
+          "enabled": true,
+          "no_agent": true
+        },
+        {
+          "id": "fd8d7006309c",
+          "enabled": true,
+          "no_agent": true
+        }
+      ],
+      "ack": "PENDING_ROLE_CONSUMPTION",
+      "wake": {
+        "executed": null,
+        "execution_skipped": null,
+        "delegation_id": null,
+        "execution_mode": null,
+        "success": false,
+        "error": "multiple repeat at position 36"
+      }
+    },
+    "A": {
+      "poll_id": "d5cb80cf2fc5",
+      "enabled": true,
+      "reports": [
+        {
+          "id": "169849556cc2",
+          "enabled": true,
+          "no_agent": true
+        }
+      ],
+      "ack": "PENDING_ROLE_CONSUMPTION",
+      "wake": {
+        "executed": null,
+        "execution_skipped": null,
+        "delegation_id": null,
+        "execution_mode": null,
+        "success": false,
+        "error": "multiple repeat at position 36"
+      }
+    },
+    "B": {
+      "poll_id": "6f7471d8747c",
+      "enabled": true,
+      "reports": [
+        {
+          "id": "7c1cf5029635",
+          "enabled": true,
+          "no_agent": true
+        }
+      ],
+      "ack": "PENDING_ROLE_CONSUMPTION",
+      "wake": {
+        "executed": null,
+        "execution_skipped": null,
+        "delegation_id": null,
+        "execution_mode": null,
+        "success": false,
+        "error": "multiple repeat at position 36"
+      }
+    },
+    "C": {
+      "poll_id": "f01517c16f2f",
+      "enabled": true,
+      "reports": [
+        {
+          "id": "b99cc17222c3",
+          "enabled": true,
+          "no_agent": true
+        }
+      ],
+      "ack": "PENDING_ROLE_CONSUMPTION",
+      "wake": {
+        "executed": null,
+        "execution_skipped": null,
+        "delegation_id": null,
+        "execution_mode": null,
+        "success": false,
+        "error": "multiple repeat at position 36"
+      }
+    },
+    "TESTER": {
+      "poll_id": "167580c0500b",
+      "enabled": true,
+      "reports": [
+        {
+          "id": "b41450f1df3c",
+          "enabled": true,
+          "no_agent": true
+        }
+      ],
+      "ack": "PENDING_ROLE_CONSUMPTION",
+      "wake": {
+        "executed": null,
+        "execution_skipped": null,
+        "delegation_id": null,
+        "execution_mode": null,
+        "success": false,
+        "error": "multiple repeat at position 36"
+      }
+    }
+  }
+}

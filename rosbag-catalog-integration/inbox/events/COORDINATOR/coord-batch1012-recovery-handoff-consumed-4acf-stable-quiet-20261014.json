@@ -1,0 +1,14 @@
+{
+  "event_id": "coord-batch1012-recovery-handoff-consumed-4acf-stable-quiet-20261014",
+  "occurred_at": "2026-10-14T02:49:17+08:00",
+  "recorded_at": "2026-10-14T02:49:17+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "prerun 指纹 7a20f1cd；消费用户恢复交接+5 变更源（A 02:40 事件、B sessions 00:43、本角色 02:44 自回声）；ACK 21:07:41 在案",
+  "summary": "恢复交接按批次实况核收：四派单全部在途、A 拷贝/提交 8 包收口、首包复用 PASS、空包 D6 拒绝在案；本轮无新外部指令、无升级条件命中、无独立可推进控制动作。批次维持 4acf689f INFER 跨夜（ruling-4acf-infer-active-0218）+flat 三提交 PENDING_INPUT 等串行释放。",
+  "evidence": "snapshot COORDINATOR.json（operations bigbags-copy RECONCILED / finalbag-160203-163747verify SUCCEEDED；events A 02:40 只读 mysql 实测 SCENE_RUNNING；B 00:43 IDLE；TESTER 02:33 裁决口径一致）；sessions/COORDINATOR.md 21:07 ACK 在案；ruling-4acf-infer-active-0218.md",
+  "next": "5min observer 核 4acf689f 模型段完成信号（checkpoint 翻 EXTRACT/DONE、八步 DB 推进或 SCENE_DONE）→ 终态后放行 A flat 绑定（D4③）+TESTER 增量验收；升级条件（heartbeat 4 连败/FAILED/VLM Wait 堆积）才重新裁决；08:00 夜间汇总。",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

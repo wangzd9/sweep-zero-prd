@@ -1,0 +1,12 @@
+{
+ "event_id": "tester-t11s-batch-1012-0546-infer-continue-quiet-20261014",
+ "occurred_at": "2026-10-14T05:47:55+08:00",
+ "recorded_at": "2026-10-14T05:47:55+08:00",
+ "role": "TESTER",
+ "task": "TASK-11S-BATCH-1012",
+ "attempt": "1",
+ "status": "IN_PROGRESS",
+ "summary": "05:46 静默期增量只读巡检（prerun 指纹 6803ff36…）：scene 4acf689f SCENE_RUNNING attempt1 heartbeat=05:45:54 八步全 QUEUED（~401min）；升级条件逐项未命中（VLM Running 2-3/Waiting 0/prefix 90.8-91.0%/KV 2.1-3.8%/POST 200 连发；proxy volcsw 83807→83831 递增、RSS 18213948kB S）→ INFER 远端推理持续活跃不 kill/cancel/retry；flat 三提交仍 PENDING_INPUT 等 A D4③，14_42_48 正式全链 NOT_RUN；scan 4039（05:35:47）最新无 4040；scene run 7=6DONE+1RUNNING 无新 run；8767 health=ok；PASS 基线不变。全部动作只读，未提交/retry/调模型/写生产。",
+ "evidence": "pipeline_run scene-4acf689f9a6a473da1fa2f2efc70 SCENE_RUNNING attempt1 heartbeat=2026-10-14 05:45:54；step_run 八步 QUEUED；ingest_submission 8 行；scan_job max=4039；health active_runs=[4acf689f ACCEPTED]；探针 tester_0540_check.py exit 0",
+ "next": "继续等 4acf689f 模型段完成信号（checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE，跨夜继续）；A flat 三提交绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING"
+}

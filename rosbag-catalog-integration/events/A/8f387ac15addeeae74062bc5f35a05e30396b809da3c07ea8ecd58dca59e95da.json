@@ -1,0 +1,12 @@
+{
+  "event_id": "a-t10def1-attempt1-delivered-20261012",
+  "occurred_at": "2026-10-12T00:26:59+08:00",
+  "recorded_at": "2026-10-12T00:26:59+08:00",
+  "role": "A",
+  "task": "t10-defect1-source-ready",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "03B 登记成功路径 source_status DISCOVERED→READY 最小返修交付（TASK-10 缺口 #1）；SQLite 定向 5 passed + 全量 818 passed/10 skipped + ruff 绿；反证 stash 回原代码 4 AC 用例转红",
+  "evidence": "commit 1b92ce6 / receipts/TASK-03B/t10-defect1-source-ready.md",
+  "next": "REVIEW_PENDING 冻结，等协调者核验+串行OCR+合入；真MySQL8.4.11并发复跑留独立验证阶段"
+}

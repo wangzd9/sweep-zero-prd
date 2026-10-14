@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t11s-batch-1012-ruling-duprun-2338-consumed-idle-20261013-2350",
+  "occurred_at": "2026-10-13T23:50:00+08:00",
+  "recorded_at": "2026-10-13T23:50:30+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Cron wake on fingerprint 48c4f36e (BATCH-STATUS.md 23:38 sync + ruling-duprun-2338.md). Read new ruling D1-D6: B's independent zero-iv-topic NOT_APPLICABLE classification for 16_37_47/16_58_28 is adopted (D3). No rework, no new B dispatch, no B-side process, zero commit/model/copy/prod-write. B row DONE 21:12 stands; sessions/B.md checkpoint appended (356->357 lines).",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md;inbox/coordinator/SPRAY-BATCH-1012-20261013/ruling-duprun-2338.md;inbox/control/runtime/observer/B.json",
+  "next": "IDLE_WAITING: await next dispatch from coordinator; quiet hours 21:00-08:00 - no proactive group messages, 08:00 digest."
+}

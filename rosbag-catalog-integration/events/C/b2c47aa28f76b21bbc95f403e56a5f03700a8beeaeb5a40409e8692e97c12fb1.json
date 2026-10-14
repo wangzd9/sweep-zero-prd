@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-040853-t16b-ocr-b1-failed-b2-inflight",
+  "occurred_at": "2026-10-13T04:15:52+08:00",
+  "recorded_at": "2026-10-13T04:15:52+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "04:03:53 后 C 范围无新派单/返修单；16B OCR b1 orchestrator 04:05:50 DONE rc=1 FAILED（0 findings，session 235dac12 带 --resume 提示，重试/resume 裁决归协调者）；v2 已自动推进 b2 scene_host_proxy 04:05:50 START INFLIGHT（pid 1142402）、b3 fake_vlm 排队；父进程 980094 存活持 ocr.lock；16B 交付 0208a73 维持冻结 REVIEW_PENDING；main c2018dd/origin 502bf8e 零漂移；wt-03b/wt-03b-t16b 干净；leases 在途 A.json/COORDINATOR.json 均非 C 不接管",
+  "evidence": "sessions/C.md 04:14 条目；scratch/t16_ocr/t16_ocr_v2_progress.txt tail；ps 1142402/980094；find inbox/3号 inbox/coordinator 04:00 后为空",
+  "next": "等协调者：16B b1 失败 resume 裁决+b2/b3 OCR 收口→无 CORRECTION 级即合入；16A 最小返修单（6 项）派 A→增量 OCR→合入；16A 接受后 real 栈全链冒烟（16D 前）"
+}

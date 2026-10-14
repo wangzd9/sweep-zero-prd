@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-033753-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T03:39:40+08:00",
+  "recorded_at": "2026-10-12T03:39:40+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "3",
+  "status": "IDLE_WAITING",
+  "summary": "P0 收口后常规空转：无新派单/返修，main 453da0c 双核不变，本侧冻结干净",
+  "evidence": "sessions/B.md",
+  "next": "等协调者新派单或 TASK-11 生产门禁放行"
+}

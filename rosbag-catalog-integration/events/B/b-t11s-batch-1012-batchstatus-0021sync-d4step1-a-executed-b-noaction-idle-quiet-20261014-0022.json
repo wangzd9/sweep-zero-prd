@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t11s-batch-1012-batchstatus-0021sync-d4step1-a-executed-b-noaction-idle-quiet-20261014-0022",
+  "occurred_at": "2026-10-14T00:23:40+08:00",
+  "recorded_at": "2026-10-14T00:23:40+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Consumed BATCH-STATUS.md 00:21:12 sync (observer pending fp 1a0b41ae, single changed_source, coordinator single-write). New content is A-role scope only: D4 step-1 executed by A (00:17:07 backup 3 date-grouped submission rows d4-dategrouped-subs-backup-0016.json; 00:17:59 delete 03281a51/5e08e73d/7f4e7b75 all rc=0, post cleared, d4-dategrouped-subs-delete-0017.json); remaining 409 release check + binding push + NAS ready/spray/20261012/ delete stay in A (sole upload/submit owner). B side zero action: inbox/2号 no new dispatch/rework (T11S-BATCH-1012 still attempt-1 dispatch+ack only); B DONE 21:12 classification (4 packet-routable / 3 NOT_APPLICABLE / 1 invalid empty) continues to hold, referenced consistently by C/TESTER and not overturned; zero commit/model/copy/prod-write; no B-side process; wt-04a-t12sb frozen unchanged. Maintains IDLE_WAITING; quiet hours 21:00-08:00, no proactive group message; 08:00 digest includes C actor-identity escalation.",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md (00:21:12 mtime, 9216B); receipts/TASK-11S-BATCH-1012/d4-dategrouped-subs-backup-0016.json (00:17:07); receipts/TASK-11S-BATCH-1012/d4-dategrouped-subs-delete-0017.json (00:17:59); receipts/TASK-11S-BATCH-1012/b-attempt-1.md (B DONE 21:12 classification); observer pending fp 1a0b41ae0f4af2264f6633bdb0d5dcb77c2feed3b215b3df8e71bab5188a3cae",
+  "next": "IDLE_WAITING: await next coordinator dispatch; quiet hours until 08:00, 08:00 digest."
+}

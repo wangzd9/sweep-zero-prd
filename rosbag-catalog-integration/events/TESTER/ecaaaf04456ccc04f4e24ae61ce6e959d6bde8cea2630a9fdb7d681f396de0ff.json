@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-4acf-infer-ruling-consumed-20261014023351",
+  "occurred_at": "2026-10-14T02:33:51+08:00",
+  "recorded_at": "2026-10-14T02:33:51+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "02:3x 纠偏（消费协调者 ruling-4acf-infer-active-0218 + BATCH-STATUS 02:1x 增补，本轮 pending 唯一外部新输入）：4acf689f 定性裁决落定=INFER 阶段远端模型推理活跃（VLM 3-4 reqs/Waiting 0/POST 200 连发/prefix cache ~95%、proxy 持 192.168.2.45:8002 ESTABLISHED、EXTRACT 产物 jpg 1781/pcd 5373 冻结、lease 随 heartbeat 前移），本角色 01:4x/01:52 stall-escalate 与 02:03/02:11『零实质推进/证据分歧』口径**一并撤销**（协调者裁定=阶段边界写口径非矛盾：八步 DB 状态在阶段完成时翻转，逐帧模型调用不落逐步 DB 行；01:52 宿主 ss 空输出=观测盲区）；02:2x 段回执中『维持报协调者定性』为裁决前口径已注记过期。新核销口径=模型段完成信号（checkpoint 翻 EXTRACT/DONE、八步 DB 推进、SCENE_DONE），升级条件=heartbeat 4 连败/翻 FAILED/VLM Waiting 持续>0 且无 ESTAB/八步翻 FAILED；不 kill/cancel/retry 跨夜既定口径。DB 侧 02:23 实测与裁决一致（SCENE_RUNNING attempt1 heartbeat 02:23:41、八步 QUEUED=模型段未完成信号未到）；flat 三提交 PENDING_INPUT 不变（串行阻塞等 4acf689f 终态，D4③）；PASS 基线不变。",
+  "evidence": "ruling-4acf-infer-active-0218.md（协调者 02:1x，独立核实 6 项只读取证+撤案处置+升级条件）; BATCH-STATUS.md 02:1x 增补行; 本角色 02:23 DB 实测 pipeline_run SCENE_RUNNING heartbeat 02:23:41 / step_run 8 QUEUED; ingest_submission flat PENDING_INPUT 4 行不变",
+  "next": "按裁决新口径等 4acf689f 模型段完成信号（checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE），下轮不再升级 CPU 静默项；SCENE_DONE 后核跨 DB3 边界/产物/两次 reconcile（16_02_03 正式全链）；A flat 三提交绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）"
+}

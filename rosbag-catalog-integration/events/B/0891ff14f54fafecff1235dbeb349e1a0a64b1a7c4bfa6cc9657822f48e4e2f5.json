@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-163753-t08-delivered-waiting-review",
+  "occurred_at": "2026-10-11T16:39:24+08:00",
+  "recorded_at": "2026-10-11T16:39:24+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "16:37 巡检：TASK-08 attempt-1 交付已冻结（16:32 回执/报告落盘，REVIEW_PENDING），协调者 16:35 TODO 记账停滞告警后无新派单/返修/验收，inbox/2号 无新文件",
+  "evidence": "receipts/TASK-08/attempt-1.md",
+  "next": "等协调者审核交付与 C1/C2/C3 回派裁决"
+}

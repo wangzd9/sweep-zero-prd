@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs77-scene-proxy-oom-recovered-20261014",
+  "occurred_at": "2026-10-14T15:57:45+08:00",
+  "recorded_at": "2026-10-14T16:06:57+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第77轮只读观察（prerun 15:18:52 指纹 2503a03c 消费：5 changed_sources 全核实=已消费/历史面，无 C 新派单/返修；TASK-16C-C 叶 14:24 ACCEPTED 维持，C 槽释放）：处理机 15:56-16:02 实测发现 scene proxy 容器 OOM 重启——dmesg 15:57:45 kernel oom-kill pid 3495931(python, docker-3376cd90f44e scope, anon-rss 23340384kB≈22.8GB，free -g 总量 30G)，旧容器 15:57:46 Removed、systemd 15:57:52 restart counter=1 拉起新容器 ddcc7df81635（Up），日志 \"recovering 1 scene run(s) after old writer verified stopped\"；run scene-4acf689f（16_02_03 正式链）8180 实测仍 SCENE_RUNNING attempt=1 auto_retry_count=0，heartbeat 16:01:24 续租活跃 lease 16:03:24，steps=PRECHECK/EXTRACT DONE、INFER RUNNING、余 QUEUED 未翻转，error 面空；RSS 历史基线 10:5x 观察≈18GB→22.8GB 持续增长=大包 INFER 内存面风险点，供协调者评估（C 不处置）；proxy 8767 /health ok active_runs 唯一在途 stage=RECOVERING→恢复中。C 全程只读（ssh dmesg/journalctl/docker logs+ps/curl 8180/8767/free/uptime），未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "处理机 15:56-16:02 只读实测：dmesg -T 15:57:45 oom-kill pid 3495931 total-vm 49817724kB anon-rss 23340384kB（docker-3376cd90f44e.scope=旧 rosbag-scene-proxy 容器）；journalctl -u rosbag-scene-host 15:57:46 Stopped/Removing→15:57:52 restart counter=1 Started→新容器日志 scene host proxy starting + recovering 1 scene run(s)；docker ps ddcc7df81635 Up 4 minutes；curl 8180 pipeline-runs/scene-4acf689f… status=SCENE_RUNNING attempt=1 auto_retry_count=0 heartbeat_at=2026-10-14T16:01:24 lease_expires_at=2026-10-14T16:03:24 steps EXTRACT DONE/INFER RUNNING/PRECHECK DONE/余5 QUEUED；curl 8767 /health status ok active_runs=[scene-4acf689f stage RECOVERING]；free -g total 30 used 2 avail 27；NAS 98T/70T/29T 71% 不变；load 11.59（INFER 段抬升，C 未起进程）。RSS 基线=obs75 10:5x 回执（18084068 kB≈17.2GB）",
+  "next": "下轮续核：RECOVERING→INFER 续跑/是否 OOM 再发（RSS 增长面供协调者评估限流或部署带内存修复的隔离树版本）；INFER 完成信号=checkpoint 翻转+VLM Running 回落；4acf 终态后立即交协调者收尾；C 只读不处置"
+}

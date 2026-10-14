@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-043053-r120-t16b-b2-fail-b3-inflight",
+  "occurred_at": "2026-10-13T04:34:57+08:00",
+  "recorded_at": "2026-10-13T04:34:57+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16B",
+  "attempt": "v2",
+  "status": "OCR_IN_PROGRESS",
+  "summary": "16B-b2 proxy rc=1(1440s LLM队列超时,session e2b8a607 manifest在案可resume);16B-b3 fake_vlm 04:29:50 START INFLIGHT;resume链政策更新(b1→b2各最后一次)落账;16A r1交付冻结3aee4d1核验口径续r119不变",
+  "evidence": "scratch/t16_ocr/t16_ocr_v2_progress.txt; reviews/TASK-16/16A-16B-ocr-batches.md r120",
+  "next": "r121核b3收口→v2 done释放ocr.lock后detached resume链b1(235dac12)→b2(e2b8a607)"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-203253-nochange-t07b-ocr-b5-timeout-b6-zero-idle",
+  "occurred_at": "2026-10-12T20:39:43+08:00",
+  "recorded_at": "2026-10-12T20:39:43+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "无新派单无返修；r95 detached OCR b5 RC=1 30min 超时失败(session 81a66282,可resume) b6 bag-detail.css 0 findings(session c010afa4) 处置属协调者；07B f4bfcf2 冻结等审",
+  "evidence": "scratch/t07b/ocr/remaining_progress.txt + reviews/TASK-07B/attempt-1/ocr-batches.md",
+  "next": "等协调者处置 b5 超时+续 b7-b10+契约批→b3 裁决→机械核验/强审查→合入→TESTER 独立验证→07B DONE"
+}

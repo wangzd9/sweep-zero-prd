@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-020253-reverify-v2-driver-done-lineage404-srcfalse",
+  "occurred_at": "2026-10-12T02:07:49+08:00",
+  "recorded_at": "2026-10-12T02:07:49+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "e2e-reverify-v2",
+  "status": "POLL_OBSERVATION",
+  "summary": "TESTER 复跑 v2 驱动 01:59:14 收口（main 453da0c 双核，真实 row19 VLM ≤1 袋）：#3 修复真链生效（complete-scene 200 SCENE_DONE/AVAILABLE、derive_storage_offset=100381744 非 None、/results 200、analyze SUCCESS 83s）；B 只读独立核两新事实：① step5 lineage 404=app 侧 lineage 服务已实现（scene_result_query.py:296）但全仓无 HTTP 路由注册（疑新缺口 #4，06B 域，待 TESTER 回执+协调者裁决，不代修）；② 驱动 5_source_unchanged=SOURCE_MODIFIED 疑口径误报（:97 before <60MB 全量 sha vs :401 after head1MB，metadata.yaml 11KB 必不等），B 同口径独立重算 7/7 MATCH=原包 ALL_UNCHANGED；attempt-2 回执尚未落盘（TESTER 在途，dispatch 02:03 标 ACCEPTED）。inbox/2号 01:58 后零新增，B 维持 IDLE_WAITING 不占开发槽",
+  "evidence": "scratch/t10/t10-e2e.json",
+  "next": "等 TESTER attempt-2 回执结论；lineage 404 若确认 app 缺口等协调者回派"
+}

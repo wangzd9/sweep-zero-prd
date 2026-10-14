@@ -1,0 +1,12 @@
+{
+  "event_id": "planner-spray-post-v04-20261014",
+  "occurred_at": "2026-10-14T13:53:01+08:00",
+  "recorded_at": "2026-10-14T13:53:01+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S",
+  "attempt": "post-v04-plan",
+  "status": "DESIGN_READY_DEFERRED",
+  "summary": "用户三项水雾后续收尾已规划E/F与原D1/D2；等待当前v0.4完成，未立即派单或抢占",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/SPRAY-POST-V04.md",
+  "next": "父16原AC收口后协调者核base/owner/材料资源再派E/D1→F→D2，缺真实质量证据不扩量"
+}

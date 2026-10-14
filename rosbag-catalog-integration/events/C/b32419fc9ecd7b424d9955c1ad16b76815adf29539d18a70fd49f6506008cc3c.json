@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-081353-r133-r401-adjudication-no-c-order",
+  "occurred_at": "2026-10-13T08:17:59+08:00",
+  "recorded_at": "2026-10-13T08:17:59+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "巡检：无C新派单；07B R4-01协调者裁决非原AC违例不返修+TESTER post-r已派(均非C)；16B保持NEEDS_REVIEW冻结",
+  "evidence": "sessions/C.md 08:13 条目",
+  "next": "等协调者proxy OCR解除后16B最小返修单"
+}

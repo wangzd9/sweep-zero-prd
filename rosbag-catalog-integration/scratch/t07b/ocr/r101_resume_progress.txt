@@ -1,0 +1,39 @@
+== r101 resume started 2026-10-12 21:59:38 +0800 pid=607379 jobs=[('b5', '81a66282'), ('b7', 'daa45a1c')] base=502bf8e head=f4bfcf2 ==
+
+### b5 FILE=app/services/scene_manual_revision_service.py OK_RC0 SECONDS=1800 session=81a66282
+deterministically gets 409. Same pattern applies in `withdraw_slice` below.
+─── app/services/scene_manual_revision_service.py:215-221 ───
+[bug · medium] Robustness: `db.scalar(select(BagSceneLabelEvidence)...)` has no
+`.order_by()`/`.limit(1)`. If two `MANUAL` rows ever exist for the same (bag_uid, scene_id, MANUAL)
+— e.g. historical data, or the small race window above where two writers both observe no MANUAL row
+before either commits — `scalar()` raises `MultipleResultsFound` (→500) instead of updating a
+deterministic row. Add `.order_by(BagSceneLabelEvidence.id).limit(1)` (or `.desc()` for the latest)
+so the effective projection always resolves to a single, well-defined row.
+─── app/services/scene_manual_revision_service.py:379-383 ───
+[style · low] Missing trailing newline at end of file (POSIX text convention; can cause spurious
+diffs/lint noise). Add a final newline.
+[ocr] WARNING [review_round_failed] app/services/scene_manual_revision_service.py: round 2: LLM completion error: caller deadline exceeded: context deadline exceeded
+LLM retry report summary: 1 of 54 requests affected -- 1 request failed
+Core review (1 request):
+- app/services/scene_manual_revision_service.py: timed out -> failed
+Per-attempt detail: --format json (retry_report).
+
+### b7 FILE=app/static/bag-search.css OK_RC0 SECONDS=839 session=daa45a1c
+badges in the column — the column's `gap: 4px` already handles vertical spacing. `display:
+inline-block` also has no effect here, since flex items are blockified. Suggested fix: drop
+`display` and `margin-left`, add `align-self: flex-start`.
+─── app/static/bag-search.css:1384-1384 ───
+[style · low] This file consistently uses CSS custom properties for badge text colors
+(`var(--green)`, `var(--muted)`, `var(--blue)` in the sibling `.bag-scene-*` rules), and `app.css`
+defines `--red: #c43838`. Consider `color: var(--red)` for consistency (the rgba background/border
+is fine — it matches the existing `.revision-flash.err` palette in `bag-detail.css`).
+─── app/static/bag-search.css:1378-1378 ───
+[style · low] `margin-left: 6px` only makes sense for an inline flow, but this badge is always
+rendered as a direct child of the column-flex `.bag-scene-cell` (see bags.html). As a flex item it
+won't sit beside the label/history pills — the margin just shifts it 6px to the right of every other
+left-aligned pill in the column, producing an inconsistent left edge even after `align-self:
+flex-start` is added. If the intent is a stacked pill, drop the margin; if it should appear inline
+next to the scene label, the markup needs a row wrapper (e.g., group it with
+`.bag-scene-label`/`.bag-scene-history` in a `display: flex` line).
+
+== r101 resume done 2026-10-12 22:43:38 +0800 ==

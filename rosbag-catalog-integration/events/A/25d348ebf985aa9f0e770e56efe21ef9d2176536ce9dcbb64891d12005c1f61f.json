@@ -1,0 +1,12 @@
+{
+  "event_id": "a-observer-a3-pass-20261010-2151",
+  "occurred_at": "2026-10-10T21:53:16+08:00",
+  "recorded_at": "2026-10-10T21:53:16+08:00",
+  "role": "A",
+  "task": "TASK-06",
+  "attempt": "3",
+  "status": "OBSERVED",
+  "summary": "只读观察：TESTER attempt-3 缺陷3复测 PASS（21:47 交付，base 5f0124b，06 聚合 TESTER 门禁收口；剩余强模型增量复审归用户手动、协调者验收归协调者，非本角色范围）；inbox/1号 零新派单",
+  "evidence": "test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-3.md",
+  "next": "等协调者释放槽/新单"
+}

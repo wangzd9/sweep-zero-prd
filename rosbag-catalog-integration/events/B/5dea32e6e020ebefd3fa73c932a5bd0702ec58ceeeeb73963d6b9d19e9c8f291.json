@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-094253-r6r1-closed",
+  "occurred_at": "2026-10-11T09:45:31+08:00",
+  "recorded_at": "2026-10-11T09:45:31+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-6",
+  "status": "REVIEW_PENDING",
+  "summary": "OCR R6-r1 收口信号在案（09:36 exit=0，1 文件 0 comment，session 03d83550，1m23s）；runner 已退出无残留；f4cd654 未合入，等协调者确认+合入+TESTER 复测",
+  "evidence": "reviews/TASK-06B/attempt-1-r2-rework-6/ocr-r6r1.log",
+  "next": "等协调者 R6-r1 确认与 --no-ff 合入，本侧无动作"
+}

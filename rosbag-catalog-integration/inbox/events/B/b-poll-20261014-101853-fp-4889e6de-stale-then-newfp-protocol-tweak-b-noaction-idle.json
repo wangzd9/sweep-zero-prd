@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261014-101853-fp-4889e6de-stale-then-newfp-protocol-tweak-b-noaction-idle",
+  "occurred_at": "2026-10-14T10:18:53+08:00",
+  "recorded_at": "2026-10-14T10:19:30+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "ack 4ea5fedb returned STALE_OBSERVATION (observer captured newer fp 4889e6de); per protocol read new notification instead of retrying old fingerprint. New diff = PROTOCOL.md 10:15:17 re-sync (coordinator single-writer, wording tweak in 2026-10-14 human-session section only - new/old session skill loading, no change to B poll/quiet/dispatch rules) + sessions/B.md self-echo of own 10:17 entry and 10:18 event file. Zero B dispatch/rework in inbox/2号 (find verified). B attempt-1 input applicability check remains DONE 21:12 (4 packet / 3 NOT_APPLICABLE / 1 INVALID_EMPTY_INPUT), ruling b-input-ruling-2117.md closed, no rework. 10:17 session entry tail updated in place with stale-fp resolution (398 lines preserved). Maintains IDLE_WAITING, no dev slot.",
+  "evidence": "sessions/B.md 398 lines (in-place edit verified, line count unchanged); PROTOCOL.md 112-116 diff vs 10:11:34 version read; find inbox/2号 newermt 10:12 empty; ps no B business processes; leases no B",
+  "next": "IDLE_WAITING: await next coordinator dispatch or algorithm rework order; 11:00 phase summary per policy."
+}

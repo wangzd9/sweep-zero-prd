@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-task06-r2-final-mysql-e2e-ack-20261010-1718",
+  "occurred_at": "2026-10-10T17:19:42+08:00",
+  "recorded_at": "2026-10-10T17:19:42+08:00",
+  "role": "TESTER",
+  "task": "TASK-06",
+  "attempt": "r2-final-mysql-e2e",
+  "status": "ACCEPTED",
+  "summary": "ACK 协调者新派单 r2-final-mysql-e2e：main 74ba3bf 六笔同批合入已核实、c285e2e OCR 0 findings 收口；7 场景 MySQL 隔离库终测开工",
+  "evidence": "inbox/TESTER/TASK-06/r2-final-mysql-e2e.md",
+  "next": "建 MySQL 8.4 隔离环境逐场景执行后交付 reports/TASK-06/r2-final-mysql-e2e.md"
+}

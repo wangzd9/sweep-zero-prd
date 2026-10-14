@@ -1,0 +1,12 @@
+{
+  "event_id": "b-ack-20261011-220300-task10",
+  "occurred_at": "2026-10-11T22:04:29+08:00",
+  "recorded_at": "2026-10-11T22:04:29+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "ACCEPTED",
+  "summary": "领取 TASK-10 attempt-1 P0 收尾单（base ca8730d），ACK 落盘",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/2号/TASK-10/attempt-1-ack.md",
+  "next": "建 wt-04a-t10 后台跑端到端四步"
+}

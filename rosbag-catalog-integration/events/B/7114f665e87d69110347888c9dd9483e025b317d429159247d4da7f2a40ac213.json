@@ -1,0 +1,12 @@
+{
+  "event_id": "b-ack-20261012-150000-task07b",
+  "occurred_at": "2026-10-12T15:03:45+08:00",
+  "recorded_at": "2026-10-12T15:03:45+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "07B attempt-1 ACK 落盘+wt-04a-t07b 建立 base 502bf8e 开发开工",
+  "evidence": "inbox/2号/TASK-07B/attempt-1-ack.md",
+  "next": "开发中 checkpoint 记 sessions/B.md"
+}

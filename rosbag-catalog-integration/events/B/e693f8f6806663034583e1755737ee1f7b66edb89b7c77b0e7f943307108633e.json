@@ -1,0 +1,12 @@
+{
+  "event_id": "b20261010-2115-defect3-delivered",
+  "occurred_at": "2026-10-10T21:15:11+08:00",
+  "recorded_at": "2026-10-10T21:15:11+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "缺陷3 reconcile 幂等二次 MySQL StaleDataError 已修复交付：单 commit 4e2158e（base 0f6aa87，仅 scene_result_report_service.py +27/-3，attempt=1-defect3-reconcile-replay）。真实 MySQL 8.4.11 A/B 复现闭环（旧码 StaleDataError FAILED / 修复后 PASSED）；SQLite 定向 31 passed + 全量 822 passed + ruff 绿。根因=DATETIME(0) 秒精度下 no-op updated_at UPDATE rowcount=0（无 CLIENT_FOUND_ROWS）。",
+  "evidence": "receipts/TASK-06B/attempt-1-defect3-reconcile-replay.md",
+  "next": "等协调者验收+串行 OCR+合入，随后 TESTER 新 attempt 真 MySQL 独立复测"
+}

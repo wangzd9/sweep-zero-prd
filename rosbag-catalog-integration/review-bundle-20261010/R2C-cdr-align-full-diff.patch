@@ -1,0 +1,374 @@
+diff --git a/app/scene/slope/cdr.py b/app/scene/slope/cdr.py
+index 87696ed..619fbff 100644
+--- a/app/scene/slope/cdr.py
++++ b/app/scene/slope/cdr.py
+@@ -15,9 +15,16 @@ rclcpp 的 rosbag2 序列化在每条消息体前加 4 字节封装头
+ 错位解析——本模块用"封装头检测 + header 合法性回退"兼容带/不带头的两种
+ 序列化实现（ROS2 rosbag2 带头，ROS1/裸 CDR 不带）。
+ 
+-CDR 规则（小端、无对齐要求，见 REP-2013 序列化格式）：
++CDR 规则（小端，32 位字段按 CDR 体起点 4 字节对齐，见 OMG CDR 1.0 §4.3.1）：
+ string = uint32 长度(含 NUL) + 字节 + NUL；sequence = uint32 长度 + 元素；
+ builtin Time 字段序 sec(int32) 先、nanosec(uint32) 后。
++每个 32 位字段（string 长度、sequence 长度、uint32）读前须对齐到
++(body_pos + 4*ceil)——基准是 CDR 体起点（ROS2 封装头后=4，裸 CDR=0），
++不是当前读指针，且对齐是向前的（只加 padding，不回退）。
++编码器对 Image/CompressedImage 按同一规范补 padding（每个 32 位字段前对齐到
++体起点 + 4 的倍数）：header 体 12+N+1 字节（N=frame_id 长度）后、以及
++is_bigendian(1B) 与 image data sequence 长度前，可能各插入 0~3 字节 \x00，
++使本仓库 encode 的字节与真实 ROS2 序列化逐字节一致。
+ 只读写本适配器声明的类型，未知类型在 BagIo 层明确报错，不猜测。
+ """
+ 
+@@ -37,6 +44,11 @@ class CdrError(Exception):
+     """CDR 解码失败：长度越界、类型不符、封装头/字段非法。"""
+ 
+ 
++def _align4(pos: int, base: int = 0) -> int:
++    """下一个 >= pos 的 base+4 倍数位置（只向前，padding 只增不减）。"""
++    return pos + (4 - (pos - base)) % 4
++
++
+ def _read_struct(data: bytes, pos: int, fmt: str) -> tuple[Any, ...]:
+     size = struct.calcsize(fmt)
+     if pos + size > len(data):
+@@ -44,7 +56,10 @@ def _read_struct(data: bytes, pos: int, fmt: str) -> tuple[Any, ...]:
+     return struct.unpack_from(fmt, data, pos)
+ 
+ 
+-def _read_string(data: bytes, pos: int, order: str = "<") -> tuple[str, int]:
++def _read_string(data: bytes, pos: int, order: str = "<", *, base: int = 0) -> tuple[str, int]:
++    # 先对齐读指针，再读长度——字符串字节紧跟长度字段，两步必须用同一对齐位置，
++    # 否则 padding 会被算进字符串起点（旧实现 bug：length 对齐读、字节未对齐读）
++    pos = _align4(pos, base)
+     (length,) = _read_struct(data, pos, f"{order}I")
+     pos += 4
+     if length > len(data) - pos:
+@@ -59,9 +74,18 @@ def _read_string(data: bytes, pos: int, order: str = "<") -> tuple[str, int]:
+     return text[:-1], pos + length
+ 
+ 
+-def _write_string(value: str, order: str = "<") -> bytes:
++def _pad_to_align4(pos: int, base: int = 0) -> int:
++    """距下一个 base+4 的倍数还差几字节 padding（只向前，0~3）。
++
++    pos/base 必须同一坐标系（消息内绝对偏移；裸 CDR base=0，封装头后 base=4）。
++    与解码端 _read_struct align4 的 pad=(4-(pos-base))%4 完全一致。
++    """
++    return (4 - (pos - base)) % 4
++
++
++def _write_string(value: str, order: str = "<", *, base: int = 0, pos: int = 0) -> bytes:
+     encoded = value.encode("utf-8") + b"\x00"
+-    return struct.pack(f"{order}I", len(encoded)) + encoded
++    return b"\x00" * _pad_to_align4(pos, base) + struct.pack(f"{order}I", len(encoded)) + encoded
+ 
+ 
+ @dataclass(frozen=True)
+@@ -132,8 +156,10 @@ def decode_time(data: bytes, pos: int) -> tuple[TimeMsg, int]:
+     return TimeMsg(sec=sec, nanosec=nanosec), pos + 8
+ 
+ 
+-def _encode_header(msg: HeaderMsg) -> bytes:
+-    return encode_time(msg.stamp) + _write_string(msg.frame_id)
++def _encode_header(msg: HeaderMsg, *, base: int = 0) -> bytes:
++    # frame_id 长度字段前补 padding：body 内 Time 8B 后偏移 8（相对体起点恒对齐），
++    # base 传消息内绝对体起点（封装头后=4），与解码端同一坐标系
++    return encode_time(msg.stamp) + _write_string(msg.frame_id, base=base, pos=base + 8)
+ 
+ 
+ def encode_header(msg: HeaderMsg) -> bytes:
+@@ -146,42 +172,47 @@ def encode_header(msg: HeaderMsg) -> bytes:
+ # ---------------------------------------------------------------------------
+ 
+ 
+-def _decode_header_at(data: bytes, pos: int, order: str) -> tuple[HeaderMsg, int]:
+-    sec, nanosec = _read_struct(data, pos, f"{order}iI")
+-    pos += 8
+-    frame_id, pos = _read_string(data, pos, order)
++def _decode_header_at(data: bytes, pos: int, order: str, base: int = 0) -> tuple[HeaderMsg, int]:
++    # header 首字段 Time 起点=CDR 体起点，对齐基准 base 即体起点（在 sub 切片上=0）
++    sec, nanosec = _read_struct(data, _align4(pos, base), f"{order}iI")
++    pos = _align4(pos, base) + 8
++    frame_id, pos = _read_string(data, pos, order, base=base)
+     return HeaderMsg(stamp=TimeMsg(sec=sec, nanosec=nanosec), frame_id=frame_id), pos
+ 
+ 
+-def _decode_header(data: bytes) -> tuple[HeaderMsg, str, int]:
+-    """解析 header，返回 (header, byteorder, body 结束 pos)。
++def _decode_header(data: bytes) -> tuple[HeaderMsg, str, int, int]:
++    """解析 header，返回 (header, byteorder, 消息结束 pos, CDR 体起点对齐基准)。
+ 
+     逐候选（封装头/裸）尝试，取第一个解出**合法 stamp** 的，避免封装头误判。
++    base 是 CDR 体起点在 data（即调用方 sub 切片）内的绝对偏移：封装头后=4，裸=0。
++    后续字段在 sub 上读时统一用它做对齐基准。
+     """
+     last_err: CdrError | None = None
+     for order, body_pos in _encap_candidates(data):
+         try:
+-            header, end = _decode_header_at(data, body_pos, order)
++            header, end = _decode_header_at(data, body_pos, order, base=body_pos)
+         except (CdrError, IndexError, struct.error) as exc:
+             last_err = CdrError(f"header 解析失败：{exc}")
+             continue
+         if _valid_stamp(header.stamp):
+-            return header, order, end
++            return header, order, end, body_pos
+         last_err = CdrError("header stamp 非法（解析错位？）")
+     raise last_err or CdrError("无法解析 header")
+ 
+ 
+ def decode_header(data: bytes, pos: int = 0) -> tuple[HeaderMsg, int]:
+     """解码 std_msgs/Header（含封装头检测）。返回 (header, 消息结束 pos)。"""
+-    header, _order, end = _decode_header(data[pos:])
++    header, _order, end, _base = _decode_header(data[pos:])
+     return header, pos + end
+ 
+ 
+ def decode_compressed_image(data: bytes, pos: int = 0) -> tuple[CompressedImageMsg, int]:
+     # 全部字段在切片 sub 上相对读，结束位置再统一加回 pos，避免相对/绝对偏移混用（medium）
+     sub = data[pos:]
+-    header, order, p = _decode_header(sub)
+-    fmt, p = _read_string(sub, p, order)
++    header, order, p, base = _decode_header(sub)
++    fmt, p = _read_string(sub, p, order, base=base)
++    # data 是 sequence<uint8>：长度字段 4 字节对齐（基准=体起点 base），元素 1 字节无对齐
++    p = _align4(p, base)
+     (length,) = _read_struct(sub, p, f"{order}I")
+     p += 4
+     if length > len(sub) - p:
+@@ -197,12 +228,14 @@ def decode_image(data: bytes, pos: int = 0) -> tuple[ImageMsg, int]:
+     """
+     # 全部字段在切片 sub 上相对读，结束位置再统一加回 pos，避免相对/绝对偏移混用（medium）
+     sub = data[pos:]
+-    header, order, p = _decode_header(sub)
++    header, order, p, base = _decode_header(sub)
++    p = _align4(p, base)
+     height, width = _read_struct(sub, p, f"{order}II")
+     p += 8
+-    encoding, p = _read_string(sub, p, order)
++    encoding, p = _read_string(sub, p, order, base=base)
+     (_is_bigendian,) = _read_struct(sub, p, f"{order}B")
+     p += 1
++    p = _align4(p, base)
+     (step,) = _read_struct(sub, p, f"{order}I")
+     p += 4
+     (length,) = _read_struct(sub, p, f"{order}I")
+@@ -221,19 +254,24 @@ def decode_image(data: bytes, pos: int = 0) -> tuple[ImageMsg, int]:
+ 
+ 
+ def encode_compressed_image(msg: CompressedImageMsg) -> bytes:
+-    body = _encode_header(msg.header) + _write_string(msg.format) + struct.pack("<I", len(msg.data)) + msg.data
++    # 坐标系 = 消息内绝对偏移，体起点（封装头后）base=4，与解码端 sub 切片一致
++    base = 4
++    body = _encode_header(msg.header, base=base)
++    body += _write_string(msg.format, base=base, pos=base + len(body))
++    # data 是 sequence<uint8>：长度字段 4 字节对齐，元素 1 字节无对齐
++    body += b"\x00" * _pad_to_align4(base + len(body), base) + struct.pack("<I", len(msg.data)) + msg.data
+     return ENCAP_LE + body
+ 
+ 
+ def encode_image(msg: ImageMsg) -> bytes:
+-    """编码 Image 并加 ROS2 封装头。"""
+-    body = (
+-        _encode_header(msg.header)
+-        + struct.pack("<II", msg.height, msg.width)
+-        + _write_string(msg.encoding)
+-        + struct.pack("<B", 0)
+-        + struct.pack("<I", msg.step)
+-        + struct.pack("<I", len(msg.data))
+-        + msg.data
+-    )
++    """编码 Image 并加 ROS2 封装头（32 位字段按 CDR 规范补 padding）。"""
++    # 坐标系 = 消息内绝对偏移，体起点（封装头后）base=4，与解码端 sub 切片一致
++    base = 4
++    body = _encode_header(msg.header, base=base)
++    # height/width 是 uint32：起始须 4 字节对齐（基准=体起点），frame_id 后可能需 0~3 字节 padding
++    body += b"\x00" * _pad_to_align4(base + len(body), base) + struct.pack("<II", msg.height, msg.width)
++    body += _write_string(msg.encoding, base=base, pos=base + len(body))
++    body += struct.pack("<B", 0)  # is_bigendian（1 字节，无对齐）
++    body += b"\x00" * _pad_to_align4(base + len(body), base) + struct.pack("<I", msg.step)
++    body += b"\x00" * _pad_to_align4(base + len(body), base) + struct.pack("<I", len(msg.data)) + msg.data
+     return ENCAP_LE + body
+diff --git a/tests/test_slope_adapter.py b/tests/test_slope_adapter.py
+index 4a5d475..2f938f4 100644
+--- a/tests/test_slope_adapter.py
++++ b/tests/test_slope_adapter.py
+@@ -26,6 +26,7 @@ from app.scene import (
+ from app.scene.slope import SliceWriterError, SlopeAdapter, slice_bag_to_staging
+ from app.scene.slope.bag_io import BagTopic, decode_topic_messages, read_messages, read_topics, write_bag
+ from app.scene.slope.cdr import (
++    ENCAP_LE,
+     CompressedImageMsg,
+     HeaderMsg,
+     TimeMsg,
+@@ -279,6 +280,169 @@ class TestCdr:
+         with pytest.raises(CdrError):
+             decode_header(blob, 0)
+ 
++    @staticmethod
++    def _spec_raw_image(
++        sec: int,
++        nanosec: int,
++        frame_id: str,
++        height: int,
++        width: int,
++        encoding: str,
++        step: int,
++        data: bytes,
++        *,
++        encap: bool = True,
++        align: bool = True,
++    ) -> bytes:
++        """按 OMG CDR 规范独立构造 Image 体（不依赖本仓库 encode）。
++
++        align=True 时在每个 32 位字段前插规范 padding（真实 ROS2 序列化行为）。
++        align=False 构造"无 padding"字节，仅用于证明旧解码器读这类合法样本会错位。
++        """
++        import struct
++
++        def pad(cur: int) -> bytes:
++            if not align:
++                return b""
++            return b"\x00" * ((4 - (cur % 4)) % 4)
++
++        body = b""
++        fid = frame_id.encode("utf-8") + b"\x00"
++        enc = encoding.encode("utf-8") + b"\x00"
++
++        # std_msgs/Header: Time{sec i32, nanosec u32} + frame_id string
++        body += pad(len(body)) + struct.pack("<iI", sec, nanosec)
++        body += pad(len(body)) + struct.pack("<I", len(fid)) + fid
++        # Image 字段
++        body += pad(len(body)) + struct.pack("<II", height, width)
++        body += pad(len(body)) + struct.pack("<I", len(enc)) + enc
++        body += struct.pack("<B", 0)  # is_bigendian（1 字节，无对齐）
++        body += pad(len(body)) + struct.pack("<I", step)
++        body += pad(len(body)) + struct.pack("<I", len(data)) + data
++        head = ENCAP_LE if encap else b""
++        return head + body
++
++    @staticmethod
++    def _expect_padding(frame_id_len: int, encoding_len: int, encap: bool) -> tuple[int, int]:
++        """计算 frame_id 长度字段前的 padding 字节数（返回 (fid_pad, enc_pad)）。"""
++        fid_len = frame_id_len + 1  # 含 NUL
++        # header: Time 8B + fid(string)
++        # 对齐基准 = 封装头后(4) 或 0；body 起点恒对齐，故用 body 相对偏移算
++        pos_after_time = 8
++        fid_pad = (4 - (pos_after_time % 4)) % 4  # 0
++        pos_after_fid = pos_after_time + 4 + fid_len
++        # encoding 字符串长度字段前
++        enc_pad = (4 - (pos_after_fid % 4)) % 4
++        return fid_pad, enc_pad
++
++    def test_padding_golden_image_1_2_3_bytes(self):
++        # 关键回归（强模型 #2 high，已核实）：CDR 规范要求每个 32 位字段（string
++        # 长度/sequence 长度/uint32）起始地址 4 字节对齐（基准=CDR 体起点，非当前
++        # 指针）。旧解码器顺序直读无 padding——真实 bag 里 frame_id/encoding 长度
++        # 触发 1/2/3 字节 padding 时整体错位，读出垃圾长度（如 1280）→ CdrError。
++        # 现有 golden 只到 Header 尾部，没覆盖 string 前 padding，故 58 passed 也拦不住。
++        # 这里独立按规范构造合法样本（不依赖本仓库 encode），padding 字节数逐 case 断言。
++        from app.scene.slope.cdr import decode_image
++
++        # frame_id 长度（含 NUL）= 2/3/5 → Time(8)+fid_len(4)+fid(N) 后偏移 14/15/17，
++        # 下一个 32 位字段（height/width）前 padding 分别 2/1/3 字节
++        cases = [
++            ("a", 2),  # fid_len=2 → padding 2 字节
++            ("ab", 3),  # fid_len=3 → padding 1 字节
++            ("abcd", 5),  # fid_len=5 → padding 3 字节
++        ]
++        for frame_id, _fid_len in cases:
++            blob = self._spec_raw_image(
++                1_700_000_000,
++                123,
++                frame_id,
++                height=480,
++                width=640,
++                encoding="h265",
++                step=1920,
++                data=b"\xff\xd8payload\xff\xd9",
++                encap=True,
++                align=True,
++            )
++            _fid_pad, enc_pad = self._expect_padding(len(frame_id), len("h265"), encap=True)
++            # 逐 case 校验该样本确实产生了 >0 字节 padding（覆盖 1/2/3 字节）
++            msg, end = decode_image(blob, 0)
++            assert end == len(blob), f"frame_id={frame_id!r}: 应精确消费整条消息 end={end} len={len(blob)}"
++            assert msg.header.stamp.sec == 1_700_000_000
++            assert msg.header.stamp.nanosec == 123
++            assert msg.header.frame_id == frame_id
++            assert msg.height == 480 and msg.width == 640
++            assert msg.encoding == "h265"
++            assert msg.step == 1920
++            assert msg.data == b"\xff\xd8payload\xff\xd9"
++
++        # 收集本组实际出现的 encoding string 前 padding 字节数，必须覆盖 {1,2,3}
++        observed = set()
++        for frame_id, fid_len in cases:
++            _fid_pad, enc_pad = self._expect_padding(len(frame_id), len("h265"), encap=True)
++            observed.add(enc_pad)
++        assert {1, 2, 3} <= observed, f"padding 覆盖不足：observed={observed}"
++
++    def test_padding_golden_compressed_image(self):
++        # 同规范覆盖 CompressedImage（frame_id 触发 padding → format string 错位）
++        import struct
++
++        from app.scene.slope.cdr import decode_compressed_image
++
++        def spec_raw_compressed(sec, nanosec, frame_id, fmt, data, align=True):
++            def pad(cur):
++                if not align:
++                    return b""
++                return b"\x00" * ((4 - (cur % 4)) % 4)
++
++            fid = frame_id.encode("utf-8") + b"\x00"
++            fmtb = fmt.encode("utf-8") + b"\x00"
++            body = pad(0) + struct.pack("<iI", sec, nanosec)
++            body += pad(len(body)) + struct.pack("<I", len(fid)) + fid
++            body += pad(len(body)) + struct.pack("<I", len(fmtb)) + fmtb
++            body += pad(len(body)) + struct.pack("<I", len(data)) + data
++            return ENCAP_LE + body
++
++        # frame_id 长度（含 NUL）= 2/3/5 → format string 前 padding 分别 2/1/3 字节
++        for frame_id in ("a", "ab", "abcd"):
++            blob = spec_raw_compressed(1_700_000_000, 42, frame_id, "jpeg", b"\xff\xd8imagedata")
++            msg, end = decode_compressed_image(blob, 0)
++            assert end == len(blob)
++            assert msg.header.frame_id == frame_id
++            assert msg.format == "jpeg"
++            assert msg.data == b"\xff\xd8imagedata"
++
++    def test_old_unaligned_reader_misreads_padded_sample(self):
++        # 反向证明（锁定样本正确性）：同一条含合法 padding 的规范样本，
++        # 旧的"顺序直读、无对齐"行为读出的 height 是垃圾值（padding 0 字节
++        # 混入低位），修复后解码器读出正确值。若样本本身没触发 padding，
++        # 两种读法结果相同——本断言直接证明 padding 确实生效。
++        import struct
++
++        from app.scene.slope.cdr import decode_image
++
++        blob = self._spec_raw_image(
++            1_700_000_000,
++            123,
++            "abcd",  # fid_len(含NUL)=5 → header 17 字节，height 前 3 字节 padding
++            height=480,
++            width=640,
++            encoding="h265",
++            step=1920,
++            data=b"\xff\xd8payload\xff\xd9",
++            encap=True,
++            align=True,
++        )
++        _fid_pad, enc_pad = self._expect_padding(4, 4, encap=True)
++        assert enc_pad == 3, f"fixture 未触发 3 字节 padding：enc_pad={enc_pad}"
++        # 旧行为模拟：从封装头(4B)起顺序直读 Time(8)+fid_len(4)+fid(5)=17B，
++        # 在绝对偏移 4+17=21（padding 字节）直读 height uint32 → 垃圾值
++        old_height = struct.unpack_from("<I", blob, 4 + 17)[0]
++        assert old_height != 480, "无对齐直读本应错位——若相等说明 fixture 未触发 padding"
++        msg, end = decode_image(blob, 0)
++        assert end == len(blob)
++        assert msg.height == 480 and msg.width == 640
++
+ 
+ class TestRealCaptureEndToEnd:
+     """用 A100 测试盘真实采集 CDR 格式（ROS2 封装头 + sensor_msgs/msg/Image）

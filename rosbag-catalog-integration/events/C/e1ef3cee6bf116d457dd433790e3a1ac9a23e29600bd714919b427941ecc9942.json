@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs61-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T08:14:00+08:00",
+  "recorded_at": "2026-10-14T08:13:30+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第61轮只读观察（处理机/llm-server 08:11 实测）：**与 obs60 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜续跑不 kill/retry）**。C 全程只读（ssh curl 8180/8767、ps/df/uptime/stat/find/ls、llm-server 读 log、docker top），未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "8180 scene-4acf689f… SCENE_RUNNING attempt=1 error 空 lease_expires_at 08:13:04（08:11:20 查点 heartbeat 续租）八步全 QUEUED；8767 active_runs=[scene-4acf689f ACCEPTED pid1]；proxy pid 3495931 LSTART 10-13 20:22:38 未重启 ELAPSED 11:48:52 TIME 01:20:18；checkpoint.json mtime 2026-10-14 00:23:10.474817688 +0800 未翻 find -newermt 30min=0 零新写 jpg 1781/pcd 5373；VLM 08:11:28-58 多采样 Running 2-3 Waiting 0 prefix 93.6% MM 88.9% gen 58-175 tok/s=推理活跃续证；NAS 98T/70T/29T 71%、18000 production ready、load 2.16/2.18/1.70、incoming/spray 仅 16_33_10 空目录。无升级条件命中。canonical append 前 609 行+末行 \\n 核验、写后 610 行、旧镜像 54 行 obs61 签名=0 断言通过。",
+  "next": "接续只读观察：模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账（A 面绑定推进）；16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。白天口径：状态变化即时通报，无变化不报进度"
+}

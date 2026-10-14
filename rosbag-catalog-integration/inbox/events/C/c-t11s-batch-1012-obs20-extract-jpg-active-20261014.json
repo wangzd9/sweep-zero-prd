@@ -1,0 +1,14 @@
+{
+  "event_id": "c-t11s-batch-1012-obs20-extract-jpg-active-20261014",
+  "occurred_at": "2026-10-14T01:23:00+08:00",
+  "recorded_at": "2026-10-14T01:23:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs19（01:13）后新一轮：pending 触发源=obs19 自产事件文件（first_seen 01:18:53）；ACK 21:07:41 在案不重复领取",
+  "summary": "C 第20轮只读复核（处理机 01:19-01:23 实测：ssh curl 8180/8767、docker inspect/exec、ls/df/uptime，未 kill/未删/未重启/未 retry/未改任何生产路径）与 obs19 零 run 级状态变化，并修正 EXTRACT 进程级口径：① 7 scene run 不变——六 SCENE_DONE + scene-4acf689f（16_02_03 正式链 source 91FFEEC1/submission 24d60fee）仍 SCENE_RUNNING attempt=1 auto_retry_count=0 lease_owner=platform-local，heartbeat 01:20:04 续租活跃 lease 至 01:22:04、364 事件链末 12 条全 HEARTBEAT/RESOURCE_HEARTBEAT 无 FAILED、proxy 8767 active_runs=[scene-4acf689f ACCEPTED]；② EXTRACT 进程级：obs19 所见 pid 12623 packet2pointcloud 子进程已退出——pcd 阶段完成（attempt-1/pcd 5373 文件，末件 12:14 UTC 落盘），提取已转入 jpg 阶段且运行在 proxy 主进程 pid 1 内部（非独立子进程，obs19 子进程口径仅覆盖 pcd 子进程窗口）：jpg 计数 20s 内 852→890 持续增长、末件 frame_000890.jpg mtime 01:22 实时、pid 1 CPU TIME 00:35:05→00:43:30 在算；checkpoint.json 仍 EXTRACT PENDING（阶段完成才翻，属阶段边界写口径）；③ rosbag-scene-proxy 容器 StartedAt 12:22:38 UTC=本地 20:22:38、Running 未重启、RestartCount=0、OOMKilled=false，obs19 与本轮状态连续；④ incoming/spray 仍仅 16_33_10 空包目录（D6 拒绝痕迹 A 面补台账）；⑤ flat 三提交 a65a25a7/87dfebaa/518089ed 仍无新绑定 run（D4 第③步归 A 面，SCENE_EXEC_HOST 被 4acf689f 串行占用属预期）；⑥ 资源：NAS 98T/70T/29T 71% 不变、load 瞬时 6.02/3.78/2.38（EXTRACT jpg 阶段 CPU 密集抬升，15min 均值 2.38 回落，无风险）。本批 8 包无新终态，大包跨夜继续不因观察超窗 kill/retry。",
+  "evidence": "处理机只读实测 01:19-01:23：8180 /api/v1/pipeline-runs/scene-4acf689f rc=200（SCENE_RUNNING attempt=1 auto_retry_count=0 heartbeat_at 2026-10-14T01:20:04 lease_expires_at 01:22:04，事件 364 条末 12 条全 HEARTBEAT/RESOURCE_HEARTBEAT）；8180 /api/v1/pipeline-runs?limit=200 total=24 七 scene run 六 DONE 一 RUNNING；8767/health rc=200 {status:ok active_runs:[scene-4acf689f ACCEPTED pid1]}；docker inspect rosbag-scene-proxy StartedAt=2026-10-13T12:22:38Z（本地 20:22:38）Running=true RestartCount=0 OOMKilled=false；docker exec ps：容器内无 packet2pointcloud 子进程，pid1 scene_host_proxy.py CPU TIME 43:30；attempt-1/pcd=5373 文件（末件 12:14 UTC）、jpg 20s 计数 852→890（末件 frame_000890.jpg mtime 12:22 UTC 实时）、checkpoint.json EXTRACT/PENDING PRECHECK/DONE；stat incoming/spray 仅 rosbag2_2026_10_12-16_33_10（2026-10-12 17:37）；df /mnt/nas_backup 98T 70T 29T 71%；uptime 01:20:18 load 6.02/3.78/2.38",
+  "next": "接续只读观察：① scene-4acf689f 终态（jpg 提取完成→checkpoint 翻 EXTRACT/DONE→八步推进→SCENE_DONE，完成信号=checkpoint 翻转+八步推进）；② 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run，C 按 run 核账（含 ruling-dup-slices-0038 观察面：正式 a65a25a7 绑定 run 对现存 FFDEE943 同 source 切片处置痕迹取证，C 不处置）；③ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261014-021753-ruling4acf-b-noaction-idle-quiet",
+  "occurred_at": "2026-10-14T02:25:00+08:00",
+  "recorded_at": "2026-10-14T02:25:00+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "prerun 指纹 70cdf6e8 变更源 sessions/B.md（mtime 02:14:09）核为本侧 02:11 条目追加自产物；业务面唯一新输入=协调者 02:21 ruling-4acf-infer-active-0218（4acf689f INFER 模型段活跃非卡死、TESTER stall-escalate 撤案、不 kill/cancel/retry）与 02:19 BATCH-STATUS 同步——均协调者面，B 面（输入适用性只读检查）维持 DONE 21:12，裁决未对 B 取证面提出异议，零动作。",
+  "evidence": "find inbox/{2号,1号,3号,TESTER,coordinator}+receipts+reports+test-receipts newermt 02:14 仅 2 协调者面文件；ruling-4acf 全文已读（B 无认领面）；sessions/B.md 381 行尾换行 od 实测；ps 无 B 侧业务进程；零 commit/零模型/零复制/零生产写（生产固定 3c9c496）；wt-04a-t12sb 冻结不变。",
+  "next": "IDLE_WAITING：夜间静默 21:00-08:00 不群报，08:00 汇总（含 C 肇事身份上报口径 + 4acf689f 模型段进展）；仅收协调者新派单/返修再启动。"
+}

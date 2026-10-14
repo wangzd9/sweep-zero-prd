@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t16b-deliver-20261013-0111",
+  "occurred_at": "2026-10-13T01:16:03+08:00",
+  "recorded_at": "2026-10-13T01:16:03+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "C 交付 TASK-16B attempt-1 常驻代理 scene_host_proxy（commit 0208a73，在 9437308 之上）：POST /run 先持久 (run_id,attempt) 台账后 accepted、同身份重发禁第二写者、kill -9 崩溃恢复核验旧写者终止续跑、续租对账+取消协作停写、不直连库全经 Backend API、受控发布根 fail-closed；编排12+代理14=26 passed、场景套件 276 passed 0 回归、ruff 绿；未执行=real 栈全链冒烟待 16A 接受",
+  "evidence": "wt-03b-t16b c/task-16b-scene-host-proxy@0208a73 / receipts/TASK-16B/attempt-1.md",
+  "next": "等协调者机械核验→串行 OCR→合入→16A 接线冒烟→TESTER 16D 候选"
+}

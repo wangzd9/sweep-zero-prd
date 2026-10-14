@@ -1,0 +1,13 @@
+{
+  "event_id": "coord-r159-spray1900-handover-consumed-3way-dispatch",
+  "occurred_at": "2026-10-13T14:55:00+08:00",
+  "recorded_at": "2026-10-13T14:55:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S/TASK-12S-B/TASK-16B",
+  "attempt": "n/a",
+  "status": "DISPATCHED",
+  "summary": "r159（prerun 指纹 510cfc4b）：SPRAY-1900 规划交接全消费；S9 补充单 r160 并行回合已在途（s9-dispatch 14:4x 为准，本侧重复 note 标 SUPERSEDED）；16B r1 增量 OCR 固定入口在途（run 0a77a83f，14:32 b01 健康推进）；11S-PREP 发布准备单派 A（17:15 前交付=17:30 发布决策 G1-G4 材料，零生产写入）；15:15 真实解码/渲染目标已由环境面达成（53s 包 PASS+处理机 cross-host PASS）；TODO r161 段+sessions r159 检查点落盘。",
+  "evidence": "inbox/coordinator/SPRAY-1900-20261013/{notice,runtime-owner,packet-frame-mapping}.md; inbox/1号/TASK-11S-PREP/attempt-1-dispatch.md; reviews/TASK-16B/attempt-2-r1/ocr/state.json(RUNNING); analysis/spray-runtime-install-20261013/evidence/local-53s-v1.json(status=PASS); strong_review.py status 14:4x(0/5 至 10-14 13:27:15)",
+  "next": "B S9 ACK 核→16B r1 OCR 收口裁决→12S-A 增量 OCR 固定入口→A 11S-PREP 交付核→17:30 发布决策材料汇总",
+  "fingerprint": "510cfc4ba8cef5d4943d8fe66946c48f90831e6d238a263cdaec8e440631dd88"
+}

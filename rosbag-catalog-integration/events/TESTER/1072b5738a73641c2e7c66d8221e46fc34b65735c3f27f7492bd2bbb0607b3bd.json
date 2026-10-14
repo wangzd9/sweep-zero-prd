@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-095453-nochange",
+  "occurred_at": "2026-10-12T09:56:01+08:00",
+  "recorded_at": "2026-10-12T09:56:01+08:00",
+  "role": "TESTER",
+  "task": "N/A",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "5分钟巡检nochange：main 453da0c双核一致、无新派单、无在途进程、T10已收口",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/events/TESTER/tester-poll-20261012-095453-nochange.md",
+  "next": "继续5分钟巡检"
+}

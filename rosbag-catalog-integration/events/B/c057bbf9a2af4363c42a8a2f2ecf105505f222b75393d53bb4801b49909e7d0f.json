@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-040753-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T04:08:45+08:00",
+  "recorded_at": "2026-10-12T04:08:45+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "04:02 check no business change, TASK-10 DONE, P0 dispatch stopped",
+  "evidence": "origin/main 453da0c; wt-04a-t10d3 HEAD=0943885",
+  "next": "idle poll only"
+}

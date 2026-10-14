@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-015753-defect3-merged-idle",
+  "occurred_at": "2026-10-12T01:59:20+08:00",
+  "recorded_at": "2026-10-12T01:59:20+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "t10-defect3-publish-bounds-r1",
+  "status": "MERGED",
+  "summary": "t10-defect3 0943885 已合入 main 453da0c（ACCEPT_MERGED 01:52），本侧无新派单，转 IDLE_WAITING 等 TASK-10 收口",
+  "evidence": "inbox/coordinator/TASK-10/t10-defect3-acceptance-decision.md",
+  "next": "等协调者 TESTER 复跑 v2 通过后 TASK-10 DONE 收口；收到返修/新单再启动"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-193453-nochange",
+  "occurred_at": "2026-10-12T19:36:27+08:00",
+  "recorded_at": "2026-10-12T19:36:27+08:00",
+  "role": "TESTER",
+  "task": "TEST-POLL",
+  "attempt": "1",
+  "status": "NO_CHANGE",
+  "summary": "5分钟巡检无变化：零新增TESTER派单，07B REVIEW_PENDING 未合入，维持 IDLE",
+  "evidence": "inbox/events/TESTER/tester-poll-20261012-193453-nochange.md",
+  "next": "继续5分钟巡检"
+}

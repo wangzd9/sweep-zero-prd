@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-211053-r101-t07b-ocr-b9-inflight-nochange",
+  "occurred_at": "2026-10-12T21:27:00+08:00",
+  "recorded_at": "2026-10-12T21:27:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "OCR_INFLIGHT",
+  "summary": "r101: 20:55后零业务交付; b9 detail.html 在途(pid 525278 活性确认); vllm 4 running/2 waiting 非低负载, b5/b7 resume 顺延; A/B/C/TESTER 全空闲; 强审查授权在期至 2026-10-13 11:33:12, 60min 0/5, 无在途调用",
+  "evidence": "sessions/COORDINATOR.md r101 检查点; reviews/TASK-07B/attempt-1/ocr-batches.md",
+  "next": "r102 核 b9 收口 -> b10+契约批 -> 低负载期 b5/b7 resume"
+}

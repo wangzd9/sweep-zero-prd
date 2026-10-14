@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-202453-nochange",
+  "occurred_at": "2026-10-12T20:30:26+08:00",
+  "recorded_at": "2026-10-12T20:30:26+08:00",
+  "role": "TESTER",
+  "task": "N/A",
+  "attempt": "1",
+  "status": "IDLE_NO_CHANGE",
+  "summary": "5min poll: no new TESTER dispatch; 07B OCR r95 still running (coordinator scope); origin/main 502bf8e unchanged; idle standby",
+  "evidence": "preflight checked_at 2026-10-12T20:24:53+08:00; find -newermt 20:14:53 inbox/TESTER+test-receipts empty; ps no TESTER business proc (ocr r95 pid 464164 is coordinator 07B scope); git fetch origin/main=502bf8e unchanged; COORDINATOR lease released this round",
+  "next": "continue 5min poll; ACK fixed-snapshot dispatch if 07B post-merge TESTER verification order arrives"
+}

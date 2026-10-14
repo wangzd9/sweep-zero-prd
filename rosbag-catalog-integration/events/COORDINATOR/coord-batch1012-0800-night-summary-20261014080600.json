@@ -1,0 +1,14 @@
+{
+  "event_id": "coord-batch1012-0800-night-summary-quiet-end-20261014",
+  "occurred_at": "2026-10-14T08:06:00+08:00",
+  "recorded_at": "2026-10-14T08:06:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "NIGHT_SUMMARY",
+  "supersedes_context": "prerun 08:00:53 指纹 d1514a48（8 变更源全自产回声，零外部新输入）；静默窗口 21:00-08:00 结束",
+  "summary": "08:00 夜间汇总（11h）：本批零代码变更/零控制翻转/零新派单。大包 4acf689f INFER 模型段持续约545min 升级条件未命中不 kill/retry；flat 三提交 PENDING_INPUT 等串行释放 14_42_48 维持 NOT_RUN；8 包 6 DONE+1 RUNNING+空包拒绝面；NAS 71%/8 容器 Up/health ok。上报两项：dup RETRY 肇事身份=开发机 192.168.2.132 外部人工（待用户核实不新开任务）；C obs56 event JSON 落盘缺失（canonical 行为准不补造不返修）。强审 REVOKED 近60min 0/5 在途0。",
+  "evidence": "sessions/COORDINATOR.md 08:06 条目（2658 -> 2659 行）；C obs59 08:0x、TESTER 07:5x、coord 07:56 事件；strong_review.py status：authorization=REVOKED used_last_60_minutes=0 active_calls=[] last_call SUCCEEDED",
+  "next": "A 续 D4③（终态后 409 核+绑定+回执）；C 续观察+完成信号申报；TESTER 续独立验收+TEST_REPORT_PENDING；B IDLE；5min observer 接续，白天 20 分钟报告。",
+  "quiet_hours_note": "08:00 静默窗口结束，本事件随 final 投递 08:00 全角色汇总。"
+}

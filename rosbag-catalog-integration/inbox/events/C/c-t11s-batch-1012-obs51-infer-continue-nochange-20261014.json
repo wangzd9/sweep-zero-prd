@@ -1,0 +1,14 @@
+{
+  "event_id": "c-t11s-batch-1012-obs51-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T06:50:00+08:00",
+  "recorded_at": "2026-10-14T06:52:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs50（06:45-06:46）后新一轮：prerun 06:48:53 指纹 dae8b141 触发源=sessions/C.md（obs50 自产记账）；ACK 21:07:41 在案不重复领取，恢复交接重申仅按本批动作接续",
+  "summary": "C 第51轮只读观察（处理机 06:49-06:50 实测）：与 obs50 零状态变化，scene-4acf689f（16_02_03 正式链）仍 SCENE_RUNNING attempt=1 无升级条件命中，INFER 模型段持续活跃（大包跨夜不 kill/retry）。C 全程只读（ssh curl 8180/8767、docker top/exec 只读、llm-server 读 vllm log、df/uptime），未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "处理机 06:49-06:50 只读实测：8180 scene-4acf689f9a6a473da1fa2f2efc70 status=SCENE_RUNNING attempt=1 error_message 空 lease_expires_at 06:51:58 续租活跃 lease_owner=platform-local frozen_at 23:05:30 八步全 QUEUED；8767/health ok active_runs=[4acf689f ACCEPTED pid1]；proxy 宿主 pid 3495931 CPU 12.6% TIME 01:19:20（obs50 01:19:16，+4s 持续非零）ELAPSED 10:27:47 未重启；容器 /proc/1/net/tcp ESTAB 6 条含 192.168.2.45:8002 VLM 通道（1F42 与 obs50 同端口）；work 树 checkpoint.json find -newermt 15min=0 零新写（mtime 未翻）；llm-server vllm log 06:49:57-06:50:17 三点采样 Running 2-3 reqs、Waiting 全 0、prefix cache 92.5%、MM cache 88.6%、gen 吞吐 75.2-154.1 tok/s=推理活跃续证；NAS 98T/70T/29T 71% 不变、load 0.33/0.37/0.38 低位、up 5 天 21:09",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按 ruling-4acf：heartbeat 4 连败/FAILED/VLM Waiting 持续积压且 proxy 无 ESTAB；③ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-batch1012-wake2330-duprun-ruling-2338-20261013",
+  "occurred_at": "2026-10-13T23:38:00+08:00",
+  "recorded_at": "2026-10-13T23:50:57+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "RULING",
+  "summary": "23:30唤醒（指纹9ccad03）消费 A 23:2x 回执 a-attempt-1.md：A 已删 13dc398c、正式重提交 a65a25a7(14_42_48)/87dfebaa(16_37_47) HTTP 201、24d60fee(16_02_03) 23:05 已 SCHEDULED 绑定 scene-4acf689f 且 source_metadata 实测完整，并申报 2210 裁决三处前提失效（dup run 22:53:02 自动 RETRY attempt-2 重入其一 SCENE_RUNNING）。落裁决 ruling-duprun-2338：D1 24d60fee 保留（2210 清除指令作废）；D2 A 按正式 cancel 端点处置 14_42_48 dup（无端点自然收敛，SUCCESS=重复烧模型实证即报）；D3 另两 dup 不 kill 自然收敛；D4 时序=dup 全终态→删 3 date-grouped submission→核 flat 409 释放→删 NAS ready/spray/20261012；D5 C 只读归因 RETRY 发起方；D6 A 补 16_33_10 拒绝痕迹入台账。四角色指针已派（resume-ruling-2338/ruling-2338-observation/ruling-2338-verify），BATCH-STATUS 逐包表+角色占用同步。",
+  "evidence": "receipts/TASK-11S-BATCH-1012/a-attempt-1.md(23:28); inbox/coordinator/SPRAY-BATCH-1012-20261013/ruling-duprun-2338.md; test-receipts/TASK-11S-BATCH-1012/attempt-1.md 23:0x 段; snapshot operations finalbag SUCCEEDED; recovery evidence /home/wang/.hermes/cache/scratch/coord-2331-recovery-evidence.txt",
+  "next": "5min observer 接续：A D2 cancel/收敛 + D4 时序推进 + D6 落账；C D5 RETRY 归因事件；TESTER 按 2338 第四节增量（16_02_03 scene-4acf689f SCENE_DONE 后八步/边界/reconcile + dup 面 + 409 释放对账）；BATCH-STATUS 随实质移动同步；大包跨夜不 kill/retry；夜间静默不群报，08:00 汇总"
+}

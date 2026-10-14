@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-0407-infer-continue-quiet-20261014",
+  "occurred_at": "2026-10-14T04:10:06+08:00",
+  "recorded_at": "2026-10-14T04:10:06+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "04:07 静默期增量只读巡检：4acf689f INFER 持续活跃（VLM Running 3-4/Waiting 0/POST 200 连发/prefix 93.1-93.2%/proxy volcsw +24/12s），八步全 QUEUED ~301min 完成信号未到，无升级条件命中，维持不 kill/retry；flat 三提交 PENDING_INPUT 等 A D4③；scan_job 4021 空包拒绝周期持续；PASS 基线不变",
+  "evidence": "pipeline_run scene-4acf689f SCENE_RUNNING attempt1 heartbeat=04:06:48; step_run 八步全 QUEUED started_at=NULL; ingest_submission 8 行不变（flat 三 PENDING_INPUT source_id=NULL）; scan_job 4021 04:05:44 SUCCESS {dirs:3 bags:1 failed:2}; 8767 health=ok active_runs=[4acf689f ACCEPTED]; proxy 3495931 volcsw 71849→71873（12s）RSS 18213940kB S; VLM 04:06:56-04:07:06 Running 3-4/Waiting 0 prefix 93.1-93.2% POST 200 连发",
+  "next": "继续等 4acf689f 模型段完成信号跨夜继续；SCENE_DONE 后核 16_02_03 正式全链（跨DB3边界/产物/两次reconcile）；A flat 绑定行出现后核 14_42_48 正式全链（0038口径）；全批齐后 TEST_REPORT_PENDING"
+}

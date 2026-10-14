@@ -1,0 +1,13 @@
+{
+  "event_id": "c-t11s-batch-1012-obs14-20261014",
+  "occurred_at": "2026-10-14T00:19:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "第14轮（00:13:53 prerun 指纹 7be6e05e，changed_sources=BATCH-STATUS.md 协调者刷新（00:13:55 mtime）+恢复交接入口重申；ACK 21:07:41 在案不重复领取；接续 obs13『next』五项观察面）",
+  "summary": "① **scene-24ab78bbc4254cf3820daa8c67fa（dup 16_58_28）终态=SCENE_DONE NOT_APPLICABLE 00:07:46**：spray outcome error_detail=缺 /iv_packets_front_mid 与 /iv_points_front_mid_transformed（同 eb4397c3 口径，与 B 定性吻合）、零模型、无伪切片（slices/.staging/ 实测四目录无 24ab78bb）、proxy 8767 active_runs=[] lease 已释放。**D4 解锁条件（3 dup 全终态）现 3/3 达成**：a4824f1c SUCCESS + eb4397c3 NOT_APPLICABLE + 24ab78bb NOT_APPLICABLE，供协调者推进 date-grouped 清理时序（删 3 date-grouped submission→核 A flat 409 释放→删 NAS ready/spray/20261012/），A 面跟踪 C 只核账。② **串行推进**：scene-4acf689f9a6a473da1fa2f2efc70（16_02_03 正式链，source 91FFEEC1…）现 SCENE_RUNNING，lease_owner=platform-local、heartbeat 00:16:27 续租活跃（00:18:27 到期窗口内）、config frozen_at 23:05:30；跨 DB3 大包串行中，跨夜继续不 kill/retry。③ **dup 14_42_48 第二份切片顶层发布确认**：slices/test/spray/ 顶层现 6 发布切片目录=051768B1(16_00_13 正式)/615A4A7B(15_58_23 复用)/FFDEE943(14_42_48)×4（含 .staging/scene-a4824f1c 23:48 移入的第二份产物）；保留现场 C 不删不并，处置口径在 TESTER/协调者。④ 资源面：NAS 98T/70T/29T 71%、load 2.44/1.87/1.46（大包运行抬升）、8767 ok、incoming/spray 仅 16_33_10 空包（正式拒绝痕迹仍未见，A 面 D6 处置）。C 全程只读（ssh curl 8180/8767、find/ls/df/uptime），未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "处理机 00:16-00:18 只读实测：8180 pipeline-runs?limit=200 七 scene run=五 SCENE_DONE（c4a88c07/604c0896/bc8c1d1c/a4824f1c/eb4397c3）+24ab78bb SCENE_DONE+4acf689f SCENE_RUNNING；scene-24ab78bb 详情=pipeline_config_snapshot.scene_outcomes.spray outcome NOT_APPLICABLE recorded_at 2026-10-14T00:07:46.422377、auto_retry_count=0；scene-4acf689f 详情=SCENE_RUNNING lease_owner platform-local heartbeat_at 2026-10-14T00:16:27 lease_expires_at 00:18:27 source_id 91FFEEC14C6243C49A81C75AB5 frozen_at 2026-10-13T23:05:30；8767 /health={status:ok, active_runs:[4acf689f ACCEPTED]→00:17 复核 active_runs=[]（24ab78bb 已终态，4acf689f 由后端持租）}；slices/.staging/ ls 四目录（nas-sqlite-probe/604c0896/a4824f1c/c4a88c07）无 24ab78bb/eb4397c3；slices/test/spray/ 顶层 6 目录（FFDEE943×4 均 23:54）；df //192.168.2.77/public=98T 70T 29T 71%；uptime load 2.44/1.87/1.46；incoming/spray=rosbag2_2026_10_12-16_33_10（空包）",
+  "next": "接续只读观察：① scene-4acf689f（16_02_03 正式链）SCENE_RUNNING→终态（跨 DB3 大包，按 run 核 checkpoint/续租区分 adapter 长阶段，不因超窗 kill/retry）；② 协调者依 D4 推进 date-grouped 清理后核 A flat 三提交（a65a25a7/87dfebaa/518089ed）409 释放与绑定（A 面 C 只跟踪）；③ 16_33_10 空包正式拒绝痕迹落台账（A 面 D6）同步核账；④ dup 14_42_48 第二份切片保留现场维持，待 TESTER/协调者处置口径。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

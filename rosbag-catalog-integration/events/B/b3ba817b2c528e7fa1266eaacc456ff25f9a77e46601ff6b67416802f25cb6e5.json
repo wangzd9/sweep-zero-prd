@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t06b-merged-74ba3bf-waiting-test-20261010-1719",
+  "occurred_at": "2026-10-10T17:20:30+08:00",
+  "recorded_at": "2026-10-10T17:20:30+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-3",
+  "status": "MERGED_WAITING_TEST",
+  "summary": "巡检核实：协调者 17:12-17:13 六笔 --no-ff 合入 main 74ba3bf（06B 侧 c67600d+a07c181+9325155+86b2cc1，03B 侧 e5d356f f088c2b+c285e2e），origin 已推；全量 823 passed（17:14 后台日志）；本侧转 WAITING_TEST，等 TESTER MySQL 终测派单与协调者验收",
+  "evidence": "git log main 74ba3bf/e5d356f; /home/wang/.hermes/cache/scratch/main-74ba3bf-full.log; receipts/TASK-06B/attempt-1-r2-rework-3.md",
+  "next": "等 TESTER 派单（R2-05 交错+R2-01/02/03 真实迁移+车辆路径逃逸断言）与协调者验收转 DONE"
+}

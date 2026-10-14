@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-032953-nochange",
+  "occurred_at": "2026-10-13T03:32:58+08:00",
+  "recorded_at": "2026-10-13T03:32:58+08:00",
+  "role": "TESTER",
+  "task": "IDLE-POLL",
+  "attempt": "1",
+  "status": "NO_CHANGE",
+  "summary": "空闲待命：03:25 后零 TESTER 新增派单/回执；07B R3 4baf79f 与 16A/16B 未合入（origin/main 502bf8e 不变）；ocr pid 1085908 属 16A v2 面不接管；无 TESTER 业务进程",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/sessions/TESTER.md",
+  "next": "继续 5 分钟巡检；07B post-r3/16D 派单收到即 ACK 固定快照开工"
+}

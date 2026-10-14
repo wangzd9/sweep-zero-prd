@@ -1,0 +1,14 @@
+{
+  "event_id": "b-poll-20261014-104800-fp-63b99bfa-batchstatus-1036-codex-repair-scope-a-stop-b-noaction-idle",
+  "occurred_at": "2026-10-14T10:48:00+08:00",
+  "recorded_at": "2026-10-14T10:48:00+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Consumed observer pending fp 63b99bfa (old fp f16c7ff0 ack returned STALE_OBSERVATION; read new pending per protocol). Changed sources: sessions/B.md = own 10:38 entry echo; BATCH-STATUS.md 10:36 resync supersedes the 10:38 entry's cited wording - new 'defect repair (10:07 Codex direct-repair scope, isolated tree fix/spray-progress-20261014 single-write)' section: three flat submissions a65a25a7/87dfebaa/518089ed re-registration now executed by Codex via official Backend API (reuse terminal runs, no new model execution, no direct prod DB write); A STOPPED from re-upload/resubmit/retry and resume-ruling-binding-1017 is STOPPED for A. Correction ledgered as new entry (10:38 entry body untouched). B zero action: attempt-1 stays DONE 21:12 (BATCH-STATUS 10:36 B row still DONE 21:12 unrefuted), find inbox/2号 -newermt 04:00 = 0 hits (no new dispatch/rework), B zero commit/zero model/zero copy/zero prod write (prod fixed 3c9c496).",
+  "evidence": "sessions/B.md (10:48 correction entry appended, 399->400 lines verified via wc + tail + od newline); BATCH-STATUS.md mtime 10:36:01 size 15827 (sections lines 36-52 read in full); find inbox/2号 zero hits since 04:00; ps = no B-side business processes; leases dir has no B.json",
+  "next": "IDLE_WAITING: await next coordinator dispatch or algorithm-issue minimal rework order; 11:00 phase summary uses corrected wording (A binding-resume order STOPPED, Codex isolated-tree single-write repair surface).",
+  "source": "inbox/events/B/b-poll-20261014-104800-fp-63b99bfa-batchstatus-1036-codex-repair-scope-a-stop-b-noaction-idle.json",
+  "source_mtime": "2026-10-14T10:48:00+08:00"
+}

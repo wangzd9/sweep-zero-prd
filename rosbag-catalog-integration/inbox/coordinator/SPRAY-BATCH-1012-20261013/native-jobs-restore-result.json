@@ -1,0 +1,94 @@
+{
+  "at": "2026-10-13T21:03:54.267244+08:00",
+  "roles": {
+    "COORDINATOR": {
+      "poll": "14ae4556629a",
+      "enabled": true,
+      "reports": [
+        {
+          "id": "99bb6c6cacc6",
+          "enabled": true
+        },
+        {
+          "id": "fd8d7006309c",
+          "enabled": true
+        }
+      ],
+      "wake": {
+        "executed": true,
+        "execution_skipped": null,
+        "delegation_id": null,
+        "success": true,
+        "error": null
+      }
+    },
+    "A": {
+      "poll": "d5cb80cf2fc5",
+      "enabled": true,
+      "reports": [
+        {
+          "id": "169849556cc2",
+          "enabled": true
+        }
+      ],
+      "wake": {
+        "executed": false,
+        "execution_skipped": "Job is already being fired by the scheduler; not run again.",
+        "delegation_id": null,
+        "success": true,
+        "error": null
+      }
+    },
+    "B": {
+      "poll": "6f7471d8747c",
+      "enabled": true,
+      "reports": [
+        {
+          "id": "7c1cf5029635",
+          "enabled": true
+        }
+      ],
+      "wake": {
+        "executed": false,
+        "execution_skipped": "Job is already being fired by the scheduler; not run again.",
+        "delegation_id": null,
+        "success": true,
+        "error": null
+      }
+    },
+    "C": {
+      "poll": "f01517c16f2f",
+      "enabled": true,
+      "reports": [
+        {
+          "id": "b99cc17222c3",
+          "enabled": true
+        }
+      ],
+      "wake": {
+        "executed": true,
+        "execution_skipped": null,
+        "delegation_id": null,
+        "success": true,
+        "error": null
+      }
+    },
+    "TESTER": {
+      "poll": "167580c0500b",
+      "enabled": true,
+      "reports": [
+        {
+          "id": "b41450f1df3c",
+          "enabled": true
+        }
+      ],
+      "wake": {
+        "executed": true,
+        "execution_skipped": null,
+        "delegation_id": null,
+        "success": true,
+        "error": null
+      }
+    }
+  }
+}

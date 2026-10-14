@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-165953-1700-notice-consumed",
+  "occurred_at": "2026-10-13T17:07:30+08:00",
+  "recorded_at": "2026-10-13T17:07:30+08:00",
+  "role": "TESTER",
+  "task": "TASK-12S-BC-freeze",
+  "attempt": "1",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "巡检消费两份 TESTER 通知：①first-bag-runtime-window-1700.md（17:01）首包窗口勘误=4.38s 短包可做功能首包但不申报完整 15s 窗口质量、非空入库需真实命中+可读产物、固定 SHA 解码/渲染证据直接复用（本角色 16:5x 探针 1184/44 计入复用池）；②docker-home-migration-1649.md（16:54 恢复）镜像 ID e3fe73534ad8 维持、可继续真实探针。r167 对账：16B r2 交付冻结 e152465 机械核验全绿、增量 OCR run 4492b7f6 在途→强审增量复审（授权剩 4/5）→TESTER 收口（r1 口径）→合入；12S-C B 面 wiring 证据对 92dcb52 快照有效，r2 改 proxy 后受影响项增量复验。均无新 TESTER 派单，不预占不启动",
+  "evidence": "inbox/TESTER/TASK-12S-BC-freeze/first-bag-runtime-window-1700.md; inbox/TESTER/TASK-12S-BC-freeze/docker-home-migration-1649.md",
+  "next": "等 16B r2 OCR+强审收口后 TESTER 收口派单（r1 口径）+ s9_head 冻结后增量复验（复用 16:5x 探针独立计数）+ 12S-C 受影响项 r2 合入后增量复验"
+}

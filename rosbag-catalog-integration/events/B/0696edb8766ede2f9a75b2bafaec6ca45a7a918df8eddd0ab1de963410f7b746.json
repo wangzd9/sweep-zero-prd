@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-045253-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T04:54:31+08:00",
+  "recorded_at": "2026-10-12T04:54:31+08:00",
+  "role": "B",
+  "task": "P0-CLOSED-IDLE",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "TASK-10 DONE 收口后 P0 停止派发，04:47 巡检后零业务变化，仅协调者 HANDOFF 空转检查点",
+  "evidence": "main 453da0c 双核；wt-04a-t10d3 HEAD 0943885 冻结；inbox/2号 01:20 后零新增",
+  "next": "维持 IDLE_WAITING，按需巡检与事件接续；TASK-11 生产门禁未放行不自行启动"
+}

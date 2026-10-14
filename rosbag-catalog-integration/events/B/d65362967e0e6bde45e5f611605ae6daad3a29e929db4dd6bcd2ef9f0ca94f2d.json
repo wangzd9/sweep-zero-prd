@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261014-011253-selfartifact-b-noaction-idle-quiet",
+  "occurred_at": "2026-10-14T01:15:30+08:00",
+  "recorded_at": "2026-10-14T01:16:06+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Consumed prerun fp ddf804c9 (single changed source sessions/B.md = self 01:13 entry append). find inbox/2号 + business dirs since 01:04: zero new (no dispatch/rework/issue-ID); BATCH-STATUS 00:59:51 already consumed 01:04. B DONE 21:12 input-applicability ruling (4 packet/3 NOT_APPLICABLE/1 empty) stands unrefuted. Zero commit/model/copy/prod-write; no B processes; quiet hours 21:00-08:00 no proactive message; 08:00 digest includes C actor-identity escalation.",
+  "evidence": "sessions/B.md 01:15 entry (373->374 lines, newline-verified, grep 011253-selfartifact=1); find 01:04 since zero business files; ps no B business processes",
+  "next": "IDLE_WAITING: await next coordinator dispatch; quiet until 08:00 digest."
+}

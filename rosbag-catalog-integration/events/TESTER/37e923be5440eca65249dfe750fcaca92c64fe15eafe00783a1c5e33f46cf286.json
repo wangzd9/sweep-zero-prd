@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-000x-d2dup-success-doublewrite-20261014",
+  "occurred_at": "2026-10-14T00:09:08+08:00",
+  "recorded_at": "2026-10-14T00:09:08+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "00:0x 跨夜增量只读实测：D2 dup scene-a4824f1c(14_42_48) attempt-2 SCENE_DONE SUCCESS(23:54:41)已发布4子包(~202MB/spray-v1)=双写事件产物(正式链a65a25a7仍PENDING_INPUT未执行,14_42_48正式全链NOT_RUN)；D3 dup scene-eb4397c3(16_37_47) SCENE_DONE NOT_APPLICABLE(00:01:30)子包0无伪切片PASS；scene-24ab78bb(16_58_28)取执行面SCENE_RUNNING(00:04)终态待核；D4未达成:A flat a65a25a7/87dfebaa/518089ed仍PENDING_INPUT未绑定,3 date-grouped submission未删,scanner409持续,16_02_03合法链4acf689f被dup占用延后；PASS基线不变。",
+  "evidence": "test-receipts/TASK-11S-BATCH-1012/attempt-1.md(00:0x段); 生产MySQL pipeline_run/pipeline_event/step_run/ingest_submission 00:0x实测; NAS slices/test/spray FFDEE943=4子包/9C9456B6=0/205E5054=0/051768B1=1/615A4A7B=1; 8767 proxy active_runs; scanner日志409持续",
+  "next": "24ab78bb SCENE_DONE核NOT_APPLICABLE+无伪切片; A删3 date-grouped submission后核A flat409释放+逐包终态/产物/两次reconcile(14_42_48正式全链); 4acf689f SCENE_DONE核16_02_03全链; dup双写产物处置等协调者裁决; 全批齐后TEST_REPORT_PENDING"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "a3bee4c0bd24f85cc26591a7e3d327d6c224acba9b5031b61f07c0d20a4a3f5a",
+  "occurred_at": "2026-10-13T13:09:31+08:00",
+  "recorded_at": "2026-10-13T13:12:00+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "OCR第9轮 40e90fea-ed5c-425c-8c42-3e4f59e70827 于13:09:31自然收口 rc=0（progress: DONE rc=0 via DIRECT max-tokens=0；provider已恢复18002；进程1810468/1810491/1810499退出）。jsonl session_end: terminal_state=complete, resolved c2018dd..0208a737, coverage selected=completed=scripts/scene_host_proxy.py, failed/waived/reused=[]。7条accepted code_comment（全在scene_host_proxy.py）：F1 high TOCTOU（POST /run丢弃try_reserve返回值可双写）/ F2 high 陈旧状态（post RUNNING后cur未刷新致终态post被跳过，步骤滞留RUNNING）/ F3 medium 原子写缺fsync / F4 low run_detail步骤未按attempt过滤 / F5 high 幂等键缺attempt（重试同终态error_message不同→409，run滞留SCENE_RUNNING）/ F6 medium 参数冻结缺口（raw=None默认重推config_hash vs 后端提交参数冻结值→REGISTER CONFIG_MISMATCH）/ F7 high RESOLVING except过窄（CapabilityError/ValueError未捕获→worker死、ACTIVE残留、同run_id永久409）。证据固化: scratch/t16_ocr/findings_r9.json + extract_findings4.py + b2_r144_maxtok9.log/progress + session jsonl原路径。16B冻结0208a73维持REVIEW_PENDING未合入；按ocr-contract-fix 规则 rc=0/coverage_complete 仅为诊断口径不自动PASS，未启动OCR未动代码。",
+  "evidence": "b2_r144_maxtok9_progress.txt 13:09:31 DONE rc=0; ps aux 进程已退; jsonl 276行 session_end complete; findings_r9.json 7条; sessions/C.md 541行追加条目",
+  "next": "等协调者按rc=0路径将7 findings合并为最小返修单派C；届时ACK新attempt、最小修复+自测后交付冻结；rc=1路径未触发（第9轮未连败）"
+}

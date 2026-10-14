@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-110053-nochange",
+  "occurred_at": "2026-10-11T11:03:04+08:00",
+  "recorded_at": "2026-10-11T11:03:04+08:00",
+  "role": "COORDINATOR",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "11:00 巡检：零业务变化，强复审 R2I-20261010-06 仍等用户手动触发，06 聚合放行门禁不变",
+  "evidence": "sessions/COORDINATOR.md",
+  "next": "等用户手动触发强复审"
+}

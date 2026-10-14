@@ -1,0 +1,31 @@
+[2026-10-10 16:48:18] B9 start pid=480324 commit=c285e2e
+[2026-10-10 16:48:18] B9 holding ocr.lock, launching ocr
+[ocr] Summary: 1 file(s) reviewed, 0 comment(s), ~0 token(s) used, 2m3s elapsed
+[ocr] Session: cdba7e7f-79cb-441b-bc56-bd90d96d941a
+Review failed (cancelled): 0 finding(s); 1 of 1 selected item(s) failed.
+
+LLM retry report summary: 1 of 1 request affected -- 1 request cancelled
+
+Review planning (1 request):
+- app/services/scene_schedule_consumer.py: cancelled
+
+Per-attempt detail: --format json (retry_report).
+[ocr] usage on failure: 1 file(s), 0 input + 0 output = 0 total tokens, 0 tool calls, elapsed 2m3s, budget_exceeded=false, session cdba7e7f-79cb-441b-bc56-bd90d96d941a
+[ocr] Session: cdba7e7f-79cb-441b-bc56-bd90d96d941a (retry with: --resume cdba7e7f-79cb-441b-bc56-bd90d96d941a)
+Error: review failed: context canceled
+
+[2026-10-10 16:57:47] B9-r2 start pid=493122 commit=c285e2e (r1 cdba7e7f failed: context canceled @16:50)
+[2026-10-10 16:57:47] B9-r2 holding ocr.lock, launching ocr
+[ocr] Summary: 1 file(s) reviewed, 0 comment(s), ~0 token(s) used, 1m26s elapsed
+[ocr] Session: 45c6b960-8704-4dce-aff4-6fca7daad90a
+Review failed (cancelled): 0 finding(s); 1 of 1 selected item(s) failed.
+
+LLM retry report summary: 1 of 1 request affected -- 1 request cancelled
+
+Review planning (1 request):
+- app/services/scene_schedule_consumer.py: cancelled
+
+Per-attempt detail: --format json (retry_report).
+[ocr] usage on failure: 1 file(s), 0 input + 0 output = 0 total tokens, 0 tool calls, elapsed 1m26s, budget_exceeded=false, session 45c6b960-8704-4dce-aff4-6fca7daad90a
+[ocr] Session: 45c6b960-8704-4dce-aff4-6fca7daad90a (retry with: --resume 45c6b960-8704-4dce-aff4-6fca7daad90a)
+Error: review failed: context canceled

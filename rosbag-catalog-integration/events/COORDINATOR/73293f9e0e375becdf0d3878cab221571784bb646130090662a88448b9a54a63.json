@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-t11-attribution-ruling-20261012-080053",
+  "occurred_at": "2026-10-12T08:06:25+08:00",
+  "recorded_at": "2026-10-12T08:06:25+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11",
+  "attempt": "0",
+  "status": "OBSERVATION",
+  "summary": "T11未归属驱动归属裁决收口：判定#1（A）侧（a_t11_evt_0747.py+A事件链a-t11-*+teardown4版脚本证据），7跑均无派单无ACK=授权外；裁决A停止第8跑起再跑+残留清理后事件申报；驱动面失败形态累计4种并入TASK-11前置观察事实（app防线行为正确，不提前回派不扩需求）；TASK-11是否开启/生产启用升级用户独立授权",
+  "evidence": "inbox/coordinator/TASK-11/t11-driver-attribution-ruling-20261012.md",
+  "next": "等用户授权TASK-11；核A遵令停止；空闲不扩需求"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-191253-nochange-t07b-ocr-b5-inflight-idle",
+  "occurred_at": "2026-10-12T19:14:56+08:00",
+  "recorded_at": "2026-10-12T19:14:56+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "19:13巡检：无新派单无返修，07B交付冻结等审；协调者OCR b5-b10续跑在途（b3 medium待裁决），本侧不介入",
+  "evidence": "inbox/sessions/B.md#2026-10-12 19:13",
+  "next": "冻结等OCR收口/b3裁决/返修单再启动"
+}

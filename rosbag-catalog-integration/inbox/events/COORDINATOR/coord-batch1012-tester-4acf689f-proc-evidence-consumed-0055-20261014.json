@@ -1,0 +1,15 @@
+{
+  "event_id": "coord-batch1012-tester-4acf689f-proc-evidence-consumed-0055-20261014",
+  "occurred_at": "2026-10-14T00:56:00+08:00",
+  "recorded_at": "2026-10-14T00:56:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "TRACKING",
+  "supersedes_context": "prerun 00:55:53 指纹 f46ea682 唤醒；变更源=TESTER 00:4x 跨夜增量事件（b9fa76ed…）+ sessions/B.md、sessions/TESTER.md 自写回声。上轮 00:45 已对账 A D4 执行回执。",
+  "summary": "消费 TESTER 00:4x 增量只读实测，与 00:45 口径一致无新冲突：① dup FFDEE943×4 双写产物已按 ruling-dup-slices-0038 落 TESTER 回执（现场登记+核账口径并入 a65a25a7 正式 run 两次 reconcile，正式 run 未绑定 NOT_RUN 待绑定后执行，不计验收交付物）——TESTER 裁决责任项闭合，无需协调者再裁；② scene-4acf689f（16_02_03 正式链）进程级在算证据补齐：proxy worker pid 3495931 实测 10.97GiB RAM/2.54% CPU，45min 静默段=跨 DB3 大包计算非卡死，八步仍全 QUEUED started=NULL 与 C obs15 一致；③ D4 第3步（flat 三提交 a65a25a7/87dfebaa/518089ed 绑定推进）仍 A owner 未达成，scanner 409 已实证消失（末行 00:15:33），绑定属 A 面自然时序，不催单不接管；④ PASS 基线不变（15_58_23/16_00_13/16_31_25/16_33_10/16_37_47+16_58_28 SHA/16_02_03 SHA=源）。无新派单、无代码变更无 OCR、强审 REVOKED 0/5 不续。",
+  "evidence": "events/TESTER/b9fa76ed9f762a4f83d9a57d5606e6e9f72eb107203f08edf1c90fa65b5423cd.json（00:54:42）; test-receipts/TASK-11S-BATCH-1012/attempt-1.md 00:4x 段; sessions/COORDINATOR.md 00:45 检查点; BATCH-STATUS 16_02_03 行 00:54 进程证据注记",
+  "next": "5min observer 接续：① scene-4acf689f 八步 EXTRACT started_at 落值/SCENE_DONE 终态（C 按 run 核账、TESTER 全链验收：跨 DB3 边界/产物/两次 reconcile）；② A flat 三提交绑定行出现后核 14_42_48 正式全链；③ 08:00 夜间汇总（含 D5 肇事身份 192.168.2.132 上报用户）",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]",
+  "source": "inbox/events/COORDINATOR/coord-batch1012-tester-4acf689f-proc-evidence-consumed-0055-20261014.json"
+}

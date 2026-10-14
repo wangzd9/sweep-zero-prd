@@ -1,0 +1,351 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-13T11:00:53.731287+08:00",
+  "role": "TESTER",
+  "kind": "phase",
+  "start": "2026-10-13T08:00:00+08:00",
+  "end": "2026-10-13T11:00:00+08:00",
+  "artifact": "inbox/control/runtime/digests/2026-10-13/TESTER-phase-1100.json",
+  "roles": [
+    {
+      "role": "TESTER",
+      "start": "2026-10-13T08:00:00+08:00",
+      "end": "2026-10-13T11:00:00+08:00",
+      "totals_seconds": {
+        "working": 600.0,
+        "waiting": 3141.0,
+        "blocked": 0,
+        "idle": 0,
+        "unknown": 7059.0
+      },
+      "segments": [
+        {
+          "start": "2026-10-13T08:00:00+08:00",
+          "end": "2026-10-13T08:02:53+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T08:02:53+08:00",
+          "end": "2026-10-13T08:12:53+08:00",
+          "category": "unknown",
+          "task": "TASK-07B",
+          "attempt": "1",
+          "summary": "测试者 ACK 07B-post-r 合入后独立验证派单（target 62620a3，SR-05 真 MySQL 双连接 200/409 + R4 迁移面双库探针 + 定向回归）",
+          "sources": [
+            "events/TESTER/82be0a2a151128f79d17f5f0bb5a0bb5be69c51f7f31f0bc2c44cb23b647aa99.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T08:12:53+08:00",
+          "end": "2026-10-13T08:22:37+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T08:22:37+08:00",
+          "end": "2026-10-13T08:32:37+08:00",
+          "category": "waiting",
+          "task": "TASK-07B",
+          "attempt": "1",
+          "summary": "07B-post-r 独立验证 PASS：SR-05 真 MySQL 双连接 200/409（版本+1/审计与evidence各1行）、R4 迁移正常态往返 RC=0 + 表缺失态双库 downgrade 不抛异常、定向回归 12 passed、页面实测 6 项全过；交付 attempt-1 待协调者合入裁决",
+          "sources": [
+            "events/TESTER/dc77fc0f0a96ffaebe75c38f64489a7eaae008fefdeefd8d290e10f79d03bdf2.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T08:32:37+08:00",
+          "end": "2026-10-13T08:33:16+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T08:33:16+08:00",
+          "end": "2026-10-13T08:43:16+08:00",
+          "category": "waiting",
+          "task": "TASK-07B",
+          "attempt": "post-r",
+          "summary": "r136 巡检：origin/main 4b9f30a 实测合入 07B 整链（TESTER post-r PASS 采信），TESTER 面零新派单，残留 0，保持待命",
+          "sources": [
+            "events/TESTER/af715ac798036ac8d0b410bc57356a933f1ae423b04df276aaba01c1ac833953.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T08:43:16+08:00",
+          "end": "2026-10-13T09:34:08+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T09:34:08+08:00",
+          "end": "2026-10-13T09:53:53+08:00",
+          "category": "waiting",
+          "task": "TASK-16A",
+          "attempt": "t16a-post-merge-verify",
+          "summary": "16A post-merge 独立验证 PASS 交付：真 MySQL 8.4.11 全链迁移三趟 RC=0+单头+回填取证；SQLite 56+12=68 passed；test_web 单跑失败按 r138 口径申报非 16A 回归；容器 0 残留",
+          "sources": [
+            "events/TESTER/7ef61e6b44ffb4b65e61dfec82845831a88c7e19ce93ea8a1618513e5f76f2a1.json",
+            "events/TESTER/d6b82657daf780ea568820e4344a809a0d9355b3de2ad61a2c2f8f81c7bb981a.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T09:53:53+08:00",
+          "end": "2026-10-13T10:33:33+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T10:33:33+08:00",
+          "end": "2026-10-13T10:43:33+08:00",
+          "category": "working",
+          "task": "TASK-16C",
+          "attempt": "t16c-independent-verify",
+          "summary": "TESTER 领取 16C 独立验证：快照 5c80857（6fb42c4+单commit，diff 与 4b9f30a..ad37ae1 逐字节一致）独立核一致，9 项场景（页面/API/回归）取证开工；不触碰 16B worktree 与 ocr.lock",
+          "sources": [
+            "events/TESTER/f1eafba38f3bf27d36f4a996b7fc58662bb6646d72b9c9e98b0be52f3847ba46.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T10:43:33+08:00",
+          "end": "2026-10-13T10:47:24+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T10:47:24+08:00",
+          "end": "2026-10-13T11:00:00+08:00",
+          "category": "waiting",
+          "task": "TASK-16C",
+          "attempt": "t16c-independent-verify",
+          "summary": "TESTER 16C 独立验证 PASS 交付：快照 5c80857 独立核实；9 项场景取证全过（自包含 uvicorn 58 项探针 + 浏览器走查 + 集合路由 cursor/limit/422 + 八步详情 + 环境区 + 旧界面回归）；SQLite 全仓 898 passed 4 failed 均 base 既有 0 新增；资源 0 残留；不要求真 MySQL（本单无 DDL 仅 SELECT 谓词）",
+          "sources": [
+            "events/TESTER/fcd014e677b1210a676a76c62ee3d541cd13ac3d5298558d9060dadef41db8bc.json"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "event_id": "tester-t16a-t07b-closure-observed-20261013",
+          "occurred_at": "2026-10-13T09:43:53+08:00",
+          "recorded_at": "2026-10-13T09:43:53+08:00",
+          "role": "TESTER",
+          "task": "TASK-16A",
+          "attempt": "t16a-post-merge-verify",
+          "status": "CLOSED_DONE",
+          "summary": "TESTER 空闲待命：16A post-merge 验证 PASS 交付（09:34）被协调者 r139 裁决 DONE（main 6fb42c4，强审 NOT_REQUIRED）；07B post-r PASS（08:21）已由 r136 裁决整链 DONE（4b9f30a）对账完成；无在途 TESTER 任务，无残留容器/进程；16D 三前置未齐（16B 冻结等用户裁决、16C 开发中）",
+          "evidence": "inbox/coordinator/TASK-16A/t16a-post-merge-verify-acceptance-decision-20261013.md; inbox/coordinator/TASK-07B/07b-done-merge-decision-20261013.md",
+          "next": "空闲待命（2h 短报）；16D 联合验收或新测试派单即 ACK 开工",
+          "source": "events/TESTER/7ef61e6b44ffb4b65e61dfec82845831a88c7e19ce93ea8a1618513e5f76f2a1.json",
+          "source_mtime": "2026-10-13T09:44:39+08:00"
+        },
+        {
+          "event_id": "tester-t16a-post-merge-verify-pass-20261013",
+          "occurred_at": "2026-10-13T09:34:08+08:00",
+          "recorded_at": "2026-10-13T09:34:08+08:00",
+          "role": "TESTER",
+          "task": "TASK-16A",
+          "attempt": "t16a-post-merge-verify",
+          "status": "TEST_REPORT_PENDING",
+          "summary": "16A post-merge 独立验证 PASS 交付：真 MySQL 8.4.11 全链迁移三趟 RC=0+单头+回填取证；SQLite 56+12=68 passed；test_web 单跑失败按 r138 口径申报非 16A 回归；容器 0 残留",
+          "evidence": "test-receipts/TEST-TASK16A-post-merge/attempt-1.md",
+          "next": "待协调者裁决（PASS 即 16A DONE）",
+          "source": "events/TESTER/d6b82657daf780ea568820e4344a809a0d9355b3de2ad61a2c2f8f81c7bb981a.json",
+          "source_mtime": "2026-10-13T09:34:08+08:00"
+        },
+        {
+          "event_id": "tester-poll-20261013-082953-r136-07b-merged-no-new-order",
+          "occurred_at": "2026-10-13T08:33:16+08:00",
+          "recorded_at": "2026-10-13T08:33:16+08:00",
+          "role": "TESTER",
+          "task": "TASK-07B",
+          "attempt": "post-r",
+          "status": "TEST_REPORT_PENDING",
+          "summary": "r136 巡检：origin/main 4b9f30a 实测合入 07B 整链（TESTER post-r PASS 采信），TESTER 面零新派单，残留 0，保持待命",
+          "evidence": "test-receipts/TEST-TASK07B-post-r/attempt-1.md",
+          "next": "等协调者 16D 前验证/07C/16C 派单",
+          "source": "events/TESTER/af715ac798036ac8d0b410bc57356a933f1ae423b04df276aaba01c1ac833953.json",
+          "source_mtime": "2026-10-13T08:33:16+08:00"
+        },
+        {
+          "event_id": "tester-07b-post-r-report-pending-20261013",
+          "occurred_at": "2026-10-13T08:22:37+08:00",
+          "recorded_at": "2026-10-13T08:22:37+08:00",
+          "role": "TESTER",
+          "task": "TASK-07B",
+          "attempt": "1",
+          "status": "TEST_REPORT_PENDING",
+          "summary": "07B-post-r 独立验证 PASS：SR-05 真 MySQL 双连接 200/409（版本+1/审计与evidence各1行）、R4 迁移正常态往返 RC=0 + 表缺失态双库 downgrade 不抛异常、定向回归 12 passed、页面实测 6 项全过；交付 attempt-1 待协调者合入裁决",
+          "evidence": "test-receipts/TEST-TASK07B-post-r/attempt-1.md",
+          "next": "待协调者 07B 整链 --no-ff 合入（先于 16A rebase 双头）",
+          "source": "events/TESTER/dc77fc0f0a96ffaebe75c38f64489a7eaae008fefdeefd8d290e10f79d03bdf2.json",
+          "source_mtime": "2026-10-13T08:22:37+08:00"
+        },
+        {
+          "event_id": "tester-t16c-independent-verify-pass-20261013",
+          "occurred_at": "2026-10-13T10:47:24+08:00",
+          "recorded_at": "2026-10-13T10:47:24+08:00",
+          "role": "TESTER",
+          "task": "TASK-16C",
+          "attempt": "t16c-independent-verify",
+          "status": "TEST_REPORT_PENDING",
+          "summary": "TESTER 16C 独立验证 PASS 交付：快照 5c80857 独立核实；9 项场景取证全过（自包含 uvicorn 58 项探针 + 浏览器走查 + 集合路由 cursor/limit/422 + 八步详情 + 环境区 + 旧界面回归）；SQLite 全仓 898 passed 4 failed 均 base 既有 0 新增；资源 0 残留；不要求真 MySQL（本单无 DDL 仅 SELECT 谓词）",
+          "evidence": "test-receipts/TEST-TASK16C-independent/attempt-1.md",
+          "next": "TEST_REPORT_PENDING 待协调者推进 16C 串行 OCR 裁决与合入门禁",
+          "source": "events/TESTER/fcd014e677b1210a676a76c62ee3d541cd13ac3d5298558d9060dadef41db8bc.json",
+          "source_mtime": "2026-10-13T10:47:24+08:00"
+        },
+        {
+          "event_id": "tester-t16c-independent-verify-ack-20261013",
+          "occurred_at": "2026-10-13T10:33:33+08:00",
+          "recorded_at": "2026-10-13T10:33:33+08:00",
+          "role": "TESTER",
+          "task": "TASK-16C",
+          "attempt": "t16c-independent-verify",
+          "status": "RUNNING",
+          "summary": "TESTER 领取 16C 独立验证：快照 5c80857（6fb42c4+单commit，diff 与 4b9f30a..ad37ae1 逐字节一致）独立核一致，9 项场景（页面/API/回归）取证开工；不触碰 16B worktree 与 ocr.lock",
+          "evidence": "inbox/TESTER/TASK-16C/t16c-independent-verify-ack.md",
+          "next": "长验证在途：页面浏览器走查+集合路由 API 取证+SQLite 全仓回归 → test-receipts/TEST-TASK16C-independent/attempt-1.md TEST_REPORT_PENDING",
+          "source": "events/TESTER/f1eafba38f3bf27d36f4a996b7fc58662bb6646d72b9c9e98b0be52f3847ba46.json",
+          "source_mtime": "2026-10-13T10:33:33+08:00"
+        },
+        {
+          "event_id": "tester-07b-post-r-ack-20261013-075953",
+          "occurred_at": "2026-10-13T08:02:53+08:00",
+          "recorded_at": "2026-10-13T08:02:53+08:00",
+          "role": "TESTER",
+          "task": "TASK-07B",
+          "attempt": "1",
+          "status": "ACKED",
+          "summary": "测试者 ACK 07B-post-r 合入后独立验证派单（target 62620a3，SR-05 真 MySQL 双连接 200/409 + R4 迁移面双库探针 + 定向回归）",
+          "evidence": "inbox/TESTER/TASK-07B/post-r-ack.md",
+          "next": "独立验证开工（长任务留进程检查点后释放控制租约）",
+          "source": "events/TESTER/82be0a2a151128f79d17f5f0bb5a0bb5be69c51f7f31f0bc2c44cb23b647aa99.json",
+          "source_mtime": "2026-10-13T08:02:53+08:00"
+        }
+      ],
+      "delivery_records": [
+        {
+          "event_id": "tester-t16a-t07b-closure-observed-20261013",
+          "occurred_at": "2026-10-13T09:43:53+08:00",
+          "recorded_at": "2026-10-13T09:43:53+08:00",
+          "role": "TESTER",
+          "task": "TASK-16A",
+          "attempt": "t16a-post-merge-verify",
+          "status": "CLOSED_DONE",
+          "summary": "TESTER 空闲待命：16A post-merge 验证 PASS 交付（09:34）被协调者 r139 裁决 DONE（main 6fb42c4，强审 NOT_REQUIRED）；07B post-r PASS（08:21）已由 r136 裁决整链 DONE（4b9f30a）对账完成；无在途 TESTER 任务，无残留容器/进程；16D 三前置未齐（16B 冻结等用户裁决、16C 开发中）",
+          "evidence": "inbox/coordinator/TASK-16A/t16a-post-merge-verify-acceptance-decision-20261013.md; inbox/coordinator/TASK-07B/07b-done-merge-decision-20261013.md",
+          "next": "空闲待命（2h 短报）；16D 联合验收或新测试派单即 ACK 开工",
+          "source": "events/TESTER/7ef61e6b44ffb4b65e61dfec82845831a88c7e19ce93ea8a1618513e5f76f2a1.json",
+          "source_mtime": "2026-10-13T09:44:39+08:00"
+        }
+      ],
+      "unverified_sources": [
+        "events/TESTER/20261010-2302-attempt4-delivered.md: 时间或内容待核对",
+        "events/TESTER/20261011-1513-poll-strongmodel-inflight.md: 时间或内容待核对",
+        "events/TESTER/tester-poll-20261012-214953-nochange.json: 时间或内容待核对"
+      ]
+    }
+  ],
+  "current": {
+    "TESTER": {
+      "schema_version": 1,
+      "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+      "role": "TESTER",
+      "observed_at": "2026-10-13T11:00:53+08:00",
+      "control": "ACTIVE",
+      "confirmed_idle": false,
+      "classification_reasons": [
+        "assigned nonterminal task: TASK-07",
+        "assigned nonterminal task: TASK-16C",
+        "assigned nonterminal task: TASK-16D",
+        "unresolved or unclassified dispatch: inbox/TESTER/TASK-16C/t16c-independent-verify-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/TESTER/TASK-07B/post-r-dispatch.md"
+      ],
+      "tasks": [
+        {
+          "task": "TASK-07",
+          "state": "🏃",
+          "progress": "2号 / attempt-1（派单 `inbox/2号/TASK-08/attempt-1-dispatch.md`）",
+          "owner": "【r131 2026-10-13 07:14】B R4 ACK 开工（07:02，base `4ba … tempt-1-dispatch.md`，base `4b9f30a`，§8.4 口径，待 ACK）"
+        },
+        {
+          "task": "TASK-16C",
+          "state": "**REVIEW_PENDING**（r142 已交付冻结 rebase 接线  … ON+TESTER PASS 双证据齐 → DONE → 16D 前置 2/3）",
+          "progress": "场景八步详情、三视图/类型谓词、正式查询 API、旧界面兼容",
+          "owner": "**REVIEW_PENDING**（r142 已交付冻结 rebase 接线 head `5c80 … 零 CORRECTION+TESTER PASS 双证据齐 → DONE → 16D 前置 2/3）"
+        },
+        {
+          "task": "TASK-16D",
+          "state": "WAITING / TESTER 未领取",
+          "progress": "正式代理单包真实闭环、浏览器/API、故障/带宽/原包证据",
+          "owner": "WAITING / TESTER 未领取"
+        }
+      ],
+      "events": {
+        "TESTER": {
+          "event_id": "tester-t16c-independent-verify-pass-20261013",
+          "occurred_at": "2026-10-13T10:47:24+08:00",
+          "recorded_at": "2026-10-13T10:47:24+08:00",
+          "role": "TESTER",
+          "task": "TASK-16C",
+          "attempt": "t16c-independent-verify",
+          "status": "TEST_REPORT_PENDING",
+          "summary": "TESTER 16C 独立验证 PASS 交付：快照 5c80857 独立核实；9 项场景取证全过（自包含 uvicorn 58 项探针 + 浏览器走查 + 集合路由 cursor/limit/422 + 八步详情 + 环境区 + 旧界面回归）；SQLite 全仓 898 passed 4 failed 均 base 既有 0 新增；资源 0 残留；不要求真 MySQL（本单无 DDL 仅 SELECT 谓词）",
+          "evidence": "test-receipts/TEST-TASK16C-independent/attempt-1.md",
+          "next": "TEST_REPORT_PENDING 待协调者推进 16C 串行 OCR 裁决与合入门禁",
+          "source": "events/TESTER/fcd014e677b1210a676a76c62ee3d541cd13ac3d5298558d9060dadef41db8bc.json",
+          "source_mtime": "2026-10-13T10:47:24+08:00"
+        }
+      },
+      "dispatches": {
+        "TESTER": {
+          "role": "TESTER",
+          "source": "inbox/TESTER/TASK-16C/t16c-independent-verify-dispatch.md",
+          "status": "待核对",
+          "mtime": 1791858425.3848293,
+          "summary": "# TESTER 派单：TASK-16C 独立验证（2026-10-13 10:2x，协调者 r142） - **task/attempt**：TASK-16C / t16c-independent-verify（att … 8. **旧界面兼容回归**：bags 列表页原有筛选/分页不回归；`dataset_type` 旧书签可用；pipeline 详情非场景面板（A100 环境/文件日志）scene 不渲染。 9. **回归**：SQLi"
+        }
+      },
+      "processes": {
+        "TESTER": {
+          "state": "none"
+        }
+      },
+      "sources": {
+        "TODO.md": "2026-10-13T10:44:24+08:00"
+      },
+      "strong_review": null,
+      "fingerprint": "ba98748516db4fcae653aadf059fe97e6eb4e915f9f8b97c489d6e56d72319c2"
+    }
+  }
+}

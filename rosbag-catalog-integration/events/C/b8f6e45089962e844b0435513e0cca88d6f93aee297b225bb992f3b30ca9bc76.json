@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-054353-nochange-t16b-b2-split-inflight",
+  "occurred_at": "2026-10-13T05:46:39+08:00",
+  "recorded_at": "2026-10-13T05:46:39+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "NO_CHANGE",
+  "summary": "C巡检:无C新派单/返修;16B OCR b1 resume收口3findings全CONFIRMED; b2 resume rc=1后b2拆组fresh在途 pid1266766 05:40:34START 硬截止06:00-06:20; 16B冻结0208a73 合入门禁维持关闭",
+  "evidence": "sessions/C.md第508行; reviews/TASK-16/16A-16B-ocr-batches.md",
+  "next": "空闲待b2拆组收口后合并裁决"
+}

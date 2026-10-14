@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-174753-nochange-t07b-ocr-b1-inflight",
+  "occurred_at": "2026-10-12T17:53:41+08:00",
+  "recorded_at": "2026-10-12T17:53:41+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "T07B attempt-1 交付冻结等审；协调者 OCR T07B-b1 批（alembic 迁移文件）ps 实测在途；本侧无新派单/返修，IDLE_WAITING",
+  "evidence": "reviews/TASK-07B/attempt-1/ocr-batches.md",
+  "next": "等协调者 OCR b1-b10+契约批收口/机械核验/合入"
+}

@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "skill_version": "1.0.0",
+  "project_root": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+  "timezone": "Asia/Shanghai",
+  "control": "ACTIVE",
+  "runtime_script": "/home/wang/.codex/skills/complex-task-coordinator/scripts/role_runtime.py",
+  "migration": {
+    "started_at": "2026-10-10T14:19:08+08:00",
+    "backup_root": "/home/wang/.codex/skill-migrations/five-roles-20261010-140917",
+    "status": "ACTIVE",
+    "handover_verified_at": "2026-10-10T14:37:49+08:00"
+  },
+  "roles": {
+    "COORDINATOR": {
+      "skill": "complex-task-coordinator",
+      "chat_id": "oc_b64dc5bf34ec1edcc8cce92ffd56604b",
+      "chat_name": "协调者",
+      "poll_job_id": "14ae4556629a",
+      "report_job_id": "99bb6c6cacc6",
+      "session_file": "sessions/COORDINATOR.md",
+      "worktree": null,
+      "report_policy": "coordinator_day20m_morning08",
+      "idle_report_job_id": null,
+      "skill_version": "1.10.1",
+      "morning_report_job_id": "fd8d7006309c"
+    },
+    "A": {
+      "skill": "complex-task-executor",
+      "chat_id": "oc_a2b2bc6b8a261371ff713d1b2a2aff6c",
+      "chat_name": "执行者A（数据处理链路开发）",
+      "poll_job_id": "d5cb80cf2fc5",
+      "report_job_id": "169849556cc2",
+      "session_file": "sessions/A.md",
+      "worktree": "/home/wang/.local/state/rosbag-scene/wt-01",
+      "report_policy": "phase_11_15_18",
+      "idle_report_job_id": null,
+      "skill_version": "1.5.2",
+      "retired_idle_report_job_id": "2ebfb183de3a"
+    },
+    "B": {
+      "skill": "complex-task-executor",
+      "chat_id": "oc_113eed3b509e7dd95d0e44559fa48654",
+      "chat_name": "执行者B（前端功能开发群）",
+      "poll_job_id": "6f7471d8747c",
+      "report_job_id": "7c1cf5029635",
+      "session_file": "sessions/B.md",
+      "worktree": "/home/wang/.local/state/rosbag-scene/wt-04a",
+      "report_policy": "phase_11_15_18",
+      "idle_report_job_id": null,
+      "skill_version": "1.5.2",
+      "retired_idle_report_job_id": "6d1518e6c697"
+    },
+    "C": {
+      "skill": "complex-task-executor",
+      "chat_id": "oc_80c7a5a5ebb33e937a365bca2a1e7404",
+      "chat_name": "执行者C（数据链路监控告警群）",
+      "poll_job_id": "f01517c16f2f",
+      "report_job_id": "b99cc17222c3",
+      "session_file": "sessions/C.md",
+      "worktree": "/home/wang/.local/state/rosbag-scene/wt-03b",
+      "report_policy": "phase_11_15_18",
+      "idle_report_job_id": null,
+      "skill_version": "1.5.2",
+      "retired_idle_report_job_id": "83a2aaa9a279"
+    },
+    "TESTER": {
+      "skill": "complex-task-tester",
+      "chat_id": "oc_f04bc8b0fce65cce3fe43a41f83743fa",
+      "chat_name": "测试者",
+      "poll_job_id": "167580c0500b",
+      "report_job_id": "b41450f1df3c",
+      "session_file": "sessions/TESTER.md",
+      "worktree": null,
+      "report_policy": "phase_11_15_18",
+      "idle_report_job_id": null,
+      "skill_version": "1.5.2",
+      "retired_idle_report_job_id": "54096d889bf4"
+    }
+  },
+  "legacy_runs": [
+    {
+      "role": "COORDINATOR",
+      "job_id": "e0263b8ac010",
+      "execution_id": "42799555e11f4041b9c773aa531fe7bf",
+      "pid": 199119,
+      "process_start": "931465",
+      "started_at": "2026-10-10T13:10:53.298143+08:00",
+      "stopped_verified": true,
+      "verified_at": "2026-10-10T14:37:49+08:00"
+    }
+  ],
+  "presentation_skill": "feishu-progress-style",
+  "presentation_version": "1.5.1",
+  "strong_review_runtime": "/home/wang/.codex/skills/complex-task-coordinator/scripts/strong_review.py",
+  "development_log": "DEVELOPMENT-LOG.md",
+  "report_policy": {
+    "timezone": "Asia/Shanghai",
+    "quiet_hours": [
+      "21:00",
+      "08:00"
+    ],
+    "coordinator_day_minutes": 20,
+    "coordinator_morning": "08:00",
+    "executor_tester_times": [
+      "11:00",
+      "15:00",
+      "18:00"
+    ],
+    "no_agent": true,
+    "snapshot_root": "inbox/control/runtime/snapshots",
+    "activity_root": "inbox/control/runtime/activity",
+    "digest_root": "inbox/control/runtime/digests",
+    "facts_command": "/home/wang/.codex/skills/complex-task-coordinator/scripts/runtime_tools.py progress-facts --project /home/wang/work/doc/prd/rosbag-catalog-integration --json",
+    "facts_root": "inbox/control/runtime/progress/facts.json"
+  },
+  "observer_runtime": "/home/wang/.codex/skills/complex-task-coordinator/scripts/role_observer.py",
+  "runtime_policy_version": "quiet-digest-v2",
+  "poll_policy": {
+    "minutes": 5,
+    "script_check": true,
+    "idle_model_wake": false,
+    "coordinator_audit_minutes": null,
+    "ack_after_handling": true,
+    "independent_timer": "role-document-observer.timer",
+    "queue": "observer/<ROLE>.json pending",
+    "same_role_parallel": false
+  },
+  "runtime_helpers": {
+    "entry": "/home/wang/.codex/skills/complex-task-coordinator/scripts/runtime_tools.py",
+    "coordinator_intake": "native_model_explicit_action_only",
+    "plugin": "role-workflow-runtime"
+  }
+}

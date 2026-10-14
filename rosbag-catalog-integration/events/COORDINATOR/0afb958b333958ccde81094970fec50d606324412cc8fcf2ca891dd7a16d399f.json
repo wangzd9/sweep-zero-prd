@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011211053-task09-500probe-running",
+  "occurred_at": "2026-10-11T21:13:13+08:00",
+  "recorded_at": "2026-10-11T21:13:13+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "2号 500帧聚焦探针在途（pid 2848053，目标帧 21:11 实测 mt2048/mt512 均 500、对照帧 200 坡道），未 commit 无交付回执，继续等待",
+  "evidence": "scratch/t09-500-probe.json",
+  "next": "等2号 commit+receipts/TASK-09 交付→机械核验→串行OCR→合入"
+}

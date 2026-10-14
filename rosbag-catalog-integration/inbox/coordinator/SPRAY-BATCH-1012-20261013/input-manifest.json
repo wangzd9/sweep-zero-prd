@@ -1,0 +1,1005 @@
+{
+  "schema_version": 1,
+  "batch_id": "spray-production-1012-20261013",
+  "created_at": "2026-10-13T20:58:48+08:00",
+  "source_root": "/home/wang/下载/1012",
+  "environment": "production",
+  "vehicle_code": "test",
+  "incoming_logical_root": "/public/rosbag_scene_processing/incoming/spray",
+  "incoming_host_root": "/mnt/nas_backup/rosbag_scene_processing/incoming/spray",
+  "bag_count": 8,
+  "total_bytes": 25119612157,
+  "bags": [
+    {
+      "bag_name": "rosbag2_2026_10_08-14_42_48",
+      "source_path": "/home/wang/下载/1012/rosbag2_2026_10_08-14_42_48",
+      "files": [
+        {
+          "relative_path": "metadata.yaml",
+          "bytes": 10282
+        },
+        {
+          "relative_path": "rosbag2_2026_10_08-14_42_48_0.db3",
+          "bytes": 724627456
+        }
+      ],
+      "bytes": 724637738,
+      "metadata_sha256": "a5bd2d903b72cde3ca3f7b9773d1a79ffe7ca707355b0c90c6c4b3122a4c46dc",
+      "metadata_bytes": 10282,
+      "db3_count": 1,
+      "duration_ns": 53429426278,
+      "message_count": 39711,
+      "topics": [
+        {
+          "name": "/bev/cam_front_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 261
+        },
+        {
+          "name": "/perception/detected_objects",
+          "type": "perception_msgs/msg/ObjectList",
+          "messages": 261
+        },
+        {
+          "name": "/perception/label_mapping",
+          "type": "std_msgs/msg/String",
+          "messages": 0
+        },
+        {
+          "name": "/perception/detected_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 261
+        },
+        {
+          "name": "/iv_packets_rear_mid",
+          "type": "seyond/msg/SeyondScan",
+          "messages": 3732
+        },
+        {
+          "name": "/apriltag/ego_pose",
+          "type": "perception_msgs/msg/ApriltagPose",
+          "messages": 0
+        },
+        {
+          "name": "/vehicle/chassis",
+          "type": "vehicle_msgs/msg/Chassis",
+          "messages": 2676
+        },
+        {
+          "name": "/perception/tracked_objects",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 262
+        },
+        {
+          "name": "/perception/tracked_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 262
+        },
+        {
+          "name": "/iv_packets_front_mid",
+          "type": "seyond/msg/SeyondScan",
+          "messages": 14404
+        },
+        {
+          "name": "/perception/grid_occ_fusion",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 262
+        },
+        {
+          "name": "/chcnav/rawimu",
+          "type": "sensor_msgs/msg/Imu",
+          "messages": 5332
+        },
+        {
+          "name": "/perception/curb_array",
+          "type": "curb_msgs/msg/CurbArray",
+          "messages": 267
+        },
+        {
+          "name": "/jinlvlomp/localization/estimate_pose",
+          "type": "lomp_msgs/msg/Localization",
+          "messages": 5343
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_left",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 262
+        },
+        {
+          "name": "/tf",
+          "type": "tf2_msgs/msg/TFMessage",
+          "messages": 5340
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 262
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_8M_wa_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 262
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_right",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 262
+        }
+      ],
+      "initial_classification": "NEEDS_RUNTIME_RESULT",
+      "vehicle_code": "test",
+      "profile_id": "scene-spray",
+      "relative_path": "rosbag2_2026_10_08-14_42_48",
+      "source_metadata": {
+        "schema_version": "scene-input/v1",
+        "vehicle_code": "test",
+        "collection_timezone": "Asia/Shanghai",
+        "batch_id": "spray-production-1012-20261013",
+        "sensor_profile": "seyond-front-mid-approved-v1"
+      }
+    },
+    {
+      "bag_name": "rosbag2_2026_10_12-15_58_23",
+      "source_path": "/home/wang/下载/1012/rosbag2_2026_10_12-15_58_23",
+      "files": [
+        {
+          "relative_path": "metadata.yaml",
+          "bytes": 9749
+        },
+        {
+          "relative_path": "rosbag2_2026_10_12-15_58_23_0.db3",
+          "bytes": 57679872
+        }
+      ],
+      "bytes": 57689621,
+      "metadata_sha256": "5a3cb2966cffa7485f95cc0d6cb20a85a3eb20d046c6397338d52c95d86b0064",
+      "metadata_bytes": 9749,
+      "db3_count": 1,
+      "duration_ns": 4379874754,
+      "message_count": 2325,
+      "topics": [
+        {
+          "name": "/perception/label_mask/camera_cam_8M_wa_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 22
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 22
+        },
+        {
+          "name": "/perception/grid_occ_fusion",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 0
+        },
+        {
+          "name": "/tf",
+          "type": "tf2_msgs/msg/TFMessage",
+          "messages": 0
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_left",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 22
+        },
+        {
+          "name": "/perception/detected_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 22
+        },
+        {
+          "name": "/apriltag/ego_pose",
+          "type": "perception_msgs/msg/ApriltagPose",
+          "messages": 0
+        },
+        {
+          "name": "/iv_packets_rear_mid",
+          "type": "seyond/msg/SeyondScan",
+          "messages": 307
+        },
+        {
+          "name": "/perception/tracked_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 0
+        },
+        {
+          "name": "/iv_packets_front_mid",
+          "type": "seyond/msg/SeyondScan",
+          "messages": 1184
+        },
+        {
+          "name": "/perception/tracked_objects",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 0
+        },
+        {
+          "name": "/vehicle/chassis",
+          "type": "vehicle_msgs/msg/Chassis",
+          "messages": 220
+        },
+        {
+          "name": "/perception/curb_array",
+          "type": "curb_msgs/msg/CurbArray",
+          "messages": 22
+        },
+        {
+          "name": "/chcnav/rawimu",
+          "type": "sensor_msgs/msg/Imu",
+          "messages": 438
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_right",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 22
+        },
+        {
+          "name": "/perception/detected_objects",
+          "type": "perception_msgs/msg/ObjectList",
+          "messages": 22
+        },
+        {
+          "name": "/perception/label_mapping",
+          "type": "std_msgs/msg/String",
+          "messages": 0
+        },
+        {
+          "name": "/bev/cam_front_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 22
+        }
+      ],
+      "initial_classification": "REUSE_COMPLETED_AFTER_HASH_CHECK",
+      "vehicle_code": "test",
+      "profile_id": "scene-spray",
+      "relative_path": "rosbag2_2026_10_12-15_58_23",
+      "source_metadata": {
+        "schema_version": "scene-input/v1",
+        "vehicle_code": "test",
+        "collection_timezone": "Asia/Shanghai",
+        "batch_id": "spray-production-1012-20261013",
+        "sensor_profile": "seyond-front-mid-approved-v1"
+      },
+      "existing_submission_id": "9949d1a7ea4f4feb8284b3cebfd4fab1",
+      "existing_run_id": "scene-c4a88c0746e9422ca35136035fe7"
+    },
+    {
+      "bag_name": "rosbag2_2026_10_12-16_00_13",
+      "source_path": "/home/wang/下载/1012/rosbag2_2026_10_12-16_00_13",
+      "files": [
+        {
+          "relative_path": "metadata.yaml",
+          "bytes": 11718
+        },
+        {
+          "relative_path": "rosbag2_2026_10_12-16_00_13_0.db3",
+          "bytes": 89653248
+        }
+      ],
+      "bytes": 89664966,
+      "metadata_sha256": "68032a411b9d64fcdb567a47ba3957c95de5f3917e21268a87803245713a4c79",
+      "metadata_bytes": 11718,
+      "db3_count": 1,
+      "duration_ns": 4747014218,
+      "message_count": 2595,
+      "topics": [
+        {
+          "name": "/bev/cam_right_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 24
+        },
+        {
+          "name": "/bev/cam_rear_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 24
+        },
+        {
+          "name": "/bev/cam_front_8m_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 24
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_left",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 24
+        },
+        {
+          "name": "/perception/grid_occ_fusion",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 0
+        },
+        {
+          "name": "/perception/label_mapping",
+          "type": "std_msgs/msg/String",
+          "messages": 0
+        },
+        {
+          "name": "/bev/cam_front_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 24
+        },
+        {
+          "name": "/perception/detected_objects",
+          "type": "perception_msgs/msg/ObjectList",
+          "messages": 24
+        },
+        {
+          "name": "/bev/cam_left_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 24
+        },
+        {
+          "name": "/perception/curb_array",
+          "type": "curb_msgs/msg/CurbArray",
+          "messages": 24
+        },
+        {
+          "name": "/chcnav/rawimu",
+          "type": "sensor_msgs/msg/Imu",
+          "messages": 476
+        },
+        {
+          "name": "/apriltag/ego_pose",
+          "type": "perception_msgs/msg/ApriltagPose",
+          "messages": 0
+        },
+        {
+          "name": "/iv_packets_rear_mid",
+          "type": "seyond/msg/SeyondScan",
+          "messages": 330
+        },
+        {
+          "name": "/iv_packets_front_mid",
+          "type": "seyond/msg/SeyondScan",
+          "messages": 1262
+        },
+        {
+          "name": "/perception/tracked_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 0
+        },
+        {
+          "name": "/vehicle/chassis",
+          "type": "vehicle_msgs/msg/Chassis",
+          "messages": 239
+        },
+        {
+          "name": "/perception/tracked_objects",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 0
+        },
+        {
+          "name": "/perception/detected_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 24
+        },
+        {
+          "name": "/tf",
+          "type": "tf2_msgs/msg/TFMessage",
+          "messages": 0
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_8M_wa_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 24
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 24
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_right",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 24
+        }
+      ],
+      "initial_classification": "NEEDS_RUNTIME_RESULT",
+      "vehicle_code": "test",
+      "profile_id": "scene-spray",
+      "relative_path": "rosbag2_2026_10_12-16_00_13",
+      "source_metadata": {
+        "schema_version": "scene-input/v1",
+        "vehicle_code": "test",
+        "collection_timezone": "Asia/Shanghai",
+        "batch_id": "spray-production-1012-20261013",
+        "sensor_profile": "seyond-front-mid-approved-v1"
+      }
+    },
+    {
+      "bag_name": "rosbag2_2026_10_12-16_02_03",
+      "source_path": "/home/wang/下载/1012/rosbag2_2026_10_12-16_02_03",
+      "files": [
+        {
+          "relative_path": "metadata.yaml",
+          "bytes": 12518
+        },
+        {
+          "relative_path": "rosbag2_2026_10_12-16_02_03_0.db3",
+          "bytes": 5368995840
+        },
+        {
+          "relative_path": "rosbag2_2026_10_12-16_02_03_1.db3",
+          "bytes": 4736909312
+        }
+      ],
+      "bytes": 10105917670,
+      "metadata_sha256": "e40a8d8652cb98a1226a02c51f26926df272ab3ab0b39947aef882dfd8cf67ce",
+      "metadata_bytes": 12518,
+      "db3_count": 2,
+      "duration_ns": 537245805921,
+      "message_count": 410669,
+      "topics": [
+        {
+          "name": "/bev/cam_front_8m_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 2673
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_left",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 2672
+        },
+        {
+          "name": "/perception/curb_array",
+          "type": "curb_msgs/msg/CurbArray",
+          "messages": 2686
+        },
+        {
+          "name": "/chcnav/rawimu",
+          "type": "sensor_msgs/msg/Imu",
+          "messages": 53711
+        },
+        {
+          "name": "/perception/grid_occ_fusion",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 2673
+        },
+        {
+          "name": "/bev/cam_left_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 2673
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_right",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 2673
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 2673
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_8M_wa_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 2673
+        },
+        {
+          "name": "/bev/cam_rear_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 2673
+        },
+        {
+          "name": "/jinlvlomp/localization/estimate_pose",
+          "type": "lomp_msgs/msg/Localization",
+          "messages": 53726
+        },
+        {
+          "name": "/iv_packets_rear_mid",
+          "type": "seyond/msg/SeyondScan",
+          "messages": 37607
+        },
+        {
+          "name": "/apriltag/ego_pose",
+          "type": "perception_msgs/msg/ApriltagPose",
+          "messages": 0
+        },
+        {
+          "name": "/iv_packets_front_mid",
+          "type": "seyond/msg/SeyondScan",
+          "messages": 144971
+        },
+        {
+          "name": "/perception/tracked_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 2641
+        },
+        {
+          "name": "/perception/detected_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 2673
+        },
+        {
+          "name": "/bev/cam_right_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 2673
+        },
+        {
+          "name": "/perception/detected_objects",
+          "type": "perception_msgs/msg/ObjectList",
+          "messages": 2673
+        },
+        {
+          "name": "/bev/cam_front_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 2673
+        },
+        {
+          "name": "/perception/label_mapping",
+          "type": "std_msgs/msg/String",
+          "messages": 0
+        },
+        {
+          "name": "/tf",
+          "type": "tf2_msgs/msg/TFMessage",
+          "messages": 53721
+        },
+        {
+          "name": "/perception/tracked_objects",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 2673
+        },
+        {
+          "name": "/vehicle/chassis",
+          "type": "vehicle_msgs/msg/Chassis",
+          "messages": 26858
+        }
+      ],
+      "initial_classification": "NEEDS_RUNTIME_RESULT",
+      "vehicle_code": "test",
+      "profile_id": "scene-spray",
+      "relative_path": "rosbag2_2026_10_12-16_02_03",
+      "source_metadata": {
+        "schema_version": "scene-input/v1",
+        "vehicle_code": "test",
+        "collection_timezone": "Asia/Shanghai",
+        "batch_id": "spray-production-1012-20261013",
+        "sensor_profile": "seyond-front-mid-approved-v1"
+      }
+    },
+    {
+      "bag_name": "rosbag2_2026_10_12-16_31_25",
+      "source_path": "/home/wang/下载/1012/rosbag2_2026_10_12-16_31_25",
+      "files": [
+        {
+          "relative_path": "metadata.yaml",
+          "bytes": 10744
+        },
+        {
+          "relative_path": "rosbag2_2026_10_12-16_31_25_0.db3",
+          "bytes": 25174016
+        }
+      ],
+      "bytes": 25184760,
+      "metadata_sha256": "fcc5ff252dff517f980570ff2c2084730c21f389774d53a6789cefe8fbe75dda",
+      "metadata_bytes": 10744,
+      "db3_count": 1,
+      "duration_ns": 3577497443,
+      "message_count": 734,
+      "topics": [
+        {
+          "name": "/bev/cam_front_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 17
+        },
+        {
+          "name": "/perception/label_mapping",
+          "type": "std_msgs/msg/String",
+          "messages": 0
+        },
+        {
+          "name": "/perception/detected_objects",
+          "type": "perception_msgs/msg/ObjectList",
+          "messages": 17
+        },
+        {
+          "name": "/bev/cam_right_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 17
+        },
+        {
+          "name": "/bev/cam_front_8m_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 17
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_left",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 17
+        },
+        {
+          "name": "/apriltag/ego_pose",
+          "type": "perception_msgs/msg/ApriltagPose",
+          "messages": 0
+        },
+        {
+          "name": "/tf",
+          "type": "tf2_msgs/msg/TFMessage",
+          "messages": 0
+        },
+        {
+          "name": "/perception/tracked_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 0
+        },
+        {
+          "name": "/perception/detected_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 17
+        },
+        {
+          "name": "/perception/grid_occ_fusion",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 0
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 17
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_8M_wa_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 17
+        },
+        {
+          "name": "/perception/tracked_objects",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 0
+        },
+        {
+          "name": "/vehicle/chassis",
+          "type": "vehicle_msgs/msg/Chassis",
+          "messages": 178
+        },
+        {
+          "name": "/bev/cam_rear_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 17
+        },
+        {
+          "name": "/perception/curb_array",
+          "type": "curb_msgs/msg/CurbArray",
+          "messages": 18
+        },
+        {
+          "name": "/chcnav/rawimu",
+          "type": "sensor_msgs/msg/Imu",
+          "messages": 351
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_right",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 17
+        },
+        {
+          "name": "/bev/cam_left_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 17
+        }
+      ],
+      "initial_classification": "NOT_APPLICABLE",
+      "classification_note": "2026-10-13T21:17+08:00 协调者据 B 独立只读取证更正：无 /iv_packets_front_mid 也无 pointcloud 水雾输入 topic，路由阶段 NOT_APPLICABLE，不进解码/模型/分段，预期无伪切片；原 NEEDS_RUNTIME_RESULT 口径不实",
+      "vehicle_code": "test",
+      "profile_id": "scene-spray",
+      "relative_path": "rosbag2_2026_10_12-16_31_25",
+      "source_metadata": {
+        "schema_version": "scene-input/v1",
+        "vehicle_code": "test",
+        "collection_timezone": "Asia/Shanghai",
+        "batch_id": "spray-production-1012-20261013",
+        "sensor_profile": "seyond-front-mid-approved-v1"
+      }
+    },
+    {
+      "bag_name": "rosbag2_2026_10_12-16_33_10",
+      "source_path": "/home/wang/下载/1012/rosbag2_2026_10_12-16_33_10",
+      "files": [
+        {
+          "relative_path": "metadata.yaml",
+          "bytes": 0
+        },
+        {
+          "relative_path": "rosbag2_2026_10_12-16_33_10_0.db3",
+          "bytes": 0
+        }
+      ],
+      "bytes": 0,
+      "metadata_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "metadata_bytes": 0,
+      "db3_count": 1,
+      "duration_ns": null,
+      "message_count": null,
+      "topics": [],
+      "initial_classification": "INVALID_EMPTY_INPUT",
+      "vehicle_code": "test",
+      "profile_id": "scene-spray",
+      "relative_path": "rosbag2_2026_10_12-16_33_10",
+      "source_metadata": {
+        "schema_version": "scene-input/v1",
+        "vehicle_code": "test",
+        "collection_timezone": "Asia/Shanghai",
+        "batch_id": "spray-production-1012-20261013",
+        "sensor_profile": "seyond-front-mid-approved-v1"
+      }
+    },
+    {
+      "bag_name": "rosbag2_2026_10_12-16_37_47",
+      "source_path": "/home/wang/下载/1012/rosbag2_2026_10_12-16_37_47",
+      "files": [
+        {
+          "relative_path": "metadata.yaml",
+          "bytes": 11021
+        },
+        {
+          "relative_path": "rosbag2_2026_10_12-16_37_47_0.db3",
+          "bytes": 5368852480
+        },
+        {
+          "relative_path": "rosbag2_2026_10_12-16_37_47_1.db3",
+          "bytes": 1952661504
+        }
+      ],
+      "bytes": 7321525005,
+      "metadata_sha256": "fdbec0075c733449aea5e5ea2beaa88e876d3874270a9c8ea30381a57ed3c88b",
+      "metadata_bytes": 11021,
+      "db3_count": 2,
+      "duration_ns": 1049018764598,
+      "message_count": 218570,
+      "topics": [
+        {
+          "name": "/bev/cam_front_8m_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 5238
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_left",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 5239
+        },
+        {
+          "name": "/perception/curb_array",
+          "type": "curb_msgs/msg/CurbArray",
+          "messages": 5245
+        },
+        {
+          "name": "/chcnav/rawimu",
+          "type": "sensor_msgs/msg/Imu",
+          "messages": 103252
+        },
+        {
+          "name": "/perception/grid_occ_fusion",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 0
+        },
+        {
+          "name": "/apriltag/ego_pose",
+          "type": "perception_msgs/msg/ApriltagPose",
+          "messages": 0
+        },
+        {
+          "name": "/bev/cam_left_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 5238
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 5239
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_8M_wa_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 5239
+        },
+        {
+          "name": "/perception/detected_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 5238
+        },
+        {
+          "name": "/bev/cam_right_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 5238
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_right",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 5239
+        },
+        {
+          "name": "/perception/detected_objects",
+          "type": "perception_msgs/msg/ObjectList",
+          "messages": 5238
+        },
+        {
+          "name": "/perception/label_mapping",
+          "type": "std_msgs/msg/String",
+          "messages": 0
+        },
+        {
+          "name": "/bev/cam_front_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 5238
+        },
+        {
+          "name": "/tf",
+          "type": "tf2_msgs/msg/TFMessage",
+          "messages": 0
+        },
+        {
+          "name": "/perception/tracked_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 0
+        },
+        {
+          "name": "/perception/tracked_objects",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 0
+        },
+        {
+          "name": "/vehicle/chassis",
+          "type": "vehicle_msgs/msg/Chassis",
+          "messages": 52451
+        },
+        {
+          "name": "/bev/cam_rear_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 5238
+        }
+      ],
+      "initial_classification": "NOT_APPLICABLE",
+      "classification_note": "2026-10-13T21:17+08:00 协调者据 B 独立只读取证更正：无 /iv_packets_front_mid 也无 pointcloud 水雾输入 topic（manifest 自身 topic 列表亦未列 iv_*），路由阶段 NOT_APPLICABLE，预期无伪切片；原 NEEDS_RUNTIME_RESULT 口径不实",
+      "vehicle_code": "test",
+      "profile_id": "scene-spray",
+      "relative_path": "rosbag2_2026_10_12-16_37_47",
+      "source_metadata": {
+        "schema_version": "scene-input/v1",
+        "vehicle_code": "test",
+        "collection_timezone": "Asia/Shanghai",
+        "batch_id": "spray-production-1012-20261013",
+        "sensor_profile": "seyond-front-mid-approved-v1"
+      }
+    },
+    {
+      "bag_name": "rosbag2_2026_10_12-16_58_28",
+      "source_path": "/home/wang/下载/1012/rosbag2_2026_10_12-16_58_28",
+      "files": [
+        {
+          "relative_path": "metadata.yaml",
+          "bytes": 11021
+        },
+        {
+          "relative_path": "rosbag2_2026_10_12-16_58_28_0.db3",
+          "bytes": 5368750080
+        },
+        {
+          "relative_path": "rosbag2_2026_10_12-16_58_28_1.db3",
+          "bytes": 1426231296
+        }
+      ],
+      "bytes": 6794992397,
+      "metadata_sha256": "935220dcca4f467b7b021050c5c03ec0e2fc91cbf28e3f87fa618768064219ae",
+      "metadata_bytes": 11021,
+      "db3_count": 2,
+      "duration_ns": 1048598236472,
+      "message_count": 218488,
+      "topics": [
+        {
+          "name": "/perception/tracked_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 0
+        },
+        {
+          "name": "/bev/cam_front_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 5235
+        },
+        {
+          "name": "/perception/label_mapping",
+          "type": "std_msgs/msg/String",
+          "messages": 0
+        },
+        {
+          "name": "/perception/detected_objects",
+          "type": "perception_msgs/msg/ObjectList",
+          "messages": 5236
+        },
+        {
+          "name": "/bev/cam_right_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 5235
+        },
+        {
+          "name": "/bev/cam_rear_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 5235
+        },
+        {
+          "name": "/perception/detected_objects/markers",
+          "type": "visualization_msgs/msg/MarkerArray",
+          "messages": 5236
+        },
+        {
+          "name": "/apriltag/ego_pose",
+          "type": "perception_msgs/msg/ApriltagPose",
+          "messages": 0
+        },
+        {
+          "name": "/perception/grid_occ_fusion",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 0
+        },
+        {
+          "name": "/perception/curb_array",
+          "type": "curb_msgs/msg/CurbArray",
+          "messages": 5243
+        },
+        {
+          "name": "/chcnav/rawimu",
+          "type": "sensor_msgs/msg/Imu",
+          "messages": 103231
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 5236
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_8M_wa_front",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 5236
+        },
+        {
+          "name": "/tf",
+          "type": "tf2_msgs/msg/TFMessage",
+          "messages": 0
+        },
+        {
+          "name": "/vehicle/chassis",
+          "type": "vehicle_msgs/msg/Chassis",
+          "messages": 52422
+        },
+        {
+          "name": "/perception/tracked_objects",
+          "type": "perception_msgs/msg/TrackList",
+          "messages": 0
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_right",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 5236
+        },
+        {
+          "name": "/bev/cam_left_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 5235
+        },
+        {
+          "name": "/perception/label_mask/camera_cam_3M_left",
+          "type": "sensor_msgs/msg/Image",
+          "messages": 5236
+        },
+        {
+          "name": "/bev/cam_front_8m_jpg",
+          "type": "sensor_msgs/msg/CompressedImage",
+          "messages": 5236
+        }
+      ],
+      "initial_classification": "NOT_APPLICABLE",
+      "classification_note": "2026-10-13T21:17+08:00 协调者据 B 独立只读取证更正：无 /iv_packets_front_mid 也无 pointcloud 水雾输入 topic（manifest 自身 topic 列表亦未列 iv_*），路由阶段 NOT_APPLICABLE，预期无伪切片；原 NEEDS_RUNTIME_RESULT 口径不实",
+      "vehicle_code": "test",
+      "profile_id": "scene-spray",
+      "relative_path": "rosbag2_2026_10_12-16_58_28",
+      "source_metadata": {
+        "schema_version": "scene-input/v1",
+        "vehicle_code": "test",
+        "collection_timezone": "Asia/Shanghai",
+        "batch_id": "spray-production-1012-20261013",
+        "sensor_profile": "seyond-front-mid-approved-v1"
+      }
+    }
+  ],
+  "hash_note": "metadata hash为已实测；DB3完整SHA由A上传前计算、传后独立核对，本清单未伪造完整包摘要"
+}

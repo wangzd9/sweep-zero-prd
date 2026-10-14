@@ -1,0 +1,13 @@
+{
+  "event_id": "c-t11s-batch-1012-anomaly-obs6-20261013",
+  "occurred_at": "2026-10-13T22:12:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "ANOMALY_UPDATING",
+  "supersedes_context": "第6轮只读观察（obs5 22:06 后 ~6 分钟窗），接续 c-t11s-batch-1012-anomaly-obs5-20261013 异常链；prerun 22:08:53 指纹 1c16eefd（changed=sessions/C.md 自产 obs5 行）",
+  "summary": "11S-BATCH-1012 C 第6轮只读观察：与 obs5 相比**无实质变化，批次维持静默停摆**——① ps 实测仍无任何上传/提交进程（grep cp -a/bigbag/20261012/spray 仅本机常驻 scene_host_proxy+orchestrator+uvicorn 28180，etime ~2h53m，非本批业务）；② operations/A 22:00 后零新文件，A 原生 execution 与冻结 bigbags-copy op 仍无存活；③ incoming/spray 仍仅 16_33_10 空包目录 1 个；④ upload-ledger.json mtime 仍停 21:43:56，bags 6 条目状态摘要未变（15_58_23 REUSE_READY_SHA_MATCH；16_31_25/16_00_13/16_33_10/14_42_48/16_58_28 PLACED_INCOMING）；⑤ 16_02_03（10GB 最大包）find 全域仍零命中，源 /home/wang/下载/1012/rosbag2_2026_10_12-16_02_03 du -sb 实测 10105921766 字节完整在位（只读可重拷）；⑥ 16_37_47 仍仅 ready/spray/ 单份、ledger 无条目（账实不符维持待裁决）。obs5 五项裁决问题原样保留，等协调者/A 面动作，C 继续按 run 只读观察，不接管 A 槽、不代跑、不 kill/retry。",
+  "evidence": "ps -eo pid,etime,cmd grep 仅 2376977/2377013/2377038 常驻（02:53:1x etime）；find operations/A -newermt 22:00 空；ls incoming/spray 仅 rosbag2_2026_10_12-16_33_10（dir mtime 10-12 17:37）；stat upload-ledger.json mtime=2026-10-13 21:43:56（python json 解析 bags 6 键摘要与 obs5 一致）；find /mnt/nas_backup/rosbag_scene_processing *16_02_03* 零命中；du -sb 源 16_02_03=10105921766；find *16_37_47* 仅 ready/spray/rosbag2_2026_10_12-16_37_47",
+  "next": "维持 obs5 五项裁决请求等协调者：① A 链是否续起（op 收口+16_33_10 空包拒绝+14_42_48 补 submission）；② 16_02_03 10GB 失踪处置（源完整可重拷）；③ 16_37_47 账实不符补账或回退；④ ready 双份去重与 relative_path 血缘（TESTER 面）；⑤ 生产 backend 18000 归属核实。夜间静默继续，C 每轮 run 只读观察至有实质变化。",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

@@ -1,0 +1,13 @@
+{
+  "event_id": "b20261010-2007-tester-a2-defect3",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": 1,
+  "status": "IDLE_WAITING",
+  "at": "2026-10-10T20:07:53+08:00",
+  "summary": "TESTER r2-final 复测 attempt-2 交付：S1 迁移链三 AC 全 PASS（1406 高阻塞解除），不变式套件 39/40，残留 1 FAIL 经探针定性缺陷3（中，06B app 代码面，reconcile 幂等重放 MySQL StaleDataError）；attempt-1 的 uid 截断/夹具口径归因被推翻更正。inbox/2号 无新派单；缺陷3 回派口径与 rework-4 两单账目待协调者核账裁决。本侧不自行再领不提前开工，维持 IDLE_WAITING。",
+  "evidence": "test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-2.md; reports/TASK-06/r2-final-mysql-e2e-attempt-2.md; sessions/B.md",
+  "next": "等协调者审核 attempt-2 并正式回派缺陷3（06B app reconcile 幂等重放根因）返修单",
+  "occurred_at": "2026-10-10T20:07:53+08:00",
+  "recorded_at": "2026-10-10T20:07:53+08:00"
+}

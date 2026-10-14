@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t10-reverify-20261012-0115-delivered-fail",
+  "occurred_at": "2026-10-12T01:15:30+08:00",
+  "recorded_at": "2026-10-12T01:15:30+08:00",
+  "role": "TESTER",
+  "task": "TASK-10",
+  "attempt": "e2e-reverify-after-merges/1",
+  "status": "TEST_REPORT_PENDING_FAIL",
+  "summary": "E2E 复跑交付 FAIL：defect2 修复真链生效（derive_storage_offset=100381744ns 非 None、publish 成功、/results 200）+ 原包独立复核 ALL_UNCHANGED + 真实 VLM analyze SUCCESS 143.6s/54 帧；但 complete-scene 409 新缺口 #3（切片端点 header_stamp 与存储轴界漂移 97.2ms，scene_result_report_service:899/writer:142，两文件 a77aa45 未被两笔修复改动=新暴露面）断链 + 驱动 t10_e2e_reverify.py:385 NameError(child) 阻断步骤 5 API 取证（harness 面）；被测快照 a77aa45 双核一致；零业务代码改动；证据 scratch/t10（221M 现场保留）+ t10-nasroot（229M）",
+  "evidence": "test-receipts/TEST-TASK10-e2e-reverify/attempt-1.md + reports/TASK-10/e2e-reverify-after-merges.md + scratch/t10/t10-e2e.json + t10-run.log",
+  "next": "待协调者裁决：#3 complete-scene 409 回派执行者定位（06B/04B 归属）+ 驱动 step5 NameError 修复 → 按新 attempt 复跑收口；不满足 TASK-10 DONE"
+}

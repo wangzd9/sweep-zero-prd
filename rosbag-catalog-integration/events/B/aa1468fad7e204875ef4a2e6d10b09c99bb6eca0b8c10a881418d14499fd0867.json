@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t06b-r7-low-delivered-20261010-1616",
+  "occurred_at": "2026-10-10T16:16:39+08:00",
+  "recorded_at": "2026-10-10T16:16:39+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-3",
+  "status": "REVIEW_PENDING",
+  "summary": "OCR low 死代码小修交付：删 _verify_source_identity 不可达 manifest 缺指纹分支（-2 行），无测试断言该分支消息，回归面不变；定向31/全量812/ruff 绿",
+  "evidence": "commit 86b2cc1; receipts/TASK-06B/attempt-1-r2-rework-3.md",
+  "next": "等协调者对 9325155..tip 增量 OCR 无 high/critical 后与 f088c2b+c67600d+a07c181+9325155 同批 --no-ff 合入"
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "input_sha256": "bbd31d0fd34052ee755d633ae39a1cc374452dd3a16963798f7a355ac2ea4b02",
+  "record": {
+    "event_id": "A:a-obs-t16ca-poll-fp-bcb82ef6-protocol-resume-header-202610141520",
+    "kind": "observation",
+    "task": "TASK-16C-A",
+    "attempt": "attempt-1-correction",
+    "status": "OBSERVED_NO_A_CHANGE",
+    "summary": "消费 pending 变更源（fp bcb82ef6，checked_at 15:16:50）：PROTOCOL.md 15:14:30 落盘=顶部追加 2026-10-14 恢复覆盖头（与 V04-UI-RESUME 入口同口径，本角色 11:33 起已按此入口执行）；其余变更源（TODO 14:27 / 16C-C leaf-acceptance 14:26 / 12S-C 机械核验 10-13 / SPRAY-POST-V04 VALIDATION 13:55）均为已消费或他角色面，对 A 非新派单/非新返修/非门禁变化。A 叶状态维持 REVIEW_PENDING：冻结 head ff2a005 不变；A 叶 OCR run 7a72eed8 b01（两 services 文件）15:03 实测 RUNNING 正常在途，收口后由协调者逐批裁决；TESTER 16D 回执（14:59 落盘）A 叶段已 PASS（563a91a 增量面 21/21 探针+真实 Chrome，ff2a005 仅断言面口径沿用）。A 无可执行项。",
+    "evidence": "inbox/PROTOCOL.md（stat mtime 2026-10-14 15:14:30，仅顶部恢复覆盖头变化）；ocr_runtime.py status --run reviews/TASK-16C-A/ocr-run-20261014/run（15:03 state=RUNNING b01 pid 3731863）；test-receipts/TEST-TASK16D/attempt-1.md（14:59:37 落盘，A 叶段 PASS）；wt-01-t16ca HEAD ff2a005 冻结不变",
+    "next": "5min observer 续核 7a72eed8 收口（AWAITING_DECISION 后协调者逐批裁决）；裁决/返修/释放按协调者优先级回本分支 a/task-16c-a-query-api",
+    "occurrence": {
+      "kind": "now"
+    },
+    "schema_version": 1,
+    "role": "A",
+    "recorded_at": "2026-10-14T15:33:01+08:00",
+    "occurred_at": "2026-10-14T15:33:01+08:00",
+    "time_source": {
+      "kind": "script_now"
+    }
+  },
+  "complete": true
+}

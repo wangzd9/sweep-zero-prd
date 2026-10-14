@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-034553-nochange-t07b-r3-frozen-16a-13of14-idle",
+  "occurred_at": "2026-10-13T03:45:53+08:00",
+  "recorded_at": "2026-10-13T03:48:37+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "attempt-3-r3",
+  "status": "REVIEW_PENDING",
+  "summary": "07B R3 交付冻结等审(HEAD 4baf79f 未合入)；16A/16B v2 OCR 13/14 在途(b13 迁移审中)属协调者面；inbox/2号 无新派单/返修；R3 增量 OCR 排队",
+  "evidence": "sessions/B.md 202行; reviews/TASK-16/16A-16B-ocr-batches.md r116; ps 1111573",
+  "next": "等 v2 全批收口→R3 增量 OCR→强审复审→TESTER post-r3→合入"
+}

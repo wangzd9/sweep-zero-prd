@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-193053-tester-postmerge-inflight-nochange",
+  "occurred_at": "2026-10-11T19:33:36+08:00",
+  "recorded_at": "2026-10-11T19:33:36+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "post-merge-0a8ca8a",
+  "status": "POLL_NO_CHANGE",
+  "summary": "19:23 后零业务变化：TESTER post-merge 复核在途（ACK 19:22，wt-tester-pm08 独立检出 main 0a8ca8a，回执未落盘）；main 0a8ca8a=origin 双核；A/B/C 空闲；08 保持 RUNNING 不写 DONE；生产/真实样本门禁不变",
+  "evidence": "inbox/TESTER/TASK-08/post-merge-0a8ca8a-red-files-ack.md; /home/wang/.local/state/rosbag-scene/wt-tester-pm08; git main 0a8ca8a",
+  "next": "下轮核 TESTER 合入后 9 红文件复核交付"
+}

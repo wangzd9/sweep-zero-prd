@@ -1,0 +1,12 @@
+{
+  "event_id": "20261011-184053-ocr-c1c2-r1-v3-context-canceled",
+  "occurred_at": "2026-10-11T18:42:23+08:00",
+  "recorded_at": "2026-10-11T18:42:23+08:00",
+  "role": "TESTER",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "POLL_NO_CHANGE",
+  "summary": "C1C2-r1 OCR v3 18:38 context canceled（三连败 c56d992c→1bfcef65）；协调者 18:40 起 v4，门禁维持关闭；TESTER 维持 IDLE 无新派单",
+  "evidence": "scratch/t08c-ocr/c1c2-r1.log;ocr session list",
+  "next": "等 C1C2-r1 OCR 收口→t08c-1 合入→独立验证派单 ACK 后开工"
+}

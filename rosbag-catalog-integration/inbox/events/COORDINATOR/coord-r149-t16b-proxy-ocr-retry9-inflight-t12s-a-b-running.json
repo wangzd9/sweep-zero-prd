@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r149-t16b-proxy-ocr-retry9-inflight-t12s-a-b-running",
+  "occurred_at": "2026-10-13T12:32:00+08:00",
+  "recorded_at": "2026-10-13T12:32:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16B / TASK-12S-A / TASK-12S-B / TASK-16C",
+  "attempt": "r149-poll",
+  "status": "OBSERVED",
+  "summary": "r149 巡检（指纹 d9de9874，checked_at 12:25:53，变更源=TODO.md+TESTER 12:24 no-change 事件+本侧 r148 事件）：① 16B proxy OCR 第 9 次已起跑=交互会话侧 12:26:35 `b2_r144_maxtok9.py` pid 1810468 持 ocr.lock（fuser 核），参数方向修正按 r8 解剖：--max-tokens 0（消除 20000 prompt 上限<968 行主请求 56-60K chars 的 compaction 触发）+ 默认 medium effort（2 回合，low 只 1 回合）+ 直连 8002 + OCR_LLM_TIMEOUT=900 + --timeout 60，finally 恢复 18002 配置；本侧记账不拦截（口径同 r144 第 8 次等待器），硬截止 12:50；rc=1 则 9/9 连败不再自动第 10 次、升级用户 a/b/c。② 水雾双线开发中：A 12S-A ACK 已核（base 6fb42c4 双核一致，wt-01-t12sa 4 文件 M+新测试，diffstat +390/−32，开发中待回执）；B 12S-B 已 ACK 开工（lease 11:59，wt-04a-t12sb HEAD 6fb42c4 分支 b/task-12s-b-spray-adapter，app/scene/spray/ 9 模块在写）——16C 派单「待 ACK」快照滞后，实际已在途，B 不占 16C 返修槽无冲突。③ TESTER 12:24 事件=NO_CHANGE_POLL（16C PASS 维持 TEST_REPORT_PENDING、返修单随暂停搁置、12S-D/16D/16C 复测 WAITING 不预占），无 TESTER 新派单面变化。④ 16C OCR 7/7 全闭环 r148 口径不变（C5+C8 CONFIRMED CORRECTION+C7 候选，返修单随用户暂停搁置）。强审查 EXPIRED（11:33:12 已过）零新增。",
+  "evidence": "b2_r144_maxtok9_progress.txt 12:26:35 START + fuser inbox/ocr.lock=1810468 + b2_r144_maxtok9.py 参数段; inbox/1号/TASK-12S-A/attempt-1-ack.md 11:38 + wt-01-t12sa git status/diffstat 实测; lease B.json 11:59 + wt-04a-t12sb HEAD/branch + app/scene/spray/ 9 文件实测; events/TESTER/894df5d0…json 12:24; TODO r148 段",
+  "next": "12:50 前后核 16B 第 9 次收口（rc=0→findings 全合并一次最小返修单派 C→16B 解冻；rc=1→9/9 升级用户 a/b/c）；A 12S-A 回执落盘后机械核验；B 12S-B 回执机械核验→OCR（排队，ocr.lock 被第 9 次占）→TESTER→合入；16C 恢复后 C5+C7+C8+low 一次最小返修单派 B（注意 B 已转 12S-B，返修槽需重算 owner=16C 原开发 B 或改派空闲者）"
+}

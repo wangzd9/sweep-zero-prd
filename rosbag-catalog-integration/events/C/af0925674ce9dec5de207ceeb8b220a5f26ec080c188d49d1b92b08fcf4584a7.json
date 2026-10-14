@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t16b-r156-poll-consumed-20261013",
+  "occurred_at": "2026-10-13T13:46:30+08:00",
+  "recorded_at": "2026-10-13T13:46:45+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "2-r1",
+  "status": "WAITING_REVIEW",
+  "summary": "r156 poll consumed: TODO r155 = coordinator mechanical verify of 40ab818 delivery all green; incremental OCR queued behind 12S-B c01/c02 chain. No new dispatch/decision to C (inbox/3号 and inbox/coordinator zero new files after 13:39). 16B frozen REVIEW_PENDING unmerged; closure = incremental OCR -> strong review pack (auth-24h-20261013 within grant) -> merge -> 12S-C. 12S-C still WAITING (16B+12S-A+12S-B not all merged). C no in-flight process, no second dev slot.",
+  "evidence": "snapshot C.json fp 232205f7; TODO.md r155; sessions/C.md r156 entry line 543",
+  "next": "wait incremental OCR chain + coordinator new dispatch"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-205353-nochange",
+  "occurred_at": "2026-10-12T20:56:23+08:00",
+  "recorded_at": "2026-10-12T20:56:23+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "C 巡检零新增无派单，main 本地前移 2 纯文档 commit 非 C，保持空闲",
+  "evidence": "sessions/C.md 2026-10-12 20:55 行",
+  "next": "继续 5 分钟巡检等待派单"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261012-124853-nochange",
+  "occurred_at": "2026-10-12T12:50:17+08:00",
+  "recorded_at": "2026-10-12T12:50:17+08:00",
+  "role": "C",
+  "task": "poll",
+  "attempt": "1",
+  "status": "NO_CHANGE",
+  "summary": "10:38:53 后 C 范围零新增、无 C 新派单；events/C 10:49-12:46 共 16 轮 NO_CHANGE 巡检在案但 sessions/C.md mtime 停 10:46:52，11:58-12:43 各轮 sessions 追加缺口已知待协调者抽查；ocr.lock 12:44=协调者 r79 T07A OCR 续批在途非 C；main 453da0c 双核、wt-03b 6f1a9ad 干净、无 C 在途进程；保持空闲待派单",
+  "evidence": "sessions/C.md 12:49 条目；events/C c-poll-20261012-124353-nochange 前轮事件",
+  "next": "继续 5 分钟巡检"
+}

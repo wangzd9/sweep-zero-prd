@@ -1,0 +1,83 @@
+{
+  "status": "complete",
+  "llm": {
+    "provider": "vllm-local",
+    "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8"
+  },
+  "message": "Review complete: 0 finding(s) across 1 selected item(s).",
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 0,
+    "total_tokens": 673214,
+    "input_tokens": 623805,
+    "output_tokens": 49409,
+    "elapsed": "19m56s"
+  },
+  "tool_calls": {
+    "total": 34,
+    "by_tool": {
+      "code_search": 13,
+      "file_read": 19,
+      "file_read_diff": 2
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [],
+  "groups": [
+    {
+      "label": "app/services/ingest_service.py",
+      "files": [
+        "app/services/ingest_service.py"
+      ]
+    }
+  ],
+  "session_id": "1fba88c1-2b55-4cce-9e97-003dcf1009e9",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "1fba88c1-2b55-4cce-9e97-003dcf1009e9",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "6fb42c4821bc5dfa54531c88fbc0ef1578715748",
+      "requested_head": "77c395b902f8b8b57276ac509e1c2dcc5ab26e90",
+      "resolved_base": "6fb42c4821bc5dfa54531c88fbc0ef1578715748",
+      "resolved_head": "77c395b902f8b8b57276ac509e1c2dcc5ab26e90",
+      "exact_range": "6fb42c4821bc5dfa54531c88fbc0ef1578715748..77c395b902f8b8b57276ac509e1c2dcc5ab26e90",
+      "source_artifact_sha256": "5f7d3269cb17b7b8a9f4553e2b7f3a22f306e11c5a7efd1358e0d1fce676ee62"
+    },
+    "execution": {
+      "ocr_version": "v1.12.13",
+      "provider": "vllm-local",
+      "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "4b124c2db64aaa594d53430fa44f32f31280d3b4b7b6fed6082f8565c364993d",
+      "runtime_config_sha256": "8edc2e1d8571fdf287cc13c33745cd126301e450999b13d052de01b19b6d17d2"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "a98ad152feca5d2ccdbc574676beb94501f2dcb123ef7c0cf8d756332070fd29",
+          "path": "app/services/ingest_service.py",
+          "fingerprint": "bbe8968fa83dacfc6be0f715b4c49f00ec6ece2762c2f20b2c5bf3107b18fac7"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "a98ad152feca5d2ccdbc574676beb94501f2dcb123ef7c0cf8d756332070fd29",
+          "path": "app/services/ingest_service.py",
+          "fingerprint": "bbe8968fa83dacfc6be0f715b4c49f00ec6ece2762c2f20b2c5bf3107b18fac7"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 1196079
+  }
+}

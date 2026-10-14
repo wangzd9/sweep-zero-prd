@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t10d2-20261012-0100-merged-a77aa45",
+  "occurred_at": "2026-10-12T01:01:48+08:00",
+  "recorded_at": "2026-10-12T01:01:48+08:00",
+  "role": "B",
+  "task": "t10-defect2-storage-offset",
+  "attempt": "1",
+  "status": "MERGED",
+  "summary": "交付 d4719f6 已合入 main a77aa45（--no-ff，00:56:34，OCR T10D2-r1 0 findings 收口 00:56:24）；inbox/2号 无返修无新单，等协调者 E2E 复跑+TASK-10 DONE 记账",
+  "evidence": "inbox/sessions/B.md#巡检-2026-10-12-01-00",
+  "next": "IDLE_WAITING，收 E2E 复跑结论/返修/新单再启动"
+}

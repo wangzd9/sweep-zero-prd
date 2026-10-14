@@ -1,0 +1,14 @@
+{
+ "event_id": "coord-batch1012-d4-delete-executed-24ab78bb-done-20261014",
+ "occurred_at": "2026-10-14T00:21:00+08:00",
+ "recorded_at": "2026-10-14T00:24:00+08:00",
+ "role": "COORDINATOR",
+ "task": "TASK-11S-BATCH-1012",
+ "attempt": "1",
+ "status": "TRACKING",
+ "supersedes_context": "prerun 00:15:53 指纹 c6f4b6c1 唤醒；pending 变更源（本角色 00:13 事件/BATCH-STATUS/sessions）核对为本轮自写回声；00:16 后新发现=A D4 删除时序执行（00:17）+ C obs14（00:19：24ab78bb NOT_APPLICABLE 实证 + 4acf689f 起跑）+ B 00:17 消费事件",
+ "summary": "D4 删除时序完成第①步且解锁条件全部满足：A 00:17:07 备份 3 date-grouped submission 全行（03281a51/5e08e73d/7f4e7b75，post 前均 SCHEDULED、claim_key NULL、对应 dup run 全 SCENE_DONE）→00:17:59 删除全 rc=0，post 查询 1012 批次 submission 仅剩 A flat 四提交（24d60fee SCHEDULED/518089ed/a65a25a7/87dfebaa PENDING_INPUT），备份+删除双回执在案（d4-dategrouped-subs-backup-0016.json / d4-dategrouped-subs-delete-0017.json）。dup 面三 run 全终态且 outcome 实证齐（C obs14 只读实测）：a4824f1c SUCCESS 23:54:41 / eb4397c3 NOT_APPLICABLE 00:01:29 / 24ab78bb NOT_APPLICABLE 00:07:46 零模型无伪切片（slices/.staging 四目录实测无 24ab78bb，缺 /iv_* topic 同 eb4397c3 口径），D4 解锁 3/3。**scene-4acf689f（16_02_03 正式链，source 91FFEEC1…）现 SCENE_RUNNING**（lease_owner platform-local，heartbeat 00:16:27 续租活跃，frozen_at 23:05:30），跨 DB3 大包串行中跨夜不 kill/retry——TESTER 八步/跨DB3/reconcile 验收面正式进入终态等待。NAS 71%（98T 用 70T）、load 2.44 大包运行抬升属预期。A 余 D4 第②③步=核 flat 三提交 409 释放与绑定推进 + 删 NAS ready/spray/20261012/ 残留（scanner 409 行指向 16_00_13 date-grouped 副本，随目录清理）；C obs14 同步核账。dup 14_42_48 第二份切片（slices/test/spray 顶层 FFDEE943×4）保留现场，处置口径待 TESTER 取证后由协调者收口。BATCH-STATUS 逐包三行与 A/C 角色行已同步。无新派单：A/C/TESTER 均在既定指针内（resume-ruling-2338 / obs14 next / ruling-2338-verify）。",
+ "evidence": "receipts/TASK-11S-BATCH-1012/d4-dategrouped-subs-backup-0016.json(00:17:07, run_links 三 dup SCENE_DONE); receipts/TASK-11S-BATCH-1012/d4-dategrouped-subs-delete-0017.json(00:17:59, post 清零); inbox/events/C/c-t11s-batch-1012-obs14-20261014.json(24ab78bb NOT_APPLICABLE 00:07:46 实证+4acf689f SCENE_RUNNING); receipts/TASK-11S-BATCH-1012/scan2-dupruns-409-evidence-2338.json; inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md(本轮同步)",
+ "next": "5min observer 接续：① C 核 4acf689f SCENE_RUNNING→终态（checkpoint/续租区分 adapter 长阶段，不因超窗 kill/retry）；② A 核 flat 409 释放+绑定+ready/spray/20261012/ 清理回执→TESTER D4 claim 释放对账与逐包终态验收（4acf689f 八步/跨DB3/两次 reconcile）；③ NAS slices 顶层 FFDEE943 dup 第二份切片保留现场，TESTER 取证后协调者收口处置；08:00 夜间汇总（含 D5 肇事身份 192.168.2.132 上报用户）",
+ "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

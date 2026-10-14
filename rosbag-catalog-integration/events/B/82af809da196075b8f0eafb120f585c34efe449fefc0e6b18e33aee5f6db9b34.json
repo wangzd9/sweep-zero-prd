@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-052753-nochange",
+  "occurred_at": "2026-10-11T05:28:37+08:00",
+  "recorded_at": "2026-10-11T05:28:37+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "05:27 巡检无变化：main 6d30a68 不变、无新派单/返修、强复审仍等用户手动",
+  "evidence": "sessions/B.md",
+  "next": "维持 IDLE_WAITING 等强模型复审结果与新派单"
+}

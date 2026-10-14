@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-114753-t16c-paused-ocr-c05-inflight-r146-verified",
+  "occurred_at": "2026-10-13T11:48:30+08:00",
+  "recorded_at": "2026-10-13T11:48:30+08:00",
+  "role": "B",
+  "task": "TASK-16C",
+  "attempt": "1",
+  "status": "PAUSED",
+  "summary": "11:47:53 巡检（fingerprint c6e96f54，变更源=TODO.md 11:44:52 刷新+本侧 11:43 r146 事件）：已核 TODO r146 注记口径与 r146 事件一致，无新约束、无 B 新派单/返修/裁决单（inbox/2号|coordinator|decision 11:43 后 find 零新增）；16C 串行 OCR 链 progress 实测维持 4/7 收口（c01 4 findings/c02 2 findings C5 CONFIRMED CORRECTION/c03 4 findings 时间契约 CORRECTION 候选/c04 0 findings），c05 pipeline_detail.html 在途（chain pid 1682826 存活，16B 第 8 次等待器 pid 1733066 将在 c07 后自动接跑）——均协调者门禁面只读观察；返修单随 PAUSED 搁置不派，本侧零动作。",
+  "evidence": "sessions/B.md 11:47 巡检条目（248 行）；~/.hermes/cache/scratch/t16c_ocr/t16c_ocr_progress.txt c04 DONE 11:33:15 行；ps 1682826/1733066 存活；find inbox/2号|coordinator|decision 11:43 后零新增；wt-04a-t16c HEAD=5c80857 冻结洁净",
+  "next": "等协调者 OCR 链 c05-c07 收口+findings 汇总裁决；16C 恢复且收问题 ID 返修单按 attempt 续 b/task-16c-scene-ui-minimal（C5+c03 时间契约同族面一次最小返修）；空闲只读巡检不扩需求、不碰生产。"
+}

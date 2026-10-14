@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-task06-r2-final-mysql-e2e-deliver-20261010-1818",
+  "occurred_at": "2026-10-10T18:18:26+08:00",
+  "recorded_at": "2026-10-10T18:18:26+08:00",
+  "role": "TESTER",
+  "task": "TASK-06",
+  "attempt": "r2-final-mysql-e2e",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "R2 全链 MySQL 8.4 终测交付：6 PASS / 1 FAIL。S1 R2-01 迁移链 1406：alembic_version.version_num VARCHAR(32) 容不下 33 字符 revision 20261009_02_ingest_frozen_columns，全新库与已有库增量路径均停在 20261009_01，06 聚合放行门禁不通过。S2 outbox 方言与 rowcount 接线、S3 switch 并发无 1093 不倒退、S4 R2-05 契约交错、S5 B8c 路径逃逸、S7 r6 M-1/M-2 均 PASS。另发现缺陷2：测试夹具 _parent 长 tag 生成 27 字符以上 bag_uid 超出 VARCHAR(26)，SQLite 静默截断遮坑，致 3 个仓库用例在 MySQL 下 1406 或 StaleDataError。",
+  "evidence": "reports/TASK-06/r2-final-mysql-e2e.md; test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-1.md",
+  "next": "等协调者裁决：S1 回派 1 号加宽 version_num 迁移后新 attempt 复测；缺陷2 建议 2 号修夹具；06 聚合维持锁闭"
+}

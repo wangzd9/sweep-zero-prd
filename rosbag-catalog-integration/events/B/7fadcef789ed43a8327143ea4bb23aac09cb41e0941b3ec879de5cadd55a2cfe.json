@@ -1,0 +1,12 @@
+{
+  "event_id": "b-ack-20261011-165403-t08c1",
+  "occurred_at": "2026-10-11T16:54:47+08:00",
+  "recorded_at": "2026-10-11T16:54:47+08:00",
+  "role": "B",
+  "task": "T08-C1C2",
+  "attempt": "t08c-1",
+  "status": "ACCEPTED",
+  "summary": "领取 C1C2 秒精度专项：ACK 落盘，wt-04a-t08c 新建 base f9bafb0，开工",
+  "evidence": "inbox/2号/TASK-08/c1c2-second-precision-ack.md",
+  "next": "开发与真 MySQL A/B"
+}

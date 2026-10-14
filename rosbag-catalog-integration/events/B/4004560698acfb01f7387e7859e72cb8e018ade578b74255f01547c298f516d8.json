@@ -1,0 +1,12 @@
+{
+  "event_id": "d3-r2-ocr-complete-81a9e337",
+  "occurred_at": "2026-10-10T21:43:30+08:00",
+  "recorded_at": "2026-10-10T21:43:30+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "D3-r2 OCR 批次收口：session 81a9e337 complete，4e2158e 单文件 +27/-3，0 findings（无 high/critical），6m6s/333k tokens",
+  "evidence": "reviews/TASK-06B/attempt-1-defect3-reconcile-replay/ocr-d3-r2.log",
+  "next": "等协调者销账+--no-ff 合入 main 后派 TESTER 新 attempt 真 MySQL 复测"
+}

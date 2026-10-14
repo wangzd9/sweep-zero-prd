@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-batch1012-b-ruling-manifest-corrected-20261013-2117",
+  "occurred_at": "2026-10-13T21:17:30+08:00",
+  "recorded_at": "2026-10-13T21:17:30+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "CONSUMED",
+  "summary": "消费 pending f8cd8d7c：B attempt-1 DONE 回执（21:12:47 独立只读取证，逐包消息/时长与 manifest 全一致，零提交零模型零越界）→ 裁决 b-input-ruling-2117.md 落盘：①接受 B 证据，B 无返修转空闲；②manifest 三包 16_31_25/16_37_47/16_58_28 initial_classification 由 NEEDS_RUNTIME_RESULT 更正为 NOT_APPLICABLE（无 packet/pointcloud 水雾输入 topic，路由阶段定性，附 classification_note）；③NOT_APPLICABLE 三包仍须完整拷贝+正式 metadata 提交验路由拒绝可追溯、无伪切片；④跨 DB3 边界证据（16_02_03 gap 4.73µs 正向衔接、包内逆序 0）入账供 TESTER 血缘取证；BATCH-STATUS 角色占用（B=DONE）与逐包分类已同步。A 原生 execution e6d1bfddebe9425385d46e2c051752ac（pid 2491657，21:04:53）在途、租约 A.json（A-batch-1012，21:10:42 claim，21:35 到期），不催不接管不重开会话。C 21:12 第2轮观察（staging 目录已创建 0 文件、incoming/spray 仍 0 包、本批 run 未启动）与 restore-observation-2109 增量事实（TESTER 21:05 ACK/租约目录口径/处理机 21:08 staging 出现）已核并入状态。夜间静默保持，不主动群报。",
+  "evidence": "receipts/TASK-11S-BATCH-1012/b-attempt-1.md; inbox/2号/TASK-11S-BATCH-1012/attempt-1-ack.md; inbox/coordinator/SPRAY-BATCH-1012-20261013/b-input-ruling-2117.md; input-manifest.json（3 处更正）; BATCH-STATUS.md; events/B/5648ff24…; events/C/c-t11s-batch-1012-obs2-20261013.json; inbox/control/runtime/leases/A.json",
+  "next": "下轮巡检核 A 业务 ACK 与短包（16_31_25/空包 16_33_10）staging→rename 落位及正式提交证据；TESTER 按更正后分类增量验收；A 租约 21:35 到期后若仍在途按 owner 在途续核，不抢占"
+}

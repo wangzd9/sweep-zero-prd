@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-214753-task09-merged-ca8730d-waiting-tester",
+  "occurred_at": "2026-10-11T21:49:21+08:00",
+  "recorded_at": "2026-10-11T21:49:21+08:00",
+  "role": "B",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "MERGED_WAITING_POST_MERGE_VERIFY",
+  "summary": "协调者 ACCEPT_MERGED 合入 ca8730d，TESTER 合入后验证在途，本侧 IDLE_WAITING",
+  "evidence": "inbox/coordinator/TASK-09/attempt-1-acceptance-decision.md",
+  "next": "等 TESTER 验证/09 DONE 记账或 TASK-10 派单"
+}

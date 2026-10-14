@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-012253-nochange-t07b-ocr-r2b4-stalled-idle",
+  "occurred_at": "2026-10-13T01:25:24+08:00",
+  "recorded_at": "2026-10-13T01:25:24+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "2-r2",
+  "status": "REVIEW_PENDING",
+  "summary": "07B a2r2 交付冻结等审；r105 OCR r2b4 失活待协调者收口；本侧零业务变化 IDLE_WAITING",
+  "evidence": "sessions/B.md 01:23 条目",
+  "next": "等协调者收口 r2b4/r2b5/r2b1 补跑与 b3 裁决"
+}

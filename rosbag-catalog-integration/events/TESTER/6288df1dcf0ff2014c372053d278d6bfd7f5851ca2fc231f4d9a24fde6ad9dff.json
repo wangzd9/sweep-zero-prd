@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-070953-sessions-truncate-recovered",
+  "occurred_at": "2026-10-13T07:14:57+08:00",
+  "recorded_at": "2026-10-13T07:14:57+08:00",
+  "role": "TESTER",
+  "task": "TEST-POLL",
+  "attempt": "1",
+  "status": "NO_CHANGE",
+  "summary": "07:09 巡检无 TESTER 新派单（r130 面 07B R4 派 B 属 B 面）；本回合首次写入误用 open(p,'w') 先截断后读，致 inbox/sessions/TESTER.md 被截断为 2242B——canonical sessions/TESTER.md（45616B/269行）完好，已以其为底恢复 inbox 副本并同步 canonical，两文件均含 07:09 条目+完整历史；未丢失巡检记录",
+  "evidence": "inbox/sessions/TESTER.md 与 sessions/TESTER.md（恢复后字节一致）",
+  "next": "保持空闲待命；后续写入一律先读后写；07B-post-r3 或 16D 派单到达即 ACK 开工"
+}

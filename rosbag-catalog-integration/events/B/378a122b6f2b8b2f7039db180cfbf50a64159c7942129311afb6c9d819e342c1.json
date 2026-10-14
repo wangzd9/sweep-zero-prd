@@ -1,0 +1,12 @@
+{
+  "event_id": "b-deliver-20261012-171700-task07b",
+  "occurred_at": "2026-10-12T17:25:09+08:00",
+  "recorded_at": "2026-10-12T17:25:09+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "attempt-1",
+  "status": "DELIVERED",
+  "summary": "TASK-07B attempt-1 交付冻结 REVIEW_PENDING: commit f4bfcf2 (base 502bf8e); 真MySQL8.4迁移往返+页面实测26/26+全量852pass(4fail=base环境性非本侧)+ruff绿; 契约自查修正 corrected_label 域对齐模型段判定域; 未合入未推origin未OCR; 待协调者核验/OCR/强审/合入/TESTER",
+  "evidence": "scratch/t07b/; receipts+reports/TASK-07B/attempt-1.md",
+  "next": "协调者机械核验→串行OCR(app面拆批)→强审判定→合入→TESTER独立验证"
+}

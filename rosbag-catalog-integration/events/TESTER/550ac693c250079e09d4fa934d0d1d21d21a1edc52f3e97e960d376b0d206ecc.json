@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-a-landing-first-wave-202610132137000800",
+  "occurred_at": "2026-10-13T21:47:07+08:00",
+  "recorded_at": "2026-10-13T21:47:07+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "A落包首波独立核验：16_00_13 SCHEDULED+run SCENE_RUNNING（ready sha 2/2 MATCH）、16_31_25 SCHEDULED+QUEUE（iv topic空=NOT_APPLICABLE输入面确认、sha 2/2 MATCH）、16_33_10空包PENDING_INPUT待拒绝可追溯、14_42_48已落incoming契约路径sha MATCH但正式提交未核验；发现A落包目标为incoming/spray/20261012/子目录（非契约直接子路径）报协调者+A核对；首包复用PASS冻结；16_02_03/16_37_47/16_58_28在途跨夜",
+  "evidence": "test-receipts/TASK-11S-BATCH-1012/attempt-1.md#增量验收-213x",
+  "next": "下轮核16_00_13终态+产物+reconcile、16_31_25路由拒绝无伪切片、14_42_48提交落账、空包拒绝可追溯"
+}

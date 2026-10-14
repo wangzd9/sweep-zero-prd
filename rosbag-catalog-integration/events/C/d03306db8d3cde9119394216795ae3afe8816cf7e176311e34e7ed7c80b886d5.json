@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-181853-t08c1-delivery-no-dispatch",
+  "occurred_at": "2026-10-11T18:20:16+08:00",
+  "recorded_at": "2026-10-11T18:20:16+08:00",
+  "role": "C",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "NO_CHANGE",
+  "summary": "巡检：2号 t08c-1 回执/报告 18:15 后落盘（REVIEW_PENDING，f9bafb0→bf48a45 未合入），inbox/3号 无新派单，C 保持空闲",
+  "evidence": "receipts/TASK-08/c1c2-t08c-1.md",
+  "next": "等协调者验收/测试者独立验证，无 C 新单"
+}

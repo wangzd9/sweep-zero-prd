@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "input_sha256": "adacd3c8540c0c0f529a380846499a751b3bb234b64fbab616998fc7fb95a530",
+  "record": {
+    "event_id": "C:ccr1-delivered-frozen-ce5921d-20261014",
+    "kind": "business",
+    "task": "TASK-16C-C",
+    "attempt": "attempt-1-ccr1",
+    "status": "DELIVERED_REVIEW_PENDING",
+    "summary": "C CC-R1 返修冻结交付：续 commit 522bb3f→ce5921d（不新开 attempt，branch c/task-16cc-pipeline-detail，wt-c-16cc 干净仅 .venv 未跟踪）。修复面=模板数据血缘兜底 {% else %} 分支补 <ol class=\"lineage\"> 开始标签（c05-04 半修收口，li 文案/muted 不变）+ test_no_lineage_fallback_li_in_ol 同步断言兜底 li 位于开始标签之后、</ol> 之前。RED→GREEN 实测：新断言对 522bb3f 旧模板 FAILED（assert -1 != -1），修复后 1 passed；复跑 pytest tests/test_task16cc_scene_detail.py tests/test_task16c_ui_minimal.py -q = 31 passed（seed 固有失败不在本两文件内，原口径不计本账）。diff 严格在返修单两小面内，按口径不整叶重跑 OCR。回执 attempt-1.md 已补 CC-R1 返修段。",
+    "evidence": "git rev-parse ce5921dcd9df71b295f58404a8d74e0dbac9e6bd；git diff --stat 522bb3f..ce5921d=2 files +8/-2（app/templates/pipeline_detail.html +1、tests/test_task16cc_scene_detail.py +7/-2）；pytest 单测 stash RED/GREEN 实测在案；receipts/TASK-16C-C/attempt-1.md CC-R1 返修段；ACK inbox/3号/TASK-16C-C/cc-r1-ack.md 13:08",
+    "next": "等协调者在 ce5921d 上独立核 diff 与实际文件（超面则转增量 OCR，协调者唯一入口）；TESTER 16D 独立验证（浏览器 JS/严格 MySQL）在固定集成候选上收口，不互斥；c05-04 账交 16R 更新为「修复已交付待独立核」；C 开发槽释放，11S 只读观察面按 5 分钟巡检继续。",
+    "occurrence": {
+      "kind": "now"
+    },
+    "schema_version": 1,
+    "role": "C",
+    "recorded_at": "2026-10-14T13:11:39+08:00",
+    "occurred_at": "2026-10-14T13:11:39+08:00",
+    "time_source": {
+      "kind": "script_now"
+    }
+  },
+  "complete": true,
+  "session": "sessions/C.md"
+}

@@ -1,0 +1,11 @@
+# b-poll-20261012-115753-t07a-delivered-ocr-coord-running
+- event_id: b-poll-20261012-115753-t07a-delivered-ocr-coord-running
+- role: B
+- occurred_at: 2026-10-12T11:57:53+08:00
+- recorded_at: 2026-10-12T11:59:45+08:00
+- task: TASK-07A
+- attempt: 1
+- status: REVIEW_PENDING
+- summary: T07A attempt-1 交付冻结（09:45 派单→09:49 ACK→11:17 交付，sessions 09:39 后断记本轮补记）：commit f94d006（base 453da0c，11 文件 +905/-30，scene/task-07a-visibility-lineage @ wt-04a-t07a）；lineage API 双向+非场景 200 null（零迁移，收口 T10 路由缺口 #2）/pipelines 场景状态可见/bags 三视图+筛选旧入口不回归/详情双向跳转/本地 real 栈页面实测证据在报告。协调者 r79 串行 OCR T07A-r1f g2 批在途（ocr.lock 11:56:33，只读观察）。origin/main 453da0c 双核不变（07A 未合入符合预期）；inbox/2号 无新派单/返修；本侧无在途业务进程。
+- evidence: receipts/TASK-07A/attempt-1.md; reports/TASK-07A/attempt-1.md; inbox/2号/TASK-07A/attempt-1-ack.md
+- next: 等协调者 OCR 收口+机械核验+合入+TESTER 独立验证；返修按 attempt 续本分支；07B/07C 未派不启动。

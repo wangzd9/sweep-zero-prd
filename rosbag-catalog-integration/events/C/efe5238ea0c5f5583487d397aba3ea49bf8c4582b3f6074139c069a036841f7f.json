@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-020853-t16b-delivered-ocr-queued",
+  "occurred_at": "2026-10-13T02:15:37+08:00",
+  "recorded_at": "2026-10-13T02:15:37+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "16B attempt-1 交付冻结 0208a73（5文件+2543/-0，回执01:09）；补记 sessions 22:35→02:1x 记账缺口；协调者 r107 机械核验全绿；16A/16B OCR v2 在途（16A 3/14 批收口 0 findings，16B 3 批 QUEUED）；07B 强审 REWORK_REQUIRED→R3 派 B（非 C 范围）",
+  "evidence": "receipts/TASK-16B/attempt-1.md",
+  "next": "保持交付冻结，等 16B OCR 收口→合入→16A 接受后全链冒烟"
+}

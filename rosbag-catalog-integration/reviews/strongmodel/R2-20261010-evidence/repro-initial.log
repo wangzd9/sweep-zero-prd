@@ -1,0 +1,111 @@
+effective settings: {"a100_enabled": false, "app_name": "ROSBag 数据追溯", "auto_retry_enabled": true, "auto_retry_max_retries": 2, "backend_url": "", "database_url": "sqlite:////tmp/r2-review-on6fyt7c/db.sqlite", "demo_data": true, "deployment_mode": "development", "display_timezone": "Asia/Shanghai", "environment": "test", "nas_final_root": "/test/final", "nas_ready_root": "/test/ready", "nas_scan_root": "/test/incoming", "nas_storage_root": "/test", "nvidia_nas_origin_root": "/test/nvidia_origin", "orchestrator_interval_seconds": 10, "phase0_work_root": "/home/wang/work/.local/rosbag-catalog/phase0-work", "scanner_interval_seconds": 600, "test_execution_mode": "mock"}
+switch retry: HTTP 409 -> HTTP 200, SCENE_DONE, current=False
+.effective settings: {"a100_enabled": false, "app_name": "ROSBag 数据追溯", "auto_retry_enabled": true, "auto_retry_max_retries": 2, "backend_url": "", "database_url": "sqlite:////tmp/r2-review-on6fyt7c/db.sqlite", "demo_data": true, "deployment_mode": "development", "display_timezone": "Asia/Shanghai", "environment": "test", "nas_final_root": "/test/final", "nas_ready_root": "/test/ready", "nas_scan_root": "/test/incoming", "nas_storage_root": "/test", "nvidia_nas_origin_root": "/test/nvidia_origin", "orchestrator_interval_seconds": 10, "phase0_work_root": "/home/wang/work/.local/rosbag-catalog/phase0-work", "scanner_interval_seconds": 600, "test_execution_mode": "mock"}
+reconcile with two valid versions:  409 {"detail":"INCOMPLETE: 发布物 per-slice manifest digest 不一致（混合版本，需人工对账）"}
+.effective settings: {"a100_enabled": false, "app_name": "ROSBag 数据追溯", "auto_retry_enabled": true, "auto_retry_max_retries": 2, "backend_url": "", "database_url": "sqlite:////tmp/r2-review-on6fyt7c/db.sqlite", "demo_data": true, "deployment_mode": "development", "display_timezone": "Asia/Shanghai", "environment": "test", "nas_final_root": "/test/final", "nas_ready_root": "/test/ready", "nas_scan_root": "/test/incoming", "nas_storage_root": "/test", "nvidia_nas_origin_root": "/test/nvidia_origin", "orchestrator_interval_seconds": 10, "phase0_work_root": "/home/wang/work/.local/rosbag-catalog/phase0-work", "scanner_interval_seconds": 600, "test_execution_mode": "mock"}
+Feffective settings: {"a100_enabled": false, "app_name": "ROSBag 数据追溯", "auto_retry_enabled": true, "auto_retry_max_retries": 2, "backend_url": "", "database_url": "sqlite:////tmp/r2-review-on6fyt7c/db.sqlite", "demo_data": true, "deployment_mode": "development", "display_timezone": "Asia/Shanghai", "environment": "test", "nas_final_root": "/test/final", "nas_ready_root": "/test/ready", "nas_scan_root": "/test/incoming", "nas_storage_root": "/test", "nvidia_nas_origin_root": "/test/nvidia_origin", "orchestrator_interval_seconds": 10, "phase0_work_root": "/home/wang/work/.local/rosbag-catalog/phase0-work", "scanner_interval_seconds": 600, "test_execution_mode": "mock"}
+Feffective settings: {"a100_enabled": false, "app_name": "ROSBag 数据追溯", "auto_retry_enabled": true, "auto_retry_max_retries": 2, "backend_url": "", "database_url": "sqlite:////tmp/r2-review-on6fyt7c/db.sqlite", "demo_data": true, "deployment_mode": "development", "display_timezone": "Asia/Shanghai", "environment": "test", "nas_final_root": "/test/final", "nas_ready_root": "/test/ready", "nas_scan_root": "/test/incoming", "nas_storage_root": "/test", "nvidia_nas_origin_root": "/test/nvidia_origin", "orchestrator_interval_seconds": 10, "phase0_work_root": "/home/wang/work/.local/rosbag-catalog/phase0-work", "scanner_interval_seconds": 600, "test_execution_mode": "mock"}
+Fsuccessful publish replay with original specs: FileNotFoundError before target reuse
+.
+=================================== FAILURES ===================================
+__________________ test_empty_published_db3_becomes_available __________________
+
+client = <starlette.testclient.TestClient object at 0x7594f397ab00>
+tmp_path = PosixPath('/tmp/pytest-of-wang/pytest-0/test_empty_published_db3_becom0')
+
+    def test_empty_published_db3_becomes_available(client, tmp_path):
+        with SessionLocal() as db:
+            parent = h._parent(db, "empty-db3")
+            run = h._create_run(client, parent.bag_uid)
+>           run.update(h._claim_specific(client, run["pipeline_run_id"]))
+
+../doc/prd/rosbag-catalog-integration/reviews/strongmodel/R2-20261010-evidence/test_r2_repro.py:84: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = <starlette.testclient.TestClient object at 0x7594f397ab00>
+run_id = 'scene-0ab92aaf0a3b46f1b2c50c51aad3'
+
+    def _claim_specific(client, run_id: str) -> dict:
+        """领取并校验拿到的是指定 run；其他测试残留场景 run 则释放回队列重试。"""
+        for _ in range(10):
+            claimed = client.post(
+                "/api/v1/orchestrator/claim", json={"queue": "SCENE_SLICE_QUEUE", "executor_id": "t06b", "ttl_seconds": 300}
+            ).json()
+            if claimed.get("claimed") and claimed["pipeline_run_id"] == run_id:
+                return claimed
+            if claimed.get("claimed"):
+                client.post(
+                    f"/api/v1/orchestrator/task-leases/{claimed['lease_token']}/release-claim", json={"reason": "test"}
+                )
+>       raise AssertionError("无法领取指定场景 run")
+E       AssertionError: 无法领取指定场景 run
+
+tests/test_scene_result_report.py:157: AssertionError
+_________________ test_unclaimed_run_accepts_worker_completion _________________
+
+client = <starlette.testclient.TestClient object at 0x7594f3ba1ba0>
+
+    def test_unclaimed_run_accepts_worker_completion(client):
+        with SessionLocal() as db:
+            parent = h._parent(db, "unclaimed")
+            run = h._create_run(client, parent.bag_uid)
+            run["lease_token"] = None
+            req = body(parent, run, no_match(parent, run))
+            got = client.post(h._base_url(run["pipeline_run_id"], "complete-scene"), json=req)
+>           assert got.status_code == 200, got.text
+E           AssertionError: {"detail":"illegal pipeline status transition: SCENE_SLICE_QUEUE -> SCENE_DONE"}
+E           assert 409 == 200
+E            +  where 409 = <Response [409 Conflict]>.status_code
+
+../doc/prd/rosbag-catalog-integration/reviews/strongmodel/R2-20261010-evidence/test_r2_repro.py:111: AssertionError
+________________ test_late_old_event_run_overwrites_new_current ________________
+
+client = <starlette.testclient.TestClient object at 0x7594f377b6d0>
+
+    def test_late_old_event_run_overwrites_new_current(client):
+        with SessionLocal() as db:
+            parent = h._parent(db, "event-order")
+            entry = SceneEntry("slope", *h._cap())
+            spec = SceneRunCreate(source_id=parent.bag_uid, source_generation=parent.source_generation,
+                                  purpose="scene_slice", scenes=(entry,))
+            old, created = create_scene_run(db, spec)
+            assert created
+            db.commit()
+            old_info = {"pipeline_run_id": old.pipeline_run_id}
+>           old_info.update(h._claim_specific(client, old.pipeline_run_id))
+
+../doc/prd/rosbag-catalog-integration/reviews/strongmodel/R2-20261010-evidence/test_r2_repro.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = <starlette.testclient.TestClient object at 0x7594f377b6d0>
+run_id = 'scene-1fac1d57b31145199ea14a70b3e2'
+
+    def _claim_specific(client, run_id: str) -> dict:
+        """领取并校验拿到的是指定 run；其他测试残留场景 run 则释放回队列重试。"""
+        for _ in range(10):
+            claimed = client.post(
+                "/api/v1/orchestrator/claim", json={"queue": "SCENE_SLICE_QUEUE", "executor_id": "t06b", "ttl_seconds": 300}
+            ).json()
+            if claimed.get("claimed") and claimed["pipeline_run_id"] == run_id:
+                return claimed
+            if claimed.get("claimed"):
+                client.post(
+                    f"/api/v1/orchestrator/task-leases/{claimed['lease_token']}/release-claim", json={"reason": "test"}
+                )
+>       raise AssertionError("无法领取指定场景 run")
+E       AssertionError: 无法领取指定场景 run
+
+tests/test_scene_result_report.py:157: AssertionError
+=============================== warnings summary ===============================
+.venv/lib/python3.10/site-packages/starlette/testclient.py:51
+  /home/wang/work/rosbag-catalog/.venv/lib/python3.10/site-packages/starlette/testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../doc/prd/rosbag-catalog-integration/reviews/strongmodel/R2-20261010-evidence/test_r2_repro.py::test_empty_published_db3_becomes_available
+FAILED ../doc/prd/rosbag-catalog-integration/reviews/strongmodel/R2-20261010-evidence/test_r2_repro.py::test_unclaimed_run_accepts_worker_completion
+FAILED ../doc/prd/rosbag-catalog-integration/reviews/strongmodel/R2-20261010-evidence/test_r2_repro.py::test_late_old_event_run_overwrites_new_current
+3 failed, 3 passed, 1 warning in 2.23s
+
+EXIT_CODE=1

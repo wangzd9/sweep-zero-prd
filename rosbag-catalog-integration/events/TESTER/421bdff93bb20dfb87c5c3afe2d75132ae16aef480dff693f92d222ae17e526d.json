@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261011-164553-t08-delivery-observed",
+  "occurred_at": "2026-10-11T16:41:47+08:00",
+  "recorded_at": "2026-10-11T16:41:47+08:00",
+  "role": "TESTER",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "巡检：2号 TASK-08 attempt-1 联调交付 REVIEW_PENDING（receipts/TASK-08/attempt-1.md，base 62a85bf，零业务改动；全链路真 MySQL PASS+I-1 回归 36 passed；文件级 55/10 暴露 C1/C2/C3 三类根因待协调者 §F 裁决回派，属 06B 缺陷3 同根因家族旧流程残留）。main f9bafb0=origin/main 未再变，attempt-5 证据不失效；inbox/TESTER 无 PENDING；无 tester 容器残留 → 维持 IDLE，不代审核不回派。",
+  "evidence": "receipts/TASK-08/attempt-1.md; reports/TASK-08/attempt-1.md; git rev-parse main f9bafb0",
+  "next": "等协调者 TASK-08 §F 裁决；如 TESTER 独立验证/回归确认新派单 ACK 后开工"
+}

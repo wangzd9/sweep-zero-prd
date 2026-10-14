@@ -1,0 +1,13 @@
+{
+  "event_id": "c-t11s-batch-1012-obs16-nochange-20261014",
+  "occurred_at": "2026-10-14T00:37:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs15-d4nasdone（00:27）后新一轮：pending 触发源=本角色自产 obs15 事件（first_seen 00:30:10）+ BATCH-STATUS 00:28:36 mtime（A 面 D4 第①②步记账，obs15 已消费其内容）；ACK 21:07:41 在案不重复领取",
+  "summary": "C 第16轮只读复核（处理机 00:35-00:36 实测）与 obs15 **零状态变化**：① 7 scene run 不变——六 SCENE_DONE（c4a88c07/604c0896/bc8c1d1c/a4824f1c/eb4397c3/24ab78bb）+ scene-4acf689f（16_02_03 正式链 source 91FFEEC1…）仍 SCENE_RUNNING attempt=1 lease_owner=platform-local，heartbeat 00:34:58 续租活跃、lease 至 00:36:58、八步全 QUEUED（CLAIMED/CLAIM_RELEASED『SCENE_EXEC_HOST busy』串行事件链在案），proxy 8767 active_runs=[4acf689f ACCEPTED]，跨 DB3 大包串行中不因观察超窗 kill/retry；② flat 三提交 a65a25a7/87dfebaa/518089ed 仍无新绑定 run（队列顺延属预期，D4 第②③步归 A 面）；③ incoming/spray 仍仅 16_33_10 空包（D6 正式拒绝痕迹 A 面补台账）；④ 资源：NAS 98T/70T/29T 71% 不变、load 1.25/1.33/1.39 无风险。C 全程只读（ssh curl 8180/8767、df、uptime），未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "处理机只读实测：curl 8180 pipeline-runs?limit=200 rc=200（7 scene run 状态与 obs15 一致）；pipeline-runs/scene-4acf689f9a6a473da1fa2f2efc70 rc=200（SCENE_RUNNING attempt=1 auto_retry_count=0 lease_expires 00:36:58 heartbeat 00:34:58 steps 8×QUEUED）；8767/health rc=200 active_runs=[scene-4acf689f ACCEPTED]；df /mnt/nas_backup 98T 70T 29T 71%；uptime load 1.25/1.33/1.39",
+  "next": "接续只读观察：① scene-4acf689f 终态（跨 DB3 大包）；② 串行释放后 flat 三提交绑定新 run，C 按 run 核账；③ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

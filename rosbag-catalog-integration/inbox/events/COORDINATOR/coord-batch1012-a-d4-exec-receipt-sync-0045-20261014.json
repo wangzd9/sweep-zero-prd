@@ -1,0 +1,14 @@
+{
+  "event_id": "coord-batch1012-a-d4-exec-receipt-sync-0045-20261014",
+  "occurred_at": "2026-10-14T00:46:00+08:00",
+  "recorded_at": "2026-10-14T00:46:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "TRACKING",
+  "supersedes_context": "prerun 00:45:53 指纹 0d736fe2 唤醒；变更源=B 00:43 IDLE 事件（消费自身 pending 后零动作）、A 回执 00:40:11 更新（D4 执行回合完整记录）、sessions/A|B 自写回声。上轮 00:39 已裁决 dup 切片并同步 BATCH-STATUS 00:40:01。",
+  "summary": "A 回执 00:40 增量与 BATCH-STATUS 00:40 口径逐条对账一致，无新冲突：D4 ①②③ 已执行（3 dup run 全终态+lease NULL 实测、3 date-grouped submission 备份 00:17:07+删除 00:17:59 全 rc=0、NAS ready/spray/20261012 14G 逐文件 SHA+flat 四包字节 4/4 MATCH 后 rename 移 .upload-staging/d4-dategrouped-delete-20261014 留暂存非 rm）、409 recovering 循环 00:28/00:33/00:36 三窗口停止（仅余 16_33_10 空包既定拒绝行）、incoming/spray/20261012 残留 absent、D1 24d60fee 未动仍 SCHEDULED 绑 scene-4acf689f（跨夜推进不 kill）、D6 台账补全。剩余面=A 下轮 poll 领取 D4③ 绑定收敛核（flat 三提交 PENDING_INPUT→绑定，预期 scene-4acf689f 终态后串行收敛）+TESTER dup 双写产物登记+scene-4acf689f 八步/跨DB3/两次 reconcile 验收。B DONE 21:12 无返修维持 IDLE_WAITING。无新派单、无 OCR（无代码变更）、强审 REVOKED 0/5 不续。",
+  "evidence": "receipts/TASK-11S-BATCH-1012/a-attempt-1.md（00:40:11，D4 执行回合节+观察项节）; receipts/TASK-11S-BATCH-1012/d4-dategrouped-subs-backup-0016.json、d4-dategrouped-subs-delete-0017.json、d4-nas-delete-evidence-0021.json; BATCH-STATUS.md 00:40:01 10881B（A 行/14_42_48/16_37_47/16_58_28/16_02_03 行口径一致）; events/B/b-t11s-batch-1012-ruling-dup-slices-0038-consumed-b-noaction-idle-quiet-20261014-0043.json; sessions/COORDINATOR.md 00:45 检查点",
+  "next": "5min observer 接续：A poll 领取 D4③ 后 flat 三提交绑定核+scene-4acf689f 终态跟踪（C 按 run 核账、TESTER 全链验收）；TESTER 按 ruling-dup-slices-0038 登记 dup 双写产物；08:00 夜间汇总含 D5 肇事身份 192.168.2.132 上报用户。",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-095753-waiting-tester5",
+  "occurred_at": "2026-10-11T10:00:10+08:00",
+  "recorded_at": "2026-10-11T10:00:10+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "WAITING_TEST",
+  "summary": "rework-6 f4cd654 已合入 main 4697be0 收口；TESTER attempt-5 已 ACK 在途；本侧无新派单无返修，空闲等待",
+  "evidence": "inbox/coordinator/TASK-06B/attempt-1-r2-rework-6-acceptance-decision.md",
+  "next": "等 TESTER attempt-5 PASS 与强复审 R2I-20261010-06（用户手动）"
+}

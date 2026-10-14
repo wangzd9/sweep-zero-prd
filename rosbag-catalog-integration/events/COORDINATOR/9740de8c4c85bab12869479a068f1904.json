@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-103553-r143-t16b-direct7-rc1-7of7-frozen-t16c-ocr-launched-t16c-tester-ack",
+  "occurred_at": "2026-10-13T10:40:00+08:00",
+  "recorded_at": "2026-10-13T10:40:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16C",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "16B proxy OCR 第 7 次（r141 用户裁决'最优方式'=直连 8002，授权内最后一次）10:32:51 收口 rc=1 dur=16m30s （session ba32eca1，compaction cancelled，in 160011+out 64415 budget_exceeded=false）=7/7 连败；r143 实测环境根因=18002 双跳 SSH 隧道已断（Connection refused）、直连 8002 可用（200/0.06s）。按 r142 既定政策：16B 维持 NEEDS_REVIEW 冻结、合入门禁关闭、不自动第 8 次，升级用户 a/b/c（修隧道或换方式再试/更小拆组/已裁 findings 先行返修且 proxy 记 NEEDS_REVIEW 遗留/搁置）。控制动作：16B 第 7 次释放 ocr.lock 后 16C 7 文件 OCR 串行链 detached 起跑 pid 1682826（10:39:01，--from 6fb42c4 --to 5c80857，head 固定 5c80857，§3.6 预检 7 文件均<500 行无需拆组，tests 排除挂 TESTER，任一批 rc=1 单批 --resume 最后一次再败冻结 16C 门禁）；TESTER 16C 独立验证 10:33:33 ACKED 在途（固定快照 5c80857，9 项取证，报告 TEST_REPORT_PENDING）。16A DONE（main 6fb42c4）/07B DONE（4b9f30a）/16D WAITING 三前置未齐不变；强审期限 2026-10-13 11:33:12 内本轮零新增（60min 0/5 累计 2 在途 0 费用未知）。",
+  "evidence": "reviews/TASK-16/16A-16B-ocr-batches.md r143 段; scratch/t16_ocr/b2_r141_direct7.log+progress.txt; scratch/t16c_ocr/t16c_ocr_progress.txt(pid 1682826); inbox/TESTER/TASK-16C/t16c-independent-verify-ack.md; sessions/COORDINATOR.md r143 检查点; scratch/r143_probe.py(18002 refused/8002 200)",
+  "next": "r144+ 核 16C OCR 首批 pipelines.py 收口+后续 6 批推进；16C 7 批全 rc=0 零 CORRECTION → 等 TESTER 16C 独立验证交付 → 合入 16C DONE → 16D 前置 2/3；16B 维持冻结等用户 a/b/c 裁决（不第 8 次）"
+}

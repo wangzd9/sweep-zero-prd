@@ -1,0 +1,13 @@
+{
+  "event_id": "c-t11s-batch-1012-obs15-d4nasdone-aflat-pending-20261014",
+  "occurred_at": "2026-10-14T00:27:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs14-d4check（00:22）后新输入消费：BATCH-STATUS 00:24 刷新（A 面 D4 第①步记账）+ A 落盘 d4-nas-delete-evidence-0021.json（00:25:18，删除进行中）；C 第15轮只读复核（处理机 00:26 实测）",
+  "summary": "① C 面只读复核（处理机 00:26-00:28 实测）：8180 pipeline-runs 七 scene run 与 obs14 一致——六 SCENE_DONE（c4a88c07/604c0896/bc8c1d1c/a4824f1c/eb4397c3/24ab78bb）+ **scene-4acf689f（16_02_03 正式链）仍 SCENE_RUNNING attempt=1 lease_owner=platform-local**、八步全 QUEUED（跨 DB3 大包串行中，proxy 8767 active_runs=[4acf689f ACCEPTED] 在案，不因观察超窗 kill/retry）；② **D4 NAS 清理已实证完成**：ready/spray 顶层实测仅 7 个 flat 包目录、date-grouped `20261012/` 子树消失，与 A 删除前清单（dated 10 文件/14930820106 字节、移入 `.upload-staging/d4-dategrouped-delete-20261014/ready-spray-20261014` 留证）一致；flat 四包 dated vs flat 字节全 match=true 在案；③ 余 D4 第②③步（flat 三提交 409 核与绑定推进）仍归 A 面：a65a25a7/87dfebaa/518089ed 本轮未见新绑定 run（4acf689f 串行占 SCENE_EXEC_HOST，队列顺延属预期），C 按 run 只读核账继续；④ incoming/spray 仍仅 16_33_10 空包（D6 正式拒绝痕迹 A 面补台账，00:02 d6 证据文件在案）；⑤ 资源：NAS 98T/70T/29T 71%、load 1.32 回落（大包运行中）。C 全程只读（ssh curl 8180/8767、ls/df/uptime），未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "处理机只读实测：8180 pipeline-runs?limit=200 rc=0（24 run，七 scene 状态如上）；8180 pipeline-runs/scene-4acf689f… rc=0（SCENE_RUNNING attempt=1 lease_owner=platform-local，steps 8×QUEUED）；8767/health rc=0 active_runs=[scene-4acf689f… ACCEPTED]；ls ready/spray 顶层 7 flat 目录（20261012 子树 absent）；df /mnt/nas_backup 98T 70T 29T 71%；uptime load 1.32/1.52/1.46；A 面 d4-nas-delete-evidence-0021.json（00:25:18 mtime）dated_inventory 10 文件 14930820106B、flat_check 4/4 match=true、post_dated_exists=false",
+  "next": "接续只读观察：① scene-4acf689f 终态（跨 DB3 大包）；② 串行释放后 flat 三提交（a65a25a7/87dfebaa/518089ed）绑定新 run，C 按 run 核账；③ 16_33_10 空包 D6 正式拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

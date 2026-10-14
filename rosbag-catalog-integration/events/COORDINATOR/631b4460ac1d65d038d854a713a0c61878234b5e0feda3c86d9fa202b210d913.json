@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-160553-t08-integration-running",
+  "occurred_at": "2026-10-11T16:08:59+08:00",
+  "recorded_at": "2026-10-11T16:08:59+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "巡检：main f9bafb0 双核一致零合入；2号 TASK-08 联调实测推进（wt-04a-t08 pytest 15:42 全量 814 nodeids，lastfailed 37，B 自有范围，base 未 rebase f9bafb0 下轮核）；A/C/TESTER 空闲；无新派单/OCR/状态变更",
+  "evidence": "sessions/COORDINATOR.md",
+  "next": "核 2号 TASK-08 rebase/回执交付"
+}

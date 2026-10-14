@@ -1,0 +1,12 @@
+{
+  "event_id": "t20261010-2128-ocr-d3r1-runner-dead",
+  "occurred_at": "2026-10-10T21:28:58+08:00",
+  "recorded_at": "2026-10-10T21:28:58+08:00",
+  "role": "TESTER",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "OBSERVATION",
+  "summary": "独立核实 OCR D3-r1 runner(pid 851050)已死亡：进程不在、ocr.lock 空闲、log 未落盘、session 5ee653d5 停在 21:22 末次请求；不代跑 OCR，待协调者 21:55 硬截止核实并 resume/重跑",
+  "evidence": "sessions/TESTER.md 21:28 心跳; .opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a/5ee653d5-c724-4103-b686-546fd928177a.jsonl",
+  "next": "协调者 OCR 收口合入 main 后 TESTER 新 attempt 复测 reconcile 用例"
+}

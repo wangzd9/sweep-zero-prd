@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-14T11:00:53.522448+08:00",
+  "role": "B",
+  "kind": "phase",
+  "start": "2026-10-14T08:00:00+08:00",
+  "end": "2026-10-14T11:00:00+08:00",
+  "artifact": "inbox/control/runtime/digests/2026-10-14/B-phase-1100.json",
+  "roles": [
+    {
+      "role": "B",
+      "start": "2026-10-14T08:00:00+08:00",
+      "end": "2026-10-14T11:00:00+08:00",
+      "totals_seconds": {
+        "working": 0,
+        "waiting": 0,
+        "blocked": 0,
+        "idle": 0,
+        "unknown": 10800.0
+      },
+      "segments": [
+        {
+          "start": "2026-10-14T08:00:00+08:00",
+          "end": "2026-10-14T11:00:00+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "Consumed observer pending fp b606141d (4 changed sources: coordinator ruling-dup-slices-0038.md 00:39, BATCH-STATUS.md 00:40 sync of same ruling, own 00:37 even … BLE / 1 empty) stands unrefuted. Maintains IDLE_WAITING; quiet hours 21:00-08:00, no proactive group message; 08:00 digest includes C actor-identity escalati",
+          "sources": [
+            "inbox/events/B/b-t11s-batch-1012-ruling-dup-slices-0038-consumed-b-noaction-idle-quiet-20261014-0043.json"
+          ]
+        }
+      ],
+      "events": [],
+      "delivery_records": [],
+      "unverified_sources": [
+        "events/B/b-ack-20261012-232800-task07b-a2r2.md: 时间或内容待核对",
+        "events/B/b-deliver-20261012-233000-task07b-a2r2.md: 时间或内容待核对",
+        "events/B/b-incident-20261012-125600.md: 时间或内容待核对",
+        "events/B/b-poll-20261011-123253-rework8-merged-65ca0be.json: 时间或内容待核对",
+        "events/B/b-poll-20261011-142253-r9-accept-booked.json: 时间或内容待核对",
+        "events/B/b-poll-20261012-085253-t11-run8-integrated-a-cleanup-b-idle.md: 时间或内容待核对",
+        "events/B/b-poll-20261012-113753-t07a-ocr-inflight-idle.md: 时间或内容待核对",
+        "events/B/b-poll-20261013-082253-tester-postr-pass-waiting-merge.md: 时间或内容待核对",
+        "events/B/tester-attempt4-pass-20261010-2257.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-054753-restore-spotcheck-passed.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-124753.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-143253-t07a-tester-postmerge-pass-b-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-175753-t07b-delivered-ocr-b1-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-182253-t07b-ocr-b3-b4-done-b5-inflight-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-185753-t07b-ocr-b3-2findings-b6-cancelled-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-222753-t07b-ocr-b5-rc0-core-timeout-b7-resume-inflight.json: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-011253-t07b-ocr-r2b4-stalled-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-060253-t07b-r3-frozen-16a-ocr-done-16b-needsreview-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-063753-r3-ocr-6of6-done-medium-pending-ruling.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-073253-t07b-r4-ocr-done-strongreview-pending-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-repair-20261013-014853-sessions-append-glue.md: 时间或内容待核对"
+      ]
+    }
+  ],
+  "current": {
+    "B": {
+      "schema_version": 1,
+      "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+      "role": "B",
+      "observed_at": "2026-10-14T11:00:53+08:00",
+      "control": "ACTIVE",
+      "confirmed_idle": false,
+      "classification_reasons": [
+        "assigned nonterminal task: TASK-16C",
+        "role lease exists; liveness requires normal checking",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-16C/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-08/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-08/c1c2-second-precision-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-12S-B/attempt-1-rework-s9b-dispatch.md"
+      ],
+      "tasks": [
+        {
+          "task": "TASK-16C",
+          "state": "**PAUSED（2026-10-13用户暂停界面增量；现有交付/在途证据保存， … 谓词面+C8 场景页脚本面修复后需复测）；wt `5c80857` 冻结保存不变",
+          "progress": "场景八步详情、三视图/类型谓词、正式查询 API、旧界面兼容",
+          "owner": "**PAUSED（2026-10-13用户暂停界面增量；现有交付/在途证据保存，协调者安全检查点交接 … 据面 1 齐（C5 谓词面+C8 场景页脚本面修复后需复测）；wt `5c80857` 冻结保存不变"
+        }
+      ],
+      "events": {
+        "B": {
+          "event_id": "b-t11s-batch-1012-ruling-dup-slices-0038-consumed-b-noaction-idle-quiet-20261014-0043",
+          "occurred_at": "2026-10-14T00:43:30+08:00",
+          "recorded_at": "2026-10-14T00:43:30+08:00",
+          "role": "B",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "status": "IDLE",
+          "summary": "Consumed observer pending fp b606141d (4 changed sources: coordinator ruling-dup-slices-0038.md 00:39, BATCH-STATUS.md 00:40 sync of same ruling, own 00:37 even … BLE / 1 empty) stands unrefuted. Maintains IDLE_WAITING; quiet hours 21:00-08:00, no proactive group message; 08:00 digest includes C actor-identity escalation.",
+          "evidence": "sessions/B.md (00:43 entry appended, newline-terminated, dry-run verified) … ruling-dup-sl … B row unchanged DONE 21:12); find inbox/2号 newer 00:37 empty; ps (no B business processes)",
+          "next": "IDLE_WAITING: await next coordinator dispatch; quiet hours until 08:00, 08:00 digest.",
+          "source": "inbox/events/B/b-t11s-batch-1012-ruling-dup-slices-0038-consumed-b-noaction-idle-quiet-20261014-0043.json",
+          "source_mtime": "2026-10-14T00:44:00+08:00"
+        }
+      },
+      "dispatches": {
+        "B": {
+          "role": "B",
+          "source": "inbox/2号/TASK-11S-BATCH-1012/attempt-1-dispatch.md",
+          "status": "待核对",
+          "mtime": 1791896328.5155814,
+          "summary": "# TASK-11S-BATCH-1012 / B / attempt-1 状态：DISPATCHED，owner=B，2026-10-13T20:58:48+08:00。生产业务固定3c9c496；用户已明确授权本批生 … /TASK-11S-BATCH-1012/b-attempt-1.md（TESTER使用test-receipts/TASK-11S-BATCH-1012/attempt-1.md）。失败如实保留证据，未完成不PASS。"
+        }
+      },
+      "processes": {
+        "B": {
+          "state": "unverified",
+          "owner": "cron-b-poll-6f7471d8747c-20261014-104900"
+        }
+      },
+      "sources": {
+        "TODO.md": "2026-10-14T10:49:02+08:00"
+      },
+      "strong_review": null,
+      "fingerprint": "fb5ff89542c43f976265d2df4f3940041a9e166146209c30dc9fe6cd53cff2e0",
+      "coordinator_requests": [],
+      "operations": []
+    }
+  }
+}

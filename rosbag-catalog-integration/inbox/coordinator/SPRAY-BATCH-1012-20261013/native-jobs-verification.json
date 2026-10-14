@@ -1,0 +1,348 @@
+{
+  "checked_at": "2026-10-13T21:17:08.944279+08:00",
+  "roles": {
+    "COORDINATOR": {
+      "poll_id": "14ae4556629a",
+      "enabled": true,
+      "configuration_preserved": true,
+      "running_executions": [
+        {
+          "id": "ec7a6a184af640889cdfb35366d084b7",
+          "job_id": "14ae4556629a",
+          "source": "builtin",
+          "process_id": "5715ed2406724987b9985da34864ed5d",
+          "pid": 2506411,
+          "process_started_at": 29761466,
+          "status": "running",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T21:15:53.106030+08:00",
+          "started_at": "2026-10-13T21:15:53.353706+08:00",
+          "finished_at": null,
+          "error": null,
+          "delivery_outcome": null,
+          "scheduled_instant": "2026-10-13T13:15:00+00:00"
+        }
+      ],
+      "recent_executions": [
+        {
+          "id": "ec7a6a184af640889cdfb35366d084b7",
+          "job_id": "14ae4556629a",
+          "source": "builtin",
+          "process_id": "5715ed2406724987b9985da34864ed5d",
+          "pid": 2506411,
+          "process_started_at": 29761466,
+          "status": "running",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T21:15:53.106030+08:00",
+          "started_at": "2026-10-13T21:15:53.353706+08:00",
+          "finished_at": null,
+          "error": null,
+          "delivery_outcome": null,
+          "scheduled_instant": "2026-10-13T13:15:00+00:00"
+        },
+        {
+          "id": "d1fe7ca1e19047699deb8b3a98917993",
+          "job_id": "14ae4556629a",
+          "source": "builtin",
+          "process_id": "9a35dfe30b604dda921e96418f736d35",
+          "pid": 1366,
+          "process_started_at": 610,
+          "status": "failed",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T21:11:53.101518+08:00",
+          "started_at": null,
+          "finished_at": "2026-10-13T21:11:53.112047+08:00",
+          "error": "Fire claim lost; execution was not started.",
+          "delivery_outcome": null,
+          "scheduled_instant": "2026-10-13T13:05:00+00:00"
+        }
+      ],
+      "reports": [
+        {
+          "id": "99bb6c6cacc6",
+          "enabled": true,
+          "no_agent": true
+        },
+        {
+          "id": "fd8d7006309c",
+          "enabled": true,
+          "no_agent": true
+        }
+      ]
+    },
+    "A": {
+      "poll_id": "d5cb80cf2fc5",
+      "enabled": true,
+      "configuration_preserved": true,
+      "running_executions": [
+        {
+          "id": "e6d1bfddebe9425385d46e2c051752ac",
+          "job_id": "d5cb80cf2fc5",
+          "source": "builtin",
+          "process_id": "2e38def11680485e87bee94e53459c73",
+          "pid": 2491657,
+          "process_started_at": 29695467,
+          "status": "running",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T21:04:53.105249+08:00",
+          "started_at": "2026-10-13T21:04:53.349976+08:00",
+          "finished_at": null,
+          "error": null,
+          "delivery_outcome": null,
+          "scheduled_instant": "2026-10-13T10:16:00+00:00"
+        }
+      ],
+      "recent_executions": [
+        {
+          "id": "e6d1bfddebe9425385d46e2c051752ac",
+          "job_id": "d5cb80cf2fc5",
+          "source": "builtin",
+          "process_id": "2e38def11680485e87bee94e53459c73",
+          "pid": 2491657,
+          "process_started_at": 29695467,
+          "status": "running",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T21:04:53.105249+08:00",
+          "started_at": "2026-10-13T21:04:53.349976+08:00",
+          "finished_at": null,
+          "error": null,
+          "delivery_outcome": null,
+          "scheduled_instant": "2026-10-13T10:16:00+00:00"
+        },
+        {
+          "id": "adb3a4135770496f97ec088f1193795d",
+          "job_id": "d5cb80cf2fc5",
+          "source": "builtin",
+          "process_id": "f249b44bdc894ba4b1dad864e6ca4c74",
+          "pid": 2210386,
+          "process_started_at": 28285467,
+          "status": "completed",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T17:09:53.113316+08:00",
+          "started_at": "2026-10-13T17:09:53.332762+08:00",
+          "finished_at": "2026-10-13T18:13:38.626911+08:00",
+          "error": null,
+          "delivery_outcome": "delivered",
+          "scheduled_instant": "2026-10-13T09:01:00+00:00"
+        }
+      ],
+      "reports": [
+        {
+          "id": "169849556cc2",
+          "enabled": true,
+          "no_agent": true
+        }
+      ]
+    },
+    "B": {
+      "poll_id": "6f7471d8747c",
+      "enabled": true,
+      "configuration_preserved": true,
+      "running_executions": [
+        {
+          "id": "4d66ba14825d4b8fbe65a0e86f022ac3",
+          "job_id": "6f7471d8747c",
+          "source": "builtin",
+          "process_id": "0c6b238e62a94b1ea5880cd2fb8bb8c4",
+          "pid": 2489288,
+          "process_started_at": 29683465,
+          "status": "running",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T21:02:53.095916+08:00",
+          "started_at": "2026-10-13T21:02:53.305263+08:00",
+          "finished_at": null,
+          "error": null,
+          "delivery_outcome": null,
+          "scheduled_instant": "2026-10-13T13:02:00+00:00"
+        }
+      ],
+      "recent_executions": [
+        {
+          "id": "4d66ba14825d4b8fbe65a0e86f022ac3",
+          "job_id": "6f7471d8747c",
+          "source": "builtin",
+          "process_id": "0c6b238e62a94b1ea5880cd2fb8bb8c4",
+          "pid": 2489288,
+          "process_started_at": 29683465,
+          "status": "running",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T21:02:53.095916+08:00",
+          "started_at": "2026-10-13T21:02:53.305263+08:00",
+          "finished_at": null,
+          "error": null,
+          "delivery_outcome": null,
+          "scheduled_instant": "2026-10-13T13:02:00+00:00"
+        },
+        {
+          "id": "8a8d85a96f5348ccb24357bdb31bb757",
+          "job_id": "6f7471d8747c",
+          "source": "builtin",
+          "process_id": "674ba3fc36aa48ea85481da40adaa8f6",
+          "pid": 2484258,
+          "process_started_at": 29653465,
+          "status": "completed",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T20:57:53.099191+08:00",
+          "started_at": "2026-10-13T20:57:53.314966+08:00",
+          "finished_at": "2026-10-13T20:57:53.451668+08:00",
+          "error": null,
+          "delivery_outcome": "suppressed",
+          "scheduled_instant": "2026-10-13T12:57:00+00:00"
+        }
+      ],
+      "reports": [
+        {
+          "id": "7c1cf5029635",
+          "enabled": true,
+          "no_agent": true
+        }
+      ]
+    },
+    "C": {
+      "poll_id": "f01517c16f2f",
+      "enabled": true,
+      "configuration_preserved": true,
+      "running_executions": [],
+      "recent_executions": [
+        {
+          "id": "8edefa06570a4371b08ab5df8a3ccd0c",
+          "job_id": "f01517c16f2f",
+          "source": "builtin",
+          "process_id": "9a35dfe30b604dda921e96418f736d35",
+          "pid": 1366,
+          "process_started_at": 610,
+          "status": "failed",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T21:13:53.087514+08:00",
+          "started_at": null,
+          "finished_at": "2026-10-13T21:13:53.098759+08:00",
+          "error": "Fire claim lost; execution was not started.",
+          "delivery_outcome": null,
+          "scheduled_instant": "2026-10-13T13:13:00+00:00"
+        },
+        {
+          "id": "baf1a30fd0084997a24ad1e6efb0684a",
+          "job_id": "f01517c16f2f",
+          "source": "direct",
+          "process_id": "6adbb69f5cae4b51a62ef1d0101b7ecf",
+          "pid": 2490490,
+          "process_started_at": 29689566,
+          "status": "completed",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T21:11:54.882517+08:00",
+          "started_at": "2026-10-13T21:11:54.898627+08:00",
+          "finished_at": "2026-10-13T21:13:54.066592+08:00",
+          "error": null,
+          "delivery_outcome": "suppressed",
+          "scheduled_instant": null
+        }
+      ],
+      "reports": [
+        {
+          "id": "b99cc17222c3",
+          "enabled": true,
+          "no_agent": true
+        }
+      ]
+    },
+    "TESTER": {
+      "poll_id": "167580c0500b",
+      "enabled": true,
+      "configuration_preserved": true,
+      "running_executions": [
+        {
+          "id": "8c0600f0410b46398cb34a577eeaa76e",
+          "job_id": "167580c0500b",
+          "source": "direct",
+          "process_id": "6adbb69f5cae4b51a62ef1d0101b7ecf",
+          "pid": 2490490,
+          "process_started_at": 29689566,
+          "status": "running",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T21:13:54.091980+08:00",
+          "started_at": "2026-10-13T21:13:54.108467+08:00",
+          "finished_at": null,
+          "error": null,
+          "delivery_outcome": null,
+          "scheduled_instant": null
+        }
+      ],
+      "recent_executions": [
+        {
+          "id": "7ec9790270ce43aea93523ef96c0a3eb",
+          "job_id": "167580c0500b",
+          "source": "builtin",
+          "process_id": "9a35dfe30b604dda921e96418f736d35",
+          "pid": 1366,
+          "process_started_at": 610,
+          "status": "failed",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T21:16:53.102635+08:00",
+          "started_at": null,
+          "finished_at": "2026-10-13T21:16:53.113139+08:00",
+          "error": "Fire claim lost; execution was not started.",
+          "delivery_outcome": null,
+          "scheduled_instant": "2026-10-13T13:14:00+00:00"
+        },
+        {
+          "id": "7d2c08631ef941738d631741dfef9450",
+          "job_id": "167580c0500b",
+          "source": "builtin",
+          "process_id": "9a35dfe30b604dda921e96418f736d35",
+          "pid": 1366,
+          "process_started_at": 610,
+          "status": "failed",
+          "handoff_pending": 0,
+          "handoff_started_at": null,
+          "claimed_at": "2026-10-13T21:15:53.119350+08:00",
+          "started_at": null,
+          "finished_at": "2026-10-13T21:15:53.132886+08:00",
+          "error": "Fire claim lost; execution was not started.",
+          "delivery_outcome": null,
+          "scheduled_instant": "2026-10-13T13:14:00+00:00"
+        }
+      ],
+      "reports": [
+        {
+          "id": "b41450f1df3c",
+          "enabled": true,
+          "no_agent": true
+        }
+      ]
+    }
+  },
+  "services": [
+    "active",
+    "active"
+  ],
+  "ack_files": [
+    "inbox/3号/TASK-11S-BATCH-1012/attempt-1-ack.md",
+    "inbox/TESTER/TASK-11S-BATCH-1012/attempt-1-ack.md",
+    "inbox/2号/TASK-11S-BATCH-1012/attempt-1-ack.md"
+  ],
+  "coordinator_batch_files": [
+    "native-jobs-restore-result.json",
+    "ACK.md",
+    "input-manifest.json",
+    "native-jobs-before-restore.json",
+    "user-request.md",
+    "native-jobs-verification.json",
+    "restore-observation-2109.md",
+    "HANDOFF.md",
+    "BATCH-STATUS.md"
+  ],
+  "coordinator_lease": null
+}

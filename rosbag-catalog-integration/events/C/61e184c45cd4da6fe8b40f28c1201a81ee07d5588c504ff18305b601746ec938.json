@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-144853-nochange",
+  "occurred_at": "2026-10-11T14:53:06+08:00",
+  "recorded_at": "2026-10-11T14:53:06+08:00",
+  "role": "C",
+  "task": "none",
+  "attempt": "0",
+  "status": "IDLE_NO_NEW_DISPATCH",
+  "summary": "5min巡检:inbox/3号无新派单(最新仍10-10 00:58 attempt-4-ocr-rework ACCEPT_MERGED),inbox/coordinator 14:45后无新增,main 62a85bf,wt-03b 6f1a9ad干净,无C在途进程,强复审R2I-20261010-06仅pack(14:49刷新)无result,保持空闲",
+  "evidence": "sessions/C.md",
+  "next": "继续5min巡检"
+}

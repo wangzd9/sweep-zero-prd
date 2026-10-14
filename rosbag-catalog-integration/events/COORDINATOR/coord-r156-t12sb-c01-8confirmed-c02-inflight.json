@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r156-t12sb-c01-8confirmed-c02-inflight",
+  "occurred_at": "2026-10-13T13:55:00+08:00",
+  "recorded_at": "2026-10-13T13:55:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "r156 巡检（指纹 1a9aa1bd）：① 12S-B OCR c01 收口 rc=0（13:51:20，session 080bc21b，5 文件 8 finding，~853862 tokens，23m5s，--from 6fb42c4 --to f62a29c 核心算法面 adapter/decode/render/model/segment）→ 协调者逐条只读核 wt-04a-t12sb（head f62a29c）代码实测 8/8 CONFIRMED 误报 0：S1[HIGH]小图删除后 rendered_frames 仍遍历致 FileNotFoundError/喂过滤帧/时间轴缓存错位 / S2[MED]全新相对 work_dir 穿透 exists 守卫 mkdir 落 CWD / S3[HIGH]parse_pointcloud2 固定尺寸 struct.unpack_from 与裸字节读无越界守卫，截断 bag struct.error 逃逸 _decode(仅捕 DecodeError) 破坏存在但解不出=FAILED(DECODE_FAILED)契约 / S4[HIGH]read_intensity 全 n 点 vs len(cropped)=mask.sum() 恒不匹配致 cloud.colors 从不设置、强度判别失效 / S5[LOW]pcd_path is None 死分支 / S6[LOW]pointcloud 路线无 cancel_check / S7[LOW]_intensity_color 纯 Python 逐点热路径 / S8[LOW]auto 双缺 topic 误报未知路线。裁决=S1/S2/S3/S4/S8 CORRECTION 级 + S5/S6/S7 维护项，c02 全链收口后合并 S1-S8+c02 一次最小返修单派 B（16C r144 同口径，不逐批返修）。② c02 在途健康核：pid 1897396 chain.py + node 子进程 1926290（--exclude c01 5 文件，审辅助配置面 __init__/cache/pcd_io/precheck/references/time_map/config/scene_capabilities.yaml 7 文件，13:51:20 START，--max-tokens 0 + --timeout 60），无 session_end/manifest 不判停止/通过。③ 收口链更新：c02 收口→S1-S8+c02 合并返修单派 B→交付冻结→机械核验→返修增量 OCR(小批)→TESTER 独立验证→合入 main→12S-B DONE→重算 12S-C 依赖；16B attempt-2-r1 增量 OCR(0208a73..40ab818)与 12S-A 增量 OCR 继续排队于 12S-B 全链之后(持 ocr.lock 串行)。④ C r156 poll 已消费(WAITING_REVIEW 无新派单,等 OCR 链+新单)。⑤ 强审只读:grant 6b2d83fb9(auth-24h-20261013)至 10-14 13:27:15,近 60min 0/5,本授权累计 0,在途 0,最近 a8febf1a SR-07B-R4 SUCCEEDED(530310 in/471552 cached/8293 out/4334 reasoning,费用未知),本轮零新增。",
+  "evidence": "reviews/TASK-16/16A-16B-ocr-batches.md r156 段; ~ /home/wang/.hermes/cache/scratch/t12sb_ocr/progress.txt(13:51:20 DONE c01 rc=0 8 finding) + c01.log 8 findings 全文 + chain.out(c02 START); ps 1897396/1926290; git wt-04a-t12sb HEAD f62a29c 只读核 adapter.py/decode.py/render.py/pcd_io.py; TODO.md r156 段; events/C/af092567...(C r156 poll); snapshot COORDINATOR.json fp 1a9aa1bd",
+  "next": "下轮核 c02 收口 rc/findings → 合并 S1-S8+c02 一次最小返修单派 B → 16B r1 增量 OCR → 12S-A 增量 OCR；TESTER 待 12S-B 返修收口后派独立验证；12S-B 合入后重算 12S-C 依赖"
+}

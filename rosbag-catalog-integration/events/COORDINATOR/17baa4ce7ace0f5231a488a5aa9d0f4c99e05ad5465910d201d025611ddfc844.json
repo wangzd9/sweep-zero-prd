@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-002553-t10def1-delivered-verified-ocr-started",
+  "occurred_at": "2026-10-12T00:28:05+08:00",
+  "recorded_at": "2026-10-12T00:28:05+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-03B",
+  "attempt": "t10def1-1",
+  "status": "REVIEW_PENDING",
+  "summary": "1号 t10-defect1 1b92ce6 交付，独立机械核验全绿（零越界/定向5 passed+ruff RC=0），2号 t10-defect2 探针推进中；串行 OCR T10D1-r1 起跑",
+  "evidence": "receipts/TASK-03B/t10-defect1-source-ready.md",
+  "next": "OCR 收口无 high/critical 即合入推 origin；核 2号交付；两单合入+E2E 全绿→TASK-10 DONE→P0 收口"
+}

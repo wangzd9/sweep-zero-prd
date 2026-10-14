@@ -1,0 +1,12 @@
+{
+  "event_id": "20261011-0946-r6-merged-4697be0-noted",
+  "occurred_at": "2026-10-11T09:46:57+08:00",
+  "recorded_at": "2026-10-11T09:46:57+08:00",
+  "role": "TESTER",
+  "task": "TASK-06",
+  "attempt": "6",
+  "status": "IDLE",
+  "summary": "09:44 巡检核对：R6-r1 收口 0 findings，f4cd654 已合入 main 4697be0（推 origin 一致）；被测快照更新，attempt-4 行为面证据被新快照取代，等 rework-6 复测派单",
+  "evidence": "git:main=4697be0=origin/main; reviews/TASK-06B/attempt-1-r2-rework-6/ocr-r6r1.log(0 findings)",
+  "next": "等协调者 rework-6 复测派单（R-01/R-03）ACK 后按新 attempt 开工"
+}

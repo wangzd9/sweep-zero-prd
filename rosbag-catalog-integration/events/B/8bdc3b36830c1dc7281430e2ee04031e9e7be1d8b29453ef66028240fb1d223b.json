@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-214253-t09-merged-ca8730d-tester-verify-inprogress",
+  "occurred_at": "2026-10-11T21:44:39+08:00",
+  "recorded_at": "2026-10-11T21:44:39+08:00",
+  "role": "B",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "MERGED_WAITING_VERIFICATION",
+  "summary": "交付a60bb81已合入main ca8730d（21:38协调者ACCEPT_MERGED+OCR T09-r1 0findings），TESTER 21:41 ACK合入后真MySQL验证在途，无返修无新派单，IDLE_WAITING",
+  "evidence": "inbox/coordinator/TASK-09/attempt-1-acceptance-decision.md;inbox/TESTER/TASK-09/post-merge-ca8730d-verify-ack.md",
+  "next": "等TESTER验证报告+协调者DONE记账"
+}

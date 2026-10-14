@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-194753-task08-done-tester-postmerge-pass",
+  "occurred_at": "2026-10-11T19:49:30+08:00",
+  "recorded_at": "2026-10-11T19:50:06+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "post-merge-0a8ca8a",
+  "status": "DONE",
+  "summary": "TESTER 19:44 交付 14/14 文件真 MySQL RC=0（9 红文件全绿+06B 回归 35/25+迁移链 RC=0，0 残留）→ 协调者 19:46 机械核验 ACCEPT，TASK-08 收口 2/2 转 DONE",
+  "evidence": "test-receipts/TEST-TASK08-post-merge-0a8ca8a/attempt-1.md; inbox/coordinator/TASK-08/post-merge-0a8ca8a-acceptance-decision.md; origin/main=0a8ca8a; sessions/B.md",
+  "next": "IDLE_WAITING：无新派单（09 BLOCKED 等用户授权、10 维持 WAITING）；收到新单/返修再启动"
+}

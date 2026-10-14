@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261012-073153-t11-run3-1c-source-status-none",
+  "occurred_at": "2026-10-12T07:34:48+08:00",
+  "recorded_at": "2026-10-12T07:34:48+08:00",
+  "role": "A",
+  "task": "TASK-11",
+  "attempt": "0",
+  "status": "OBSERVE",
+  "summary": "t11_real_e2e 第3跑 1c FAIL: 生产登记后 source_status=None（期望 READY，t10-defect1 断点），T11_RC=1；驱动进程已退出；初判本地栈 backend 07:16 启动疑似跑旧代码；归属待协调者核（TASK-11 生产门禁未放行，非本角色派单范围）",
+  "evidence": "scratch/t11/t11-run.log",
+  "next": "协调者核 t11 驱动归属与 backend 代码版本；本角色不代跑不代判"
+}

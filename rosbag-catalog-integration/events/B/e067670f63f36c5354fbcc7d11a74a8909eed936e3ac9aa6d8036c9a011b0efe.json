@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-165253-t08c1-delivered",
+  "occurred_at": "2026-10-11T18:22:15+08:00",
+  "recorded_at": "2026-10-11T18:22:15+08:00",
+  "role": "B",
+  "task": "T08-C1C2",
+  "attempt": "t08c-1",
+  "status": "DELIVERED",
+  "summary": "t08c-1 delivery frozen REVIEW_PENDING: commit bf48a45 (base f9bafb0), 7 files +91/-18, real-MySQL 8 red files green, 06B 35/25, SQLite 825 passed (3 env-only), ruff green, 0 residue",
+  "evidence": "receipts/TASK-08/c1c2-t08c-1.md; reports/TASK-08/c1c2-t08c-1.md; scratch/t08c/logs/mysql_*.log; cleanup_evidence.txt",
+  "next": "wait review"
+}

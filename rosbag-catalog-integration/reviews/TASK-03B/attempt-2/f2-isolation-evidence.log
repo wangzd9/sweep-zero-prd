@@ -1,0 +1,5 @@
+TABLES_READY
+RESULT_A: EXC StaleDataError: UPDATE statement on table 'ingest_submission' expected to update 1 row(s); 0 were matched.
+RESULT_B: OK
+FINAL row_version: 2 status: PENDING_INPUT
+F2_GUARD_VERDICT: FAIL

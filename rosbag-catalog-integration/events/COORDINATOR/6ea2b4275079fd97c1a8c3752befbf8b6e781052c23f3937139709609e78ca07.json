@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-025652-r112-t16a-b7-rulings",
+  "occurred_at": "2026-10-13T02:56:52+08:00",
+  "recorded_at": "2026-10-13T02:56:52+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16A",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "16A v2 OCR 10/14：b7 runner.py 3 findings 独立核（M1 OUT_OF_SCOPE / M2+L1 CORRECTION 待全收口合并返修）；b10 在途；07B R3 冻结维持；无新派单无合入",
+  "evidence": "reviews/TASK-16/16A-16B-ocr-batches.md",
+  "next": "r113 核 b10-b14+16B 收口后合并返修派 A"
+}

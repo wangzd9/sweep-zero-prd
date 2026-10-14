@@ -1,0 +1,13 @@
+{
+  "event_id": "c-poll-20261012-214353-nochange",
+  "role": "C",
+  "task": "IDLE-POLL",
+  "attempt": "nochange",
+  "status": "NO_CHANGE",
+  "occurred_at": "2026-10-12T21:44:37+08:00",
+  "preflight_checked_at": "2026-10-12T21:43:53+08:00",
+  "owner": "C-cron-poll-20261012-214353",
+  "summary": "C 范围 21:40:30 后零新增，无 C 新派单；TASK-16B 仍 PLANNED 未领取；保持空闲待派单",
+  "evidence": "sessions/C.md line1 21:44 条目；main c2018dd / origin 502bf8e 零漂移；wt-03b 6f1a9ad 干净；ps 0 在途；leases 仅 COORDINATOR r101 在途（非 C 仅观察）",
+  "next": "等协调者登记 TASK-16B 派单或新单；不启动不开发"
+}

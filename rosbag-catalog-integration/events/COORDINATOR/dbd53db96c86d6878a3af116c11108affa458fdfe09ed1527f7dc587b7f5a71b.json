@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-094553-07a-dispatched-r70",
+  "occurred_at": "2026-10-12T09:47:46+08:00",
+  "recorded_at": "2026-10-12T09:47:46+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07A",
+  "attempt": "1",
+  "status": "DISPATCHED",
+  "summary": "09:40:53 后唯一新事实=07A attempt-1 派单 09:44:47 落盘（用户 09:45 授权 TASK-07 提前，B owner，base 453da0c）；B 尚未 ACK（tick 09:37:53 停于派单前，sessions/B.md 09:42 无 07A 感知记录）→ 窗口内不催单不接管，本轮记账确认状态；main 453da0c 双核一致；A/C/TESTER 空闲",
+  "evidence": "inbox/2号/TASK-07A/attempt-1-dispatch.md; HANDOFF.md 09:45 段",
+  "next": "核 B ACK（inbox/2号/TASK-07A/attempt-1-ack.md）与开工；交付后机械核验→OCR→合入→TESTER 验证"
+}

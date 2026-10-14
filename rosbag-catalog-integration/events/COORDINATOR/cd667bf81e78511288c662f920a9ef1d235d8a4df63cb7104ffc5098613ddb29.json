@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-003553-t10def1-ocr-rerun-merged-277e40f",
+  "occurred_at": "2026-10-12T00:44:51+08:00",
+  "recorded_at": "2026-10-12T00:44:51+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-03B",
+  "attempt": "t10def1-1",
+  "status": "ACCEPT_MERGED",
+  "summary": "t10-defect1 1b92ce6 OCR 首跑 EXIT=1 空输出不算通过（owner 已死，进程身份层失败）；前台重跑 0 findings（session 15516784）；--no-ff 合入 main 277e40f 推 origin，sanity alembic 单头/ruff/SQLite 定向 5 passed 全绿；2号 t10-defect2 编码在途",
+  "evidence": "inbox/coordinator/TASK-03B/t10-defect1-acceptance-decision.md",
+  "next": "核 2号 t10-defect2 交付，同链收口，两单齐 E2E 全绿后 TASK-10 DONE，P0 收口"
+}

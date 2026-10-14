@@ -1,0 +1,12 @@
+{
+  "event_id": "20261011-1915-ocr-f-round-clone-only-in-flight",
+  "occurred_at": "2026-10-11T19:16:30+08:00",
+  "recorded_at": "2026-10-11T19:16:30+08:00",
+  "role": "TESTER",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "POLL_NO_CHANGE",
+  "summary": "OCR 逐文件 f- 轮只读核实：artifact_service/bootstrap/catalog_ingest/source_service 四文件均 Review complete 0 findings（session 0736fd03/baffd04b/692a65eb/1426c954），仅 clone 脚本单文件在途（pid 2677652 19:12 起，f-clone.log 0 字节）；补上轮 p1/p2 canceled 缺口中两文件；main 98f6c88=origin 双核、wt-04a-t08c 仍 bf48a45 REVIEW_PENDING 未合入；TESTER 无新 PENDING 派单，维持 IDLE，不代跑不代审核",
+  "evidence": "scratch/t08c-ocr/f-*.log;ps 2677652",
+  "next": "等 f-clone 收口→C1C2-r1 全 0 findings→rebase 98f6c88 复核→合入→独立验证派单 ACK 后开工"
+}

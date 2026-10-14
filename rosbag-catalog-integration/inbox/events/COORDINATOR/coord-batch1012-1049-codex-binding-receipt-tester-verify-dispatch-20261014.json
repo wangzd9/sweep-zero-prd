@@ -1,0 +1,15 @@
+{
+  "event_id": "coord-batch1012-1049-codex-binding-receipt-tester-verify-dispatch-20261014",
+  "occurred_at": "2026-10-14T10:49:00+08:00",
+  "recorded_at": "2026-10-14T10:50:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "DISPATCHED_TESTER_VERIFY",
+  "supersedes_context": "prerun 5c17e597（含 codex-repair-receipt-20261014.md 10:23 + C obs74 消费 09:54 审计 + TESTER 1017 巡检 + TODO/PROTOCOL 回声）；接续 10:25 coord-batch1012-1025-codex-direct-repair-supersede-a-binding 事件",
+  "summary": "消费 codex-repair-receipt-20261014.md（10:23，隔离树 fix/spray-progress-20261014 单写）：① flat 三提交绑定恢复已完成——a65a25a7→scene-a4824f1c(SUCCESS)/87dfebaa→scene-eb4397c3(NOT_APPLICABLE)/518089ed→scene-24ab78bb(NOT_APPLICABLE)，全 SCHEDULED gen1、事件 CONSUMED、created_runs=0/reused_runs=3/errors=[]（复用既有终态 run 未重烧模型，全批仍 7 run），首载快指纹 409 被切片保护拒绝后按精确原包 ready 路径恢复；② 大包 scene-4acf689f 经正式步骤 API 补报 PRECHECK/EXTRACT=DONE、INFER=RUNNING（不改 checkpoint/不重启/不 cancel/retry）；③ 新进度/逐帧恢复能力仍在隔离树开发未宣称生产已加载；④ 回归 c5d98d0 45 项定向测试通过、仅测试无业务变更、OCR prepare 无入选文件/NOT_EVALUATED 零调用、隔离分支保留不覆盖用户主仓。用户最新：大包优化由 ros2_slice 负责人先实施，平台待交付后适配，当前不派平台流式/分批缓存/并发等优化任务（本批收敛=大包终态+跨 DB3 验收+空包状态改善，不能标全批 DONE）。",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/codex-repair-receipt-20261014.md（10:23）；codex-direct-repair-20261014.md（10:07）；BATCH-STATUS.md A 行/TESTER 行/四 flat+大包行 10:23 回执更新+『缺陷修复』节 10:23 完成状态；sessions/COORDINATOR.md 10:49 条目（2703 行）；git branch fix/spray-progress-20261014 在案",
+  "next": "下发 TESTER 独立核实派单 inbox/TESTER/TASK-11S-BATCH-1012/ruling-104x-codex-binding-verify.md（只读不直接采信 Codex 回执：核三提交 SCHEDULED gen1/bound 各自 flat 源/source_metadata 完整/reused 既有 run 不新建第 8 run 无新模型烧/outcome 一致无伪切片/事件 CONSUMED/两次 reconcile 幂等/大包补报未改 checkpoint 未重启/隔离分支未污染生产 3c9c496）；等 TESTER 回执协调者裁决放行或回 Codex/报用户；同步核 scene-4acf689f 模型段完成信号→终态后 TESTER 16_02_03 八步+跨 DB3 真实时间戳边界+两次 reconcile；大包优化任务不派（用户口径 ros2_slice 先行）",
+  "quiet_hours_note": "白天口径，状态变化即时通报",
+  "source": "inbox/events/COORDINATOR/coord-batch1012-1049-codex-binding-receipt-tester-verify-dispatch-20261014.json"
+}

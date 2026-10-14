@@ -1,0 +1,13 @@
+{
+ "event_id": "coord-r167-t16b-r2-verified-ocr-inflight-tester-report-disk-full-g4-invalid",
+ "occurred_at": "2026-10-13T16:57:00+08:00",
+ "recorded_at": "2026-10-13T16:57:00+08:00",
+ "role": "COORDINATOR",
+ "task": "TASK-16B/TASK-12S-BC-freeze/TASK-11S-PREP",
+ "attempt": "n/a",
+ "status": "POLL_HANDLED",
+ "summary": "r167（prerun 指纹 c4e28c33）：①C 16B r2 交付冻结 e152465 机械核验全绿（独立复跑 39 passed+ruff clean，diff 2 文件 +506/-43 与回执一致零越界）；②并行回合以固定入口起跑 r2 增量 OCR run 4492b7f6（spec base/head/repo/provider/model 与冻结交付双核一致，b01 单批 scene_host_proxy.py 16:50 START 存活健康）→认账不重复起跑，收口后强审增量复审（只 R1-01~05，剩 4/5）→TESTER 收口→合入 16B；③TESTER 12S-BC-freeze 报告消费：A 面 0320a8e PASS（真实 decode/render 全链 27.1s，S9 缺陷复现证据在案随 s9_head 增量复验）+B 面 92dcb52 模块级 PASS（因 r2 改 proxy 按派单口径部分失效，r2 合入后增量复验受影响项）；④磁盘满环境阻塞（16:43 根分区 100%）致 A G4 副本恢复失败 ERROR 1114=副本不算 G4 PASS，用户授权 Codex 16:49 起 Docker 迁 /home（窗口内 A/TESTER 勿新建容器），16:53 根分区降至 94%，A 迁移后重建副本（同 sha 备份+bind /home+行数复核）再升级；⑤17:30 G4 双缺口口径（r1 未完成+副本失效）不预填 PASS。本轮零新 OCR 起跑、零强审调用、零新派单、零合入。",
+ "evidence": "wt-03b-t16b e152465 (ANCESTOR_OK, diff --stat 2 files +506/-43, 39 passed, ruff clean); reviews/TASK-16B/attempt-2-r2/ocr/{state.json,spec.json} run 4492b7f6 RUNNING b01 pid 2185246; test-receipts/TEST-TASK12S-BC-freeze/attempt-1.md; inbox/1号|coordinator/.../disk-full-1643.md; docker-home-migration-1649.md; df / =94% 4G avail; A tick 16:55:10 wake",
+ "next": "4492b7f6 收口裁决→强审增量复审→TESTER 收口（含 12S-C B 面受影响项）→合入 16B→重算 12S-C 依赖；B s9_head→OCR 队列首位；A 迁移窗口后重建 G4 副本+r1；17:30 发布决策材料按双缺口口径汇总；19:00 三依赖=16B+12S-B(含S9)+12S-C 接线核验",
+ "fingerprint": "c4e28c33c70d6fa4b00568b946ff8a4783457b1c75024d8ab5757993e51a5785"
+}

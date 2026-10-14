@@ -1,0 +1,12 @@
+{
+  "event_id": "a-batch1012-attempt1-ruling-executed-narrowed-deviation-20261013",
+  "occurred_at": "2026-10-13T23:33:00+08:00",
+  "recorded_at": "2026-10-13T23:33:00+08:00",
+  "role": "A",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "ruling-doublewrite-2210 授权面收窄执行完毕：①冻结 op RECONCILED + 新 op SUCCEEDED（16_37_47/16_02_03 全量 SHA 核验，16_02_03 flat 文件先于 A op 已到位零重拷）；②13dc398c（14_42_48 409 根因）备份+断言+删除+claim 释放核验，A 正式重提交 a65a25a7(201)；③A 正式提交 16_37_47 87dfebaa(201，台账补条目)；④24d60fee（16_02_03）保留：删除前 23:05 已 SCHEDULED 绑定 run scene-4acf689f，全列快照 source_metadata 完整（ruling 第16行『无 source_metadata』系读取截断误差，已申报）；⑤3 条 date-grouped submission+NAS 清理 PAUSED：ruling『run 终态 SCENE_FAILED 零模型』前提 23:01 实测失效——自动 attempt-2（scene-a4824f1c SCENE_RUNNING 活租约、另两条 SLICE_QUEUE），14_42_48 attempt-2 与 A 新提交同物理源=潜在重复 run 烧模型风险。",
+  "evidence": "receipts/TASK-11S-BATCH-1012/a-attempt-1.md（23:3x 重写）; polluted-submission-13dc398c-backup-2300.json; flat-144248-claims-before/after-2300.json; polluted-cleanup-execution-2300.md.json; operations/A finalbag op SUCCEEDED result.log; DB 23:2x 只读实测（submissions/runs/step_run）; scanner 容器日志 409 recovering 行",
+  "next": "下回合：a65a25a7/87dfebaa/518089ed 三提交绑定收敛核验（date-grouped 409 拖累是否随清理解除）+ attempt-2 三 run 终态观察（任一 SUCCESS=重复烧模型实证即报协调者保留现场）+ 16_02_03 run 4acf689f 推进观察（跨 DB3 边界 TESTER 面）；date-grouped 删除时序待协调者更新裁决，A 不扩权处置。"
+}

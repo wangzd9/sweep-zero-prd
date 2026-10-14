@@ -1,0 +1,12 @@
+{
+  "event_id": "b-ack-20261011-1219-rework8",
+  "occurred_at": "2026-10-11T12:19:13+08:00",
+  "recorded_at": "2026-10-11T12:19:13+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-8",
+  "status": "ACKED",
+  "summary": "收到 codex 第五轮收尾小修 rework-8（:1047 docstring 1 行改准），ACK 已落盘，base b7cee07 核实一致",
+  "evidence": "inbox/2号/TASK-06B/attempt-1-r2-rework-8-ack.md",
+  "next": "新建 wt-04a-r8 开工"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t12sb-s9b-20261013-190500-incremental-pass",
+  "occurred_at": "2026-10-13T19:05:00+08:00",
+  "recorded_at": "2026-10-13T19:05:00+08:00",
+  "role": "TESTER",
+  "task": "TASK-12S-B",
+  "attempt": "S9b attempt-1",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "S9b 增量独立复验完成 PASS（固定 base 0320a8e→head f76e2a9b403577b791ca3688e0da5e574c4c272a，detach worktree wt-tester-s9b，diff 2 文件 +369/-54 零越界）。镜像 rosbag-spray-runtime:20261013 内真实包（1012 小包只读）独立探针 rc=0，7/7 检查 true：1184 消息/44 is_last_scan 边界=44 PCD=44 帧，每帧 scan_mapping（首末 message_id/db3/packet_count）与独立 rclpy 解析逐字段相等，帧 storage_ns=scan 结束消息原始整数 ns（含亚毫秒位，非 ms×1e6 伪造），44 真实非空 PCD 落盘，源包 sha256 前后一致；首末锚 message_id 4/2285、ns 1791791903804001823/1791791908105918599 与 16:5x 独立计数一致。旧 DECODE_FAILED(44!=1184) 在 f76e2a9 确已替换为成功（0320a8e 同探针必抛）。定向回归：test_spray_adapter 58 passed / 旧 16 条 40 passed / spray 域 124 passed / ruff 全绿。未做：VLM 模型面/真实渲染（留 12S-D）、OCR（01407cec 在途不插手）、生产写。报告 test-receipts/TEST-TASK12S-B-s9b/attempt-1.md 交协调者裁决",
+  "evidence": "test-receipts/TEST-TASK12S-B-s9b/attempt-1.md; /home/wang/work/.local/spray-runtime/work/s9b-tester-f76e2a9/result-tester.json（checks 7/7 true, decode_seconds=0.54, tail_messages=20）",
+  "next": "等协调者按 S9b OCR 收口+核验裁决；12S-C 最终集成 SHA 另单；16B r3 冻结后核两反例与恢复路径"
+}

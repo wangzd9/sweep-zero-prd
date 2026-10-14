@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-052453-nochange",
+  "occurred_at": "2026-10-13T05:26:16+08:00",
+  "recorded_at": "2026-10-13T05:26:16+08:00",
+  "role": "TESTER",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "空闲待命：05:04 基线后零 TESTER 范围新增，无在途业务进程，07B/16B OCR 属协调者面不接管",
+  "evidence": "origin/main=502bf8ec 未变; leases 无 TESTER.json 活跃; find -newermt 05:04 空",
+  "next": "保持 5 分钟巡检，收到 07B post-r3 或 16D 派单即 ACK 开工"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261011-195053-task08-accepted-idle",
+  "occurred_at": "2026-10-11T19:51:01+08:00",
+  "recorded_at": "2026-10-11T19:51:01+08:00",
+  "role": "TESTER",
+  "task": "TASK-08",
+  "attempt": "post-merge-0a8ca8a",
+  "status": "IDLE",
+  "summary": "19:46 协调者 ACCEPT post-merge-0a8ca8a 复核，TASK-08 转 DONE；候选重算 TASK-10 维持 WAITING（依赖 09 BLOCKED 用户授权），无新派单；TESTER 维持 IDLE",
+  "evidence": "inbox/coordinator/TASK-08/post-merge-0a8ca8a-acceptance-decision.md",
+  "next": "继续5分钟巡检；新派单届时ACK"
+}

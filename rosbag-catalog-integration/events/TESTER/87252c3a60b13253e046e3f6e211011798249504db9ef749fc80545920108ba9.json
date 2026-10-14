@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-094453-nochange",
+  "occurred_at": "2026-10-12T09:47:09+08:00",
+  "recorded_at": "2026-10-12T09:47:09+08:00",
+  "role": "TESTER",
+  "task": "POLL",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "5分钟巡检：main 453da0c 双核一致，零新派单，无在途，T10 DONE/T11 生产门禁维持",
+  "evidence": "sessions/TESTER.md",
+  "next": "继续 5 分钟巡检"
+}

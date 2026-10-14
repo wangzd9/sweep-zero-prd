@@ -1,0 +1,15 @@
+{
+  "event_id": "c-t11s-batch-1012-obs52-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T06:55:00+08:00",
+  "recorded_at": "2026-10-14T06:57:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第52轮只读观察（处理机 06:53-06:55 实测，prerun 指纹 a6358f75 obs51 自产记账触发）：与 obs51 零状态变化，scene-4acf689f（16_02_03 正式链）INFER 持续活跃，模型段完成信号仍未到；大包跨夜继续不 kill/不 retry。",
+  "evidence": "处理机 06:53:47-06:55 只读实测：8180 scene-4acf689f9a6a473da1fa2f2efc70 status=SCENE_RUNNING attempt=1 error_message 空 lease_owner=platform-local、lease 两次间隔 ~25s 实测 06:56:29→06:57:29 续租活跃；8767/health ok active_runs=[scene-4acf689f ACCEPTED pid1]；proxy 宿主 pid 3495931 CPU 12.5% TIME 01:19:23（obs51 01:19:20，+3s 持续非零）STIME 10月13 未重启；容器 /proc/1/net/tcp 含 192.168.2.45:8002 VLM 通道 ESTAB 在案；work 树 attempt-1 checkpoint.json mtime 2026-10-13 16:23:10 UTC 未翻、find -newermt 15min=0 零新写、仅 checkpoint.json/jpg/pcd；llm-server 直连 /tmp/vllm_qwen38.log 06:53:47-06:54:57 十点采样 Running 0-2 reqs、Waiting 全 0、prefix cache 92.2-92.3%、MM cache 88.6%、gen 24.2-112.8 tok/s、POST /v1/chat/completions 200 OK 连发（日志 60MB 持续增长）=推理活跃续证；incoming/spray 仍仅 16_33_10 空包目录（D6 A 面不变）；本批 8 包无新终态。无升级条件命中（heartbeat 无连败/run 未 FAILED/VLM Waiting 全 0 且 proxy 有 ESTAB）。",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按 ruling-4acf-infer-active-0218=heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且 proxy 无 ESTAB/checkpoint 或八步翻 FAILED；③ 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账（含 ruling-dup-slices-0038 观察面）；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总。",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]",
+  "lease": "owner C-cron-poll-20261014-065353-t11s-obs52（06:55:39 claim，token 8168f586bdb14d26a1aee158fd9673ec 整体 JSON 解析）",
+  "source": "inbox/events/C/c-t11s-batch-1012-obs52-infer-continue-nochange-20261014.json"
+}

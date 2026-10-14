@@ -1,0 +1,12 @@
+{
+  "event_id": "20261011-0952-attempt5-ack",
+  "occurred_at": "2026-10-11T09:52:44+08:00",
+  "recorded_at": "2026-10-11T09:52:44+08:00",
+  "role": "TESTER",
+  "task": "TASK-06",
+  "attempt": "5",
+  "status": "ACKED",
+  "summary": "attempt-5 派单 ACK：R-01 秒末边界+R-03 零 UPDATE 真 MySQL 复测，base 4697be0 核对一致",
+  "evidence": "inbox/TESTER/TASK-06/r2-final-mysql-e2e-attempt-5-ack.md",
+  "next": "搭隔离 MySQL 8.4.11 容器跑 33 用例全文件+探针"
+}

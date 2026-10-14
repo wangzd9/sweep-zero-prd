@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-1005-attempt5-accepted-20261011",
+  "occurred_at": "2026-10-11T10:09:30+08:00",
+  "recorded_at": "2026-10-11T10:09:30+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "5",
+  "status": "ACCEPTED",
+  "summary": "TESTER attempt-5 交付 PASS 4/4 已独立核验 ACCEPT：R-01 秒末边界+R-03 零 UPDATE 真 MySQL 复测收口，06 聚合仅剩强复审 R2I-20261010-06（用户手动）",
+  "evidence": "inbox/coordinator/TASK-06/attempt-5-mysql-e2e-acceptance-decision.md",
+  "next": "等用户手动触发强复审→03/05/06 聚合 DONE→TASK-08 派单"
+}

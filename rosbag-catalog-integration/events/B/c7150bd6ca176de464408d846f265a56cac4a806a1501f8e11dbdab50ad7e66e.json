@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-195753-nochange-task08-done-idle",
+  "occurred_at": "2026-10-11T19:58:54+08:00",
+  "recorded_at": "2026-10-11T19:58:54+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "巡检无变化：inbox/2号 19:52后零新增（最新仍 t08c-1 dispatch/ACK 16:54 已收口）；TASK-08 19:46 已收口 DONE（c3-1 98f6c88+t08c-1 0a8ca8a 均合入+TESTER 14/14 复核 PASS）；TASK-09 BLOCKED（需用户授权真实坡道样本/VLM）、TASK-10 WAITING（依赖08+09）候选无可派单；origin/main fetch 实测 0a8ca8a 不变；wt-04a-t08c HEAD=bf48a45 冻结干净（仅 .venv 软链）、ps 无本侧在途进程；control=ACTIVE、legacy_busy 空。维持 IDLE_WAITING 不占开发槽。",
+  "evidence": "sessions/B.md",
+  "next": "等协调者新派单或返修；空闲不扩需求"
+}

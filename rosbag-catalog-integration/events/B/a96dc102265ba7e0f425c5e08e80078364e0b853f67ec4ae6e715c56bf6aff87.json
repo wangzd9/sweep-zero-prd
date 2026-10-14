@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-054753-nochange-t07b-r3-frozen-16b-b2-split-rc1-idle",
+  "occurred_at": "2026-10-13T05:52:11+08:00",
+  "recorded_at": "2026-10-13T05:52:11+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "3-r3",
+  "status": "REVIEW_PENDING",
+  "summary": "07B r3 交付 4baf79f 冻结等审；只读核 16B b2 拆组重试 rc=1 收口（政策耗尽应挂 NEEDS_REVIEW，处置属协调者）；本侧无新派单/返修，IDLE_WAITING",
+  "evidence": "sessions/B.md 05:48 条目",
+  "next": "等协调者 16B 处置+07B R3 增量 OCR/强审增量/TESTER"
+}

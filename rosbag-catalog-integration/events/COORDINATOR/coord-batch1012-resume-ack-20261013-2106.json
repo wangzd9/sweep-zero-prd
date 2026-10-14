@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-batch1012-resume-ack-20261013-2106",
+  "occurred_at": "2026-10-13T21:07:11.059460+08:00",
+  "recorded_at": "2026-10-13T21:07:11.059460+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "ACKED",
+  "summary": "恢复后首回合：用户 20:58:48 交接已 ACK，四份派单（A/B/C/TESTER）内容核实接受；在途身份核无冲突（leases 仅陈旧稳定锁，processes 全 none，OCR 无在途，强审 REVOKED）；批次唯一状态表建立（8包：首包复用/空包拒绝/2短包排队/3大包 operation 排队）；A 为唯一上传提交 owner，先短包后长包，跨夜不 kill/retry",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/ACK.md; inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md; HANDOFF.md+input-manifest.json 已读",
+  "next": "下轮巡检核 A/B/C/TESTER ACK 与 A 短包落位/空包拒绝证据；大包用 runtime_tools.py 固定 operation 跨回合接续"
+}

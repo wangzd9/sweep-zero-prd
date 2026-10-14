@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t10-20261011-2359-delivered-reviewpending",
+  "occurred_at": "2026-10-12T00:03:00+08:00",
+  "recorded_at": "2026-10-12T00:03:00+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "TASK-10 取证单交付：端到端跑到真实 VLM 切片 SUCCESS（row19 54帧 138.8s），定位 2 真实 P0 产品缺口（#1 source_status 无 READY 生产路径→03B域，#2 derive_storage_offset fail-closed 与真实 rosbag2 冲突 PUBLISH_BLOCKED→06B域优先）；原包独立复核 ALL_UNCHANGED；回归 104 passed；业务代码 0 改动；P0 闭环收口需回派 #1/#2 后复跑",
+  "evidence": "receipts/TASK-10/attempt-1.md",
+  "next": "等协调者机械核验+裁决 #1/#2 回派"
+}

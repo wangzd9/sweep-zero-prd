@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-062353-r128-07br3-2of6-16b-frozen",
+  "occurred_at": "2026-10-13T06:27:46+08:00",
+  "recorded_at": "2026-10-13T06:27:46+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "06:2x巡检:06:19后无C新派单;r128=07B R3增量OCR 2/6收口(协调者范围);16B维持NEEDS_REVIEW冻结;wt-03b-t16b HEAD 0208a73干净",
+  "evidence": "sessions/C.md",
+  "next": "等协调者proxy OCR裁决后16B最小返修单"
+}

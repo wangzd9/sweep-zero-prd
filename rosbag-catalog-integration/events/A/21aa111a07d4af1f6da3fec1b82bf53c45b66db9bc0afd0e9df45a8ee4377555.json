@@ -1,0 +1,12 @@
+{
+  "event_id": "a-batch1012-attempt1-binding1017-verified-20261014",
+  "occurred_at": "2026-10-14T10:43:22+08:00",
+  "recorded_at": "2026-10-14T10:43:22+08:00",
+  "role": "A",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "1017 绑定更正回合：消费 resume-ruling-binding-1017.md（D4③等终态自动收敛口径作废）+ codex-direct-repair-20261014.md（flat 三提交重登记由 Codex 单写经正式 API，A 暂勿 retry）。A 只读核实 Codex 10:23 已完成结果：flat 三提交 a65a25a7/87dfebaa/518089ed 于 10:23:08-09 绑定 SCHEDULED，绑定身份合法（bound_ready_path 全 flat 路径，source_id 指向 flat source_copy id119/120/121 deleted_at NULL，非 date-grouped dup 行 id116-118，created:false 复用既有源无改库），未重烧模型/未新建 run（created_runs=0，4acf689f 仍 SCENE_RUNNING heartbeat 10:29:12 跨夜继续）。A 未做任何写/重试/上传，无冲突。",
+  "evidence": "receipts/TASK-11S-BATCH-1012/a-attempt-1.md 1017节 + binding-repair.jsonl + 处理机 MySQL source_copy id116-121 + ingest_submission 10:23:08-09 绑定行 + backend 日志 02:18-02:23 register",
+  "next": "等 4acf689f 终态(任一 outcome)核 flat 三提交是否按 SCHEDULED 依次创建正式 run(TESTER 验收面)；若协调者要求 A 独立复核绑定契约(entry_relative/claim 释放/10-13 登记时 bind 漏匹配根因)再逐包深挖"
+}

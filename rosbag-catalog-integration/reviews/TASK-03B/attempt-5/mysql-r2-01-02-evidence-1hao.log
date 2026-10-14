@@ -1,0 +1,15 @@
+setup_rc= 0 
+version/sql_mode= ('8.4.11', 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION')
+pre-02: ingest tables absent OK
+R2-01: migration.upgrade() on existing-DB create branch = PASS (修复前 1101)
+continued migration 20261009_01_scene_identity_key.py = PASS
+continued migration 20261009_02_ingest_frozen_columns.py = PASS
+mysql ingest_profile.default_purposes_json default= None nullable= False
+mysql ingest_profile.default_scenes_json default= None nullable= False
+mysql ingest_profile.default_scene_parameters_json default= None nullable= False
+mysql ingest_submission.selection_json default= None nullable= False
+mysql poll row: {'event_id': 'r2fix-e67b012c88c4', 'purpose': 'scene_slice', 'scene_code': 'slope', 'source_id': 'R2FIXBAG', 'capability_config_hash': 'cap-r2fix'}
+mysql consume stats consumed/dropped/created= 1 0 1
+mysql outbox status after consume (DB 终态)= CONSUMED | run created= True
+cleanup_rc= 0
+MYSQL_EVIDENCE_ALL_PASS

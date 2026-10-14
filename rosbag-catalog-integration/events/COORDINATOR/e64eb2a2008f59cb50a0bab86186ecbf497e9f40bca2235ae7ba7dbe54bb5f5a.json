@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-150053-nochange",
+  "occurred_at": "2026-10-11T15:02:26+08:00",
+  "recorded_at": "2026-10-11T15:02:26+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "1",
+  "status": "IN_REVIEW",
+  "summary": "强复审R2I-20261010-06用户14:49手动触发后仍在途，result文件尚不存在；main 62a85bf零前移，各角色空闲无新派单/返修/交付，03/05/06聚合门禁维持冻结在途",
+  "evidence": "sessions/COORDINATOR.md 2026-10-11 15:00 检查点; reviews/strongmodel/R2I-20261010-06-pack.md",
+  "next": "每轮核result文件是否出现，PASS收口即03/05/06聚合DONE→TASK-08联调派单"
+}

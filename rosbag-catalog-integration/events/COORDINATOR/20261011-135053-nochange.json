@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-135053-nochange",
+  "occurred_at": "2026-10-11T13:50:53+08:00",
+  "recorded_at": "2026-10-11T13:51:58+08:00",
+  "role": "COORDINATOR",
+  "task": "NONE",
+  "attempt": 0,
+  "status": "POLL_NO_CHANGE",
+  "summary": "13:45后零业务变化：main 65ca0be三核一致；仅B/C例行心跳；强复审R2I-20261010-06 result仍缺，READY_FOR_USER_TRIGGER；06聚合门禁不变",
+  "evidence": "main=65ca0beb0111a2d45065206886d432bd20eb76d0",
+  "next": "继续每5分钟巡检；强复审等用户手动触发"
+}

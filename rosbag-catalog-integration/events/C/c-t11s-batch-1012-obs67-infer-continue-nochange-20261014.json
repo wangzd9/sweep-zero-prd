@@ -1,0 +1,15 @@
+{
+  "event_id": "c-t11s-batch-1012-obs67-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T09:02:00+08:00",
+  "recorded_at": "2026-10-14T09:03:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "prerun_fingerprint": "3b4f3c66b039b3683a81b04062bcb283747e89051174716a029dfe9019717ac8",
+  "summary": "C 第67轮只读观察（处理机/llm-server 09:00-09:02 实测）：与 obs66 零状态变化，INFER 持续活跃；scene-4acf689f（16_02_03 正式链）SCENE_RUNNING attempt=1 auto_retry_count=0、heartbeat 08:59:37 续租 lease 至 09:01:37、八步 QUEUED；8767 ok active_runs=[4acf689f ACCEPTED]、18000 production ready；proxy pid 3495931 连续未重启 ELAPSED 12:37:29 TIME 01:20:50（+7s）；checkpoint.json mtime 00:23:10 未翻、find -newermt 08:30 零新写；VLM 通道容器 1 ESTAB→192.168.2.45:8002（临时端口 93D4→8CA6 循环重建非消失）；vllm log 12 点采样 Running 0-3/Waiting 全程 0/prefix 92.6-92.7%/MM 89.0%=推理活跃续证；NAS 98T/70T/29T 71% 不变、load 2.31 同量级、incoming/spray 仍仅 16_33_10 空包（D6 A 面不变）。本批 8 包无新终态，无升级条件命中。C 全程只读，未 kill/删/重启/retry/改生产路径。恢复交接 ACK 21:07:41 在案不重复领取；12S-C/16B 快照所列旧单均 DONE 已接受不领取。白天口径本轮无变化不报进度。",
+  "evidence": "处理机 09:00 实测 ssh curl 8180/8767/18000、stat checkpoint.json、find -newermt 08:30 count=0、ps -p 3495931、docker exec net/tcp ESTAB 8402A8C0:8CA6→2D02A8C0:1F42、mount/df cifs 98T 71%、uptime load 2.31；llm-server 直连 vllm log 08:58:39-09:00:29 12 点采样；canonical sessions/C.md 616→617 行 append（末行 \\n 预核验 od，临时条目文件+独立 python append，计算在前写盘在后）；旧镜像 inbox/sessions/C.md 未触",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按 ruling-4acf-infer-active-0218（heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且通道消失）；③ flat 三提交 a65a25a7/87dfebaa/518089ed 绑定 run 出现后 C 按 run 核账；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。白天状态变化即时通报",
+  "owner": "C-cron-poll-20261014-085853-t11s-obs67",
+  "source": "inbox/events/C/c-t11s-batch-1012-obs67-infer-continue-nochange-20261014.json"
+}

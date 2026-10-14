@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-1756-tester-mysql-3fail-signal-20261010-1808",
+  "occurred_at": "2026-10-10T18:08:30+08:00",
+  "recorded_at": "2026-10-10T18:08:30+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "r2-final-mysql-e2e",
+  "status": "RUNNING",
+  "summary": "18:05 巡检：TESTER 终测持续在途（scratch 18:06:40 复现脚本仍在写，MySQL 容器 17:28 起存活）；18:04 tester_r2_3fail.log 出现 3 条 test_scene_result_report 用例在真实 MySQL 隔离库 FAIL，信号=fixture bag_uid 27 字符触发 1406 Data too long + StaleDataError，疑似 fixture 造数问题而非业务缺陷（定性权在测试者）；报告未交付，不催单不预调定性，门禁不变（全 PASS → 强模型增量复审包 → 06 聚合解锁）",
+  "evidence": "scratch/tester_r2_3fail.log(18:04:22)、scratch/tester_r2_r1_repro.py(18:06:40)、HANDOFF.md 18:08 检查点",
+  "next": "等测试者复现结论与 reports/TASK-06/r2-final-mysql-e2e.md 交付；FAIL 若定性业务缺陷回派 06B(2号)/03B(1号)最小返修，若 fixture 问题由测试者自修重跑"
+}

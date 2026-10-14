@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261012-160153-nochange",
+  "occurred_at": "2026-10-12T16:13:37+08:00",
+  "recorded_at": "2026-10-12T16:13:37+08:00",
+  "role": "A",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "巡检零新增: main 502bf8e 双核一致, 无新派单/返修, T07B 归 B 编码在途只读观察, 开发槽空闲",
+  "evidence": "inbox/sessions/A.md@16:01",
+  "next": "继续5分钟巡检; 无新单不扩需求"
+}

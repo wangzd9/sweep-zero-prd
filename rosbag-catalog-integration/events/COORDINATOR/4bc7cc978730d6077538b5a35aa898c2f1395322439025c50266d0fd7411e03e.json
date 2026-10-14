@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-batch1012-0236-snapshot-ruling-consistent-a-c-tester-noaction-quiet-20261014",
+  "occurred_at": "2026-10-14T02:38:00+08:00",
+  "recorded_at": "2026-10-14T02:39:09+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "02:3x 巡检（quiet_hours，prerun 指纹 3d3aade0，8 变更源全消费）：A 02:28 RUNNING（4acf689f heartbeat 02:25 推进/无升级条件；flat 三提交 PENDING_INPUT 零绑定=串行占用预期；scan_job 4001 failed:2 空包 D6 拒绝持续）、C obs24 02:31（VLM 远端直证 tok/s+POST 200 连发、checkpoint 00:23 未翻=模型段完成信号未到、双文件坑第三次复发自修迁回 canonical）、TESTER 02:32 stall-continue 被 02:33 纠偏 supersede（stall-escalate 撤案、改核完成信号三选一、批次面不变）、sessions B/C/TESTER/COORDINATOR+test-receipts 为落盘回声。全部为 ruling-4acf-infer-active-0218 的跨角色一致性落地，无新外部业务输入。批次维持：3 收口+空包 D6+4acf689f INFER 跨夜+flat 三提交等串行释放。",
+  "evidence": "find 02:2x 后无 A/B/C/TESTER 新派单/裁决/回执；leases 无他角色在途（C 02:35 释放）；claim token 7da6668c…",
+  "next": "5min observer 核 4acf689f 模型段完成信号；终态后放行 A flat 绑定（D4③）+ TESTER 增量验收；升级条件才重新裁决；08:00 夜间汇总（含 D5 肇事身份上报+双文件坑教训+模型段进展）"
+}

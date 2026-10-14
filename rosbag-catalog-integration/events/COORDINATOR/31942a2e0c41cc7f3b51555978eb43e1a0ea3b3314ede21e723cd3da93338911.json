@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-14ae4556629a-20261010-1708-b9r2-cancelled-r3-running",
+  "occurred_at": "2026-10-10T17:11:21+08:00",
+  "recorded_at": "2026-10-10T17:11:21+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-03B",
+  "attempt": "5-rework-2",
+  "status": "RUNNING",
+  "summary": "17:08 巡检：B9-r2（c285e2e）16:59 FAILED context canceled（1m26s、budget_exceeded=false，同 commit 连续两轮）；根因核对=llm 链路正常但 vLLM 4 running/2 waiting capacity 拥塞，OCR 请求排队期被 cancel，非挂死非断链；B9-r3 已在途（17:02:54 pid 500430 session 30863ac9 持 ocr.lock 硬截止 17:30）不重复启动；若 r3 同因再 cancel 即升级说明",
+  "evidence": "reviews/TASK-03B/attempt-5/ocr-batches.md（B9-r3 行）；HANDOFF.md 17:10 检查点",
+  "next": "下轮先查 B9-r3 session mtime/收口；收口无 high/critical 则六笔同批 --no-ff 合入 main（现 eff0479）→ TESTER 派单"
+}

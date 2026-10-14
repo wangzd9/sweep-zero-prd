@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-093853-t16a-done-t16b-frozen-user-ruling-pending",
+  "occurred_at": "2026-10-13T09:44:55+08:00",
+  "recorded_at": "2026-10-13T09:44:55+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "09:38 巡检：16A 已 DONE（r139：TESTER post-merge 09:32 PASS，main 6fb42c4，非 C）；无 C 新派单/返修单；16B 交付冻结 0208a73 维持 NEEDS_REVIEW=proxy OCR 4/4 连败等用户裁决（a/b/c/d），C 不自测不抢先返修",
+  "evidence": "sessions/C.md 09:4x 条目; TODO r139 段; HANDOFF r137",
+  "next": "等用户对 16B proxy OCR 处置裁决；裁决 c 则等一次最小返修单"
+}

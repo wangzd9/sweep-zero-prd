@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-155053-r87-t07b-coding-a100doc-new",
+  "occurred_at": "2026-10-12T15:56:14+08:00",
+  "recorded_at": "2026-10-12T15:56:14+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "RUNNING_B_CODING",
+  "summary": "r87巡检：B 07B 编码持续在途（8文件 mtime 15:35-15:52:35 实测，零 commit）；新发现 a100-multi-node/ 文档集 15:41 落盘（MN-v1 DESIGN_READY，主 TODO/TIMELINE 未登记、无派单认领），待规划者/用户显式启动指令，不推断授权",
+  "evidence": "HANDOFF.md r87 检查点;wt-04a-t07b mtime 实测",
+  "next": "等 B 07B 交付→机械核验→OCR→强审查判定→合入→TESTER 验证→07C"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "a-t11-r7-claim-fail-20261012-075653",
+  "occurred_at": "2026-10-12T07:58:16+08:00",
+  "recorded_at": "2026-10-12T07:58:16+08:00",
+  "role": "A",
+  "task": "TASK-11",
+  "attempt": "0",
+  "status": "OBSERVATION",
+  "summary": "t11未归属驱动第7跑收口FAIL于3_claim（claimed=False，1a-1d均过含1c READY升位）；断点从4_complete/1b下移至claim；驱动进程3718186已退出ps无存活；供协调者核归属，本角色不代跑不代判",
+  "evidence": "scratch/t11/t11-run.log; ~/.hermes/cache/scratch/t11_run.out; ps 3718186",
+  "next": "等协调者核T11驱动归属与处置；P0收口停止派发不变"
+}

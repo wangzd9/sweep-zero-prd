@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-batch1012-tester-ack-user-q-answered-20261013-2109",
+  "occurred_at": "2026-10-13T21:09:27.806754+08:00",
+  "recorded_at": "2026-10-13T21:09:27.806754+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "CONSUMED",
+  "summary": "消费新 pending 724d7c25：TESTER 21:05 ACKED（固定生产快照3c9c496/8767 LISTEN/首包复用PASS核；incoming/spray空、staging不存在→A上传未开始）；群请求'恢复了吗'(2408c2fe,21:04:43)已答=已恢复+批次状态表建立+TESTER ACK+A/B/C待ACK，证据 request-replies/2408c2fe….md 并 queue-ack；夜间静默保持不主动群报",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/request-replies/2408c2feaa652e54f11d1c7ad3155c593e2ee2350a7dcc032ce24fc37a7d400d.md; inbox/TESTER/TASK-11S-BATCH-1012/attempt-1-ack.md; BATCH-STATUS.md 角色占用更新",
+  "next": "下轮巡检核 A/B/C ACK 与 A 短包落位/空包拒绝证据；A 未 ACK 先核会话在途身份"
+}

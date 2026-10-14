@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-042253-nochange-t07b-r3-frozen-16b-b2-inflight",
+  "occurred_at": "2026-10-13T04:26:45+08:00",
+  "recorded_at": "2026-10-13T04:26:45+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "3-r3",
+  "status": "REVIEW_PENDING",
+  "summary": "07B R3 4baf79f 交付冻结维持等 R3 增量 OCR/强审/TESTER SR-05；16B-b2 在途，无 B 新派单/返修；04:2x 追加后脚本 bug 致孤儿租约已同源 release",
+  "evidence": "sessions/B.md",
+  "next": "等 16B 批次+16A 增量 OCR 收口后 R3 串行 OCR"
+}

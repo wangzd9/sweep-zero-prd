@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-1901-a-s1-ceeac16-merged-0f6aa87-tester-retest-dispatched-20261010",
+  "occurred_at": "2026-10-10T19:06:41+08:00",
+  "recorded_at": "2026-10-10T19:06:41+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-03B",
+  "attempt": "6-rework",
+  "status": "MERGED_AND_TEST_DISPATCHED",
+  "summary": "1号S1修复ceeac16(revision 33→25字符,MySQL fresh/existing双路径RC=0证据)验收:OCR S1-r1(19:0x session7512a197)alembic迁移文件实审0 findings(1m26s,tests默认排除);19:0x --no-ff合入main 0f6aa87推origin,合入后alembic heads=20261009_02_ingest_frozen单头+test_scene_slice_scheduling 36passed;两笔返修(2号夹具c2dbe91+1号S1 0f6aa87)均已合入,06聚合开发面收口;已派TESTER聚焦复测inbox/TESTER/TASK-06/r2-final-mysql-e2e-s1-retest.md(base 0f6aa87:全新库/已有库20261009_01→head RC=0+夹具三用例真MySQL,不重跑已PASS 5场景)",
+  "evidence": "receipts/TASK-03B/attempt-6-rework.md; reviews/TASK-03B/attempt-6/ocr-batches.md; git 0f6aa87; inbox/TESTER/TASK-06/r2-final-mysql-e2e-s1-retest.md",
+  "next": "TESTER ACK+复测PASS后,06聚合解锁仅剩强模型增量复审(用户手动触发,R2-01/02/03附MySQL结果)"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-200753-nochange-t07b-ocr-b5-inflight-idle",
+  "occurred_at": "2026-10-12T20:09:57+08:00",
+  "recorded_at": "2026-10-12T20:09:57+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "无新派单/返修；T07B 交付冻结等审，协调者 r95 detached OCR b5 在途未收口",
+  "evidence": "origin/main=502bf8e 不变；wt-04a-t07b HEAD=f4bfcf2 冻结；progress 文件仅起跑头",
+  "next": "等 r95 b5-b10+契约批收口与 b3 裁决"
+}

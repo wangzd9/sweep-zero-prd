@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "input_sha256": "dedf4f2218d05120b1ae1043a3411a9e24313554cd667146da1ebd05d0979e52",
+  "record": {
+    "kind": "business",
+    "event_id": "COORDINATOR:coord-t11s-batch-1012-4acf-cancel-confirmed-exec-host-freed-20261014T1755",
+    "task": "TASK-11S-BATCH-1012",
+    "attempt": "attempt-1",
+    "status": "CANCEL_CONFIRMED",
+    "summary": "1012批次大包取消确认（C obs78 17:35 实测、17:41 落盘，协调者 17:55 登记）：scene-4acf689f attempt 1 于 17:14:25 CANCELLED（INFER 阶段 decoder 收到取消信号；取消确认两次 HTTP 409 task lease expired），链路=15:57:45 处理机 kernel OOM-kill 旧 proxy 容器（C obs77 申报）→16:22 8180 观测 SCENE_CANCELLING→17:14:25 取消落定。checkpoint：EXTRACT/SEGMENT RUNNING、INFER FAILED、PUBLISH/REGISTER/VALIDATE/WRITE PENDING；INFER 取消前已产出结果（slice-write/render_log/spray_model_results 15:27 起存在），slices/test/spray 顶层无新 4acf689f 切片（FFDEE943×4 双写现场保留）。8180 状态仍滞留 SCENE_CANCELLING 未收敛 SCENE_CANCELLED、lease 16:23:55 stale=收敛面待 C/A 下轮只读核实，不抢跑。BATCH-STATUS 16_02_03 行已登记取消终态：本包验收面改为取消链证据+产物完整性（不再等 SCENE_DONE）；SCENE_EXEC_HOST 释放后 flat 三提交串行等待面（a65a25a7/87dfebaa/518089ed 绑定推进，D4③）具备推进条件，owner 按批次既定=A 面（Codex 绑定恢复线），协调者不代操作。批次其余口径不变（PASS 基线 3 包、空包拒绝可追溯）。",
+    "evidence": "events/C obs78（5ba24310，17:41:08 落盘，occurred 17:35:00）；inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md 16_02_03 行 17:50 登记段；events/COORDINATOR 本角色 17:15 SCENE_CANCELLING 观察事件（前序）",
+    "next": "C 下轮只读核实 8180 是否收敛 SCENE_CANCELLED 及 lease 释放证据；A/Codex 绑定恢复线在 SCENE_EXEC_HOST 释放后推进 flat 三提交（不抢跑，先核实释放）；TESTER 16D 大包验收面按取消链证据+产物完整性口径（协调者随 16D 联验派单时注明）",
+    "occurrence": {
+      "source": "/home/wang/work/doc/prd/rosbag-catalog-integration/events/C/5ba24310e511844643e13c3773aa44ec910ff07e3ed513e5fe68f1d5744e1333.json",
+      "field": "occurred_at"
+    },
+    "schema_version": 1,
+    "role": "COORDINATOR",
+    "recorded_at": "2026-10-14T17:50:43+08:00",
+    "occurred_at": "2026-10-14T17:35:00+08:00",
+    "time_source": {
+      "kind": "json_evidence",
+      "source": "events/C/5ba24310e511844643e13c3773aa44ec910ff07e3ed513e5fe68f1d5744e1333.json",
+      "field": "occurred_at",
+      "sha256": "8dcb95df847930f2f634adc4926912d3b5347b2647c776a6f858739a05d56f0f"
+    }
+  },
+  "complete": true,
+  "session": "sessions/COORDINATOR.md"
+}

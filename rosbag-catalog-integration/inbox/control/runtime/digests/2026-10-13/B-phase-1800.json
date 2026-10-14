@@ -1,0 +1,311 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-13T18:00:53.470770+08:00",
+  "role": "B",
+  "kind": "phase",
+  "start": "2026-10-13T15:00:00+08:00",
+  "end": "2026-10-13T18:00:00+08:00",
+  "artifact": "inbox/control/runtime/digests/2026-10-13/B-phase-1800.json",
+  "roles": [
+    {
+      "role": "B",
+      "start": "2026-10-13T15:00:00+08:00",
+      "end": "2026-10-13T18:00:00+08:00",
+      "totals_seconds": {
+        "working": 0,
+        "waiting": 3810.0,
+        "blocked": 0,
+        "idle": 0,
+        "unknown": 6990.0
+      },
+      "segments": [
+        {
+          "start": "2026-10-13T15:00:00+08:00",
+          "end": "2026-10-13T15:00:53+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T15:00:53+08:00",
+          "end": "2026-10-13T15:10:53+08:00",
+          "category": "unknown",
+          "task": "TASK-12S-B",
+          "attempt": "1",
+          "summary": "12S-B attempt-1 交付冻结：spray 能力适配器 base 6fb42c4→f62a29c（13文件+3136行），两路线+冻结选帧+双pass归一+整数ns分段+身份键缓存+7参考图受控+预检；spray 54 passed/场景域142/全仓937+4(base既有)；ruff clean/merge-tree零冲突；真实decode/render/VLM NOT_RUN(依赖缺失)；1012只读bag packet路线适用",
+          "sources": [
+            "events/B/d744c521047cc15e252c3e502e6a7549d3c2ff13c931f5ad5f65095463bac364.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T15:10:53+08:00",
+          "end": "2026-10-13T15:21:13+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T15:21:13+08:00",
+          "end": "2026-10-13T15:37:53+08:00",
+          "category": "waiting",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework",
+          "summary": "12S-B attempt-1-rework 交付冻结：c01+c02 OCR 16 findings 一次最小返修（S1–S8/T1–T8 共17条全部实质修复，无豁免），base f62a29c→0320a8e（8文件+980/-78）；新增定向40用例全绿/spray域94/全仓977+4(base既有零新增)/ruff clean；真实decode/render/VLM NOT_RUN口径不变",
+          "sources": [
+            "events/B/fa55c05df4a77fd49f903d1855321ee130e037b25f9cce2290f2fdc449b016cc.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T15:37:53+08:00",
+          "end": "2026-10-13T16:21:44+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T16:21:44+08:00",
+          "end": "2026-10-13T16:40:42+08:00",
+          "category": "unknown",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework",
+          "summary": "12S-B attempt-1-rework 交付冻结：c01+c02 OCR 16 findings 一次最小返修（S1–S8/T1–T8 共17条全部实质修复，无豁免），base f62a29c→0320a8e（8文件+980/-78）；新增定向40用例全绿/spray域94/全仓977+4(base既有零新增)/ruff clean；真实decode/render/VLM NOT_RUN口径不变",
+          "sources": [
+            "events/B/fa55c05df4a77fd49f903d1855321ee130e037b25f9cce2290f2fdc449b016cc.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T16:40:42+08:00",
+          "end": "2026-10-13T16:45:10+08:00",
+          "category": "unknown",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework-s9b",
+          "summary": "12S-B S9b（帧映射契约，0320a8e 漏项）：本侧 cron 轮次核实同逻辑角色 2号交互会话已在 16:03 ACK 同一 S9b 单并正在 wt-04a-t12sb 实现在途未提交（decode.py +200/tests +217→12 文件 +378/-74，mtimes 16:37→16:40:42 本回合内推进，HEAD 仍 0320a8e）→ 本侧零业务动作/零提交/零 HEAD 移动让位（同角色在途不抢占）。本侧只读地面真值锚独立实跑：纯 stdlib SeyondScan CDR 解析只读真实小包 1184 消息 0 错→44 is_last_scan 帧边界；镜像 packet2pointcloud 实",
+          "sources": [
+            "events/B/ccd1659c83a4f39e6844ced4ee0ded67428c286c8c2f021dc500f5e4f47b0f7d.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T16:45:10+08:00",
+          "end": "2026-10-13T16:51:30+08:00",
+          "category": "unknown",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework-s9b",
+          "summary": "12S-B S9b（帧映射契约，0320a8e 漏项）：本侧 cron 轮次核实同逻辑角色 2号交互会话已在 16:03 ACK 同一 S9b 单并正在 wt-04a-t12sb 实现在途未提交（decode.py +200/tests +217→12 文件 +378/-74，mtimes 16:37→16:40:42 … st_scan 帧边界；镜像 packet2pointcloud 实跑 rc=0 出 44 PCD 与 44 帧 ms 0 失配；首/末帧字段与协调者独立 rclpy 探针 44/44 EXACT_MATCH_ALL_44；原包 sha256 未变（前导 2 条+尾部 20 条非 is_last 残缺边均在真实包",
+          "sources": [
+            "events/B/ccd1659c83a4f39e6844ced4ee0ded67428c286c8c2f021dc500f5e4f47b0f7d.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T16:51:30+08:00",
+          "end": "2026-10-13T16:55:10+08:00",
+          "category": "waiting",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework-s9b",
+          "summary": "S9b 让位观察续核（prerun 104fb976）：2号交互会话 owner 在途活跃未停滞——wt-04a-t12sb 未提交 diff 2 文件 +368/-54，decode.py mtime 16:42:45（晚于 16:40:42 上轮观察）；HEAD 仍 0320a8e，s9_head 未冻结；receipts/TASK-12S-B/attempt-1-rework.md mtime 15:20 未含 S9 段。12S-A 已合入 main 6c7d983 并推 origin（收口链首位 OCR 已清）；12S-C 92dcb52 维持 REVIEW_PENDING 待接线核验。本侧零提交零动作，不接管不催单；16:",
+          "sources": [
+            "events/B/b-t12sb-s9b-owner-still-active-20261013-165100.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T16:55:10+08:00",
+          "end": "2026-10-13T17:35:10+08:00",
+          "category": "waiting",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework-s9b",
+          "summary": "S9b 让位观察续核（prerun 104fb976）：2号交互会话 owner 在途活跃未停滞——wt-04a-t12sb 未提交 diff 2 文件 +368/-54，decode.py mtime 16:42:45（晚于 16:40:42 上轮观察）；HEAD 仍 0320a8e，s9_head 未冻结；rece … pt-1-rework.md mtime 15:20 未含 S9 段。12S-A 已合入 main 6c7d983 并推 origin（收口链首位 OCR 已清）；12S-C 92dcb52 维持 REVIEW_PENDING 待接线核验。本侧零提交零动作，不接管不催单；16:30 交付时限已过，顺延风险交协调者",
+          "sources": [
+            "events/B/b-t12sb-s9b-owner-still-active-20261013-165100.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T17:35:10+08:00",
+          "end": "2026-10-13T17:52:00+08:00",
+          "category": "unknown",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework-s9b",
+          "summary": "S9b 让位观察续核（prerun 104fb976）：2号交互会话 owner 在途活跃未停滞——wt-04a-t12sb 未提交 diff 2 文件 +368/-54，decode.py mtime 16:42:45（晚于 16:40:42 上轮观察）；HEAD 仍 0320a8e，s9_head 未冻结；rece … pt-1-rework.md mtime 15:20 未含 S9 段。12S-A 已合入 main 6c7d983 并推 origin（收口链首位 OCR 已清）；12S-C 92dcb52 维持 REVIEW_PENDING 待接线核验。本侧零提交零动作，不接管不催单；16:30 交付时限已过，顺延风险交协调者",
+          "sources": [
+            "events/B/b-t12sb-s9b-owner-still-active-20261013-165100.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T17:52:00+08:00",
+          "end": "2026-10-13T17:55:10+08:00",
+          "category": "waiting",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework-s9b",
+          "summary": "S9b 帧映射契约交付冻结 s9_head=f76e2a9（续 0320a8e，base f62a29c 未移动，仅 decode.py+test_spray_adapter.py 2 文件 +369/-54）。催办 nudge2 消费：核验树面无在途进程后接续，spray 定向回归 98 passed（含 6 条 S9b 新用例）、真实小包 1184->44 锚定用例单跑 PASSED（44 帧/1184 消息/首末 scan 身份与独立 CDR 解析一致/ns 升序无重复）；冻结前 ruff 抓到 1 处新 E501 拆行后复扫绿+回归绿才 commit（唯一额外一轮验证，顺延 17:45->17:51）。回执 receipts",
+          "sources": [
+            "inbox/events/B/b-t12sb-s9b-delivered-f76e2a9-20261013-1752.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T17:55:10+08:00",
+          "end": "2026-10-13T18:00:00+08:00",
+          "category": "unknown",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework-s9b",
+          "summary": "S9b 让位观察续核（prerun 104fb976）：2号交互会话 owner 在途活跃未停滞——wt-04a-t12sb 未提交 diff 2 文件 +368/-54，decode.py mtime 16:42:45（晚于 16:40:42 上轮观察）；HEAD 仍 0320a8e，s9_head 未冻结；rece … pt-1-rework.md mtime 15:20 未含 S9 段。12S-A 已合入 main 6c7d983 并推 origin（收口链首位 OCR 已清）；12S-C 92dcb52 维持 REVIEW_PENDING 待接线核验。本侧零提交零动作，不接管不催单；16:30 交付时限已过，顺延风险交协调者",
+          "sources": [
+            "events/B/b-t12sb-s9b-owner-still-active-20261013-165100.json"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "event_id": "b-t12sb-s9b-owner-inflight-standdown-20261013-164000",
+          "occurred_at": "2026-10-13T16:40:42+08:00",
+          "recorded_at": "2026-10-13T16:41:00+08:00",
+          "role": "B",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework-s9b",
+          "status": "STANDING_DOWN_OWNER_INFLIGHT",
+          "summary": "12S-B S9b（帧映射契约，0320a8e 漏项）：本侧 cron 轮次核实同逻辑角色 2号交互会话已在 16:03 ACK 同一 S9b 单并正在 wt-04a-t12sb 实现在途未提交（decode.py +200/tests +217→12 文件 +378/-74，mtimes 16:37→16:40:42 本回合内推进，HEAD 仍 0320a8e）→ 本侧零业务动作/零提交/零 HEAD 移动让位（同角色在途不抢占）。本侧只读地面真值锚独立实跑：纯 stdlib SeyondScan CDR 解析只读真实小包 1184 消息 0 错→44 is_last_scan 帧边界；镜像 packet2pointcloud 实跑 rc=0 出 44 PCD 与 44 帧 ms 0 失配；首/末帧字段与协调者独立 rclpy 探针 44/44 EXACT_MATCH_ALL_44；原包 sha256 未变（前导 2 条+尾部 20 条非 is_last 残缺边均在真实包存在）",
+          "evidence": "sessions/B.md 16:40 巡检/让位条目;wt-04a-t12sb git diff HEAD --stat(12 files +378/-74);inbox/2号/TASK-12S-B/attempt-1-rework-s9b-{dispatch,ack,nudge}.md;evidence scratch s9_anchor_check EXACT_MATCH_ALL_44",
+          "next": "等 2号会话 S9b 续 commit 冻结 s9_head+回执更新 → 协调者机械核验 → 增量 OCR(f62a29c..s9_head 排队首位) → TESTER 增量复验 → 合入 12S-B；本侧仅只读核查，下轮若 2号仍无提交/无回执则标停滞告警交协调者",
+          "source": "events/B/ccd1659c83a4f39e6844ced4ee0ded67428c286c8c2f021dc500f5e4f47b0f7d.json",
+          "source_mtime": "2026-10-13T16:43:26+08:00"
+        },
+        {
+          "event_id": "b-t12sb-s9b-owner-still-active-20261013-165100",
+          "occurred_at": "2026-10-13T16:51:30+08:00",
+          "recorded_at": "2026-10-13T16:51:30+08:00",
+          "role": "B",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework-s9b",
+          "status": "WAITING_OWNER_INFLIGHT",
+          "summary": "S9b 让位观察续核（prerun 104fb976）：2号交互会话 owner 在途活跃未停滞——wt-04a-t12sb 未提交 diff 2 文件 +368/-54，decode.py mtime 16:42:45（晚于 16:40:42 上轮观察）；HEAD 仍 0320a8e，s9_head 未冻结；receipts/TASK-12S-B/attempt-1-rework.md mtime 15:20 未含 S9 段。12S-A 已合入 main 6c7d983 并推 origin（收口链首位 OCR 已清）；12S-C 92dcb52 维持 REVIEW_PENDING 待接线核验。本侧零提交零动作，不接管不催单；16:30 交付时限已过，顺延风险交协调者掌握。",
+          "evidence": "wt-04a-t12sb git diff HEAD --stat;stat decode.py mtime;git log main 6c7d983;git ls-remote origin main;inbox/coordinator/TASK-12S-A/attempt-1-ocr-closure-decision-20261013.md;sessions/B.md 16:51 条目",
+          "next": "下轮核对 2号会话是否冻结 s9_head + 回执 S9 段更新；若再无提交/写入/回执变化则标停滞告警交协调者",
+          "source": "events/B/b-t12sb-s9b-owner-still-active-20261013-165100.json",
+          "source_mtime": "2026-10-13T16:54:35+08:00"
+        },
+        {
+          "event_id": "b-t12sb-rework-delivered-20261013-152000",
+          "occurred_at": "2026-10-13T15:21:13+08:00",
+          "recorded_at": "2026-10-13T15:21:13+08:00",
+          "role": "B",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework",
+          "status": "REVIEW_PENDING",
+          "summary": "12S-B attempt-1-rework 交付冻结：c01+c02 OCR 16 findings 一次最小返修（S1–S8/T1–T8 共17条全部实质修复，无豁免），base f62a29c→0320a8e（8文件+980/-78）；新增定向40用例全绿/spray域94/全仓977+4(base既有零新增)/ruff clean；真实decode/render/VLM NOT_RUN口径不变",
+          "evidence": "receipts/TASK-12S-B/attempt-1-rework.md;commit 0320a8e96c76e126de15c61d0671afb88ae8988f",
+          "next": "等协调者机械核验→返修增量OCR(固定入口ocr_runtime.py --from f62a29c --to 0320a8e)→TESTER独立验证(B侧快照更新0320a8e)→合入main→12S-B DONE",
+          "source": "events/B/fa55c05df4a77fd49f903d1855321ee130e037b25f9cce2290f2fdc449b016cc.json",
+          "source_mtime": "2026-10-13T15:21:13+08:00"
+        },
+        {
+          "event_id": "b-t12sb-s9b-delivered-f76e2a9-20261013-1752",
+          "occurred_at": "2026-10-13T17:52:00+08:00",
+          "recorded_at": "2026-10-13T17:52:00+08:00",
+          "role": "B",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework-s9b",
+          "status": "REVIEW_PENDING",
+          "summary": "S9b 帧映射契约交付冻结 s9_head=f76e2a9（续 0320a8e，base f62a29c 未移动，仅 decode.py+test_spray_adapter.py 2 文件 +369/-54）。催办 nudge2 消费：核验树面无在途进程后接续，spray 定向回归 98 passed（含 6 条 S9b 新用例）、真实小包 1184->44 锚定用例单跑 PASSED（44 帧/1184 消息/首末 scan 身份与独立 CDR 解析一致/ns 升序无重复）；冻结前 ruff 抓到 1 处新 E501 拆行后复扫绿+回归绿才 commit（唯一额外一轮验证，顺延 17:45->17:51）。回执 receipts/TASK-12S-B/attempt-1-rework.md 增 S9b 段（映射设计+真实断言证据+回归表+催办合规）。",
+          "evidence": "wt-04a-t12sb git rev-parse HEAD=f76e2a9b403577b791ca3688e0da5e574c4c272a;pytest tests/test_spray_rework_16s.py tests/test_spray_adapter.py -q=98 passed;ruff app/scene/spray/+2 test 文件=All checks passed;真实锚定 TestPacketDecode::test_real_bag_1184_to_44_mapping PASSED;sessions/B.md 17:52 条目",
+          "next": "等协调者机械核验 s9_head + 增量 OCR 排队 f62a29c..f76e2a9（12S-A OCR 后）+ TESTER 增量复验（B 侧快照 f76e2a9）；收返修按问题 ID 续本分支最小修复；18:00 发布窗口等 12S-B 合入。",
+          "source": "inbox/events/B/b-t12sb-s9b-delivered-f76e2a9-20261013-1752.json",
+          "source_mtime": "2026-10-13T17:57:08+08:00"
+        }
+      ],
+      "delivery_records": [],
+      "unverified_sources": [
+        "events/B/b-ack-20261012-232800-task07b-a2r2.md: 时间或内容待核对",
+        "events/B/b-deliver-20261012-233000-task07b-a2r2.md: 时间或内容待核对",
+        "events/B/b-incident-20261012-125600.md: 时间或内容待核对",
+        "events/B/b-poll-20261011-123253-rework8-merged-65ca0be.json: 时间或内容待核对",
+        "events/B/b-poll-20261011-142253-r9-accept-booked.json: 时间或内容待核对",
+        "events/B/b-poll-20261012-085253-t11-run8-integrated-a-cleanup-b-idle.md: 时间或内容待核对",
+        "events/B/b-poll-20261012-113753-t07a-ocr-inflight-idle.md: 时间或内容待核对",
+        "events/B/b-poll-20261013-082253-tester-postr-pass-waiting-merge.md: 时间或内容待核对",
+        "events/B/tester-attempt4-pass-20261010-2257.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-054753-restore-spotcheck-passed.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-124753.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-143253-t07a-tester-postmerge-pass-b-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-175753-t07b-delivered-ocr-b1-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-182253-t07b-ocr-b3-b4-done-b5-inflight-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-185753-t07b-ocr-b3-2findings-b6-cancelled-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-222753-t07b-ocr-b5-rc0-core-timeout-b7-resume-inflight.json: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-011253-t07b-ocr-r2b4-stalled-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-060253-t07b-r3-frozen-16a-ocr-done-16b-needsreview-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-063753-r3-ocr-6of6-done-medium-pending-ruling.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-073253-t07b-r4-ocr-done-strongreview-pending-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-repair-20261013-014853-sessions-append-glue.md: 时间或内容待核对"
+      ]
+    }
+  ],
+  "current": {
+    "B": {
+      "schema_version": 1,
+      "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+      "role": "B",
+      "observed_at": "2026-10-13T18:00:53+08:00",
+      "control": "ACTIVE",
+      "confirmed_idle": false,
+      "classification_reasons": [
+        "assigned nonterminal task: TASK-16C",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-16C/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-08/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-08/c1c2-second-precision-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-12S-B/attempt-1-rework-s9b-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-12S-B/attempt-1-rework-dispatch.md"
+      ],
+      "tasks": [
+        {
+          "task": "TASK-16C",
+          "state": "**PAUSED（2026-10-13用户暂停界面增量；现有交付/在途证据保存， … 谓词面+C8 场景页脚本面修复后需复测）；wt `5c80857` 冻结保存不变",
+          "progress": "场景八步详情、三视图/类型谓词、正式查询 API、旧界面兼容",
+          "owner": "**PAUSED（2026-10-13用户暂停界面增量；现有交付/在途证据保存，协调者安全检查点交接 … 据面 1 齐（C5 谓词面+C8 场景页脚本面修复后需复测）；wt `5c80857` 冻结保存不变"
+        }
+      ],
+      "events": {
+        "B": {
+          "event_id": "b-t12sb-s9b-delivered-f76e2a9-20261013-1752",
+          "occurred_at": "2026-10-13T17:52:00+08:00",
+          "recorded_at": "2026-10-13T17:52:00+08:00",
+          "role": "B",
+          "task": "TASK-12S-B",
+          "attempt": "1-rework-s9b",
+          "status": "REVIEW_PENDING",
+          "summary": "S9b 帧映射契约交付冻结 s9_head=f76e2a9（续 0320a8e，base f62a29c 未移动，仅 decode.py+test_spray_adapter.py 2 文件 +369/-54）。催办 nudge2 消费：核验树面无在途进程后接续，spray 定向回归 98 passed（含 6 条 S …  CDR 解析一致/ns 升序无重复）；冻结前 ruff 抓到 1 处新 E501 拆行后复扫绿+回归绿才 commit（唯一额外一轮验证，顺延 17:45->17:51）。回执 receipts/TASK-12S-B/attempt-1-rework.md 增 S9b 段（映射设计+真实断言证据+回归表+催办合规）。",
+          "evidence": "wt-04a-t12sb git rev-parse HEAD=f76e2a9b403577b791ca3688e0da5e574c4c272a;pytest tests/test … ssed;真实锚定 TestPacketDecode::test_real_bag_1184_to_44_mapping PASSED;sessions/B.md 17:52 条目",
+          "next": "等协调者机械核验 s9_head + 增量 OCR 排队 f62a29c..f76e2a9（12S-A OCR 后）+ TESTER 增量复验（B 侧快照 f76e2a9）；收返修按问题 ID 续本分支最小修复；18:00 发布窗口等 12S-B 合入。",
+          "source": "inbox/events/B/b-t12sb-s9b-delivered-f76e2a9-20261013-1752.json",
+          "source_mtime": "2026-10-13T17:57:08+08:00"
+        }
+      },
+      "dispatches": {
+        "B": {
+          "role": "B",
+          "source": "inbox/2号/TASK-12S-B/attempt-1-rework-s9b-nudge2.md",
+          "status": "NUDGE",
+          "mtime": 1791884100.666974,
+          "summary": "# 催办：TASK-12S-B s9b 代码已在树上，本轮只做验证+冻结（17:3x，协调者） - status: NUDGE - 事实（协调者 17:33 实测）： - S9b 改动**已完成未提交**：`wt-04a … s9b 交付标记 - 17:45 前冻结目标（17:30 停止点已顺延，18:00 发布窗口等 12S-B 合入） - 若真实断言需重跑（树动过），只跑一次，带 timeout ≤300s，跑完立即提交，不要在验证上多轮"
+        }
+      },
+      "processes": {
+        "B": {
+          "state": "none"
+        }
+      },
+      "sources": {
+        "TODO.md": "2026-10-13T17:59:31+08:00"
+      },
+      "strong_review": null,
+      "fingerprint": "483ac66daa9d9cf351ef7bc2a9dfe952145ec39f7d455cc4abf19e0ac77700f0"
+    }
+  }
+}

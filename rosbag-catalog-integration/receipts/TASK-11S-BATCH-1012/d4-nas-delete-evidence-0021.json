@@ -1,0 +1,115 @@
+{
+ "at": "2026-10-14T00:20:59+0800",
+ "deleted": true,
+ "du_dated": "14G\t/mnt/nas_backup/rosbag_scene_processing/ready/spray/20261012",
+ "dated_inventory": [
+  {
+   "rel": "rosbag2_2026_10_08-14_42_48/metadata.yaml",
+   "size": 10282,
+   "sha256": "a5bd2d903b72cde3ca3f7b9773d1a79ffe7ca707355b0c90c6c4b3122a4c46dc"
+  },
+  {
+   "rel": "rosbag2_2026_10_08-14_42_48/rosbag2_2026_10_08-14_42_48_0.db3",
+   "size": 724627456,
+   "sha256": "ca879384be65d91a7835006f7a91d2474469b59b59f7bbaad1a890bc7d57b775"
+  },
+  {
+   "rel": "rosbag2_2026_10_12-16_00_13/metadata.yaml",
+   "size": 11718,
+   "sha256": "68032a411b9d64fcdb567a47ba3957c95de5f3917e21268a87803245713a4c79"
+  },
+  {
+   "rel": "rosbag2_2026_10_12-16_00_13/rosbag2_2026_10_12-16_00_13_0.db3",
+   "size": 89653248,
+   "sha256": "3f44defb738e4275c132585aaece988a61148289518af38b8111d2d33bc6c32c"
+  },
+  {
+   "rel": "rosbag2_2026_10_12-16_37_47/metadata.yaml",
+   "size": 11021,
+   "sha256": "fdbec0075c733449aea5e5ea2beaa88e876d3874270a9c8ea30381a57ed3c88b"
+  },
+  {
+   "rel": "rosbag2_2026_10_12-16_37_47/rosbag2_2026_10_12-16_37_47_0.db3",
+   "size": 5368852480,
+   "sha256": "8532ce810aa7f476028e80a9e1610946fff703c227866f8c7d7a0535e1e45b09"
+  },
+  {
+   "rel": "rosbag2_2026_10_12-16_37_47/rosbag2_2026_10_12-16_37_47_1.db3",
+   "size": 1952661504,
+   "sha256": "bc7ad38c6b7f6b0b4b0838a51c31d5633f734b9ac2105ae4d103207cda887ba4"
+  },
+  {
+   "rel": "rosbag2_2026_10_12-16_58_28/metadata.yaml",
+   "size": 11021,
+   "sha256": "935220dcca4f467b7b021050c5c03ec0e2fc91cbf28e3f87fa618768064219ae"
+  },
+  {
+   "rel": "rosbag2_2026_10_12-16_58_28/rosbag2_2026_10_12-16_58_28_0.db3",
+   "size": 5368750080,
+   "sha256": "269719387fc40a8ad5f5c1663572fdc5d7e891a8a426ab3d69caa4909c4b2b97"
+  },
+  {
+   "rel": "rosbag2_2026_10_12-16_58_28/rosbag2_2026_10_12-16_58_28_1.db3",
+   "size": 1426231296,
+   "sha256": "55ff5e559dd96e8cd201a5ee75fd822f02386e6cd519c706fa8ca30e41a4ca36"
+  }
+ ],
+ "dated_files": 10,
+ "dated_bytes": 14930820106,
+ "flat_check": {
+  "rosbag2_2026_10_08-14_42_48": {
+   "dated_bytes": 724637738,
+   "flat_bytes": 724637738,
+   "match": true
+  },
+  "rosbag2_2026_10_12-16_00_13": {
+   "dated_bytes": 89664966,
+   "flat_bytes": 89664966,
+   "match": true
+  },
+  "rosbag2_2026_10_12-16_37_47": {
+   "dated_bytes": 7321525005,
+   "flat_bytes": 7321525005,
+   "match": true
+  },
+  "rosbag2_2026_10_12-16_58_28": {
+   "dated_bytes": 6794992397,
+   "flat_bytes": 6794992397,
+   "match": true
+  }
+ },
+ "moved_to": "/mnt/nas_backup/rosbag_scene_processing/.upload-staging/d4-dategrouped-delete-20261014/ready-spray-20261014",
+ "incoming_dated": "absent (no residual)",
+ "post_dated_exists": false,
+ "post_flat": [
+  {
+   "bag": "rosbag2_2026_10_08-14_42_48",
+   "files": 2
+  },
+  {
+   "bag": "rosbag2_2026_10_12-15_58_23",
+   "files": 2
+  },
+  {
+   "bag": "rosbag2_2026_10_12-16_00_13",
+   "files": 2
+  },
+  {
+   "bag": "rosbag2_2026_10_12-16_02_03",
+   "files": 3
+  },
+  {
+   "bag": "rosbag2_2026_10_12-16_31_25",
+   "files": 2
+  },
+  {
+   "bag": "rosbag2_2026_10_12-16_37_47",
+   "files": 3
+  },
+  {
+   "bag": "rosbag2_2026_10_12-16_58_28",
+   "files": 3
+  }
+ ],
+ "ready_top_after": "总计 0\ndrwxr-xr-x 2 wang wang 0 10月 14 00:25 .\ndrwxr-xr-x 2 wang wang 0 10月 13 20:03 ..\ndrwxr-xr-x 2 wang wang 0 10月 12 18:17 rosbag2_2026_10_08-14_42_48\ndrwxr-xr-x 2 wang wang 0 10月 12 18:18 rosbag2_2026_10_12-15_58_23\ndrwxr-xr-x 2 wang wang 0 10月 12 18:20 rosbag2_2026_10_12-16_00_13\ndrwxr-xr-x 2 wang wang 0 10月 12 18:06 rosbag2_2026_10_12-16_02_03\ndrwxr-xr-x 2 wang wang 0 10月 12 17:37 rosbag2_2026_10_12-16_31_25\ndrwxr-xr-x 2 wang wang 0 10月 12 18:38 rosbag2_2026_10_12-16_37_47\ndrwxr-xr-x 2 wang wang 0 10月 12 21:54 rosbag2_2026_10_12-16_58_28"
+}

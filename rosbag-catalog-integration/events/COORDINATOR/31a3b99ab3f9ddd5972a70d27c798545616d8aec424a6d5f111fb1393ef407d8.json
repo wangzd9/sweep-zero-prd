@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-133053-nochange",
+  "occurred_at": "2026-10-11T13:31:54+08:00",
+  "recorded_at": "2026-10-11T13:31:54+08:00",
+  "role": "COORDINATOR",
+  "task": "none",
+  "attempt": "none",
+  "status": "NO_CHANGE",
+  "summary": "13:25 后零业务变化：main 65ca0be 三核一致，仅 B 13:28 例行 NO_CHANGE 心跳；强复审 R2I-20261010-06 result 仍缺（NOT_EXISTS，READY_FOR_USER_TRIGGER）；无在途 ocr/pytest 业务进程；ocr.lock/coordinator.lock 0 字节无在途持有者",
+  "evidence": "find -newermt 13:25:53 业务目录仅 events/B b1e01524… + 自身 13:27 记账 event；rev-parse 65ca0be 三核；ps 仅 wxocr 桌面；ls strongmodel NOT_EXISTS",
+  "next": "下轮核强复审 result 文件与各角色感知；无变化保持静默巡检"
+}

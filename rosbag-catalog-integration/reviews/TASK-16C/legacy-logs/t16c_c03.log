@@ -1,0 +1,71 @@
+[ocr] Summary: 1 file(s) reviewed, 4 comment(s), ~606240 token(s) used (input: ~554628, output: ~51612), 21m2s elapsed
+[ocr] Session: 64c9f697-b077-4011-9393-4b03788b5048
+Review complete: 4 finding(s) across 1 selected item(s).
+
+─── app/services/scene_result_query.py:162-165 ───
+[other · medium] started_from/started_to are passed as raw strings into `BagRecord.started_at` (a
+DateTime column) with no parsing or format validation. On MySQL (strict mode) a malformed value
+surfaces as SQL error 1292 → 500 instead of a 422; on SQLite it becomes a lexicographic TEXT
+comparison that silently mis-filters for non-`YYYY-MM-DD HH:MM:SS` formats (e.g. ISO with `T` or a
+`+08:00` offset). Also, a date-only `started_to` (e.g. `2026-09-22`) is interpreted as midnight,
+excluding the rest of the day, whereas the Web-side `bag_search_service._parse_time` pads date-only
+end values to 23:59:59.999999. Suggest parsing with `datetime.fromisoformat` here (raise 422 on
+`ValueError`) and applying the same date-only end-padding so both entries agree on the time
+contract.
+
++     def _parse_started(value: str, *, end: bool) -> datetime:
++         try:
++             parsed = datetime.fromisoformat(value)
++         except ValueError as exc:
++             raise HTTPException(422, f"采集时间格式应为 YYYY-MM-DD 或 YYYY-MM-DDTHH:MM:SS：{value}") from exc
++         if len(value) == 10 and end:
++             return parsed.replace(hour=23, minute=59, second=59, microsecond=999999)
++         return parsed
++ 
+      if started_from:
+-         q = q.where(BagRecord.started_at >= started_from)
++         q = q.where(BagRecord.started_at >= _parse_started(started_from, end=False))
+      if started_to:
+-         q = q.where(BagRecord.started_at <= started_to)
++         q = q.where(BagRecord.started_at <= _parse_started(started_to, end=True))
+
+
+─── app/services/scene_result_query.py:129-134 ───
+[bug · low] The cursor filter-context check pins only view/scene_code/data_kind/purpose, but the
+result set also depends on the new dataset_type/started_from/started_to filters (and, pre-existing,
+keyword/role/vehicle_id/parent_bag_uid/include_history). A client that reuses `next_cursor` while
+changing any of those gets silently skipped/duplicated rows instead of a 422. At minimum, carry the
+newly added filters into the cursor payload and extend this consistency check to them, mirroring the
+intent stated in the comment above.
+
+
+
+─── app/services/scene_result_query.py:135-138 ───
+[bug · low] Value-normalization break for legacy cursors: pre-deploy cursors always encoded the
+`scene_code` key, with value `None` when no scene filter was set (the common case). The new check
+computes `requested = scene_code or ""` and compares `ctx.get(field) != requested`, so `None != ""`
+rejects an in-flight legacy cursor with 422 during a rolling upgrade — contradicting the comment
+above that claims legacy cursors still validate under the old view/scene_code semantics. Suggest
+normalizing both sides, e.g. `(ctx.get(field) or "") != requested`.
+
+      for field, requested in _cursor_field_defaults.items():
+-         if field in ctx and ctx.get(field) != requested:
++         if field in ctx and (ctx.get(field) or "") != requested:
+              msg = f"cursor 筛选上下文不一致：{field}（cursor={ctx.get(field)!r} 请求={requested!r}）"
+              raise HTTPException(422, msg)
+
+
+─── app/services/scene_result_query.py:267-268 ───
+[bug · low] The Python-side classification intentionally mirrors the SQL CASE, but branch 1
+diverges: `data_kind_case()` classifies a bag as `scene_slice` by `bag_uid IN (SELECT child_bag_uid
+FROM bag_derivation)`, while this loop classifies by `view == "slices" or bag_role ==
+"SCENE_SLICE"`. For a SCENE_SLICE bag with no derivation row (a state this same file explicitly
+handles as legitimate in `bag_lineage_view`/`lineage`, which return 200 with null lineage when `der
+is None`), the row displays `data_kind: "scene_slice"` here, but a `data_kind=scene_slice` filter
+(SQL CASE) would classify it as `self_built_original` and exclude it — violating the stated
+invariant that the in-row field and the filter share one criterion. Suggest deriving branch 1 from
+the same source: batch-fetch the page's derivation child uids (`SELECT child_bag_uid WHERE
+child_bag_uid IN (...page uids...)`) and test `bag.bag_uid in row_slice_uids` instead of the role
+check.
+
+

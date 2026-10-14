@@ -1,0 +1,12 @@
+{
+  "event_id": "a-i1-deliver-20261011-1531",
+  "occurred_at": "2026-10-11T15:35:22+08:00",
+  "recorded_at": "2026-10-11T15:35:22+08:00",
+  "role": "A",
+  "task": "TASK-05",
+  "attempt": "i1-1",
+  "status": "REVIEW_PENDING",
+  "summary": "i1-1 夹具 uid 越宽最小修复交付：hex16→hex9+len<=26 assert，零 app 变更；SQLite 36 passed+ruff 绿；真 MySQL 8.4.11 隔离库文件级全绿，容器即毁 0 残留",
+  "evidence": "receipts/TASK-05/i1-1.md, commit 6823f2d",
+  "next": "等协调者审核合入"
+}

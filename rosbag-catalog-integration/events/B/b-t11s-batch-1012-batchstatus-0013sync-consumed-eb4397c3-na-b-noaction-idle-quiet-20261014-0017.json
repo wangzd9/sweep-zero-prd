@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t11s-batch-1012-batchstatus-0013sync-consumed-eb4397c3-na-b-noaction-idle-quiet-20261014-0017",
+  "occurred_at": "2026-10-14T00:17:30+08:00",
+  "recorded_at": "2026-10-14T00:17:30+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Consumed BATCH-STATUS.md 00:13:55 sync (observer pending fp bed275c1; 3 changed_sources incl. own 00:07 event + sessions self-write, no external new input). New facts (C obs13/TESTER read-only cross-check): scene-eb4397c3 (16_37_47 dup) 00:01:29 SCENE_DONE NOT_APPLICABLE zero-model no-fake-slice = B 21:12 NOT_APPLICABLE routing classification confirmed in production; scene-24ab78bb (16_58_28 dup) 00:02:34 SCENE_RUNNING D3 natural convergence in flight (expected NOT_APPLICABLE zero-model); scene-4acf689f (16_02_03, D1 retained chain, largest cross-DB3 bag) deferred SCENE_SLICE_QUEUE (overnight-continue, no kill/retry); TESTER 16_02_03 SHA=source PASS on record. B side zero action: no new dispatch/rework in inbox/2号 (T11S-BATCH-1012 still only attempt-1 dispatch+ack), zero commit/model/copy/prod-write, no B-side process, wt-04a-t12sb frozen unchanged. Maintains IDLE_WAITING; quiet hours 21:00-08:00, no proactive group message; 08:00 digest includes C actor-identity escalation.",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md (00:13:55 mtime, 8690B); observer pending fp bed275c1 (first_seen 00:10:10); events/B/b-t11s-batch-1012-batchstatus-0005sync-cd5-delivered-d2-success-b-noaction-idle-20261014-0007.json (own 00:07 artifact); receipts/TASK-11S-BATCH-1012/b-attempt-1.md (B DONE 21:12 classification)",
+  "next": "IDLE_WAITING: await next coordinator dispatch; quiet hours until 08:00, 08:00 digest."
+}

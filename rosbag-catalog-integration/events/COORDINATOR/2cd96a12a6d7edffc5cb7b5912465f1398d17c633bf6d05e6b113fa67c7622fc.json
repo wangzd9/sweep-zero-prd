@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011213053-task09-merged-ca8730d-tester-dispatched",
+  "occurred_at": "2026-10-11T21:43:52+08:00",
+  "recorded_at": "2026-10-11T21:43:52+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "MERGED",
+  "summary": "2号 a60bb81 交付收口链：机械核验全链一致+§G 裁决（接受现证据 row19 AC 达成；500 帧记外部缺陷入 TASK-11）+串行 OCR T09-r1 逐文件 2/2 0 findings（session 20a6cf39/96c83b83）→--no-ff 合入 main ca8730d 推 origin（sanity alembic 单头/ruff/SQLite 44 全绿）；强审查 NOT_REQUIRED；TESTER post-merge-ca8730d 合入后验证已派，09 维持 RUNNING（验证未完不得 DONE）",
+  "evidence": "receipts/TASK-09/attempt-1.md；inbox/coordinator/TASK-09/attempt-1-acceptance-decision.md；reviews/TASK-09/attempt-1/ocr-batches.md；inbox/TESTER/TASK-09/post-merge-ca8730d-verify-dispatch.md",
+  "next": "下轮核 TESTER ACK/交付；PASS→09 DONE→TASK-10 派单；FAIL→回派 2号最小返修"
+}

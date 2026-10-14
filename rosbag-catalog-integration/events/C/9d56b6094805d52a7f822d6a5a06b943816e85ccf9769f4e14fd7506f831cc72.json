@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-084353-t11-run8-ruling-integration",
+  "occurred_at": "2026-10-12T08:47:42+08:00",
+  "recorded_at": "2026-10-12T08:47:42+08:00",
+  "role": "C",
+  "task": "TASK-11",
+  "attempt": "0",
+  "status": "IDLE_POLL",
+  "summary": "08:39:00后C范围零新增、无C新派单；新事实（协调者/1号范围非C）=第8跑归属口径合并裁决：撤销08:10轮越权定性，第8跑采纳为用户授权测试环境实测证据（A侧驱动），不采纳为TASK-11生产证据，生产门禁维持未放行；裁决1清理核验=残留缺口1（两ready袋被scanner重登记bag_record id=26, 17→18）已回派1号最小清理单；main 453da0c双核一致、wt-03b 6f1a9ad干净、无C在途进程；保持空闲待派单",
+  "evidence": "inbox/coordinator/TASK-11/t11-run8-attribution-integration-20261012.md; inbox/1号/TASK-11/t11-cleanup-residual-20261012.md; sessions/C.md",
+  "next": "继续5分钟巡检"
+}

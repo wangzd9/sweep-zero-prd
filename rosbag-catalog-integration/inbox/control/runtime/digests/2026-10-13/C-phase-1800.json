@@ -1,0 +1,232 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-13T18:00:53.501505+08:00",
+  "role": "C",
+  "kind": "phase",
+  "start": "2026-10-13T15:00:00+08:00",
+  "end": "2026-10-13T18:00:00+08:00",
+  "artifact": "inbox/control/runtime/digests/2026-10-13/C-phase-1800.json",
+  "roles": [
+    {
+      "role": "C",
+      "start": "2026-10-13T15:00:00+08:00",
+      "end": "2026-10-13T18:00:00+08:00",
+      "totals_seconds": {
+        "working": 0,
+        "waiting": 6635.0,
+        "blocked": 0,
+        "idle": 0,
+        "unknown": 4165.0
+      },
+      "segments": [
+        {
+          "start": "2026-10-13T15:00:00+08:00",
+          "end": "2026-10-13T15:00:53+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T15:00:53+08:00",
+          "end": "2026-10-13T15:10:53+08:00",
+          "category": "unknown",
+          "task": "TASK-16B",
+          "attempt": "2-r1",
+          "summary": "r156 poll consumed: TODO r155 = coordinator mechanical verify of 40ab818 delivery all green; incremental OCR queued behind 12S-B c01/c02 chain. No new dispatch/ … eview pack (auth-24h-20261013 within grant) -> merge -> 12S-C. 12S-C still WAITING (16B+12S-A+12S-B not all merged). C no in-flight process, no second dev sl",
+          "sources": [
+            "events/C/af0925674ce9dec5de207ceeb8b220a5f26ec080c188d49d1b92b08fcf4584a7.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T15:10:53+08:00",
+          "end": "2026-10-13T15:46:34+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T15:46:34+08:00",
+          "end": "2026-10-13T15:48:53+08:00",
+          "category": "waiting",
+          "task": "TASK-12S-C",
+          "attempt": "1",
+          "summary": "12S-C attempt-1 水雾正式接线前置开发交付冻结（待接线核验）：head 92dcb52 @ wt-03b-t12sc；消费基线 40ab818 链+merge main(16A)+固定SHA import 12S-A(77c395b)/12S-B(f62a29c) byte-identical；本单真实改动 27 行（orchestrator import spray 适配器+PRECHECK 7图hash fail-closed / proxy resolve_spec spray 缺车辆 fail-closed），slope 行为面零改动；模块自测 11 passed + 回归合集 148 passed + ruf",
+          "sources": [
+            "events/C/631912565a6020e687508f4e3e4cb62b6286a62f0fa9405f80949efbe75ca9cc.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T15:48:53+08:00",
+          "end": "2026-10-13T15:58:53+08:00",
+          "category": "waiting",
+          "task": "TASK-12S-C",
+          "attempt": "1",
+          "summary": "12S-C attempt-1 水雾正式接线前置开发交付冻结（待接线核验）：head 92dcb52 @ wt-03b-t12sc；消费基线 40ab818 链+merge main(16A)+固定SHA import 12S-A(77c395b)/12S-B(f62a29c) byte-identical；本单真实改 … h fail-closed / proxy resolve_spec spray 缺车辆 fail-closed），slope 行为面零改动；模块自测 11 passed + 回归合集 148 passed + ruff/compileall clean；真实 VLM/渲染/真链冒烟留接线核验单（禁正式联调 PA",
+          "sources": [
+            "events/C/631912565a6020e687508f4e3e4cb62b6286a62f0fa9405f80949efbe75ca9cc.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T15:58:53+08:00",
+          "end": "2026-10-13T16:21:44+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T16:21:44+08:00",
+          "end": "2026-10-13T16:28:00+08:00",
+          "category": "waiting",
+          "task": "TASK-12S-C",
+          "attempt": "1",
+          "summary": "12S-C attempt-1 水雾正式接线前置开发交付冻结（待接线核验）：head 92dcb52 @ wt-03b-t12sc；消费基线 40ab818 链+merge main(16A)+固定SHA import 12S-A(77c395b)/12S-B(f62a29c) byte-identical；本单真实改 … h fail-closed / proxy resolve_spec spray 缺车辆 fail-closed），slope 行为面零改动；模块自测 11 passed + 回归合集 148 passed + ruff/compileall clean；真实 VLM/渲染/真链冒烟留接线核验单（禁正式联调 PA",
+          "sources": [
+            "events/C/631912565a6020e687508f4e3e4cb62b6286a62f0fa9405f80949efbe75ca9cc.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T16:28:00+08:00",
+          "end": "2026-10-13T16:30:10+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "2-r2",
+          "summary": "16B attempt-2-r2 强审 SR-16B-R1 5 项阻塞最小返修交付冻结：head e152465 @ wt-03b-t16b（base 40ab818 单 commit，2 文件 +506/-43 零越界：只动 scene_host_proxy.py+其测试）。R1-01 resolve_spec 已终态 run 对账拒绝（迟到重复 /run 不重烧模型）；R1-02 _report_steps/reconcile_terminal+ensure_running 终态写入失败按本 attempt 对账补报（已提交但响应丢失/未提交两分支）；R1-03 _confirm_terminal 先对账再清恢复台账（未确认保留",
+          "sources": [
+            "events/C/ef572cf2aa7cfd653931954ed410042f457e3594ed3b46224bc11a8a0e0478e4.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T16:30:10+08:00",
+          "end": "2026-10-13T16:50:10+08:00",
+          "category": "waiting",
+          "task": "TASK-12S-C",
+          "attempt": "1",
+          "summary": "12S-C attempt-1 水雾正式接线前置开发交付冻结（待接线核验）：head 92dcb52 @ wt-03b-t12sc；消费基线 40ab818 链+merge main(16A)+固定SHA import 12S-A(77c395b)/12S-B(f62a29c) byte-identical；本单真实改 … h fail-closed / proxy resolve_spec spray 缺车辆 fail-closed），slope 行为面零改动；模块自测 11 passed + 回归合集 148 passed + ruff/compileall clean；真实 VLM/渲染/真链冒烟留接线核验单（禁正式联调 PA",
+          "sources": [
+            "events/C/631912565a6020e687508f4e3e4cb62b6286a62f0fa9405f80949efbe75ca9cc.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T16:50:10+08:00",
+          "end": "2026-10-13T18:00:00+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "2-r2",
+          "summary": "16B attempt-2-r2 强审 SR-16B-R1 5 项阻塞最小返修交付冻结：head e152465 @ wt-03b-t16b（base 40ab818 单 commit，2 文件 +506/-43 零越界：只动 scene_host_proxy.py+其测试）。R1-01 resolve_spec 已终 …  failed=test_devflow base 40ab818 临时 worktree 同口径复现（与本单无关）/ruff+compileall clean。真实栈/模型冒烟留 TESTER 收口与 12S-C 接线核验（禁本单自宣 PASS）；12S-C 前置 wt-03b-t12sc@92dcb52 按派",
+          "sources": [
+            "events/C/ef572cf2aa7cfd653931954ed410042f457e3594ed3b46224bc11a8a0e0478e4.json"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "event_id": "c-t16b-a2r2-delivered-20261013",
+          "occurred_at": "2026-10-13T16:28:00+08:00",
+          "recorded_at": "2026-10-13T16:28:00+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "2-r2",
+          "status": "REVIEW_PENDING",
+          "summary": "16B attempt-2-r2 强审 SR-16B-R1 5 项阻塞最小返修交付冻结：head e152465 @ wt-03b-t16b（base 40ab818 单 commit，2 文件 +506/-43 零越界：只动 scene_host_proxy.py+其测试）。R1-01 resolve_spec 已终态 run 对账拒绝（迟到重复 /run 不重烧模型）；R1-02 _report_steps/reconcile_terminal+ensure_running 终态写入失败按本 attempt 对账补报（已提交但响应丢失/未提交两分支）；R1-03 _confirm_terminal 先对账再清恢复台账（未确认保留台账防 phantom run，其他终态不覆盖）；R1-04 clear_recovery_state unlink 异常吞错留痕、ACTIVE 恒释放；R1-05 _write_json_atomic replace 后 fsync 父目录（掉电目录项耐久，限受支持文件系统）。FakeBackend 升级有状态（step 迁移同 transitions.py 口径+step_fail/status_fail 注入面，既有 20 用例零改动语义）。自测真实执行：26 passed（20 零回归+6 新注入）/39 passed（proxy+orchestrator）/全仓 889 passed 3 failed=test_devflow base 40ab818 临时 worktree 同口径复现（与本单无关）/ruff+compileall clean。真实栈/模型冒烟留 TESTER 收口与 12S-C 接线核验（禁本单自宣 PASS）；12S-C 前置 wt-03b-t12sc@92dcb52 按派单冻结",
+          "evidence": "receipts/TASK-16B/attempt-2-r2.md; tests/test_scene_host_proxy.py 26 passed; 39 passed exit 0; 889 passed 3 failed(base同口径); e152465; 注入: test_r1_01/test_r1_02×2/test_r1_03×3/test_r1_04/H6增强",
+          "next": "等协调者机械核验→增量 OCR --from 40ab818 --to e152465→强审增量复审(只看 R1-01~05, 授权 60min 剩 4/5)→TESTER 收口(r1 口径)→合入 main→16B DONE→重算 12S-C 依赖",
+          "source": "events/C/ef572cf2aa7cfd653931954ed410042f457e3594ed3b46224bc11a8a0e0478e4.json",
+          "source_mtime": "2026-10-13T16:46:31+08:00"
+        },
+        {
+          "event_id": "c-t12sc-a1-delivered-20261013",
+          "occurred_at": "2026-10-13T15:46:34+08:00",
+          "recorded_at": "2026-10-13T15:46:34+08:00",
+          "role": "C",
+          "task": "TASK-12S-C",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "12S-C attempt-1 水雾正式接线前置开发交付冻结（待接线核验）：head 92dcb52 @ wt-03b-t12sc；消费基线 40ab818 链+merge main(16A)+固定SHA import 12S-A(77c395b)/12S-B(f62a29c) byte-identical；本单真实改动 27 行（orchestrator import spray 适配器+PRECHECK 7图hash fail-closed / proxy resolve_spec spray 缺车辆 fail-closed），slope 行为面零改动；模块自测 11 passed + 回归合集 148 passed + ruff/compileall clean；真实 VLM/渲染/真链冒烟留接线核验单（禁正式联调 PASS）",
+          "evidence": "receipts/TASK-12S-C/attempt-1.md; tests/test_scene_spray_wiring.py 11 passed; 148 passed exit 0; 92dcb52",
+          "next": "等协调者机械核验→增量 OCR(92dcb52)→强审 pack(auth-24h-20261013 内)→三依赖全合入后派接线核验单→12S-C DONE",
+          "source": "events/C/631912565a6020e687508f4e3e4cb62b6286a62f0fa9405f80949efbe75ca9cc.json",
+          "source_mtime": "2026-10-13T15:46:34+08:00"
+        }
+      ],
+      "delivery_records": [],
+      "unverified_sources": [
+        "events/C/C-poll-20261011-082853.md: 时间或内容待核对",
+        "events/C/c-poll-20261013-044353-v2done-t16b-await-resume.json: 时间或内容待核对",
+        "events/C/c-poll-20261013-051853-t16b-b1-3confirmed-b2-inflight.md: 时间或内容待核对",
+        "events/C/c-poll-20261013-055353-t16b-b2-split-fail-16a-incr-done.md: 时间或内容待核对",
+        "inbox/events/C/C-sessions-truncation-20261012-064054.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-042923-t16b2-fail-resume-pending.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-064353-r3ocr-6of6-done-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-065353-r130-t07b-r4-dispatch-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-072853-r132-b-r4-ocr-done-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-074353-r132-r4-ocr-done-no-c-order.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-092853-t16b-ocr4rc1-frozen-user-ruling-pending.md: 时间或内容待核对"
+      ]
+    }
+  ],
+  "current": {
+    "C": {
+      "schema_version": 1,
+      "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+      "role": "C",
+      "observed_at": "2026-10-13T18:00:53+08:00",
+      "control": "ACTIVE",
+      "confirmed_idle": false,
+      "classification_reasons": [
+        "unresolved or unclassified dispatch: inbox/3号/TASK-12S-C/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-12S-C/frame-mapping-contract-note.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-16B/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-16B/attempt-2-r1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-16B/attempt-2-r2-dispatch.md"
+      ],
+      "tasks": [],
+      "events": {
+        "C": {
+          "event_id": "c-t16b-a2r2-delivered-20261013",
+          "occurred_at": "2026-10-13T16:28:00+08:00",
+          "recorded_at": "2026-10-13T16:28:00+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "2-r2",
+          "status": "REVIEW_PENDING",
+          "summary": "16B attempt-2-r2 强审 SR-16B-R1 5 项阻塞最小返修交付冻结：head e152465 @ wt-03b-t16b（base 40ab818 单 commit，2 文件 +506/-43 零越界：只动 scene_host_proxy.py+其测试）。R1-01 resolve_spec 已终 …  failed=test_devflow base 40ab818 临时 worktree 同口径复现（与本单无关）/ruff+compileall clean。真实栈/模型冒烟留 TESTER 收口与 12S-C 接线核验（禁本单自宣 PASS）；12S-C 前置 wt-03b-t12sc@92dcb52 按派单冻结",
+          "evidence": "receipts/TASK-16B/attempt-2-r2.md; tests/test_scene_host_proxy.py 26 passed; 39 passed exi … assed 3 failed(base同口径); e152465; 注入: test_r1_01/test_r1_02×2/test_r1_03×3/test_r1_04/H6增强",
+          "next": "等协调者机械核验→增量 OCR --from 40ab818 --to e152465→强审增量复审(只看 R1-01~05, 授权 60min 剩 4/5)→TESTER 收口(r1 口径)→合入 main→16B DONE→重算 12S-C 依赖",
+          "source": "events/C/ef572cf2aa7cfd653931954ed410042f457e3594ed3b46224bc11a8a0e0478e4.json",
+          "source_mtime": "2026-10-13T16:46:31+08:00"
+        }
+      },
+      "dispatches": {
+        "C": {
+          "role": "C",
+          "source": "inbox/3号/TASK-16B/attempt-2-r2-dispatch.md",
+          "status": "DISPATCHED",
+          "mtime": 1791875931.8962078,
+          "summary": "# 派单：TASK-16B attempt-2-r2（强审 SR-16B-R1 5 项阻塞最小返修） - status: DISPATCHED - 派单时间：2026-10-13 15:2x +08:00（协调者 r16 …  异常中断收尾→ACTIVE 幽灵残留挡后续 /run。修复=活动位释放在清理异常下仍执行+保留清理失败恢复依据，注入 unlink 抛错验证。（except Exception 范围强审已认可，不扩不改。） - **R"
+        }
+      },
+      "processes": {
+        "C": {
+          "state": "none"
+        }
+      },
+      "sources": {
+        "TODO.md": "2026-10-13T17:59:31+08:00"
+      },
+      "strong_review": null,
+      "fingerprint": "f263303d1dbdab3086b78160b27cac83db1d2aad74d84490741515dcde17ac2e"
+    }
+  }
+}

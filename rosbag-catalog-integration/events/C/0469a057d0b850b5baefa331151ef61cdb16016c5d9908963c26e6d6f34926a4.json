@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-014353-nochange",
+  "occurred_at": "2026-10-12T01:47:00+08:00",
+  "recorded_at": "2026-10-12T01:47:00+08:00",
+  "role": "C",
+  "task": "TASK-10",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "C 巡检无新派单：2号 t10-defect3 编码在途（ACK 01:20），C 空闲待派单",
+  "evidence": "main a77aa45=origin 双核；wt-03b 6f1a9ad 干净；inbox/3号 01:28 后无新增",
+  "next": "继续 5 分钟巡检；2号 #3 交付后等协调者收口链"
+}

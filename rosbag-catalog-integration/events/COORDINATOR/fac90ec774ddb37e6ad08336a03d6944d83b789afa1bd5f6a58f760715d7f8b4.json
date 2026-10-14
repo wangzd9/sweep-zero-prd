@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-141553-nochange",
+  "occurred_at": "2026-10-11T14:17:01+08:00",
+  "recorded_at": "2026-10-11T14:17:01+08:00",
+  "role": "COORDINATOR",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "POLL_NO_CHANGE",
+  "summary": "14:08 后零业务变化：main 62a85bf=origin/main 双核一致；强复审 R2I-20261010-06 result 仍缺，READY_FOR_USER_TRIGGER；A/B/C/TESTER 全空闲（B 14:09/14:15 例行心跳）；无在途 ocr/pytest 业务进程",
+  "evidence": "sessions/COORDINATOR.md 14:15 检查点",
+  "next": "下轮巡检核强复审 result 文件是否出现（用户手动触发）；PASS 收口即 03/05/06 聚合 DONE → TASK-08"
+}

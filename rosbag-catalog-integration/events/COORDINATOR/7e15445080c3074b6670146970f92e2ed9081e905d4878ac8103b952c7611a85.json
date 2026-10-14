@@ -1,0 +1,20 @@
+{
+  "event_id": "COORDINATOR:t16cc-ocr-adjudication-c-r1-rework-dispatch-20261014",
+  "kind": "business",
+  "task": "TASK-16C-C",
+  "attempt": "attempt-1",
+  "status": "REWORK_DISPATCHED",
+  "summary": "C 叶 OCR run e7a5580c（12:46 收口 AWAITING_DECISION）协调者裁决完成：b01 唯一 finding CC-R1（c05-04 兜底 li 缺 ol 开始标签）独立核实际文件属实，回派 C 最小返修单 inbox/3号/TASK-16C-C/cc-r1-rework-dispatch-20261014.md（续 commit，不新开 attempt）；b02 0 findings；C 面 8 条遗留账对账落 reviews/TASK-16C/OCR-LEGACY-20261014.md。C 叶状态 DELIVERED_FROZEN 转 REWORK_DISPATCHED，TESTER 浏览器 JS/严格 MySQL 独立验证门禁不解除。",
+  "evidence": "reviews/TASK-16C-C/ocr-run-20261014-cc/b01.log（1 finding medium/bug）+b02.log（0 findings）；inbox/coordinator/TASK-16C-C/ocr-attempt1-adjudication-20261014.md；wt-c-16cc pipeline_detail.html line 67-68 实际读取核实；TODO §8 TASK-16C-C 行更新",
+  "next": "等 C 续 commit 返修冻结后协调者独立核 diff（不整叶重跑 OCR）；C 返修+TESTER 验证齐后接受",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "COORDINATOR",
+  "recorded_at": "2026-10-14T13:22:22+08:00",
+  "occurred_at": "2026-10-14T13:22:22+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

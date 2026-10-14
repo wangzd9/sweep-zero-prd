@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-015753-t07b-strong-review-rework-required",
+  "occurred_at": "2026-10-13T02:00:44+08:00",
+  "recorded_at": "2026-10-13T02:00:44+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "2-r2",
+  "status": "REVIEW_PENDING",
+  "summary": "r107强审查codex 50c665e4收口REWORK_REQUIRED：4 CORRECTION(SR-01 corrected_label未持久化/SR-02守卫前INSERT抢先/SR-03幂等漏操作者/SR-04二次纠错覆盖首次投影)+1 VERIFICATION_GAP(SR-05真并发409留TESTER)，仅阻塞07B模块合入门禁；返修问题ID单未出，本侧不移动HEAD不提前返修",
+  "evidence": "reviews/strongmodel/runs/50c665e48cb3465c95d29da7bf1446ce/result.md",
+  "next": "等协调者分类裁决出R3返修单，按attempt续scene/task-07b-manual-revision-withdraw最小返修"
+}

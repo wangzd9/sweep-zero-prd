@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-t16ca-delivery-mechverify-assert-transfer-append-20261014",
+  "occurred_at": "2026-10-14T12:41:45+08:00",
+  "recorded_at": "2026-10-14T12:41:45+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16C-A",
+  "attempt": "1",
+  "status": "DELIVERED_FROZEN",
+  "summary": "A 叶 a1e416a 交付冻结（12:39:51 事件 a-t16ca-attempt1-delivery-20261014T123951）：协调者机械核验全绿——seed bd0db1d 祖先链 OK、HEAD 干净、零越界 3 文件 +595/-86（bag_search_service/scene_result_query/新测试 19 用例）、定向 59 passed 独立复跑 rc=0（主仓 venv）、C5/C6/C7/c03-02/03/04 口径在回执。追加控制动作：A 冻结未含共享断言转派单（tests/test_web.py:366 仍为旧断言），已在 shared-test-assert-transfer.md 落追加段要求 A 同 worktree 续 1 最小 commit 后重新冻结；A 叶 OCR 快照以最终冻结 head 为准暂不起，避免审查身份重开。B e399daf 排队、C 522bb3f run e7a5580c b01 RUNNING 持锁不变。",
+  "evidence": "wt-01-t16ca git rev-parse/log/diff 实测；pytest 59 passed rc=0；receipts/TASK-16C-A/attempt-1.md；events/A/91f64e4f.json；shared-test-assert-transfer.md 追加段；TODO §8 16C-A 行",
+  "next": "observer 5min 核：A 续 commit 新冻结 head→机械核验→A 叶 OCR 排队；C run e7a5580c 收口后裁决；B 叶 OCR 排队中；TESTER 16D 叶增量验证（B/C 已可开验，A 等最终冻结）；fe17e8a..3c9c496 弱 OCR 补审维持空窗后低优先"
+}

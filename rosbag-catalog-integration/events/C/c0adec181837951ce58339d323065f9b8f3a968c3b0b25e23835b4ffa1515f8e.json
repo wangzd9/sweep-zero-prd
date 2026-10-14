@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261011-041853-nochange",
+  "occurred_at": "2026-10-11T04:19:35+08:00",
+  "recorded_at": "2026-10-11T04:19:35+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "04:19 巡检无变化：main 6d30a68 不变，无新派单/返修，保持空闲",
+  "evidence": "sessions/C.md",
+  "next": "继续巡检"
+}

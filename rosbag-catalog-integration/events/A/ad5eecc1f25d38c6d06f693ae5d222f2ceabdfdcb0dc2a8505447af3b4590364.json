@@ -1,0 +1,12 @@
+{
+  "event_id": "a-task16a-attempt2r1-delivered-20261013",
+  "occurred_at": "2026-10-13T04:13:23+08:00",
+  "recorded_at": "2026-10-13T04:13:23+08:00",
+  "role": "A",
+  "task": "TASK-16A",
+  "attempt": "attempt-2-r1",
+  "status": "REVIEW_PENDING",
+  "summary": "attempt-2-r1 最小返修 6 项全部落地冻结（R1-1 _scene_context 收紧 scan+ready 双根 fail-closed / R1-2 _recover_moves root_id cross-check / R1-3 list_profiles all-roots+intake_root_id 匹配隔离不动 / R1-4 scene_intake reserved 注+尾换行 / R1-5 迁移尾换行 / R1-6 无）",
+  "evidence": "receipts/TASK-16A/attempt-2-r1.md commit 3aee4d1 base c30f048",
+  "next": "待协调者机械核验+增量 OCR(--from c30f048 --to 3aee4d1)+07B 合入顺序裁决+TESTER 16D 前独立验证；本角色不自行合入"
+}

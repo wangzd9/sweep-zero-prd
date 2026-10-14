@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-013553-nochange-t10defect3-running",
+  "occurred_at": "2026-10-12T01:38:28+08:00",
+  "recorded_at": "2026-10-12T01:38:28+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "t10-defect3-publish-bounds/1",
+  "status": "RUNNING",
+  "summary": "01:25 checkpoint since: zero business change; B t10-defect3 coding in-flight (wt-04a-t10d3 2 files +31/-10 uncommitted, last mtime 01:24); main a77aa45 unchanged",
+  "evidence": "inbox/sessions/COORDINATOR.md 01:35 poll line + wt-04a-t10d3 git diff --stat/stat mtime measured",
+  "next": "await B delivery receipt -> mech verify -> serial OCR -> merge -> TESTER rerun v2; silence 3 straight rounds triggers stall alert"
+}

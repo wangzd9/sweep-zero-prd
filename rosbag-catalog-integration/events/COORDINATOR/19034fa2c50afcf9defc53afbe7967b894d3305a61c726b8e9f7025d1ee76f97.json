@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-14ae4556629a-20261010-1635-ack-inflight",
+  "occurred_at": "2026-10-10T16:38:30+08:00",
+  "recorded_at": "2026-10-10T16:39:25+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-03B",
+  "attempt": "5-rework-2",
+  "status": "RUNNING",
+  "summary": "16:35 巡检：1号 attempt-5-rework-2 已 ACK（16:27）并开工——wt-01 改 scene_schedule_consumer.py+test_scene_r2_rework_1.py（+134/-26：_mark rowcount 接线 errors+warning、poll from_outbox 标记区分真实异常/fixture 静默、终态 UPDATE 改 Core），未 commit/无新回执，按在途对待不催单；合入唯一剩余门禁=该小修 commit+增量 OCR 无 high/critical → 五笔+小修同批 --no-ff 合入 main（现 eff0479）→ TESTER 派单（R2-05 交错 MySQL 联调+R2-01/02/03 终测+路径逃逸断言）；ocr.lock 空闲，2号/3号/TESTER 无新交付",
+  "evidence": "inbox/1号/TASK-03B/attempt-5-rework-2-ack.md；wt-01 git diff（16:36）；HANDOFF 16:35 检查点",
+  "next": "等 1号小修 commit+回执 → 协调者增量 OCR → 同批合入 → TESTER 派单"
+}

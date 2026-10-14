@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-113153-t07a-ocr-started-idle",
+  "occurred_at": "2026-10-12T11:32:38+08:00",
+  "recorded_at": "2026-10-12T11:32:38+08:00",
+  "role": "B",
+  "task": "TASK-07A",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "07A交付冻结后协调者核验链启动：ocr.lock新增T07A-r1-svc批次(11:25:37)+协调者t07a-verify-r79b租约，本侧IDLE_WAITING",
+  "evidence": "receipts/TASK-07A/attempt-1.md",
+  "next": "等OCR收口/裁决/TESTER验证；无返修则持续空闲巡检"
+}

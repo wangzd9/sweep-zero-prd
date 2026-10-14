@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-132753-nochange",
+  "occurred_at": "2026-10-11T13:28:54+08:00",
+  "recorded_at": "2026-10-11T13:28:54+08:00",
+  "role": "B",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "13:23:50 后业务目录 0 命中；main 65ca0be 双核一致；强复审 R2I-20261010-06 result 仍缺 READY_FOR_USER_TRIGGER；无在途工作进程",
+  "evidence": "sessions/B.md 13:28 checkpoint",
+  "next": "维持 IDLE_WAITING，空闲不扩需求"
+}

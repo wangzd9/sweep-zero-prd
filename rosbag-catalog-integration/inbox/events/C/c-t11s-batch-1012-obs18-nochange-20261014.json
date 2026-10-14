@@ -1,0 +1,13 @@
+{
+  "event_id": "c-t11s-batch-1012-obs18-nochange-20261014",
+  "occurred_at": "2026-10-14T01:05:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs17（00:46）后新一轮：pending 触发源=BATCH-STATUS 00:59:51 mtime 刷新（TESTER 行 00:33/00:39 增补记账+ruling-dup-slices-0038 并入 TESTER 口径，C 只读消费不代改）；ACK 21:07:41 在案不重复领取",
+  "summary": "C 第18轮只读复核（处理机 01:05-01:06 实测，未 kill/未删/未重启/未 retry/未改任何生产路径）与 obs17 **零状态变化**：① 7 scene run 不变——六 SCENE_DONE（c4a88c07/604c0896/bc8c1d1c/a4824f1c/eb4397c3/24ab78bb）+ scene-4acf689f（16_02_03 正式链 source 91FFEEC1…/submission 24d60fee）仍 SCENE_RUNNING attempt=1 auto_retry_count=0 lease_owner=platform-local，heartbeat 01:06:00 续租活跃、lease 至 01:08:00、八步全 QUEUED，proxy 8767 active_runs=[scene-4acf689f ACCEPTED]，跨 DB3 大包串行中不因观察超窗 kill/retry；② NAS 00:46 后 incoming/spray 与 .upload-staging 全树 find 零命中（incoming/spray 仍仅 16_33_10 空包目录），无 bag 移动；③ flat 三提交 a65a25a7/87dfebaa/518089ed 仍无新绑定 run（D4 第③步归 A 面，upload-ledger.json mtime 00:04:39 后未见新账）；④ 资源：NAS 98T/70T/29T 71% 不变、load 1.73/1.41/1.32 大包运行期正常抬升。C 全程只读（ssh curl 8180/8767、find、df、uptime、本地 receipts 读取）。",
+  "evidence": "处理机只读实测：8180 pipeline-runs?limit=200 rc=0 total=24（7 scene run 状态与 obs17 一致）；pipeline-runs/scene-4acf689f9a6a473da1fa2f2efc70 rc=0（SCENE_RUNNING attempt=1 auto_retry_count=0 frozen_at 2026-10-13T23:05:30 submission_id=24d60fee44554e74b15df3fcdf5d93d5 steps 全 QUEUED lease_expires_at 2026-10-14T01:08:00 heartbeat_at 2026-10-14T01:06:00）；8767/health rc=0 {status:ok active_runs:[scene-4acf689f ACCEPTED pid1]}；find incoming/spray+.upload-staging -newermt 00:46 零命中；df /mnt/nas_backup 98T 70T 29T 71%；uptime load 1.73/1.41/1.32；本地 receipts/TASK-11S-BATCH-1012/upload-ledger.json mtime=2026-10-14T00:04:39 未见新账",
+  "next": "接续只读观察：① scene-4acf689f 终态（跨 DB3 大包，预计处理 ~9min+，TESTER 00:54 进程级在算证据 pid 3495931 RAM 10.97GiB 在案）；② 串行释放后 flat 三提交绑定新 run，C 按 run 核账（含 ruling-dup-slices-0038 观察面：正式 a65a25a7 绑定 run 对现存 FFDEE943 同 source 切片处置痕迹取证，C 不处置）；③ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

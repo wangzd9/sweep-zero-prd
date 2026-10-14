@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-4acf-infer-phase-crosscheck-20261014021127",
+  "occurred_at": "2026-10-14T02:11:27+08:00",
+  "recorded_at": "2026-10-14T02:11:27+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "02:1x 跨夜增量只读实测（消费 02:03 自写事件回声+sessions 回声+C obs22 事件，无新派单/新 decision）：4acf689f SCENE_RUNNING attempt1 heartbeat 02:07:40（30s 节奏）lease_expires 02:09:40 活跃续租、八步仍全 QUEUED started_at=NULL（入队 ~185min）；/proc/3495931 12s 双采样 voluntary_ctxt_switches 57347→57372（+25，~125/min 与 02:0x 的 ~110/min 同口径低速事件循环）、nonvoluntary 210 不变、docker stats proxy CPU 1.27%/MEM 20.84GiB。**C obs22（02:01）交叉新证据消费**：work 树 EXTRACT 产物冻结（jpg 1781/pcd 5373 双采样零新增、末件 frame_001787）=EXTRACT 完成口径成立、VLM 8002 ESTAB 通道活跃、RSS 15.8→18.2GB 持续增长=C 判『EXTRACT 已完成、大概率 INFER/后续段计算中，在算未卡死』——与本角色 01:4x/02:0x『零实质推进』升级口径**存在证据分歧**（DB 层八步 checkpoint 零推进 vs 进程/work 树层推理段活跃），按协议报协调者统一裁决定性；TESTER 不自行 cancel/retry。ingest_submission 8 行 02:07 实测不变（flat 三提交+空包仍 PENDING_INPUT source_id 全空，14_42_48 正式全链 NOT_RUN）；scan_job 3997（02:05:40）incoming SUCCESS failed:2 空包拒绝周期持续；scene run 7=6DONE+1RUNNING 无新 run；PASS 基线不变。",
+  "evidence": "pipeline_run heartbeat=2026-10-14 02:07:40 lease_expires=02:09:40; step_run 8/8 QUEUED started_at=NULL; /proc/3495931 voluntary_ctxt_switches 57347→57372 (12s); docker stats rosbag-scene-proxy cpu=1.27% mem=20.84GiB; 8767 active_runs=[4acf689f ACCEPTED pid:1]; ingest_submission 8 rows flat PENDING_INPUT source_id NULL; scan_job 3997 02:05:40 SUCCESS {dirs:3 bags:1 failed:2}; C obs22: work-tree jpg 1781/pcd 5373 frozen + VLM 8002 ESTAB + RSS 18.2GB",
+  "next": "等协调者统一裁决 4acf689f 定性（DB 八步零推进 vs 进程层 INFER 段在算的分歧证据）及处置（cancel/retry/继续观察由协调者/A 执行）；SCENE_DONE 后跨 DB3 边界/产物/两次 reconcile（16_02_03 正式全链）；A flat 三提交绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）"
+}

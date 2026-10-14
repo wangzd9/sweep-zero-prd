@@ -1,0 +1,11 @@
+{
+  "event_id": "c-poll-20261013-044353-v2done-t16b-await-resume",
+  "role": "C",
+  "ts": "2026-10-13T04:49:44+08:00",
+  "task": "TASK-16B",
+  "attempt": "attempt-1",
+  "status": "REVIEW_PENDING",
+  "summary": "巡检核实：v2 OCR 全链 04:39:44 done；16B b1/b2 超时 rc=1 manifest 在案、b3（C 范围）2 low findings 待协调者同批裁决；协调者 r121 resume 链脚本 04:47 落盘未起跑；无 C 新派单，交付冻结不自测",
+  "evidence": "scratch/t16_ocr/t16_ocr_v2_results.json; scratch/run_t16b_resume.py; sessions/C.md",
+  "next": "等协调者 resume 链起跑收口→findings 同批裁决→16A 增量/07B R3 串行→合入面→TESTER 16D"
+}

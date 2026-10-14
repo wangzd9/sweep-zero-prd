@@ -1,0 +1,16 @@
+{
+  "role": "B",
+  "poll": "6f7471d8747c",
+  "checked_at": "2026-10-13T05:37:53+08:00",
+  "claim": "cron-b-poll-6f7471d8747c-20261013-053753",
+  "control": "ACTIVE",
+  "state": "IDLE_WAITING",
+  "task": "TASK-07B",
+  "attempt": "attempt-3-r3",
+  "head": "4baf79f",
+  "base": "68b5188",
+  "status": "REVIEW_PENDING_FROZEN",
+  "no_new_dispatch": true,
+  "observation": "16B resume b2 process exited without ledger/log evidence (ps none, fuser ocr.lock rc=1, no resume_b2-proxy.log/progress file, batches md mtime 05:17) - b2 closure state UNVERIFIED, coordinator-side (r120 policy: b2 was last attempt, re-fail = split-retry once then NEEDS_REVIEW); B read-only, no action",
+  "next": "wait coordinator b2 closure ruling -> 16A OCR 3 batches -> 07B R3 incremental OCR -> strong review (R3-1~4 only, deadline 2026-10-13T11:33:12) -> TESTER 07B-post-r3 (SR-05) -> merge -> 07B DONE"
+}

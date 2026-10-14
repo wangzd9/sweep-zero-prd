@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t12sab-deliver-20261013-145134",
+  "occurred_at": "2026-10-13T14:51:34+08:00",
+  "recorded_at": "2026-10-13T14:51:34+08:00",
+  "role": "TESTER",
+  "task": "TASK-12S-AB",
+  "attempt": "attempt-1",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "12S-A PASS + 12S-B PASS（冻结 f62a29c 干净树）独立验证交付：A 真 MySQL 8.4 双库迁移往返 3×RC=0+零新增 DDL+坡道默认分库 seed 逐字段一致+spray 14 项行为全 OK；B 定向 54/场景域 142/全仓 937+4 既有零新增+整数 ns 6 项（亚毫秒保留证伪 ms 冒充）+分段奇数 ns 无 round+PCD 往返+7 参考图独立 hash 7/7+1012 只读适用探针；NOT_RUN=decoder/render/VLM 缺依赖留 12S-D；观察项 wt-04a-t12sb 工作区 14:35 起 B 面 OCR 返修半成品未提交污染（resolve_decoder_path 未定义→脏树 import 断），冻结 commit 完好，TESTER 未触碰",
+  "evidence": "test-receipts/TEST-TASK12S-AB/attempt-1.md; sessions/TESTER.md（2026-10-13 14:5x 段）",
+  "next": "待协调者裁决；B 返修改 head 则 12S-B 增量复验"
+}

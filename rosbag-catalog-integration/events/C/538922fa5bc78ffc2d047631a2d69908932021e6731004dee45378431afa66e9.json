@@ -1,0 +1,13 @@
+{
+  "event_id": "c-t11s-batch-1012-obs75-flat-binding-recovered-4acf-steps-advanced-20261014",
+  "occurred_at": "2026-10-14T10:52:00+08:00",
+  "recorded_at": "2026-10-14T10:53:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第75轮只读观察（处理机 10:43-10:52 实测）：消费 codex-repair-receipt-20261014.md（10:23）独立复测=flat 三提交绑定恢复落地——ingest_submission 实测 a65a25a7→FFDEE943/87dfebaa→9C9456B6/518089ed→205E5054 全 SCHEDULED（updated 10:23:08/09，obs74 搁浅申报闭环）；24d60fee→91FFEEC1 不变；7a71e404（16_33_10 空包）仍 PENDING_INPUT=输入校验拒绝链正常口径（提交层终态隔离修复在隔离树未部署）。scene-4acf689f（16_02_03 正式链）8180 实测 SCENE_RUNNING attempt=1 error 空、步骤 PRECHECK/EXTRACT=DONE、INFER=RUNNING、后续 QUEUED（obs74 全 QUEUED→回执步骤补报落地）、lease 至 10:53:44 heartbeat 续租活跃。proxy pid 3495931 连续未重启 TIME 01:22:05 持续非零；VLM 通道容器 1 条 ESTAB→8002；llm-server 10:51:10-10:52:00 采样 Running 3-4/Waiting 前四点=1 末两点 0（非持续>0 不命中升级条件）/prefix 95.6%/gen 63.7-187.0 tok/s=推理活跃续证；checkpoint.json mtime 00:23:10 未翻（模型段完成信号未到）、find -newermt 10:00 零新写；NAS 71% 不变、load 4.46 抬升（C 未起进程，如实归因 INFER+VLM 段）、incoming/spray 仍仅 16_33_10 空包。本批 8 包无新终态、无升级条件命中；绑定恢复属实质状态变化按白天口径即时通报。C 全程只读，未 kill/删/重启/retry/改生产路径。",
+  "evidence": "mysql ingest_submission 8 行（三 flat SCHEDULED 源绑定 updated 10:23:08/09，24d60fee 不变，7a71e404 PENDING_INPUT）；8180 run4acf SCENE_RUNNING steps PRECHECK/EXTRACT DONE + INFER RUNNING + 5 QUEUED，lease 10:53:44 error 空；8767 ok active_runs=[4acf689f pid1]；ps 3495931 ELAPSED 14:29:10 TIME 01:22:05 RSS 18084068；docker exec 3376cd90f44e /proc/net/tcp 1 ESTAB BB60→2D02A8C0:1F42；llm-server 六点采样 Running 3-4/Waiting 1→0/prefix 95.6%；checkpoint mtime 2026-10-14 00:23:10.474817688 未翻 + find -newermt 10:00 count=0；df 98T/70T/29T 71%、uptime load 4.46、incoming/spray=16_33_10 仅",
+  "next": "接续只读观察：① 4acf 模型段完成信号（checkpoint 翻面/INFER→DONE/后续步骤推进/SCENE_DONE）取证申报，升级条件=heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且无 ESTAB；② 协调者/TESTER 按回执核 flat 三提交复用既有终态 run 的验收面，C 不处置；③ 16_33_10 提交层终态隔离=隔离树修复待部署面跟踪。11:00 时段总结照常，白天状态变化即时通报。",
+  "quiet_hours_note": "白天口径，实质状态变化（绑定恢复）即时通报"
+}

@@ -1,0 +1,3230 @@
+diff --git a/app/scene/spray/__init__.py b/app/scene/spray/__init__.py
+new file mode 100644
+index 0000000..8bc74dd
+--- /dev/null
++++ b/app/scene/spray/__init__.py
+@@ -0,0 +1,9 @@
++"""水雾场景适配器包（TASK-12S-B）。
++
++import 本包即安装 ros2-spray-v1 适配器（对照 slope 包自注册口径）；
++真实执行面（16B 代理 / 12S-C 编排）import 本包完成 dispatch 接线。
++"""
++
++from app.scene.spray.adapter import SPRAY_ADAPTER_KEY, SprayAdapter, precheck_summary
++
++__all__ = ["SPRAY_ADAPTER_KEY", "SprayAdapter", "precheck_summary"]
+\ No newline at end of file
+diff --git a/app/scene/spray/adapter.py b/app/scene/spray/adapter.py
+new file mode 100644
+index 0000000..4d51c58
+--- /dev/null
++++ b/app/scene/spray/adapter.py
+@@ -0,0 +1,427 @@
++"""真实水雾适配器（TASK-12S-B）：register_adapter(SPRAY_ADAPTER_KEY, SprayAdapter)。
++
++流水线（对照 ros2_slice：analysis_spray → point_to_pdc → pdc_to_pic → request_spray）：
++1. 适用性：按 sensor profile 选两路线之一（packet 优先 / pointcloud 替代）；
++   对应 topic 缺失 = **NOT_APPLICABLE**（没有识别结论，不产生"正常无水雾"）；
++2. 解码：packet 路线调 packet2pointcloud（检查 returncode，序号映射源 storage ns，
++   重复/歧义拒绝）；pointcloud 路线纯 stdlib 解析 PointCloud2（x/y/z/intensity，缺
++   intensity 拒绝）；**存在但解不出有效帧 = FAILED**（DECODE_FAILED，不冒充 []）；
++3. 渲染：Open3D 离屏（3840×2160 旋转 90°、ROI、intensity 配色、q95）；跳过前 10 帧
++   每 3 帧取 1；500KiB 小图过滤（记录数量/失败/剩余）；有效帧 < 门槛 = FAILED；
++4. 模型：双 pass（V18 thinking + SIM 参考图复核 1~4 正常/5~7 异常），归一
++   spray/normal/unknown；有界重试后仍不确定 = FAILED（禁止 !=异常 统称正常）；
++5. 分段：segment_spray_ns（15s/0.15/3/5/前置 3s/合并 7s，整数 storage ns，不 round 秒）；
++6. 缓存/取消：完整身份键 manifest/hash 判断（禁止目录非空判完成、禁止写原包）；
++   每帧检查取消信号。
++
++本模块不登记 Bag、不直连数据库、不写 NAS 发布路径（06B/12S-C 职责）；
++输出结构化区间 + manifest 证据，由 dispatch/06B 消费。
++真实模型请求与写测试 NAS 不在本单（12S-C/12S-D 派单口径），本单交付能力+预检+只读探针。
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++from collections.abc import Mapping
++from dataclasses import asdict
++from pathlib import Path
++
++from app.scene.adapter import register_adapter
++from app.scene.slope.bag_io import BagIoError, read_topics
++from app.scene.spray import decode as spray_decode
++from app.scene.spray import render as spray_render
++from app.scene.spray import segment as spray_segment
++from app.scene.spray.cache import SprayCacheKey, SprayResultCache, key_digest
++from app.scene.spray.decode import PACKET_TOPIC, POINTCLOUD_TOPIC, DecodeError, SprayFrame
++from app.scene.spray.model import (
++    SprayModelClient,
++    SprayModelError,
++    classify_two_pass,
++    prompt_hashes,
++)
++from app.scene.spray.pcd_io import parse_binary_pcd_header
++from app.scene.spray.precheck import run_precheck
++from app.scene.spray.references import ReferenceError, ordered_ref_bytes, verify_references
++from app.scene.spray.time_map import MAPPING_BAG_STORAGE
++from app.scene.types import (
++    AnalysisOutput,
++    ApplicabilityVerdict,
++    EvidenceRef,
++    SceneAdapter,
++    SceneAdapterError,
++    SceneOutcome,
++    SceneRunRequest,
++    SceneSegment,
++)
++
++SPRAY_ADAPTER_KEY = "ros2-spray-v1"
++
++# 路线 → 必需 topic（按 sensor profile 选择，不 AND）
++_ROUTE_TOPIC = {
++    "packet": PACKET_TOPIC,
++    "pointcloud": POINTCLOUD_TOPIC,
++}
++
++_CANCEL_CHECK_EVERY = 10
++
++
++class SprayAdapter(SceneAdapter):
++    """水雾场景适配器；model_client 可注入（测试用确定性客户端）。"""
++
++    def __init__(self, model_client: SprayModelClient | None = None, decoder_path: str | Path | None = None):
++        self._client = model_client
++        self._decoder_path = decoder_path
++
++    # ------------------------------------------------------------------
++    # 适用性：按 profile 选路线，topic 缺失 = NOT_APPLICABLE
++    # ------------------------------------------------------------------
++
++    def _route(self, request: SceneRunRequest) -> str:
++        route = str(request.parameters.get("route", "auto")).strip()
++        return route or "auto"
++
++    def _resolve_route(self, request: SceneRunRequest, topics: Mapping[str, object]) -> str:
++        """按 sensor profile 参数 + 实际 topic 选择路线（packet 优先，不 AND，不默默后雷达）。"""
++        route = self._route(request)
++        if route == "auto":
++            route = "packet" if PACKET_TOPIC in topics else ("pointcloud" if POINTCLOUD_TOPIC in topics else "auto")
++        return route
++
++    def check_applicability(self, request: SceneRunRequest) -> ApplicabilityVerdict:
++        try:
++            topics = {t.name: t for t in read_topics(Path(request.source_path))}
++        except BagIoError as exc:
++            return ApplicabilityVerdict(applicable=False, reason=f"bag 不可读：{exc}")
++        route = self._resolve_route(request, topics)
++        if route not in _ROUTE_TOPIC:
++            return ApplicabilityVerdict(applicable=False, reason=f"未知路线 {route!r}（应为 packet/pointcloud/auto）")
++        needed = _ROUTE_TOPIC[route]
++        if needed not in topics:
++            # 缺 topic = NOT_APPLICABLE（RAW-DATA §1：后雷达不能替代前雷达；缺=不适用）
++            return ApplicabilityVerdict(
++                applicable=False,
++                reason=f"缺少水雾输入 topic {needed}（路线 {route}；实际 {[t for t in topics]}）",
++            )
++        return ApplicabilityVerdict(applicable=True)
++
++    # ------------------------------------------------------------------
++    # 分析
++    # ------------------------------------------------------------------
++
++    def analyze(self, request: SceneRunRequest) -> AnalysisOutput:
++        bag_dir = Path(request.source_path)
++        work_dir = Path(request.work_dir)
++        if work_dir.exists() and not work_dir.is_absolute():
++            raise SceneAdapterError("WORK_DIR_INVALID", "work_dir 必须是受控绝对路径")
++        work_dir.mkdir(parents=True, exist_ok=True)
++
++        topics = {t.name: t for t in read_topics(bag_dir)}
++        route = self._resolve_route(request, topics)
++        needed = _ROUTE_TOPIC.get(route)
++        if needed is None or needed not in topics:
++            raise SceneAdapterError("NOT_APPLICABLE", "适用性检查通过后水雾输入 topic 消失（源代次变化）")
++
++        # 参考图受控校验（缺失 = REFERENCE_MISSING → FAILED，不冒充无命中）
++        try:
++            refs = verify_references()
++        except ReferenceError as exc:
++            msg = str(exc)
++            code = msg.split(":", 1)[0] if ":" in msg else "REFERENCE_MISSING"
++            raise SceneAdapterError(code, msg) from exc
++
++        # 1. 解码（存在但解不出有效帧 = FAILED）
++        frames = self._decode(request, route, bag_dir, work_dir)
++        if not frames:
++            raise SceneAdapterError("DECODE_FAILED", f"路线 {route} 解码无有效帧")
++        if request.cancellation.is_cancelled():
++            raise SceneAdapterError("CANCELLED", "解码后收到取消信号")
++
++        # 2. 冻结选帧（跳过前 10 帧、每 3 帧取 1，对照 pdc_to_pic 的 pcd_files[10::3]）
++        #    选帧作用于**全部解码 PCD 序列**，渲染/过滤只跑选中帧
++        sel_idx = spray_render.select_pcd_indices(len(frames))
++        selected = [frames[i] for i in sel_idx]
++        if not selected:
++            raise SceneAdapterError(
++                "DECODE_FAILED",
++                f"冻结选帧后无有效 PCD（total={len(frames)}，skip_first=10/interval=3）——短包抽帧不足判 FAILED",
++            )
++
++        # 3. 渲染 + 500KiB 过滤（有效帧不足 = FAILED，非 NO_MATCH）
++        report = spray_render.RenderReport()
++        report.total_pcd = len(frames)
++        report.selected = len(selected)
++        rendered_frames: list[tuple[int, Path]] = []
++        for idx, fr in enumerate(selected):
++            if idx % _CANCEL_CHECK_EVERY == 0 and request.cancellation.is_cancelled():
++                raise SceneAdapterError("CANCELLED", f"渲染第 {idx} 帧前收到取消信号，停止写入")
++            out_jpg = work_dir / "jpg" / f"frame_{idx:06d}.jpg"
++            ok = self._render_one(fr, out_jpg)
++            spray_render.account_frame(
++                report, storage_ns=fr.storage_ns, rendered=ok, output_path=out_jpg if ok else None
++            )
++            if ok:
++                rendered_frames.append((fr.storage_ns, out_jpg))
++        try:
++            spray_render.finalize(report)
++        except spray_render.RenderError as exc:
++            raise SceneAdapterError(exc.code, exc.detail) from exc
++
++        # 4. 模型双 pass + 归一（有界重试后不确定 = FAILED）
++        client = self._resolve_client()
++        ref_bytes = ordered_ref_bytes(refs)
++        cache = SprayResultCache(work_dir)
++        cache_key = self._build_cache_key(request, refs, selected, client)
++        cached = cache.hit(cache_key, expected_frame_count=len(rendered_frames))
++        labels: list[str] = []
++        verdicts: list[dict] = []
++        pass_stats: list[dict] = []
++        if cached is not None:
++            # 缓存命中：verdict 自带 storage_ns，无需重跑模型；时间轴由 render report 对齐
++            for r in cached["results"]:
++                labels.append(str(r["label"]))
++                verdicts.append(r)
++            pass_stats = []  # bytes 统计来自首次执行（render_log 注明 cache_reused）
++        else:
++            for i, (storage_ns, jpg) in enumerate(rendered_frames):
++                if i % _CANCEL_CHECK_EVERY == 0 and request.cancellation.is_cancelled():
++                    raise SceneAdapterError("CANCELLED", f"模型第 {i} 帧前收到取消信号，停止写入")
++                frame_stats: list = []
++
++                def _record(stat, _bucket=frame_stats):
++                    _bucket.append(stat)
++
++                try:
++                    p1_raw, p2_raw, p2n = client.judge_frame(jpg.read_bytes(), ref_bytes, on_pass=_record)
++                except SprayModelError as exc:
++                    raise SceneAdapterError("MODEL_FAILED", f"第 {i} 帧模型有界重试后仍不确定：{exc}") from exc
++                verdict = classify_two_pass(p1_raw, p2_raw, p2n)
++                if not verdict.resolvable:
++                    # unknown / 解析失败 → FAILED（不冒充正常，不 NO_MATCH）
++                    raise SceneAdapterError(
++                        "MODEL_UNRESOLVED",
++                        f"第 {i} 帧双 pass 归一不确定（p1={verdict.p1_raw!r} p2={verdict.p2_raw!r}）"
++                        f"——FAILED 不充当正常",
++                    )
++                for s in frame_stats:
++                    pass_stats.append({"frame": i, "storage_ns": storage_ns, **asdict(s)})
++                labels.append(verdict.label)
++                verdicts.append(
++                    {
++                        "storage_ns": storage_ns,
++                        "label": verdict.label,
++                        "p1_raw": verdict.p1_raw,
++                        "p2_raw": verdict.p2_raw,
++                        "p2_ref_num": verdict.p2_ref_num,
++                    }
++                )
++            cache.save(digest=cache_key, results=verdicts)
++
++        # 缓存命中时 verdicts 来自文件（自带 storage_ns）；未命中时与 rendered_frames 逐帧对齐
++        if cached is None:
++            model_storage_ns = [ns for ns, _ in rendered_frames]
++        else:
++            model_storage_ns = [int(v["storage_ns"]) for v in verdicts]
++
++        # 5. 分段（整数 storage ns，不 round 秒）
++        try:
++            seg_params = spray_segment.validate_spray_params(
++                window_size=float(request.parameters.get("window_size", 15)),
++                min_abnormal_ratio=float(request.parameters.get("min_abnormal_ratio", 0.15)),
++                enter=int(request.parameters.get("enter", 3)),
++                exit_=int(request.parameters.get("exit_", 5)),
++                lead_seconds=int(request.parameters.get("lead_seconds", 3)),
++                overlap_merge_seconds=float(request.parameters.get("overlap_merge_seconds", 7.0)),
++            )
++        except ValueError as exc:
++            raise SceneAdapterError("SEGMENT_RULE_ERROR", str(exc)) from exc
++        publish_labels = frozenset(o.label for o in request.capability.output_labels if o.publish_target)
++        try:
++            segments = spray_segment.segment_spray_ns(
++                model_storage_ns,
++                labels,
++                params=seg_params,
++                publish_labels=publish_labels,
++            )
++        except ValueError as exc:
++            raise SceneAdapterError("SEGMENT_RULE_ERROR", str(exc)) from exc
++
++        out_segments: list[SceneSegment] = []
++        for i, seg in enumerate(segments):
++            if seg["end_ns"] <= seg["start_ns"]:
++                continue
++            out_segments.append(
++                SceneSegment(
++                    label=seg["label"],
++                    start_ns=seg["start_ns"],
++                    end_ns=seg["end_ns"],
++                    publish_target=seg["publish_target"] and seg["end_ns"] > seg["start_ns"],
++                    mapping_basis=MAPPING_BAG_STORAGE,
++                    evidence_ref=f"render_log#{i}",
++                )
++            )
++
++        # 6. 证据落盘（render_log + 帧判定 + 预检 + 带宽统计）
++        render_log = self._write_render_log(
++            request, route, report, model_storage_ns, verdicts, pass_stats, refs, frames, cached is not None
++        )
++        has_target = any(s.publish_target for s in out_segments)
++        outcome = SceneOutcome.SUCCESS if has_target else SceneOutcome.NO_MATCH
++        evidence = (
++            EvidenceRef(
++                kind="SPRAY_RENDER_LOG",
++                path=str(render_log),
++                digest=hashlib.sha256(render_log.read_bytes()).hexdigest() if render_log.exists() else None,
++                count=len(rendered_frames),
++            ),
++            EvidenceRef(kind="SPRAY_ROUTE", path=route, count=len(frames)),
++            EvidenceRef(kind="SPRAY_REFS", path=refs.ordered_hash[:16], count=7),
++        )
++        return AnalysisOutput(outcome=outcome, segments=tuple(out_segments), evidence=evidence)
++
++    # ------------------------------------------------------------------
++    # 内部步骤
++    # ------------------------------------------------------------------
++
++    def _resolve_client(self) -> SprayModelClient:
++        if self._client is not None:
++            return self._client
++        client = _default_model_client()
++        if client is None:
++            raise SceneAdapterError("MODEL_UNAVAILABLE", "服务端未配置 spray 模型客户端（model_profile 引用缺失）")
++        return client
++
++    def _decode(self, request: SceneRunRequest, route: str, bag_dir: Path, work_dir: Path) -> list[SprayFrame]:
++        def _cancel() -> bool:
++            return request.cancellation.is_cancelled()
++
++        try:
++            if route == "packet":
++                if self._decoder_path is None:
++                    # 生产路径：decoder 在处理机，本单服务端只做预检与路径封装
++                    from app.scene.spray.precheck import check_decoder
++
++                    dec = check_decoder()
++                    if not dec.ok:
++                        raise DecodeError(dec.reason, dec.detail)
++                    decoder = "/home/wang/work/ros2_slice/utils/packet2pointcloud"
++                else:
++                    decoder = str(self._decoder_path)
++                return spray_decode.decode_packet_route(bag_dir, work_dir, decoder, cancel_check=_cancel)
++            if route == "pointcloud":
++                return spray_decode.decode_pointcloud_route(bag_dir, work_dir, require_intensity=True)
++            raise DecodeError("ROUTE_INVALID", f"未知路线 {route!r}")
++        except DecodeError as exc:
++            raise SceneAdapterError(exc.code, exc.detail) from exc
++
++    def _render_one(self, fr: SprayFrame, out_jpg: Path) -> bool:
++        if fr.pcd_path is None:
++            return False
++        try:
++            parse_binary_pcd_header(fr.pcd_path)
++        except Exception:
++            return False
++        try:
++            return spray_render.render_pcd_to_jpg(fr.pcd_path, out_jpg)
++        except spray_render.RenderError as exc:
++            if exc.code == "RENDER_UNAVAILABLE":
++                # 本机无 Open3D/EGL：真实渲染不可跑 → 本单探针口径 NOT_RUN，
++                # 不能 mock 当 PASS；标记该帧不可渲染（计入 render_failed）。
++                return False
++            return False
++
++    def _build_cache_key(self, request: SceneRunRequest, refs, frames: list[SprayFrame], client) -> str:
++        frame_h = []
++        for fr in frames:
++            if fr.pcd_path is not None:
++                h = hashlib.sha256(fr.pcd_path.read_bytes()).hexdigest()[:16]
++            else:
++                pts = fr.points or ()
++                h = hashlib.sha256(json.dumps([list(p) for p in pts], sort_keys=True).encode()).hexdigest()[:16]
++            frame_h.append((fr.storage_ns, h))
++        preprocessing = {
++            "skip_first": spray_render.SKIP_FIRST_FRAMES,
++            "interval": spray_render.FRAME_INTERVAL,
++            "roi_x": list(spray_render.ROI_X),
++            "roi_y": list(spray_render.ROI_Y),
++            "quality": spray_render.JPG_QUALITY,
++            "threshold_kb": spray_render.SMALL_IMAGE_THRESHOLD_KB,
++            "render": f"{spray_render.RENDER_WIDTH}x{spray_render.RENDER_HEIGHT}r{spray_render.ROTATE_DEGREES}",
++        }
++        seg_params = {
++            "window_size": request.parameters.get("window_size", 15),
++            "min_abnormal_ratio": request.parameters.get("min_abnormal_ratio", 0.15),
++            "enter": request.parameters.get("enter", 3),
++            "exit_": request.parameters.get("exit_", 5),
++            "lead_seconds": request.parameters.get("lead_seconds", 3),
++            "overlap_merge_seconds": request.parameters.get("overlap_merge_seconds", 7.0),
++        }
++        model_profile = getattr(client, "model", "") if client is not None else ""
++        return key_digest(
++            SprayCacheKey(
++                capability_version=request.capability.capability_version,
++                rules_revision=request.capability.rules_revision,
++                model_profile=model_profile,
++                ref_ordered_hash=refs.ordered_hash,
++                preprocessing=preprocessing,
++                source_fingerprint=request.source_fingerprint,
++                frames=tuple(frame_h),
++                decoder_revision=request.capability.adapter_revision,
++                render_revision=request.capability.adapter_revision,
++                segment_params=seg_params,
++            )
++        )
++
++    def _write_render_log(
++        self, request, route, report, model_storage_ns, verdicts, pass_stats, refs, frames, cache_reused
++    ) -> Path:
++        log = {
++            "route": route,
++            "source_id": request.source_id,
++            "source_fingerprint": request.source_fingerprint,
++            "preprocessing": report.to_dict(),
++            "frames": [{"storage_ns": f.storage_ns, "route": f.route} for f in frames],
++            # verdicts 已含 storage_ns（缓存命中/未命中统一）；这里只对齐时间轴记录
++            "verdicts": list(verdicts),
++            "model_storage_ns": list(model_storage_ns),
++            "pass_stats": pass_stats,
++            "prompt_hashes": prompt_hashes(),
++            "refs": {"ordered_hash": refs.ordered_hash, "total_bytes": refs.total_bytes, "source_commit": "be23177…"},
++            "cache_reused": cache_reused,
++            "capability_version": request.capability.capability_version,
++            "rules_revision": request.capability.rules_revision,
++            "model_profile": request.capability.model_profile,
++        }
++        path = Path(request.work_dir) / "render_log.json"
++        try:
++            path.write_text(json.dumps(log, ensure_ascii=False, sort_keys=True), encoding="utf-8")
++        except OSError:
++            print(f"⚠️ spray render_log 写入失败（证据缺失，不影响结果）：{path}", flush=True)
++        return path
++
++
++def _default_model_client() -> SprayModelClient | None:
++    """生产客户端：从服务端运行配置读取模型端点引用（凭据不进能力描述）。"""
++    import os
++
++    endpoint = os.getenv("SPRAY_VLM_ENDPOINT", "").strip()
++    if not endpoint:
++        return None
++    from app.scene.spray.model import HttpSprayModelClient
++    from app.scene.spray.references import REFERENCES
++
++    ref_names = tuple(r["name"] for r in REFERENCES)
++    return HttpSprayModelClient(
++        endpoint=endpoint,
++        api_key=os.getenv("SPRAY_VLM_API_KEY", ""),
++        model=os.getenv("SPRAY_VLM_MODEL", ""),
++        ref_order_names=ref_names,
++    )
++
++
++# 能力不可用原因（供描述/预检）：源码在但依赖缺失时明确 unavailable_reason
++def precheck_summary(decoder_path: str | Path | None = None, model_client=None) -> dict:
++    return run_precheck(decoder_path=decoder_path, model_client=model_client).to_dict()
++
++
++register_adapter(SPRAY_ADAPTER_KEY, SprayAdapter)
+\ No newline at end of file
+diff --git a/app/scene/spray/cache.py b/app/scene/spray/cache.py
+new file mode 100644
+index 0000000..bbd367b
+--- /dev/null
++++ b/app/scene/spray/cache.py
+@@ -0,0 +1,101 @@
++"""spray run/attempt 私有工作目录 + manifest/hash 判断缓存（TASK-12S-B，§2/§3）。
++
++- **禁止「目录非空」判完成**：缓存命中必须逐字段核对完整身份键
++  （能力版本+规则修订+模型+参考图有序 hash+预处理参数+源指纹+帧存储 ns 序列+
++  decoder/render 修订）；
++- **禁止 PCD/图/cache 写原包内**：一切产物落 run 私有 work_dir（request.work_dir）；
++- 改变参考图/规则/参数/源指纹 → 缓存失效不复用旧判断。
++
++写失败降级为无缓存（缓存是优化不是事实来源，对照 slope.cache 口径）。
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++from dataclasses import dataclass
++from pathlib import Path
++
++SCHEMA_VERSION = 1
++
++
++def _sha(b: bytes) -> str:
++    return hashlib.sha256(b).hexdigest()
++
++
++@dataclass(frozen=True)
++class SprayCacheKey:
++    """完整身份键（任一不同即失效）。"""
++
++    capability_version: str
++    rules_revision: str
++    model_profile: str
++    ref_ordered_hash: str  # 7 参考图按序 hash 链（改变参考图→失效）
++    preprocessing: dict  # 冻结参数（skip/interval/ROI/quality/threshold）
++    source_fingerprint: str
++    frames: tuple[tuple[int, str], ...]  # (storage_ns, pcd hash 16)
++    decoder_revision: str
++    render_revision: str
++    segment_params: dict  # window/ratio/enter/exit/lead/merge
++
++
++def key_digest(key: SprayCacheKey) -> str:
++    payload = {
++        "schema_version": SCHEMA_VERSION,
++        "capability_version": key.capability_version,
++        "rules_revision": key.rules_revision,
++        "model_profile": key.model_profile,
++        "ref_ordered_hash": key.ref_ordered_hash,
++        "preprocessing": key.preprocessing,
++        "source_fingerprint": key.source_fingerprint,
++        "frames": [list(f) for f in key.frames],
++        "decoder_revision": key.decoder_revision,
++        "render_revision": key.render_revision,
++        "segment_params": key.segment_params,
++    }
++    blob = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
++    return _sha(blob.encode())
++
++
++class SprayResultCache:
++    """JSON 文件缓存（落 run 私有 work_dir/model_results.json）。"""
++
++    def __init__(self, work_dir: Path):
++        self._path = work_dir / "spray_model_results.json"
++
++    def load(self) -> dict | None:
++        if not self._path.exists():
++            return None
++        try:
++            data = json.loads(self._path.read_text(encoding="utf-8"))
++        except (OSError, json.JSONDecodeError):
++            return None
++        if not isinstance(data, dict) or data.get("schema_version") != SCHEMA_VERSION:
++            return None
++        return data
++
++    def hit(self, digest: str, expected_frame_count: int) -> dict | None:
++        """命中条件：schema + key 逐字段一致 + 帧数一致。否则 None（不复用）。"""
++        data = self.load()
++        if data is None:
++            return None
++        if data.get("cache_key") != digest:
++            return None
++        results = data.get("results")
++        if not isinstance(results, list) or len(results) != expected_frame_count:
++            return None
++        return data
++
++    def save(self, *, digest: str, results: list[dict]) -> None:
++        try:
++            self._path.parent.mkdir(parents=True, exist_ok=True)
++            self._path.write_text(
++                json.dumps(
++                    {"schema_version": SCHEMA_VERSION, "cache_key": digest, "results": results},
++                    ensure_ascii=False,
++                    sort_keys=True,
++                ),
++                encoding="utf-8",
++            )
++        except OSError:
++            pass
+\ No newline at end of file
+diff --git a/app/scene/spray/decode.py b/app/scene/spray/decode.py
+new file mode 100644
+index 0000000..6001add
+--- /dev/null
++++ b/app/scene/spray/decode.py
+@@ -0,0 +1,279 @@
++"""spray 输入解码（TASK-12S-B，SPRAY-INTEGRATION §2/§3）。
++
++两条路线，按 sensor profile 选择（不 AND、不默默用后雷达）：
++- packet 路线（优先）：/iv_packets_front_mid（seyond/msg/SeyondScan）→ 已批准
++  packet2pointcloud（x86-64 动态 ELF，型号/依赖在处理机安装）→ 逐帧 binary PCD。
++- pointcloud 路线（替代）：/iv_points_front_mid_transformed（sensor_msgs/msg/PointCloud2，
++  x/y/z[/intensity]）→ 纯 stdlib CDR+struct 解析（不依赖 rosbags/sensor_msgs/numpy）。
++
++源时间：全程源 db3 存储整数纳秒（bag_io.read_messages），不做本地时间文件名回推。
++decoder 只输出 ms 截断 PCD 文件名时，按消息序号建立确定映射；重复/歧义拒绝。
++
++本模块不 import numpy/roslib（stdlib）；packet 子进程调用检查 returncode。
++真实 PCD 解码依赖处理机 libseyond*/rclcpp/pcl —— 缺失时明确 DECODER_UNAVAILABLE
++（不冒充 PASS，不迁 A100）。
++"""
++
++from __future__ import annotations
++
++import os
++import struct
++import subprocess
++from dataclasses import dataclass
++from pathlib import Path
++
++from app.scene.slope.bag_io import BagIoError, read_messages
++from app.scene.spray.pcd_io import PcdError, build_binary_pcd, parse_binary_pcd_header
++
++# 两路线 topic（RAW-DATA-REQUIREMENTS §1）
++PACKET_TOPIC = "/iv_packets_front_mid"
++PACKET_TYPE = "seyond/msg/SeyondScan"
++POINTCLOUD_TOPIC = "/iv_points_front_mid_transformed"
++POINTCLOUD_TYPE = "sensor_msgs/msg/PointCloud2"
++
++# sensor profile → 路线
++ROUTE_PACKET = "packet"
++ROUTE_POINTCLOUD = "pointcloud"
++ROUTE_AUTO = "auto"
++
++_MS_PCD_SUFFIX = (".pcd",)
++
++
++class DecodeError(Exception):
++    """解码失败（区别于 NOT_APPLICABLE：topic 存在但解不出有效数据）。"""
++
++    def __init__(self, code: str, detail: str = ""):
++        self.code = code
++        self.detail = detail or code
++        super().__init__(f"{code}: {self.detail}" if detail else code)
++
++
++@dataclass(frozen=True)
++class SprayFrame:
++    """一帧源时间 + 解码产物（PCD 路径或点云数组）。"""
++
++    storage_ns: int
++    pcd_path: Path | None = None
++    points: tuple[tuple[float, float, float], ...] | None = None
++    intensity: tuple[float, ...] | None = None
++    route: str = ""
++
++
++# ---------------------------------------------------------------------------
++# PointCloud2 纯 stdlib 解析（替代路线）
++# ---------------------------------------------------------------------------
++
++# intensity 字段按 datatype 的 struct 小端格式（默认 FLOAT32）
++_INTENSITY_FMT = {1: "<b", 2: "<B", 3: "<h", 4: "<H", 5: "<i", 6: "<I", 7: "<f", 8: "<d"}
++
++
++def _p2_align4(pos: int, base: int) -> int:
++    return pos + (4 - (pos - base)) % 4
++
++
++def parse_pointcloud2(
++    data: bytes, *, require_intensity: bool = True
++) -> tuple[list[tuple[float, float, float]], list[float] | None]:
++    """解析 sensor_msgs/msg/PointCloud2 CDR（含 ROS2 封装头），提取 x/y/z[/intensity]。
++
++    字段布局校验：x/y/z 必须存在且为 FLOAT32；intensity 缺失时（require_intensity）
++    抛 DecodeError（不默默换配色）。未知字段/布局错位 → DecodeError（不猜测）。
++    返回 (points, intensity)；points 顺序 = 消息内行主序（height*width）。
++    """
++    # 封装头检测（与 slope.cdr 同特征：00 01 00 00 小端 CDR_LE）
++    order, base = "<", 0
++    if len(data) >= 4 and data[0] in (0, 1) and data[2:4] == b"\x00\x00" and (data[0], data[1]) in ((0, 1), (1, 2)):
++        order = "<" if data[0] == 0 else ">"
++        base = 4
++    pos = base
++    # header (std_msgs/Header): Time(sec i, nanosec I) + frame_id string
++    pos = _p2_align4(pos, base)
++    sec, nanosec = struct.unpack_from(f"{order}iI", data, pos)
++    pos += 8
++    pos = _p2_align4(pos, base)
++    (str_len,) = struct.unpack_from(f"{order}I", data, pos)
++    pos += 4
++    if pos + str_len > len(data):
++        raise DecodeError("P2_TRUNCATED", "PointCloud2 header frame_id 越界")
++    pos += str_len
++    # height/width (uint32 each)
++    pos = _p2_align4(pos, base)
++    height, width = struct.unpack_from(f"{order}II", data, pos)
++    pos += 8
++    # fields: sequence<PointField>
++    pos = _p2_align4(pos, base)
++    (nfields,) = struct.unpack_from(f"{order}I", data, pos)
++    pos += 4
++    fields: list[tuple[str, int, int, int]] = []  # (name, offset, datatype, count)
++    for _ in range(nfields):
++        pos = _p2_align4(pos, base)
++        (fname_len,) = struct.unpack_from(f"{order}I", data, pos)
++        pos += 4
++        if pos + fname_len > len(data):
++            raise DecodeError("P2_TRUNCATED", "PointCloud2 field name 越界")
++        fname = data[pos : pos + fname_len].rstrip(b"\x00").decode("utf-8", "replace")
++        pos += fname_len
++        # PointField: name(str) offset(uint32) datatype(uint8) count(uint8)
++        (f_off,) = struct.unpack_from(f"{order}I", data, pos)
++        pos += 4
++        f_dt = data[pos]
++        f_cnt = data[pos + 1]
++        pos += 2
++        fields.append((fname, f_off, f_dt, f_cnt if f_cnt > 0 else 1))
++    # is_bigendian(uint8) + point_step(uint32)
++    is_be = data[pos]
++    pos += 1
++    pos = _p2_align4(pos, base)
++    (point_step,) = struct.unpack_from(f"{order}I", data, pos)
++    pos += 4
++    # row_step(uint32)
++    (row_step,) = struct.unpack_from(f"{order}I", data, pos)
++    pos += 4
++    # data: sequence<uint8>
++    pos = _p2_align4(pos, base)
++    (data_len,) = struct.unpack_from(f"{order}I", data, pos)
++    pos += 4
++    if pos + data_len > len(data):
++        raise DecodeError("P2_TRUNCATED", f"PointCloud2 data 越界：需 {data_len} 剩 {len(data) - pos}")
++    blob = data[pos : pos + data_len]
++
++    by_name = {f[0]: f for f in fields}
++    for req in ("x", "y", "z"):
++        if req not in by_name:
++            raise DecodeError("P2_LAYOUT", f"PointCloud2 缺必需字段 {req}（实际 {list(by_name)}）")
++        if by_name[req][2] != 7:
++            raise DecodeError("P2_LAYOUT", f"PointCloud2 字段 {req} 非 FLOAT32（datatype={by_name[req][2]}）")
++    has_intensity = "intensity" in by_name
++    if require_intensity and not has_intensity:
++        raise DecodeError("P2_NO_INTENSITY", "PointCloud2 缺 intensity 字段，不能默默换渲染配色（SPRAY §2）")
++    fmt = "<" if not is_be else ">"
++    n = int(height * width)
++    if n <= 0:
++        raise DecodeError("P2_EMPTY", "PointCloud2 宽高为 0，无有效点")
++    # 期望数据长度（含 point_step 对齐）：n * point_step
++    if len(blob) < n * point_step:
++        raise DecodeError("P2_TRUNCATED", f"PointCloud2 数据长度 {len(blob)} < 期望 {n * point_step}")
++    points: list[tuple[float, float, float]] = []
++    intensities: list[float] | None = [] if has_intensity else None
++    ox, oy, oz = by_name["x"][1], by_name["y"][1], by_name["z"][1]
++    oi: int | None = None
++    i_fmt = "<f"
++    if has_intensity:
++        oi = by_name["intensity"][1]
++        i_fmt = _INTENSITY_FMT.get(by_name["intensity"][2], "<f")
++    for k in range(n):
++        base_off = k * point_step
++        x = struct.unpack_from(f"{fmt}f", blob, base_off + ox)[0]
++        y = struct.unpack_from(f"{fmt}f", blob, base_off + oy)[0]
++        z = struct.unpack_from(f"{fmt}f", blob, base_off + oz)[0]
++        # 非有限点（NaN/inf）跳过计数，但保留位置（对照实现按索引上色）
++        points.append((x, y, z))
++        if intensities is not None and oi is not None:
++            v = struct.unpack_from(i_fmt, blob, base_off + oi)[0]
++            intensities.append(float(v))
++    return points, intensities
++
++
++# ---------------------------------------------------------------------------
++# packet 路线：packet2pointcloud 子进程 + 源 ns 序号映射
++# ---------------------------------------------------------------------------
++
++
++def _sorted_ms_pcds(out_dir: Path) -> list[Path]:
++    """decoder 输出的 PCD（ms 截断命名），按文件名升序（= 源消息序号）。"""
++    return sorted(p for p in out_dir.iterdir() if p.suffix in _MS_PCD_SUFFIX and p.is_file())
++
++
++def decode_packet_route(
++    bag_dir: Path,
++    work_dir: Path,
++    decoder_path: str | Path,
++    *,
++    cancel_check=None,
++) -> list[SprayFrame]:
++    """packet 路线：调 packet2pointcloud 逐 db3 → PCD 目录，映射源 db3 存储 ns。
++
++    - 检查子进程 returncode（非 0 → DECODER_FAILED，对照实现未检查 returncode 的缺陷）；
++    - 无 PCD 输出 → DECODE_FAILED（decoder 空输出，不冒充无命中）；
++    - 源 ns 映射：read_messages(PACKET_TOPIC) 的存储 ns 升序 = PCD 序号序；
++      序号数不一致或出现重复/歧义 → DECODE_FAILED（不冒充 ms×1e6）。
++    """
++    bag_dir = Path(bag_dir)
++    work_dir = Path(work_dir)
++    decoder = Path(decoder_path)
++    if not decoder.is_file():
++        raise DecodeError("DECODER_UNAVAILABLE", f"packet2pointcloud 缺失：{decoder}（型号/依赖处理机安装）")
++    if not os.access(decoder, os.X_OK):
++        raise DecodeError("DECODER_UNAVAILABLE", f"packet2pointcloud 不可执行：{decoder}")
++    # 源消息存储 ns 升序（bag_io 多库合并升序）
++    try:
++        src_msgs = read_messages(bag_dir, topic=PACKET_TOPIC)
++    except BagIoError as exc:
++        raise DecodeError("BAG_READ_FAILED", str(exc)) from exc
++    if not src_msgs:
++        raise DecodeError("DECODE_FAILED", f"{PACKET_TOPIC} 无消息")
++    pcd_dir = work_dir / "pcd"
++    pcd_dir.mkdir(parents=True, exist_ok=True)
++    from app.scene.slope.bag_io import find_db3_files
++
++    try:
++        db3s = find_db3_files(bag_dir)
++    except BagIoError as exc:
++        raise DecodeError("BAG_READ_FAILED", str(exc)) from exc
++    for db3 in db3s:
++        if cancel_check is not None and cancel_check():
++            raise DecodeError("CANCELLED", "decoder 阶段收到取消信号")
++        proc = subprocess.run(
++            [str(decoder), str(db3), PACKET_TOPIC, str(pcd_dir)],
++            capture_output=True,
++            text=True,
++            timeout=3600,
++        )
++        if proc.returncode != 0:
++            tail = (proc.stderr or proc.stdout or "").strip()[-400:]
++            raise DecodeError("DECODER_FAILED", f"packet2pointcloud rc={proc.returncode} {db3.name}：{tail}")
++    pc_ds = _sorted_ms_pcds(pcd_dir)
++    if not pc_ds:
++        raise DecodeError("DECODE_FAILED", f"decoder 无 PCD 输出（{len(src_msgs)} 条源消息）")
++    if len(pc_ds) != len(src_msgs):
++        raise DecodeError(
++            "DECODE_FAILED",
++            f"PCD 数 {len(pc_ds)} != 源消息数 {len(src_msgs)}，序号映射歧义（重复/缺失），拒绝冒充",
++        )
++    # 逐序号映射源存储 ns（升序）；同一 ns 多次出现不歧义（帧序号唯一）
++    frames: list[SprayFrame] = []
++    for idx, pcd in enumerate(pc_ds):
++        try:
++            parse_binary_pcd_header(pcd)  # 头合法性（可解码），无 intensity 不在此拒（渲染层判）
++        except PcdError as exc:
++            raise DecodeError("DECODE_FAILED", f"PCD 头非法 {pcd.name}：{exc}") from exc
++        frames.append(SprayFrame(storage_ns=src_msgs[idx].timestamp_ns, pcd_path=pcd, route=ROUTE_PACKET))
++    return frames
++
++
++def decode_pointcloud_route(bag_dir: Path, work_dir: Path, *, require_intensity: bool = True) -> list[SprayFrame]:
++    """pointcloud 路线：纯 stdlib 解析 PointCloud2 → 写 PCD（统一下游渲染面）。"""
++    bag_dir = Path(bag_dir)
++    work_dir = Path(work_dir)
++    try:
++        src_msgs = read_messages(bag_dir, topic=POINTCLOUD_TOPIC)
++    except BagIoError as exc:
++        raise DecodeError("BAG_READ_FAILED", str(exc)) from exc
++    if not src_msgs:
++        raise DecodeError("DECODE_FAILED", f"{POINTCLOUD_TOPIC} 无消息")
++    pcd_dir = work_dir / "pcd"
++    pcd_dir.mkdir(parents=True, exist_ok=True)
++    frames: list[SprayFrame] = []
++    for idx, m in enumerate(src_msgs):
++        points, intensities = parse_pointcloud2(m.data, require_intensity=require_intensity)
++        pcd = build_binary_pcd(pcd_dir / f"frame_{idx:06d}.pcd", points, intensities)
++        frames.append(
++            SprayFrame(
++                storage_ns=m.timestamp_ns,
++                pcd_path=pcd,
++                points=tuple(points),
++                intensity=tuple(intensities) if intensities is not None else None,
++                route=ROUTE_POINTCLOUD,
++            )
++        )
++    return frames
+\ No newline at end of file
+diff --git a/app/scene/spray/model.py b/app/scene/spray/model.py
+new file mode 100644
+index 0000000..a8f0b09
+--- /dev/null
++++ b/app/scene/spray/model.py
+@@ -0,0 +1,272 @@
++"""spray 模型判定与归一（TASK-12S-B，SPRAY-INTEGRATION §3）。
++
++对照 ros2_slice/request/request_spray.py + request_common.py：
++- 双 pass：pass1=SPRAY_PROMPT_V18（thinking）主判定；pass2=SPRAY_PROMPT_SIM
++  （不 thinking）按参考图编号复核（1~4 正常 / 5~7 异常）。
++- **归一 spray/normal/unknown**：禁止照搬原 `result == '是'`（原代码把"正常/异常/
++  未知:xx"三种串混用导致全部 NO_MATCH）；也禁止 `!=异常` 统称正常。
++- pass1 明确异常 → 直接 spray；否则 pass2 复核：pass2 异常 → spray；pass2 正常且
++  pass1 正常 → normal；任一路径 unknown/解析失败 → 有界重试后仍不确定 = **FAILED**
++  （不是 normal，不是 NO_MATCH）。
++- 每 pass 记录目标图/7 参考图重复传输 bytes 与重试次数（AC-15.2 带宽证据面）。
++
++客户端可注入（测试用确定性客户端）；生产 HTTP 客户端惰性 import requests，
++端点/凭据只在服务端配置，不进能力描述。
++"""
++
++from __future__ import annotations
++
++import base64
++import re
++import time
++from dataclasses import dataclass, field
++from typing import Protocol
++
++# ---- 对照实现原样冻结的提示词/系统串（hash 进执行证据，改串=升版本）----
++SPRAY_SYSTEM = (
++    "你是一名激光雷达点云图像分析专家。判断输入的2D俯观点云图像是否受水雾干扰。"
++    "只输出结果，不添加额外解释。"
++)
++SPRAY_PROMPT_V18 = """
++    激光雷达点云水雾判定。
++判据一：右侧红色团块的状态（对照参考图）：
++- 状态A（参考图1/3）：紧凑、实心、范围窄、边界清晰——是固定墙体，正常
++- 状态B（参考图5）：宽幅、斑驳、散点蓬松弥散——是雾团，异常
++判据二：中央红色扇面内出现以下任一分布即异常：
++1. 弧线断裂、成暗色空洞（紧邻排水渠等规整结构的暗区不算）
++2. 绿/黄绿/蓝散点悬浮于弧线间隙、分布成片（正常图只有零星孤点）
++3. 蓬松雾团侵入扇面
++4. 弧线波浪形变：平滑的同心弧局部扭曲起伏、弧线本身走波浪（正常图的弧线骨架始终平滑）
++扇面干净+右侧状态A=正常（底部黄→绿渐变弧、远端衰减、零星孤点、排水渠都是正常特征）。
++
++先看7张参考图：参考图1、2、3、4是正常图，参考图5、6、7是异常图，按扇面特征和右侧状态对照。第8张图是待判定图。
++只输出"正常"或"异常"。
++"""
++SPRAY_PROMPT_SIM = (
++    "前7张是参考图（参考图1~参考图7，其中参考图1、2、3、4是正常图，参考图5、6、7是异常图）。"
++    "最后1张是待判定图。\n"
++    "问题：待判定图的整体形态（右侧红色团块状态 + 中央扇面特征）最接近哪张参考图？\n"
++    '只输出"最像参考图N"。'
++)
++
++# 归一标签
++LABEL_SPRAY = "spray"
++LABEL_NORMAL = "normal"
++LABEL_UNKNOWN = "unknown"
++
++_REF_NUM_RE = re.compile(r"参考图\s*([1-7])")
++
++
++class SprayModelError(Exception):
++    """有界重试后模型仍不可解析/HTTP 失败 → FAILED（不是 normal）。"""
++
++
++@dataclass(frozen=True)
++class PassStat:
++    """单 pass 带宽/重试证据（AC-15.2）。"""
++
++    prompt: str
++    target_bytes: int
++    refs_bytes: int
++    total_bytes: int
++    retries: int
++    elapsed_s: float = 0.0
++
++
++@dataclass
++class FrameVerdict:
++    """一帧双 pass 归一结果。"""
++
++    label: str  # spray / normal / unknown
++    p1_raw: str = ""
++    p2_raw: str = ""
++    p2_ref_num: int | None = None
++    passes: list[PassStat] = field(default_factory=list)
++    # 该帧是否可用（label != unknown 且两 pass 都成功）
++    resolvable: bool = False
++
++
++def _verdict_of(text: str) -> str:
++    """归一单 pass 文本：异常/正常/unknown（对照实现 verdict_of，但三分离）。"""
++    s = (text or "").strip()
++    if not s:
++        return LABEL_UNKNOWN
++    if "异常" in s:
++        return LABEL_SPRAY
++    if "正常" in s:
++        return LABEL_NORMAL
++    return LABEL_UNKNOWN
++
++
++def _ref_num_of(text: str) -> int | None:
++    m = _REF_NUM_RE.search(text or "")
++    return int(m.group(1)) if m else None
++
++
++def classify_two_pass(
++    p1_raw: str,
++    p2_raw: str | None,
++    p2_ref_num: int | None,
++) -> FrameVerdict:
++    """双 pass 归一纯逻辑（不依赖客户端，可独立测试）。
++
++    - pass1 明确异常 → spray（resolvable）；
++    - pass1 非异常 → 用 pass2：pass2 缺（p2_raw 为 None）视为未跑；
++      pass2 异常(5~7) → spray；pass2 正常(1~4) 且 pass1 正常 → normal；
++      pass1/pass2 有 unknown 或解析失败 → unknown（resolvable=False）。
++    """
++    p1v = _verdict_of(p1_raw)
++    if p1v == LABEL_SPRAY:
++        return FrameVerdict(
++            label=LABEL_SPRAY, p1_raw=p1_raw, p2_raw=p2_raw or "", p2_ref_num=p2_ref_num, resolvable=True
++        )
++    if p2_raw is None:
++        # pass2 未跑（不应发生；调用方保证 pass1 非异常时必跑 pass2）
++        return FrameVerdict(label=LABEL_UNKNOWN, p1_raw=p1_raw, resolvable=False)
++    # pass2 归一：参考图编号 1~4 正常 / 5~7 异常；编号缺失时退回文本判定
++    if p2_ref_num is not None and p2_ref_num <= 4:
++        p2v = LABEL_NORMAL
++    elif p2_ref_num is not None and p2_ref_num >= 5:
++        p2v = LABEL_SPRAY
++    else:
++        p2v = _verdict_of(p2_raw)
++    if p1v == LABEL_NORMAL and p2v == LABEL_SPRAY:
++        return FrameVerdict(label=LABEL_SPRAY, p1_raw=p1_raw, p2_raw=p2_raw, p2_ref_num=p2_ref_num, resolvable=True)
++    if p1v == LABEL_NORMAL and p2v == LABEL_NORMAL:
++        return FrameVerdict(label=LABEL_NORMAL, p1_raw=p1_raw, p2_raw=p2_raw, p2_ref_num=p2_ref_num, resolvable=True)
++    return FrameVerdict(label=LABEL_UNKNOWN, p1_raw=p1_raw, p2_raw=p2_raw, p2_ref_num=p2_ref_num, resolvable=False)
++
++
++class SprayModelClient(Protocol):
++    """双 pass 识别协议：输入目标图 + 7 参考图 bytes，输出 (p1_raw, p2_raw, p2_ref_num)。
++
++    实现负责有界重试与 bytes/重试计数（经 on_pass 回传 PassStat）；
++    仍不确定时抛 SprayModelError（上层 → FAILED）。
++    """
++
++    def is_available(self) -> bool: ...
++
++    def judge_frame(
++        self,
++        target_bytes: bytes,
++        ref_bytes: list[bytes],
++        on_pass=None,
++    ) -> tuple[str, str | None, int | None]: ...
++
++
++@dataclass(frozen=True)
++class HttpSprayModelClient:
++    """生产 HTTP 客户端（OpenAI chat/completions 多图，对照 request_spray.post）。
++
++    7 参考图顺序固定（1~4 正常 / 5~7 异常），待判定图为第 8 张。
++    pass1 thinking=True，pass2 thinking=False。
++    """
++
++    endpoint: str
++    api_key: str
++    model: str
++    ref_order_names: tuple[str, ...]  # 7 文件名（顺序）
++    timeout_seconds: float = 600.0
++    max_retries: int = 3
++    pass1_max_tokens: int = 4096
++    pass2_max_tokens: int = 256
++
++    def is_available(self) -> bool:
++        return bool(self.endpoint)
++
++    def _build_content(self, target_b64: str, ref_b64: list[str]) -> list[dict]:
++        content: list[dict] = []
++        for n, r in enumerate(ref_b64, 1):
++            content.append({"type": "text", "text": f"参考图{n}"})
++            content.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{r}"}})
++        content.append({"type": "text", "text": "待判定图"})
++        content.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{target_b64}"}})
++        return content
++
++    def _post(self, content: list[dict], prompt: str, thinking: bool, max_tokens: int) -> tuple[str, int]:
++        """有界重试 POST；返回 (raw_text, retries_used)。耗尽仍空 → SprayModelError。"""
++        import requests
++
++        last_err = "模型返回空内容"
++        for attempt in range(self.max_retries):
++            try:
++                resp = requests.post(
++                    self.endpoint,
++                    json={
++                        "model": self.model,
++                        "messages": [
++                            {"role": "system", "content": SPRAY_SYSTEM},
++                            {"role": "user", "content": content + [{"type": "text", "text": prompt}]},
++                        ],
++                        "max_tokens": max_tokens,
++                        "temperature": 0.0,
++                        "top_p": 0.95,
++                        "chat_template_kwargs": {"enable_thinking": thinking},
++                    },
++                    headers={"Authorization": f"Bearer {self.api_key}"},
++                    timeout=self.timeout_seconds,
++                )
++                resp.raise_for_status()
++                ch = resp.json()["choices"][0]
++                c = (ch["message"].get("content") or "").strip()
++                if c:
++                    return c, attempt
++                last_err = "模型返回空内容"
++            except Exception as exc:  # 网络/解析/HTTP
++                last_err = f"{type(exc).__name__}: {exc}"
++            if attempt < self.max_retries - 1:
++                time.sleep(2 * (attempt + 1))
++        raise SprayModelError(f"模型有界重试后仍失败：{last_err}")
++
++    def judge_frame(
++        self, target_bytes: bytes, ref_bytes: list[bytes], on_pass=None
++    ) -> tuple[str, str | None, int | None]:
++        if len(ref_bytes) != 7:
++            raise SprayModelError(f"参考图必须恰好 7 张（顺序固定），实际 {len(ref_bytes)}")
++        target_b64 = base64.b64encode(target_bytes).decode("ascii")
++        ref_b64 = [base64.b64encode(r).decode("ascii") for r in ref_bytes]
++        t0 = time.time()
++        content = self._build_content(target_b64, ref_b64)
++        refs_total = sum(len(r) for r in ref_bytes)
++        target_len = len(target_bytes)
++        p1_raw, r1 = self._post(content, SPRAY_PROMPT_V18, thinking=True, max_tokens=self.pass1_max_tokens)
++        if on_pass:
++            on_pass(
++                PassStat(
++                    prompt="V18",
++                    target_bytes=target_len,
++                    refs_bytes=refs_total,
++                    total_bytes=target_len + refs_total,
++                    retries=r1,
++                    elapsed_s=time.time() - t0,
++                )
++            )
++        p1v = _verdict_of(p1_raw)
++        if p1v == LABEL_SPRAY:
++            return p1_raw, None, None
++        t1 = time.time()
++        p2_raw, r2 = self._post(content, SPRAY_PROMPT_SIM, thinking=False, max_tokens=self.pass2_max_tokens)
++        p2n = _ref_num_of(p2_raw)
++        if on_pass:
++            on_pass(
++                PassStat(
++                    prompt="SIM",
++                    target_bytes=target_len,
++                    refs_bytes=refs_total,
++                    total_bytes=target_len + refs_total,
++                    retries=r2,
++                    elapsed_s=time.time() - t1,
++                )
++            )
++        return p1_raw, p2_raw, p2n
++
++
++def prompt_hashes() -> dict[str, str]:
++    """提示词/系统串 hash（进执行证据，改串=升 rules_revision）。"""
++    import hashlib
++
++    return {
++        "system": hashlib.sha256(SPRAY_SYSTEM.encode("utf-8")).hexdigest()[:16],
++        "v18": hashlib.sha256(SPRAY_PROMPT_V18.encode("utf-8")).hexdigest()[:16],
++        "sim": hashlib.sha256(SPRAY_PROMPT_SIM.encode("utf-8")).hexdigest()[:16],
++    }
+\ No newline at end of file
+diff --git a/app/scene/spray/pcd_io.py b/app/scene/spray/pcd_io.py
+new file mode 100644
+index 0000000..88dab5d
+--- /dev/null
++++ b/app/scene/spray/pcd_io.py
+@@ -0,0 +1,181 @@
++"""spray 点云 PCD 纯 I/O（TASK-12S-B）。
++
++只依赖标准库（struct/os/pathlib）：
++- binary PCD 头解析 + intensity 抽取（渲染/上色前的确定性层）；
++- 测试 fixture 用 binary PCD 构造（x/y/z[/intensity]，WIDTH=点数、HEIGHT=1）。
++
++真实渲染（Open3D OffscreenRenderer + EGL/软件渲染）属处理机资源，见 render 段；
++本模块不 import numpy/open3d，保证无依赖环境下映射/分段/预检可测。
++"""
++
++from __future__ import annotations
++
++import struct
++from dataclasses import dataclass
++from pathlib import Path
++
++__all__ = ["PcdError", "parse_binary_pcd_header", "read_intensity", "build_binary_pcd"]
++
++
++class PcdError(Exception):
++    """PCD 头解析/格式非法。"""
++
++
++@dataclass(frozen=True)
++class PcdHeader:
++    """binary PCD 头部关键字段。"""
++
++    data_format: str
++    fields: tuple[str, ...]
++    sizes: tuple[int, ...]
++    types: tuple[str, ...]
++    counts: tuple[int, ...]
++    width: int
++    height: int
++    points: int
++    data_start: int
++
++    @property
++    def point_step(self) -> int:
++        return sum(self.sizes)
++
++    def has_intensity(self) -> bool:
++        return "intensity" in self.fields
++
++
++def parse_binary_pcd_header(path: Path | str) -> PcdHeader:
++    """解析 PCD 头，返回 DATA 段起始偏移。仅支持 binary / ascii。
++
++    头不合法（缺 FIELDS/SIZE/TYPE/COUNT/POINTS/DATA）抛 PcdError。
++    """
++    p = Path(path)
++    try:
++        raw = p.read_bytes()
++    except OSError as exc:
++        raise PcdError(f"PCD 不可读：{p}：{exc}") from exc
++    # 头最多 4096 字节（对照实现口径），DATA 段起点在头内定位
++    head = raw[:4096].decode("utf-8", errors="ignore")
++    lines = head.split("\n")
++    fields: list[str] = []
++    sizes: list[int] = []
++    types: list[str] = []
++    counts: list[int] = []
++    width = height = points = 0
++    data_format = ""
++    data_line_pos = -1
++    for i, line in enumerate(lines):
++        s = line.strip()
++        parts = s.split()
++        if not parts:
++            continue
++        key = parts[0].upper()
++        if key == "FIELDS":
++            fields = parts[1:]
++        elif key == "SIZE":
++            sizes = [int(x) for x in parts[1:]]
++        elif key == "TYPE":
++            types = parts[1:]
++        elif key == "COUNT":
++            counts = [int(x) for x in parts[1:]]
++        elif key == "WIDTH":
++            width = int(parts[1])
++        elif key == "HEIGHT":
++            height = int(parts[1])
++        elif key == "POINTS":
++            points = int(parts[1])
++        elif key == "DATA":
++            data_format = parts[1].lower()
++            data_line_pos = i
++            break
++    if data_line_pos < 0 or not fields or not sizes or not types:
++        raise PcdError(f"PCD 头缺失关键字段：{p.name}")
++    if data_format not in {"binary", "ascii", "binary_compressed"}:
++        raise PcdError(f"PCD DATA 格式不支持：{data_format!r}（仅 binary/ascii）")
++    # DATA 段起点 = DATA 行之后一行的行首偏移
++    data_start = sum(len(ln) + 1 for ln in lines[: data_line_pos + 1])
++    if len(sizes) != len(fields) or len(counts) != len(fields):
++        raise PcdError(f"PCD FIELDS/SIZE/COUNT 长度不一致：{p.name}")
++    return PcdHeader(
++        data_format=data_format,
++        fields=tuple(fields),
++        sizes=tuple(sizes),
++        types=tuple(types),
++        counts=tuple(counts),
++        width=width,
++        height=height,
++        points=points,
++        data_start=data_start,
++    )
++
++
++def read_intensity(path: Path | str) -> list[float]:
++    """抽取 intensity 字段值序列（无 intensity 抛 PcdError）。binary 逐点解析。"""
++    header = parse_binary_pcd_header(path)
++    if not header.has_intensity():
++        raise PcdError(f"PCD 无 intensity 字段：{Path(path).name}（可用 {header.fields}）")
++    if header.data_format == "ascii":
++        p = Path(path)
++        vals: list[float] = []
++        idx = header.fields.index("intensity")
++        head_lines = p.read_bytes()[: header.data_start].decode("utf-8", errors="ignore").split("\n")
++        with p.open("r", encoding="utf-8") as f:
++            for _ in range(len(head_lines)):
++                f.readline()
++            for line in f:
++                parts = line.split()
++                if len(parts) > idx:
++                    vals.append(float(parts[idx]))
++        return vals
++    if header.data_format != "binary":
++        raise PcdError(f"PCD 格式不支持 intensity 抽取：{header.data_format}")
++    p = Path(path)
++    raw = p.read_bytes()
++    idx = header.fields.index("intensity")
++    point_step = header.point_step
++    offset = sum(header.sizes[:idx])
++    size = header.sizes[idx]
++    type_char = header.types[idx]
++    fmt = {"F": "<f", "I": "<I", "U": "<I", "i": "<i", "d": "<d"}.get(type_char)
++    if fmt is None:
++        raise PcdError(f"intensity 类型不支持：{type_char!r}")
++    n = header.points if header.points > 0 else header.width
++    vals = []
++    for k in range(n):
++        base = header.data_start + k * point_step
++        chunk = raw[base + offset : base + offset + size]
++        if len(chunk) < size:
++            break
++        vals.append(struct.unpack(fmt, chunk)[0])
++    return vals
++
++
++def build_binary_pcd(
++    path: Path | str, points: list[tuple[float, float, float]], intensity: list[float] | None = None
++) -> Path:
++    """构造 binary PCD（x/y/z[/intensity]，WIDTH=点数、HEIGHT=1）。测试 fixture 用。"""
++    p = Path(path)
++    p.parent.mkdir(parents=True, exist_ok=True)
++    has_i = intensity is not None
++    n = len(points)
++    fields = "x y z intensity" if has_i else "x y z"
++    header = (
++        "# .PCD v0.7 - Point Cloud Data file format\n"
++        "VERSION 0.7\n"
++        f"FIELDS {fields}\n"
++        f"SIZE {'4 4 4 4' if has_i else '4 4 4'}\n"
++        f"TYPE {'F F F F' if has_i else 'F F F'}\n"
++        f"COUNT {'1 1 1 1' if has_i else '1 1 1'}\n"
++        f"WIDTH {n}\n"
++        "HEIGHT 1\n"
++        "VIEWPOINT 0 0 0 1 0 0 0\n"
++        f"POINTS {n}\n"
++        "DATA binary\n"
++    )
++    with p.open("wb") as f:
++        f.write(header.encode("ascii"))
++        for k in range(n):
++            x, y, z = points[k]
++            f.write(struct.pack("<fff", x, y, z))
++            if has_i:
++                f.write(struct.pack("<f", intensity[k]))
++    return p
+\ No newline at end of file
+diff --git a/app/scene/spray/precheck.py b/app/scene/spray/precheck.py
+new file mode 100644
+index 0000000..4851e26
+--- /dev/null
++++ b/app/scene/spray/precheck.py
+@@ -0,0 +1,163 @@
++"""spray 能力/资产预检（TASK-12S-B，§2/§3 部署预检）。
++
++descriptor 与真实 adapter 同一 owner：源码在但依赖缺失时返回**明确
++unavailable_reason**（decoder 二进制/共享库、Open3D/EGL 或软件渲染、参考图清单），
++**不宣称 enabled 即可用**。预检只读、不改原包、不迁 A100。
++
++预检项（SPRAY-INTEGRATION §3 平台部署预检）：
++- 参考图 7 文件清单（hash/bytes/顺序/JPEG 可解码）→ REFERENCE_MISSING / MISMATCH；
++- decoder packet2pointcloud（文件存在 + 可执行 + 关键共享库 ldd）→ DECODER_*；
++- Open3D/numpy（渲染依赖）→ RENDER_UNAVAILABLE（本机探针口径，不迁 A100）；
++- 模型多图接口（client.is_available）→ MODEL_UNAVAILABLE。
++
++预检结果进能力描述不可用原因 + 执行证据；enabled 起步 false，资产/依赖未核实
++不宣称可用（config/scene_capabilities.yaml spray-v1 descriptor enabled=false）。
++"""
++
++from __future__ import annotations
++
++import os
++import subprocess
++from dataclasses import dataclass
++from pathlib import Path
++
++from app.scene.spray.references import REFERENCES, ReferenceError, verify_references
++
++# decoder 关键共享库（缺任一 → 处理机未装解码依赖；本机探针口径）
++_DECODER_REQUIRED_LIBS = (
++    "libseyond",  # 雷达 SDK（libseyond__rosidl_typesupport_cpp 等）
++    "librclcpp",  # ROS2 C++ 客户端
++    "libpcl",  # 点云库
++)
++
++
++@dataclass(frozen=True)
++class PrecheckResult:
++    """单项预检：ok + 不可用原因（ok=False 时）。"""
++
++    ok: bool
++    reason: str | None = None
++    detail: str = ""
++
++
++@dataclass
++class SprayPrecheck:
++    """整体预检汇总（进能力不可用原因 + 执行证据）。"""
++
++    references: PrecheckResult
++    decoder: PrecheckResult
++    render: PrecheckResult
++    model: PrecheckResult
++
++    @property
++    def all_ok(self) -> bool:
++        return self.references.ok and self.decoder.ok and self.render.ok and self.model.ok
++
++    def unavailable_reasons(self) -> list[str]:
++        out = []
++        for name, r in (
++            ("references", self.references),
++            ("decoder", self.decoder),
++            ("render", self.render),
++            ("model", self.model),
++        ):
++            if not r.ok:
++                out.append(f"{name}: {r.reason} {r.detail}".strip())
++        return out
++
++    def to_dict(self) -> dict:
++        return {
++            "ok": self.all_ok,
++            "all_ok": self.all_ok,
++            "unavailable_reasons": self.unavailable_reasons(),
++            "references": {
++                "ok": self.references.ok,
++                "reason": self.references.reason,
++                "detail": self.references.detail,
++            },
++            "decoder": {"ok": self.decoder.ok, "reason": self.decoder.reason, "detail": self.decoder.detail},
++            "render": {"ok": self.render.ok, "reason": self.render.reason, "detail": self.render.detail},
++            "model": {"ok": self.model.ok, "reason": self.model.reason, "detail": self.model.detail},
++        }
++
++
++def check_references() -> PrecheckResult:
++    try:
++        v = verify_references(REFERENCES)
++    except ReferenceError as exc:
++        msg = str(exc)
++        reason = "REFERENCE_MISSING" if "REFERENCE_MISSING" in msg else "REFERENCE_MISMATCH"
++        return PrecheckResult(ok=False, reason=reason, detail=msg)
++    except Exception as exc:
++        return PrecheckResult(ok=False, reason="REFERENCE_ERROR", detail=str(exc))
++    detail = f"7/7 校验通过 ordered_hash={v.ordered_hash[:16]} total_bytes={v.total_bytes}"
++    return PrecheckResult(ok=True, detail=detail)
++
++
++def _ldd_missing_libs(executable: Path) -> list[str]:
++    """对 decoder 做 ldd，返回缺失（not found）的关键共享库族。"""
++    try:
++        proc = subprocess.run(["ldd", str(executable)], capture_output=True, text=True, timeout=30)
++    except (OSError, subprocess.TimeoutExpired) as exc:
++        return [f"ldd 失败：{exc}"]
++    missing = [ln.strip() for ln in (proc.stdout or "").splitlines() if "not found" in ln]
++    return missing
++
++
++def check_decoder(decoder_path: str | Path | None = None) -> PrecheckResult:
++    """decoder 预检：文件存在 + 可执行 + 关键共享库（libseyond/rclcpp/pcl）。"""
++    default = Path("/home/wang/work/ros2_slice/utils/packet2pointcloud")
++    exe = Path(decoder_path) if decoder_path else default
++    if not exe.is_file():
++        detail = f"packet2pointcloud 缺失：{exe}（型号/依赖处理机安装）"
++        return PrecheckResult(ok=False, reason="DECODER_UNAVAILABLE", detail=detail)
++    if not os.access(exe, os.X_OK):
++        return PrecheckResult(ok=False, reason="DECODER_UNAVAILABLE", detail=f"不可执行：{exe}")
++    missing = _ldd_missing_libs(exe)
++    missing_families = sorted({m.split(".so")[0] for m in missing})
++    required_missing = [fam for fam in _DECODER_REQUIRED_LIBS if any(fam in mf for mf in missing_families)]
++    if required_missing:
++        detail = (
++            f"decoder 关键共享库缺失（处理机需安装）：{', '.join(required_missing)}"
++            f"；ldd not found {len(missing)} 项"
++        )
++        return PrecheckResult(ok=False, reason="DECODER_DEPS_MISSING", detail=detail)
++    return PrecheckResult(ok=True, detail=f"{exe.name} 可执行，关键共享库在位（ldd not found {len(missing)}）")
++
++
++def check_render() -> PrecheckResult:
++    """Open3D/numpy 渲染依赖预检（本机口径；EGL/软件渲染需处理机实测）。"""
++    missing = []
++    try:
++        import numpy  # noqa: F401
++    except Exception:
++        missing.append("numpy")
++    try:
++        import open3d  # noqa: F401
++    except Exception:
++        missing.append("open3d")
++    if missing:
++        detail = f"渲染依赖缺失：{', '.join(missing)}（处理机安装；EGL/软件渲染实测未在本机）"
++        return PrecheckResult(ok=False, reason="RENDER_UNAVAILABLE", detail=detail)
++    return PrecheckResult(ok=True, detail="numpy/open3d 在位（EGL 离屏渲染需处理机实测）")
++
++
++def check_model(model_client) -> PrecheckResult:
++    if model_client is None:
++        detail = "服务端未配置 spray 模型客户端（model_profile 引用缺失）"
++        return PrecheckResult(ok=False, reason="MODEL_UNAVAILABLE", detail=detail)
++    try:
++        if not model_client.is_available():
++            return PrecheckResult(ok=False, reason="MODEL_UNAVAILABLE", detail="模型端点未配置")
++    except Exception as exc:
++        return PrecheckResult(ok=False, reason="MODEL_ERROR", detail=str(exc))
++    return PrecheckResult(ok=True)
++
++
++def run_precheck(decoder_path: str | Path | None = None, model_client=None) -> SprayPrecheck:
++    return SprayPrecheck(
++        references=check_references(),
++        decoder=check_decoder(decoder_path),
++        render=check_render(),
++        model=check_model(model_client),
++    )
+\ No newline at end of file
+diff --git a/app/scene/spray/references.py b/app/scene/spray/references.py
+new file mode 100644
+index 0000000..c7ac54b
+--- /dev/null
++++ b/app/scene/spray/references.py
+@@ -0,0 +1,158 @@
++"""spray 参考图受控清单（TASK-12S-B，SPRAY-INTEGRATION §3）。
++
++严格 7 文件清单（顺序固定，1~4 正常 / 5~7 异常）；部署路径由服务端
++SPRAY_REFERENCE_DIR 受控提供，启动预检校验非空/可解码/hash/顺序，缺失返回
++REFERENCE_MISSING；不把待判定图当参考图，不虚造替代图。
++
++清单内嵌 sha256/bytes/尺寸/顺序（对照 SPRAY-REFERENCES.json，source_commit
++be23177）；校验失败（hash 不符/字节数不符/顺序不符/文件缺失）抛 ReferenceError。
++本模块不硬编码本机绝对路径，目录由 env SPRAY_REFERENCE_DIR 提供（预检面）。
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++from dataclasses import dataclass
++from pathlib import Path
++
++SOURCE_COMMIT = "be23177eca685b5f0f75160ca82503beeb63147d"
++
++REF_ORDER = (1, 2, 3, 4, 5, 6, 7)
++NORMAL_ORDERS = frozenset({1, 2, 3, 4})
++ABNORMAL_ORDERS = frozenset({5, 6, 7})
++
++# 永久清单（对照 SPRAY-REFERENCES.json 逐图冻结）
++REFERENCES: tuple[dict, ...] = (
++    {
++        "order": 1,
++        "name": "2026_07_29-17_21_13_457-1785316873457.jpg",
++        "class": "normal",
++        "bytes": 1991039,
++        "sha256": "f6217d478a5052271fdd515f967934a22ceb748dc9de49721d87da4f26a257b3",
++        "dimensions": (3840, 2160),
++    },
++    {
++        "order": 2,
++        "name": "2026_07_29-17_21_12_257-1785316872257.jpg",
++        "class": "normal",
++        "bytes": 2032911,
++        "sha256": "1409e87992564dccaf0449cf3ee70e1a8220a99cde519c5d4cad34f782e0a4be",
++        "dimensions": (3840, 2160),
++    },
++    {
++        "order": 3,
++        "name": "2026_07_29-17_21_10_757-1785316870757.jpg",
++        "class": "normal",
++        "bytes": 2091513,
++        "sha256": "fa98957c0c9a31c3e7429466162c3b032f289326152422d3b65e6e9e58e4e460",
++        "dimensions": (3840, 2160),
++    },
++    {
++        "order": 4,
++        "name": "2026_07_01-11_07_37_357-1782875257357.jpg",
++        "class": "normal",
++        "bytes": 2253293,
++        "sha256": "f56d6a15529cfae28c6b9170489a3fa23954c15112ed9a7bed079ff0459fde46",
++        "dimensions": (3840, 2160),
++    },
++    {
++        "order": 5,
++        "name": "2026_07_29-17_21_45_257-1785316905257.jpg",
++        "class": "spray",
++        "bytes": 2373045,
++        "sha256": "3ebc9c76215510ff3a8fe184c3753bcee896d57449c6e54ba964ca464882b7ce",
++        "dimensions": (3840, 2160),
++    },
++    {
++        "order": 6,
++        "name": "2026_07_29-17_20_58_757-1785316858757.jpg",
++        "class": "spray",
++        "bytes": 2283924,
++        "sha256": "13cf7e1d821d40d7f45e9c1f1c5ce7bd5b099221d279907a19e9a16ee2deeac1",
++        "dimensions": (3840, 2160),
++    },
++    {
++        "order": 7,
++        "name": "2026_07_29-17_21_52_757-1785316912757.jpg",
++        "class": "spray",
++        "bytes": 2164316,
++        "sha256": "e57d9d892a5389b51bb77bc4eca710077670af5173c900aa5d8aefe66cc8e3ed",
++        "dimensions": (3840, 2160),
++    },
++)
++TOTAL_BYTES = sum(r["bytes"] for r in REFERENCES)  # 15190041
++
++
++class ReferenceError(Exception):
++    """参考图缺失/hash 不符/顺序不符/不可解码。"""
++
++
++def reference_dir() -> Path | None:
++    """服务端受控参考图目录（env SPRAY_REFERENCE_DIR）；未配置返回 None。"""
++    raw = os.getenv("SPRAY_REFERENCE_DIR", "").strip()
++    return Path(raw) if raw else None
++
++
++@dataclass(frozen=True)
++class VerifiedRefs:
++    """校验通过的 7 参考图：按顺序的绝对路径 + 逐图摘要。"""
++
++    paths: tuple[Path, ...]
++    total_bytes: int
++    ordered_hash: str
++
++
++def _jpeg_magic_ok(path: Path) -> bool:
++    try:
++        with path.open("rb") as f:
++            return f.read(3) == b"\xff\xd8\xff"
++    except OSError:
++        return False
++
++
++def verify_references(refs: tuple[dict, ...] = REFERENCES, directory: Path | str | None = None) -> VerifiedRefs:
++    """校验 7 文件清单：非空/可解码(hash+bytes)/顺序/尺寸。任一失败抛 ReferenceError。
++
++    - 顺序：文件名必须按 REFERENCES 的 order 排列；
++    - hash/sha256：逐图核对（对照清单冻结值）；
++    - bytes：逐图核对字节数；
++    - 可解码：JPEG magic（FF D8 FF）；
++    - 尺寸：不依赖 PIL（无 numpy 环境），仅记录清单尺寸进证据，真实像素校验
++      由处理机渲染预检补（本层 hash+bytes+magic 已足以防替换/缺图）。
++    """
++    dir_ = Path(directory) if directory is not None else reference_dir()
++    if dir_ is None:
++        raise ReferenceError("REFERENCE_MISSING: SPRAY_REFERENCE_DIR 未配置（参考图受控目录缺失）")
++    if not dir_.is_dir():
++        raise ReferenceError(f"REFERENCE_MISSING: 参考图目录不可读：{dir_}")
++    paths: list[Path] = []
++    for spec in refs:
++        p = dir_ / spec["name"]
++        if not p.is_file():
++            raise ReferenceError(f"REFERENCE_MISSING: 参考图{spec['order']} 缺失 {p.name}")
++        if p.stat().st_size == 0:
++            raise ReferenceError(f"REFERENCE_MISSING: 参考图{spec['order']} 为空文件 {p.name}")
++        actual_bytes = p.stat().st_size
++        if actual_bytes != spec["bytes"]:
++            detail = f"REFERENCE_MISMATCH: 参考图{spec['order']} 字节数 {actual_bytes} != 清单 {spec['bytes']}"
++            raise ReferenceError(detail)
++        digest = hashlib.sha256(p.read_bytes()).hexdigest()
++        if digest != spec["sha256"]:
++            raise ReferenceError(f"REFERENCE_MISMATCH: 参考图{spec['order']} sha256 不符（{digest[:16]}…）")
++        if not _jpeg_magic_ok(p):
++            raise ReferenceError(f"REFERENCE_UNDECODABLE: 参考图{spec['order']} 非 JPEG 可解码 {p.name}")
++        paths.append(p)
++    # 顺序指纹：7 图按 order 逐图 hash 串联
++    ordered = hashlib.sha256(
++        json.dumps([hashlib.sha256(p.read_bytes()).hexdigest() for p in paths], sort_keys=True).encode()
++    ).hexdigest()
++    if len(paths) != 7:
++        raise ReferenceError(f"REFERENCE_MISMATCH: 必须恰好 7 张参考图，实际 {len(paths)}")
++    return VerifiedRefs(paths=tuple(paths), total_bytes=TOTAL_BYTES, ordered_hash=ordered)
++
++
++def ordered_ref_bytes(verified: VerifiedRefs) -> list[bytes]:
++    """按 1~7 顺序返回 7 张参考图字节（送模型第 1~7 张）。"""
++    return [p.read_bytes() for p in verified.paths]
+\ No newline at end of file
+diff --git a/app/scene/spray/render.py b/app/scene/spray/render.py
+new file mode 100644
+index 0000000..0066d0c
+--- /dev/null
++++ b/app/scene/spray/render.py
+@@ -0,0 +1,227 @@
++"""spray 本机渲染与预处理冻结（TASK-12S-B，SPRAY-INTEGRATION §3）。
++
++预处理冻结规则（与原算法对照，不随意降阈值）：
++- PCD 有序序列**跳过前 10 帧、每 3 帧取 1**（对照 pdc_to_pic.generate_point_picture
++  的 `pcd_files[10::frame_interval]`，frame_interval=3）；
++- 渲染 3840×2160、旋转 90°、ROI x=(-2,6)/y=(-3,3)、intensity 配色、JPG q95；
++- 参考图过滤阈值 **500KiB**：小于阈值的小图**删除并记录**（不冒充"无水雾"）；
++  **过滤数量/失败/剩余数必须记录**；过滤后无足够有效数据 = **FAILED**（非 NO_MATCH）。
++
++渲染本体依赖 numpy + open3d + EGL/软件渲染（处理机资源）。本模块把纯会计逻辑
++（选帧索引/过滤计数/最少有效门槛）与真实离屏渲染分离：纯部分 stdlib 可测；
++真实渲染惰性 import open3d，缺失抛 RenderError(RENDER_UNAVAILABLE)（不迁 A100、
++不 mock 当 PASS）。
++"""
++
++from __future__ import annotations
++
++from dataclasses import dataclass, field
++from pathlib import Path
++from typing import Any
++
++# 冻结预处理参数（SPRAY-INTEGRATION §3）
++SKIP_FIRST_FRAMES = 10
++FRAME_INTERVAL = 3
++RENDER_WIDTH = 3840
++RENDER_HEIGHT = 2160
++ROTATE_DEGREES = 90
++ROI_X = (-2.0, 6.0)
++ROI_Y = (-3.0, 3.0)
++JPG_QUALITY = 95
++SMALL_IMAGE_THRESHOLD_KB = 500.0
++# 过滤后最少有效帧：低于此数 = FAILED（抽帧不足≠无命中）
++MIN_VALID_FRAMES = 3
++
++
++class RenderError(Exception):
++    """渲染依赖缺失/渲染失败/有效帧不足。"""
++
++    def __init__(self, code: str, detail: str = ""):
++        self.code = code
++        self.detail = detail or code
++        super().__init__(f"{code}: {self.detail}" if detail else code)
++
++
++def select_pcd_indices(total: int, skip_first: int = SKIP_FIRST_FRAMES, interval: int = FRAME_INTERVAL) -> list[int]:
++    """选帧索引（对照实现 `pcd_files[10::3]`）。total<=0 → []。
++
++    返回原 PCD 序列中的下标列表（升序）。interval<1 抛 RenderError。
++    """
++    if interval < 1:
++        raise RenderError("RENDER_CONFIG", f"interval 必须 >=1，实际 {interval}")
++    if total <= 0:
++        return []
++    return list(range(skip_first, total, interval))
++
++
++@dataclass
++class RenderReport:
++    """渲染/过滤会计（AC-15.2 证据 + "过滤数量/失败/剩余数必须记录"）。"""
++
++    threshold_kb: float = SMALL_IMAGE_THRESHOLD_KB
++    total_pcd: int = 0
++    selected: int = 0
++    rendered_ok: int = 0
++    filtered_small: int = 0
++    render_failed: int = 0
++    remaining: int = 0
++    min_valid: int = MIN_VALID_FRAMES
++    # 有效帧的 (storage_ns, jpg_path) 供下游模型判定
++    valid_frames: list[tuple[int, Path]] = field(default_factory=list)
++
++    def to_dict(self) -> dict:
++        return {
++            "threshold_kb": self.threshold_kb,
++            "total_pcd": self.total_pcd,
++            "selected": self.selected,
++            "rendered_ok": self.rendered_ok,
++            "filtered_small": self.filtered_small,
++            "render_failed": self.render_failed,
++            "remaining": self.remaining,
++            "min_valid": self.min_valid,
++            "valid_frame_count": len(self.valid_frames),
++        }
++
++
++def _size_kb(path: Path) -> float:
++    try:
++        return path.stat().st_size / 1024
++    except OSError:
++        return 0.0
++
++
++def account_frame(report: RenderReport, *, storage_ns: int, rendered: bool, output_path: Path | None) -> None:
++    """单帧会计：渲染成功且 >= 阈值 → 有效；渲染成功但 < 阈值 → 过滤删除；渲染失败 → 失败。
++
++    - 不把图片小当"无水雾"：小图计入 filtered_small（从推理剔除），不进 valid_frames；
++    - 失败计入 render_failed。
++    """
++    if not rendered or output_path is None:
++        report.render_failed += 1
++        return
++    kb = _size_kb(output_path)
++    if kb < report.threshold_kb:
++        # 过小图删除（对照实现 os.remove），保留计数
++        try:
++            output_path.unlink()
++        except OSError:
++            pass
++        report.filtered_small += 1
++        return
++    report.rendered_ok += 1
++    report.remaining += 1
++    report.valid_frames.append((storage_ns, output_path))
++
++
++def finalize(report: RenderReport) -> None:
++    """有效帧不足门槛 → FAILED（RENDER_INSUFFICIENT，非 NO_MATCH）。"""
++    if report.remaining < report.min_valid:
++        raise RenderError(
++            "RENDER_INSUFFICIENT",
++            f"过滤后有效帧 {report.remaining} < 门槛 {report.min_valid}"
++            f"（selected={report.selected}, filtered_small={report.filtered_small}, "
++            f"render_failed={report.render_failed}）——抽帧/过滤不足判 FAILED，不当无命中",
++        )
++
++
++# ---------------------------------------------------------------------------
++# 真实离屏渲染（numpy + open3d，处理机资源；缺失 fail-closed）
++# ---------------------------------------------------------------------------
++
++
++def render_pcd_to_jpg(pcd_path: Path, output_path: Path) -> bool:
++    """Open3D 离屏渲染 PCD → JPG（3840×2160 旋转 90°、ROI 裁剪、intensity 配色、q95）。
++
++    对照 pdc_to_pic.render_pcd_headless。缺 open3d/EGL → 抛 RenderError(RENDER_UNAVAILABLE)。
++    裁剪后为空/渲染返回空 → 返回 False（计入 render_failed）。
++    """
++    try:
++        import numpy as np
++        import open3d as o3d
++    except Exception as exc:  # ImportError / EGL 缺失
++        raise RenderError("RENDER_UNAVAILABLE", f"Open3D/numpy 不可用（处理机需安装）：{exc}") from exc
++
++    # ROI 裁剪 + intensity 上色：复用对照实现算法（红-绿-蓝渐变）
++    from app.scene.spray.pcd_io import read_intensity
++
++    try:
++        o3d_pcd = o3d.io.read_point_cloud(str(pcd_path))
++        points = np.asarray(o3d_pcd.points)
++        if len(points) == 0:
++            return False
++        mask = (
++            (points[:, 0] > ROI_X[0])
++            & (points[:, 0] < ROI_X[1])
++            & (points[:, 1] > ROI_Y[0])
++            & (points[:, 1] < ROI_Y[1])
++        )
++        cropped = points[mask]
++        if len(cropped) == 0:
++            return False
++        intensity = None
++        try:
++            intensity = read_intensity(pcd_path)
++        except Exception:
++            intensity = None
++        cloud = o3d.geometry.PointCloud()
++        cloud.points = o3d.utility.Vector3dVector(cropped)
++        if intensity is not None and len(intensity) == len(cropped):
++            cloud.colors = o3d.utility.Vector3dVector(_intensity_color(np.asarray(intensity, dtype=float)))
++        try:
++            renderer = o3d.visualization.rendering.OffscreenRenderer(RENDER_WIDTH, RENDER_HEIGHT)
++        except TypeError:
++            renderer = o3d.visualization.rendering.OffscreenRenderer(RENDER_WIDTH, RENDER_HEIGHT, headless=True)
++        except Exception as exc:  # EGL/无显示
++            raise RenderError("RENDER_UNAVAILABLE", f"OffscreenRenderer 创建失败（EGL/软件渲染缺失）：{exc}") from exc
++        renderer.scene.set_background(np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float32))
++        material = o3d.visualization.rendering.MaterialRecord()
++        material.shader = "defaultUnlit"
++        renderer.scene.add_geometry("pointcloud", cloud, material)
++        center = cloud.get_center()
++        bounds = cloud.get_axis_aligned_bounding_box()
++        bbox_size = bounds.get_max_bound() - bounds.get_min_bound()
++        max_dim = float(np.max(bbox_size)) * 1.5
++        angle_rad = np.radians(-ROTATE_DEGREES)
++        up_x = 0 * np.cos(angle_rad) + (-1) * np.sin(angle_rad)
++        up_y = -0 * np.sin(angle_rad) + (-1) * np.cos(angle_rad)
++        up = np.array([up_x, up_y, 0])
++        up = up / np.linalg.norm(up)
++        renderer.scene.camera.look_at(center, center + np.array([0, 0, max_dim * 0.3]), up)
++        img = renderer.render_to_image()
++        if img is None:
++            return False
++        output_path.parent.mkdir(parents=True, exist_ok=True)
++        ok = o3d.io.write_image(str(output_path), img, quality=JPG_QUALITY)
++        return bool(ok)
++    except RenderError:
++        raise
++    except Exception as exc:
++        raise RenderError("RENDER_FAILED", f"渲染异常 {pcd_path.name}：{exc}") from exc
++
++
++def _intensity_color(values: Any) -> Any:
++    """对照实现 intensity_to_color_custom（深红→红→黄→绿→蓝，归一 [0,1]）。"""
++    import numpy as np
++
++    i_min = float(np.min(values)) if len(values) else 0.0
++    i_max = float(np.max(values)) if len(values) else 0.0
++    if i_max - i_min > 1e-6:
++        normalized = (values - i_min) / (i_max - i_min)
++    else:
++        normalized = np.zeros_like(values)
++    n = len(normalized)
++    colors = np.zeros((n, 3))
++    for i, val in enumerate(normalized):
++        if val < 0.25:
++            t = val / 0.25
++            colors[i] = [0.5 + 0.5 * t, 0.0, 0.0]
++        elif val < 0.5:
++            t = (val - 0.25) / 0.25
++            colors[i] = [1.0, t, 0.0]
++        elif val < 0.75:
++            t = (val - 0.5) / 0.25
++            colors[i] = [1.0 - t, 1.0, 0.0]
++        else:
++            t = (val - 0.75) / 0.25
++            colors[i] = [0.0, 1.0 - t, t]
++    return colors
+\ No newline at end of file
+diff --git a/app/scene/spray/segment.py b/app/scene/spray/segment.py
+new file mode 100644
+index 0000000..fae523a
+--- /dev/null
++++ b/app/scene/spray/segment.py
+@@ -0,0 +1,207 @@
++"""spray 分段纯逻辑（TASK-12S-B，SPRAY-INTEGRATION §4）。
++
++对照 ros2_slice/src/analysis_spray.py::analysis_ros + _denoise，整数纳秒化：
++- 全程**源 storage 整数 ns**，不 round 到秒、不从文件名回推（对照实现末尾
++  `int(round(w['start']))` 丢精度，本模块禁止）；
++- 时序滞后去噪 _denoise（enter/exit_）；
++- 滑动窗口按**异常帧密度**判定（不受帧率影响），短包裁剪窗口不补帧；
++- 重叠 >= overlap_merge 合并；
++- 参数 schema 校验：密度∈[0,1]、整数阈值 enter/exit_>=1、时长 window_size/lead/
++  overlap_merge>0。
++
++输入帧标签只含 spray/normal（unknown 在 adapter 层已判 FAILED，不进分段）。
++输出片段 label=spray（可发布）/normal（仅证据），publish_target 由能力
++output_labels 决定。
++"""
++
++from __future__ import annotations
++
++import bisect
++from dataclasses import dataclass
++
++NANO = 1_000_000_000
++
++# analysis_ros2 实际调用参数（SPRAY-INTEGRATION §4 冻结）
++DEFAULT_WINDOW_SIZE_S = 15
++DEFAULT_MIN_ABNORMAL_RATIO = 0.15
++DEFAULT_ENTER = 3
++DEFAULT_EXIT_ = 5
++DEFAULT_LEAD_S = 3
++DEFAULT_OVERLAP_MERGE_S = 7.0
++
++LABEL_SPRAY = "spray"
++LABEL_NORMAL = "normal"
++
++
++@dataclass(frozen=True)
++class SprayParams:
++    """校验后的分段参数（全部 ns 单位 + 密度）。"""
++
++    window_ns: int
++    min_abnormal_ratio: float
++    enter: int
++    exit_: int
++    lead_ns: int
++    overlap_merge_ns: int
++
++
++def validate_spray_params(
++    window_size: float = DEFAULT_WINDOW_SIZE_S,
++    min_abnormal_ratio: float = DEFAULT_MIN_ABNORMAL_RATIO,
++    enter: int = DEFAULT_ENTER,
++    exit_: int = DEFAULT_EXIT_,
++    lead_seconds: int = DEFAULT_LEAD_S,
++    overlap_merge_seconds: float = DEFAULT_OVERLAP_MERGE_S,
++) -> SprayParams:
++    """参数 schema 校验（密度[0,1]、整数阈值>=1、时长>0）。非法抛 ValueError。"""
++    if isinstance(window_size, bool) or not isinstance(window_size, int | float) or window_size <= 0:
++        raise ValueError(f"window_size 必须 >0，实际 {window_size!r}")
++    if isinstance(min_abnormal_ratio, bool) or not isinstance(min_abnormal_ratio, int | float):
++        raise ValueError(f"min_abnormal_ratio 必须 ∈[0,1]，实际 {min_abnormal_ratio!r}")
++    if not (0 <= min_abnormal_ratio <= 1):
++        raise ValueError(f"min_abnormal_ratio 必须 ∈[0,1]，实际 {min_abnormal_ratio!r}")
++    for name, val in (("enter", enter), ("exit_", exit_)):
++        if isinstance(val, bool) or not isinstance(val, int) or val < 1:
++            raise ValueError(f"{name} 必须是整数且 >=1，实际 {val!r}")
++    if isinstance(lead_seconds, bool) or not isinstance(lead_seconds, int) or lead_seconds < 0:
++        raise ValueError(f"lead_seconds 必须 >=0，实际 {lead_seconds!r}")
++    if (
++        isinstance(overlap_merge_seconds, bool)
++        or not isinstance(overlap_merge_seconds, int | float)
++        or overlap_merge_seconds <= 0
++    ):
++        raise ValueError(f"overlap_merge_seconds 必须 >0，实际 {overlap_merge_seconds!r}")
++    return SprayParams(
++        window_ns=int(window_size * NANO),
++        min_abnormal_ratio=float(min_abnormal_ratio),
++        enter=int(enter),
++        exit_=int(exit_),
++        lead_ns=int(lead_seconds * NANO),
++        overlap_merge_ns=int(overlap_merge_seconds * NANO),
++    )
++
++
++def _denoise(is_abnormal: list[bool], enter: int, exit_: int) -> list[bool]:
++    """时序滞后去噪（对照 analysis_spray._denoise，逐帧布尔语义整数化无关）。"""
++    out: list[bool] = []
++    state = False
++    run = 0
++    for a in is_abnormal:
++        if state:
++            if a:
++                run = 0
++            else:
++                run += 1
++                if run >= exit_:
++                    state = False
++                    run = 0
++        else:
++            if a:
++                run += 1
++                if run >= enter:
++                    state = True
++                    run = 0
++                    for k in range(1, enter):
++                        out[-k] = True
++            else:
++                run = 0
++        out.append(state)
++    return out
++
++
++def segment_spray_ns(
++    timestamps_ns: list[int],
++    labels: list[str],
++    *,
++    params: SprayParams | None = None,
++    publish_labels: frozenset[str] = frozenset({LABEL_SPRAY}),
++) -> list[dict]:
++    """整数 ns 分段（对照 analysis_ros，保留源 ns 不 round 到秒）。
++
++    :param timestamps_ns: 升序源存储纳秒（adapter 已保证升序；空列表由调用方判 FAILED）
++    :param labels: 与 timestamps 等长，仅 spray/normal（unknown 不在此）
++    :return: 片段列表，每项 {start_ns, end_ns, duration_ns, label, frame_count,
++             abnormal_count, publish_target}
++    """
++    if not timestamps_ns:
++        raise ValueError("timestamps_ns 不能为空：无有效帧应由调用方判 FAILED")
++    if len(timestamps_ns) != len(labels):
++        raise ValueError("timestamps_ns 与 labels 长度不一致")
++    p = params or validate_spray_params()
++    n = len(timestamps_ns)
++    is_abnormal = [lab == LABEL_SPRAY for lab in labels]
++    smooth = _denoise(is_abnormal, enter=p.enter, exit_=p.exit_)
++    window_ns = p.window_ns
++    lead_ns = p.lead_ns
++    min_ratio = p.min_abnormal_ratio
++
++    windows: list[dict] = []
++    i = 0
++    while i < n:
++        start_time = timestamps_ns[i]
++        end_time = start_time + window_ns
++        j = i
++        while j < n and timestamps_ns[j] <= end_time:
++            j += 1
++        window_indices = list(range(i, j))
++        if not window_indices:
++            i += 1
++            continue
++        ab_in_window = [k for k in window_indices if smooth[k]]
++        density = len(ab_in_window) / len(window_indices)
++        if ab_in_window and density >= min_ratio:
++            first_ab = ab_in_window[0]
++            window_start = max(timestamps_ns[0], timestamps_ns[first_ab] - lead_ns)
++            window_end = window_start + window_ns
++            if window_end > timestamps_ns[-1]:
++                window_end = timestamps_ns[-1]
++                window_start = max(timestamps_ns[0], window_end - window_ns)
++            start_local = bisect.bisect_left(timestamps_ns, window_start)
++            end_local = bisect.bisect_right(timestamps_ns, window_end) - 1
++            if end_local < start_local:
++                i += 1
++                continue
++            ab_final = [k for k in range(start_local, end_local + 1) if smooth[k]]
++            windows.append(
++                {
++                    "start": window_start,
++                    "end": window_end,
++                    "abnormal_count": len(ab_final),
++                    "total_count": end_local - start_local + 1,
++                }
++            )
++            i = end_local + 1
++        else:
++            i += 1
++
++    # 重叠合并（对照实现：重叠 >= overlap_merge 合并，时间取并集）
++    merged: list[dict] = []
++    for w in windows:
++        if merged and (merged[-1]["end"] - w["start"]) >= p.overlap_merge_ns:
++            prev = merged[-1]
++            prev["end"] = max(prev["end"], w["end"])
++            prev["total_count"] = max(prev["total_count"], w["total_count"])
++            prev["abnormal_count"] += w["abnormal_count"]
++            continue
++        merged.append(dict(w))
++
++    out: list[dict] = []
++    for w in merged:
++        start = int(w["start"])
++        end = int(w["end"])
++        if end <= start:
++            continue
++        # 片段 label：含去噪异常帧 → spray（可发布）；纯正常窗口不产生（ab_in_window 前提）
++        label = LABEL_SPRAY if w["abnormal_count"] > 0 else LABEL_NORMAL
++        out.append(
++            {
++                "start_ns": start,
++                "end_ns": end,
++                "duration_ns": end - start,
++                "label": label,
++                "frame_count": int(w["total_count"]),
++                "abnormal_count": int(w["abnormal_count"]),
++                "publish_target": label in publish_labels,
++            }
++        )
++    return out
+\ No newline at end of file
+diff --git a/app/scene/spray/time_map.py b/app/scene/spray/time_map.py
+new file mode 100644
+index 0000000..8481fb4
+--- /dev/null
++++ b/app/scene/spray/time_map.py
+@@ -0,0 +1,78 @@
++"""spray 源时间映射（TASK-12S-B，SPRAY-INTEGRATION §2/§4）。
++
++全程**源 DB3 存储时间整数纳秒**：
++- 不从本地时间文件名/毫秒 round 回推；
++- 旧 decoder 只输出 ms 截断文件名时，由工作副本/包装层建立确定映射并检验，
++  重复/歧义拒绝，**不把 ms×1e6 冒充源 ns**；
++- 映射依据写入 mapping_basis 证据（本场景固定 bag_storage_ns，offset=0，
++  scene_publish_service.derive_storage_offset 已支持该 basis 返回 0）。
++
++对照实现 pdc_to_pic 用 `datetime.fromtimestamp` 把文件名秒→本地 epoch→毫秒
++（无时区字符串回推 + round 丢精度）；本模块**禁止**该路径，一律用源 db3
++messages.timestamp 整数纳秒作为帧时间轴。
++"""
++
++from __future__ import annotations
++
++import re
++from dataclasses import dataclass
++
++# mapping_basis 取值：spray 场景固定 bag 存储轴（与 slope.time_map 同常量域）
++MAPPING_BAG_STORAGE = "bag_storage_ns"
++
++# 源 db3 文件名毫秒截断签名：<name>-<13位毫秒>（decoder 只输出 ms 时的回退路径）
++_MS_NAME_RE = re.compile(r"-(\d{13})$")
++
++
++@dataclass(frozen=True)
++class SprayFrameTime:
++    """一帧的确定源时间映射结果。"""
++
++    storage_ns: int
++    basis: str
++    # 若由 ms 文件名回退推断（仅在源 db3 存在对应消息且唯一匹配时），标记 inferred=True
++    inferred: bool = False
++
++
++def resolve_storage_ns(
++    file_ms: int | None,
++    candidates_ns: list[int],
++) -> SprayFrameTime:
++    """从 ms 文件名 + 候选源 db3 存储 ns 建立确定映射。
++
++    - 无 candidates_ns：拒绝（无法确定源轴，不冒充 ms×1e6）。
++    - 有 candidates_ns：取与 file_ms（若给定）最近的候选；
++      若最近距离 < 1ms（确定性唯一）且仅一个候选在该容差内 → 命中，basis 标 inferred；
++      否则歧义 → 抛 ValueError（重复/歧义拒绝，SPRAY §2）。
++    - file_ms 为 None 时直接取候选唯一值（多候选歧义拒绝）。
++    """
++    if not candidates_ns:
++        raise ValueError("无源 db3 存储时间候选，不能从 ms 文件名冒充源 ns（SPRAY §2）")
++    if file_ms is None:
++        if len(candidates_ns) != 1:
++            raise ValueError(f"候选存储时间歧义（{len(candidates_ns)} 个），拒绝回退映射")
++        return SprayFrameTime(storage_ns=candidates_ns[0], basis=MAPPING_BAG_STORAGE, inferred=True)
++    # file_ms 给定：找 1ms 容差内候选
++    window_ns = 1_000_000
++    target_lo = file_ms * 1_000_000 - window_ns
++    target_hi = file_ms * 1_000_000 + window_ns
++    hits = [c for c in candidates_ns if target_lo <= c <= target_hi]
++    if len(hits) == 0:
++        # 放宽到最近候选，但要求唯一最近且距离 < 50ms（防止跨帧误配）
++        nearest = min(candidates_ns, key=lambda c: abs(c - file_ms * 1_000_000))
++        dist = abs(nearest - file_ms * 1_000_000)
++        if dist >= 50_000_000:
++            raise ValueError(f"ms 文件名与候选源时间最近距离 {dist // 1_000_000}ms 过远，拒绝映射")
++        hits = [nearest]
++    if len(hits) > 1:
++        raise ValueError(f"ms 文件名 {file_ms} 命中 {len(hits)} 个候选源时间，歧义拒绝")
++    return SprayFrameTime(storage_ns=hits[0], basis=MAPPING_BAG_STORAGE, inferred=len(candidates_ns) > 1)
++
++
++def ms_from_filename(name: str) -> int | None:
++    """从 PCD/JPG 文件名尾段提取 13 位 ms（对照实现命名约定）。无则 None。"""
++    stem = name.rsplit(".", 1)[0]
++    m = _MS_NAME_RE.search(stem)
++    if m:
++        return int(m.group(1))
++    return None
+\ No newline at end of file
+diff --git a/config/scene_capabilities.yaml b/config/scene_capabilities.yaml
+index 844852a..93ecc41 100644
+--- a/config/scene_capabilities.yaml
++++ b/config/scene_capabilities.yaml
+@@ -96,4 +96,86 @@ capabilities:
+         publish_target: true
+       - label: miss
+         scene_tag: 测试未命中
++        publish_target: false
++
++  # ------------------------------------------------------------------
++  # spray 水雾（TASK-12S-B）：spray-v1 实装，起步 enabled=false。
++  # 资产/依赖（7 参考图/decoder 共享库/Open3D-EGL/模型多图）未核实不宣称可用；
++  # 处理机实测预检通过后由 12S-C/12S-D 口径开启。原 slope/test 条目零变化。
++  # 两路线按 sensor profile 参数选择（不 AND、不默默后雷达）：
++  #   packet（优先）=/iv_packets_front_mid 替代=/iv_points_front_mid_transformed
++  # ------------------------------------------------------------------
++  - scene_code: spray
++    capability_version: spray-v1
++    display_name: 水雾识别
++    enabled: false
++    disabled_reason: 资产/依赖未核实（7 参考图/decoder 共享库/Open3D-EGL 渲染/模型多图接口），处理机预检通过前不宣称可用
++    adapter_key: ros2-spray-v1
++    adapter_revision: 12sb
++    required_inputs:
++      - topic: /iv_packets_front_mid
++        message_type: seyond/msg/SeyondScan
++        required: false
++      - topic: /iv_points_front_mid_transformed
++        message_type: sensor_msgs/msg/PointCloud2
++        required: false
++    preprocessing_key: spray-packet-3840x2160-90r-500kiB
++    parameter_schema:
++      - name: route
++        type: str
++        default: auto
++        description: 输入路线 packet/pointcloud/auto（auto=优先 packet，其次 pointcloud，不 AND）
++      - name: window_size
++        type: float
++        default: 15
++        minimum: 1
++        maximum: 300
++        description: 分段窗口时长（秒），沿用 analysis_ros2 实际参数
++      - name: min_abnormal_ratio
++        type: float
++        default: 0.15
++        minimum: 0
++        maximum: 1
++        description: 窗口内异常帧密度阈值（0~1），沿用 analysis_ros2 实际参数
++      - name: enter
++        type: int
++        default: 3
++        minimum: 1
++        maximum: 100
++        description: 进入异常态所需连续异常帧数（整数 >=1）
++      - name: exit_
++        type: int
++        default: 5
++        minimum: 1
++        maximum: 100
++        description: 退出异常态所需连续正常帧数（整数 >=1）
++      - name: lead_seconds
++        type: int
++        default: 3
++        minimum: 0
++        maximum: 60
++        description: 切片起点前置时长（秒），沿用 analysis_ros2 实际参数
++      - name: overlap_merge_seconds
++        type: float
++        default: 7.0
++        minimum: 0.1
++        maximum: 300
++        description: 相邻片段重叠合并阈值（秒，>= 该时长合并），沿用 analysis_ros2 实际参数
++    defaults:
++      route: auto
++      window_size: 15
++      min_abnormal_ratio: 0.15
++      enter: 3
++      exit_: 5
++      lead_seconds: 3
++      overlap_merge_seconds: 7.0
++    model_profile: vlm-spray-pointcloud-v18
++    rules_revision: spray-rules-v1
++    # 输出标签：spray 可发布；normal 仅证据；unknown 不进入分段（FAILED 前拦截）
++    output_labels:
++      - label: spray
++        scene_tag: 水雾
++        publish_target: true
++      - label: normal
++        scene_tag: 正常
+         publish_target: false
+\ No newline at end of file
+diff --git a/tests/test_spray_adapter.py b/tests/test_spray_adapter.py
+new file mode 100644
+index 0000000..0c61654
+--- /dev/null
++++ b/tests/test_spray_adapter.py
+@@ -0,0 +1,952 @@
++"""spray 适配器测试（TASK-12S-B）。
++
++覆盖派单 §9 测试面（合成已知命中/正常、字符串冲突归一、未知/空/空模型 FAILED、
++缺 topic NOT_APPLICABLE、缺图/非零 converter 返回、PointCloud 字段布局/强度校验、
++短包/边界/乱序/多 DB3、源不变/取消/缓存版本）+ AC-17.1/17.2/17.3 关键证据。
++
++真实渲染/模型探针依赖处理机（numpy/open3d/decoder 共享库）与模型端点；本套在
++开发机用确定性替身（fake decoder / monkeypatch render / fake model client）跑
++完整管线逻辑，真实参考图用 /home/wang/work/ros2_slice/images/refs（7/7 受控清单）。
++"""
++
++from __future__ import annotations
++
++import json
++import struct
++import sys
++from pathlib import Path
++
++import pytest
++
++# 共享 fixture（rosbag2 sqlite3 bag 构造）在 tests/ 下
++sys.path.insert(0, str(Path(__file__).parent))
++from scene_fixture import build_single_db3  # noqa: E402
++
++BASE_TS = 1_700_000_000_000_000_000  # 1.7e18 ns
++NANO = 1_000_000_000
++
++PACKET_TOPIC = "/iv_packets_front_mid"
++PACKET_TYPE = "seyond/msg/SeyondScan"
++POINT_TOPIC = "/iv_points_front_mid_transformed"
++POINT_TYPE = "sensor_msgs/msg/PointCloud2"
++
++REAL_REF_DIR = Path("/home/wang/work/ros2_slice/images/refs")
++
++
++# ---------------------------------------------------------------------------
++# PointCloud2 CDR 合成（含 ROS2 封装头，对照 slope.cdr 口径）
++# ---------------------------------------------------------------------------
++
++
++def build_pointcloud2_cdr(
++    sec: int,
++    nanosec: int,
++    pts: list[tuple[float, float, float, float]],
++    *,
++    frame_id: str = "front_mid",
++    with_intensity: bool = True,
++) -> bytes:
++    """构造 sensor_msgs/PointCloud2 CDR（封装头 00010000 + header + 字段 + 数据）。
++
++    CDR 4 字节对齐：字符串序列后的下一个定长字段需对齐到 body 的 4 字节边界
++    （与 decode.parse_pointcloud2 的 _p2_align4 口径一致，base=封装头后 body 起点）。
++    """
++    fields = [("x", 0, 7, 1), ("y", 4, 7, 1), ("z", 8, 7, 1)]
++    if with_intensity:
++        fields.append(("intensity", 12, 7, 1))
++    point_step = 4 * len(fields)
++
++    body = bytearray()
++
++    def _align4() -> None:
++        pad = (-len(body)) % 4
++        if pad:
++            body.extend(b"\x00" * pad)
++
++    body += struct.pack("<iI", sec, nanosec)
++    fid = frame_id.encode("utf-8") + b"\x00"
++    body += struct.pack("<I", len(fid)) + fid
++    _align4()
++    body += struct.pack("<II", 1, len(pts))  # height=1, width=n
++    _align4()
++    body += struct.pack("<I", len(fields))
++    for name, off, dt, cnt in fields:
++        n = name.encode("utf-8") + b"\x00"
++        _align4()
++        body += struct.pack("<I", len(n)) + n
++        body += struct.pack("<IBB", off, dt, cnt)
++    body += struct.pack("<B", 0)  # is_bigendian
++    _align4()
++    body += struct.pack("<III", point_step, point_step, point_step * len(pts))
++    _align4()
++    for x, y, z, inten in pts:
++        body += struct.pack("<ffff", x, y, z, inten) if with_intensity else struct.pack("<fff", x, y, z)
++
++    wrapped = b"\x00\x01\x00\x00" + bytes(body)
++    return wrapped
++
++
++def _msg(topic: str, mtype: str, ts: int, payload: bytes) -> tuple:
++    return (topic, mtype, ts, payload)
++
++
++def build_packet_bag(tmp: Path, n: int, topic: str = PACKET_TOPIC) -> Path:
++    bag = tmp / "pk_bag"
++    msgs = [topic, None, None, None]
++    msgs = []
++    for i in range(n):
++        msgs.append(_msg(topic, PACKET_TYPE, BASE_TS + i * NANO, b"\x00" * 32))
++    build_single_db3(bag / "r.db3", msgs)
++    return bag
++
++
++def build_packet_multi(tmp: Path, n: int, topic: str = PACKET_TOPIC) -> Path:
++    bag = tmp / "pk_multi"
++    mid = n // 2
++    m0 = [_msg(topic, PACKET_TYPE, BASE_TS + i * NANO, b"\x00" * 32) for i in range(mid)]
++    m1 = [_msg(topic, PACKET_TYPE, BASE_TS + (mid + i) * NANO, b"\x00" * 32) for i in range(n - mid)]
++    build_single_db3(bag / "part0.db3", m0)
++    build_single_db3(bag / "part1.db3", m1)
++    return bag
++
++
++def build_pointcloud_bag(tmp: Path, labels: list[str], *, multi: bool = False, ooo: bool = False) -> Path:
++    bag = tmp / "pc_bag"
++    msgs = []
++    for i, lab in enumerate(labels):
++        ts = BASE_TS + i * NANO
++        pts = [(0.0 + i, 1.0, 2.0, 0.5 if lab == "spray" else 0.1)]
++        msgs.append(_msg(POINT_TOPIC, POINT_TYPE, ts, build_pointcloud2_cdr(ts // NANO, ts % NANO, pts)))
++    if ooo:
++        msgs = list(reversed(msgs))
++    if multi:
++        mid = len(msgs) // 2
++        build_single_db3(bag / "p0.db3", msgs[:mid])
++        build_single_db3(bag / "p1.db3", msgs[mid:])
++    else:
++        build_single_db3(bag / "r.db3", msgs)
++    return bag
++
++
++def build_other_topics_bag(tmp: Path) -> Path:
++    """只含后雷达 + 相机，无前雷达输入 → NOT_APPLICABLE。"""
++    bag = tmp / "other"
++    msgs = [
++        _msg("/iv_packets_rear_mid", PACKET_TYPE, BASE_TS, b"\x00" * 32),
++        _msg("/bev/cam_front_jpg", "sensor_msgs/msg/CompressedImage", BASE_TS + NANO, b"jpg"),
++    ]
++    build_single_db3(bag / "r.db3", msgs)
++    return bag
++
++
++def build_no_intensity_bag(tmp: Path) -> Path:
++    bag = tmp / "pc_noint"
++    msgs = []
++    for i in range(3):
++        ts = BASE_TS + i * NANO
++        payload = build_pointcloud2_cdr(ts // NANO, ts % NANO, [(1.0, 1.0, 1.0, 0.0)], with_intensity=False)
++        msgs.append(_msg(POINT_TOPIC, POINT_TYPE, ts, payload))
++    build_single_db3(bag / "r.db3", msgs)
++    return bag
++
++
++# ---------------------------------------------------------------------------
++# capability / request / fake 替身
++# ---------------------------------------------------------------------------
++
++
++def spray_capability(enabled: bool = False):
++    from app.scene.types import OutputLabel, ParameterSpec, SceneCapability, TopicRequirement
++
++    return SceneCapability(
++        scene_code="spray",
++        capability_version="spray-v1",
++        display_name="水雾",
++        enabled=enabled,
++        disabled_reason=None if enabled else "资产/依赖未核实",
++        adapter_key="ros2-spray-v1",
++        adapter_revision="12s-b",
++        required_inputs=(TopicRequirement(POINT_TOPIC, POINT_TYPE, True),),
++        parameter_schema=(
++            ParameterSpec("route", "str", "auto"),
++            ParameterSpec("window_size", "float", 15, minimum=1),
++            ParameterSpec("min_abnormal_ratio", "float", 0.15, minimum=0, maximum=1),
++            ParameterSpec("enter", "int", 3, minimum=1),
++            ParameterSpec("exit_", "int", 5, minimum=1),
++            ParameterSpec("lead_seconds", "int", 3, minimum=0),
++            ParameterSpec("overlap_merge_seconds", "float", 7.0, minimum=0),
++        ),
++        defaults={
++            "route": "auto",
++            "window_size": 15,
++            "min_abnormal_ratio": 0.15,
++            "enter": 3,
++            "exit_": 5,
++            "lead_seconds": 3,
++            "overlap_merge_seconds": 7.0,
++        },
++        model_profile="vlm-front-camera-spray",
++        rules_revision="spray-rules-v1",
++        output_labels=(
++            OutputLabel("spray", "水雾", publish_target=True),
++            OutputLabel("normal", "无水雾", publish_target=False),
++        ),
++    )
++
++
++def make_request(bag_dir: Path, work: Path, *, params: dict | None = None, cancellation=None, enabled: bool = False):
++    from app.scene.types import Cancellation, SceneRunRequest
++
++    cap = spray_capability(enabled)
++    parameters = {**cap.defaults, **(params or {})}
++    return SceneRunRequest(
++        source_id="SRC-SPRAY-001",
++        source_generation=1,
++        source_fingerprint="s" * 64,
++        source_path=str(bag_dir),
++        source_topics=(POINT_TOPIC,),
++        capability=cap,
++        parameters=parameters,
++        config_hash="c" * 64,
++        work_dir=str(work),
++        cancellation=cancellation or Cancellation(),
++    )
++
++
++class DeterministicModel:
++    """确定性客户端：按调用次序（=渲染选中帧次序）返回标签，可注入 spray 位置集。"""
++
++    def __init__(
++        self,
++        always: str | None = None,
++        fail: bool = False,
++        calls: list | None = None,
++        spray_positions: set[int] | None = None,
++    ):
++        self._always = always
++        self._fail = fail
++        self._calls = calls if calls is not None else []
++        self._spray_pos = spray_positions
++
++    def is_available(self) -> bool:
++        return True
++
++    def judge_frame(self, target_bytes: bytes, ref_bytes: list[bytes], on_pass=None):
++        from app.scene.spray.model import PassStat
++
++        if len(ref_bytes) != 7:
++            raise AssertionError("参考图必须恰好 7 张")
++        self._calls.append(target_bytes)
++        if self._fail:
++            from app.scene.spray.model import SprayModelError
++
++            raise SprayModelError("模型端点不可解析")
++        if on_pass:
++            total = len(target_bytes) + sum(len(r) for r in ref_bytes)
++            on_pass(
++                PassStat(
++                    prompt="V18",
++                    target_bytes=len(target_bytes),
++                    refs_bytes=sum(len(r) for r in ref_bytes),
++                    total_bytes=total,
++                    retries=0,
++                )
++            )
++        if self._spray_pos is not None:
++            spray = len(self._calls) - 1 in self._spray_pos
++        elif self._always is not None:
++            spray = self._always == "异常"
++        else:
++            spray = False
++        if spray:
++            return "异常", None, None
++        return "正常", "最像参考图3", 3
++
++
++def patch_render(monkeypatch, size_bytes: int = 600 * 1024):
++    """monkeypatch adapter._render_one 与 render.render_pcd_to_jpg 走确定性渲染。"""
++    import app.scene.spray.adapter as A
++
++    def fake_render_one(self, fr, out_jpg) -> bool:
++        out_jpg.parent.mkdir(parents=True, exist_ok=True)
++        out_jpg.write_bytes(b"\xff\xd8\xff\xe0" + b"\x00" * max(0, size_bytes - 4))
++        return True
++
++    monkeypatch.setattr(A.SprayAdapter, "_render_one", fake_render_one)
++    return fake_render_one
++
++
++def patch_refs(monkeypatch):
++    import app.scene.spray.adapter as A
++    from app.scene.spray.references import VerifiedRefs
++
++    def fake_verify(directory=None):
++        paths = tuple(REAL_REF_DIR / r for r in sorted(p.name for p in REAL_REF_DIR.glob("*.jpg")))[:7]
++        ordered = "testorderedhash"
++        return VerifiedRefs(paths=paths, total_bytes=15190041, ordered_hash=ordered)
++
++    monkeypatch.setattr(A, "verify_references", fake_verify)
++
++
++# ===========================================================================
++# 纯逻辑：模型归一（AC-17.2 字符串冲突修正）
++# ===========================================================================
++
++
++class TestModelNormalize:
++    def test_pass1_abnormal_direct_spray(self):
++        from app.scene.spray.model import classify_two_pass
++
++        v = classify_two_pass("异常", None, None)
++        assert v.label == "spray" and v.resolvable is True
++
++    def test_pass1_normal_pass2_ref6_spray(self):
++        from app.scene.spray.model import classify_two_pass
++
++        v = classify_two_pass("正常", "最像参考图6", 6)
++        assert v.label == "spray" and v.resolvable is True
++
++    def test_pass1_normal_pass2_ref3_normal(self):
++        from app.scene.spray.model import classify_two_pass
++
++        v = classify_two_pass("正常", "最像参考图3", 3)
++        assert v.label == "normal" and v.resolvable is True
++
++    def test_string_conflict_normal_with_zi_normal(self):
++        # 原代码 'result == 是' 冲突：'正常' 含'常'但应为 normal
++        from app.scene.spray.model import _verdict_of
++
++        assert _verdict_of("正常") == "normal"
++        assert _verdict_of("异常") == "spray"
++        assert _verdict_of("未知:解析失败") == "unknown"
++        assert _verdict_of("") == "unknown"
++
++    def test_unknown_not_treated_as_normal(self):
++        from app.scene.spray.model import classify_two_pass
++
++        v = classify_two_pass("未知:超时", "最像参考图X", None)
++        assert v.resolvable is False and v.label == "unknown"
++
++    def test_pass1_normal_pass2_unknown_not_normal(self):
++        from app.scene.spray.model import classify_two_pass
++
++        v = classify_two_pass("正常", "无法判断", None)
++        assert v.resolvable is False  # 不冒充 normal
++
++
++# ===========================================================================
++# 纯逻辑：分段（AC-17.2 规则 + 整数 ns；AC-17.3 短包/边界/乱序）
++# ===========================================================================
++
++
++def _labels_for(spray_idx: set[int], n: int):
++    return ["spray" if i in spray_idx else "normal" for i in range(n)]
++
++
++class TestSegment:
++    def test_known_hit_produces_publish_spray(self):
++        from app.scene.spray.segment import segment_spray_ns, validate_spray_params
++
++        n = 30
++        spray = set(range(13, 25))
++        ts = [BASE_TS + i * NANO for i in range(n)]
++        segs = segment_spray_ns(ts, _labels_for(spray, n), params=validate_spray_params())
++        assert segs
++        pub = [s for s in segs if s["publish_target"]]
++        assert pub
++        for s in segs:
++            assert isinstance(s["start_ns"], int) and isinstance(s["end_ns"], int)
++            assert s["end_ns"] > s["start_ns"]
++            assert s["label"] in {"spray", "normal"}
++        # 命中区间应覆盖 spray 核心
++        assert any(s["label"] == "spray" for s in pub)
++
++    def test_all_normal_no_publish(self):
++        from app.scene.spray.segment import segment_spray_ns, validate_spray_params
++
++        n = 30
++        ts = [BASE_TS + i * NANO for i in range(n)]
++        segs = segment_spray_ns(ts, ["normal"] * n, params=validate_spray_params())
++        assert not any(s["publish_target"] for s in segs)
++
++    def test_empty_raises(self):
++        from app.scene.spray.segment import segment_spray_ns
++
++        with pytest.raises(ValueError):
++            segment_spray_ns([], [])
++
++    def test_length_mismatch_raises(self):
++        from app.scene.spray.segment import segment_spray_ns
++
++        with pytest.raises(ValueError):
++            segment_spray_ns([BASE_TS, BASE_TS + NANO], ["spray"])
++
++    def test_param_validation(self):
++        from app.scene.spray.segment import validate_spray_params
++
++        with pytest.raises(ValueError):
++            validate_spray_params(min_abnormal_ratio=1.5)
++        with pytest.raises(ValueError):
++            validate_spray_params(enter=0)
++        with pytest.raises(ValueError):
++            validate_spray_params(window_size=0)
++        with pytest.raises(ValueError):
++            validate_spray_params(overlap_merge_seconds=-1)
++        p = validate_spray_params()
++        assert p.window_ns == 15 * NANO
++        assert p.min_abnormal_ratio == 0.15
++        assert p.enter == 3 and p.exit_ == 5
++        assert p.lead_ns == 3 * NANO
++        assert p.overlap_merge_ns == 7 * NANO
++
++    def test_out_of_order_input_still_sorted_by_caller_semantics(self):
++        # 分段依赖升序；adapter 用 read_messages 升序。乱序 bag 在解码层已升序。
++        from app.scene.spray.segment import segment_spray_ns, validate_spray_params
++
++        ts = [BASE_TS + i * NANO for i in range(20)]
++        segs = segment_spray_ns(ts, _labels_for(set(range(13, 18)), 20), params=validate_spray_params())
++        # 孤立短异常（enter=3 去噪后可能不足窗口密度）→ 无 publish 或 publish；断言不崩
++        assert isinstance(segs, list)
++
++
++# ===========================================================================
++# 纯逻辑：时间映射（AC-17.3 源 storage ns，不从文件名猜）
++# ===========================================================================
++
++
++class TestTimeMap:
++    def test_single_candidate(self):
++        from app.scene.spray.time_map import resolve_storage_ns
++
++        r = resolve_storage_ns(None, [BASE_TS + 123])
++        assert r.storage_ns == BASE_TS + 123 and r.basis == "bag_storage_ns" and r.inferred is True
++
++    def test_ambiguous_candidates_rejected(self):
++        from app.scene.spray.time_map import resolve_storage_ns
++
++        with pytest.raises(ValueError):
++            resolve_storage_ns(None, [100, 200])
++
++    def test_no_candidates_rejected_no_ms_fake(self):
++        from app.scene.spray.time_map import resolve_storage_ns
++
++        with pytest.raises(ValueError):
++            resolve_storage_ns(1700000000000, [])
++
++    def test_ms_name_parse(self):
++        from app.scene.spray.time_map import ms_from_filename
++
++        assert ms_from_filename("frame-1785316873457.jpg") == 1785316873457
++        assert ms_from_filename("frame_0001.pcd") is None
++
++
++# ===========================================================================
++# 纯逻辑：PCD I/O + PointCloud2 解析（AC-17.1 字段布局/强度校验）
++# ===========================================================================
++
++
++class TestPcd:
++    def test_build_and_read_intensity(self, tmp_path):
++        from app.scene.spray.pcd_io import build_binary_pcd, parse_binary_pcd_header, read_intensity
++
++        pts = [(1.0, 2.0, 3.0), (4.0, 5.0, 6.0)]
++        inten = [0.5, 0.9]
++        p = build_binary_pcd(tmp_path / "a.pcd", pts, inten)
++        h = parse_binary_pcd_header(p)
++        assert h.has_intensity() and h.points == 2
++        vals = read_intensity(p)
++        assert len(vals) == 2 and abs(vals[0] - 0.5) < 1e-6
++
++    def test_no_intensity_header(self, tmp_path):
++        from app.scene.spray.pcd_io import build_binary_pcd, read_intensity
++
++        p = build_binary_pcd(tmp_path / "b.pcd", [(1.0, 2.0, 3.0)])
++        with pytest.raises(Exception):
++            read_intensity(p)
++
++
++class TestPointCloud2:
++    def test_parse_valid_with_intensity(self):
++        from app.scene.spray.decode import parse_pointcloud2
++
++        data = build_pointcloud2_cdr(1, 2, [(1.5, -2.5, 3.25, 0.75)])
++        pts, inten = parse_pointcloud2(data)
++        assert len(pts) == 1
++        assert abs(pts[0][0] - 1.5) < 1e-4
++        assert abs(inten[0] - 0.75) < 1e-4
++
++    def test_parse_rejects_missing_intensity(self):
++        from app.scene.spray.decode import DecodeError, parse_pointcloud2
++
++        data = build_pointcloud2_cdr(1, 2, [(1.0, 1.0, 1.0, 0.0)], with_intensity=False)
++        with pytest.raises(DecodeError) as ei:
++            parse_pointcloud2(data, require_intensity=True)
++        assert ei.value.code == "P2_NO_INTENSITY"
++
++    def test_parse_multi_point(self):
++        from app.scene.spray.decode import parse_pointcloud2
++
++        pts = [(0.1, 0.2, 0.3, 0.4), (1.1, 1.2, 1.3, 1.4), (2.1, 2.2, 2.3, 2.4)]
++        data = build_pointcloud2_cdr(5, 6, pts)
++        out, inten = parse_pointcloud2(data)
++        assert len(out) == 3 and abs(out[2][0] - 2.1) < 1e-4
++
++
++# ===========================================================================
++# 纯逻辑：渲染会计（冻结选帧 + 500KiB 过滤 + 最少有效门槛）
++# ===========================================================================
++
++
++class TestRenderAccounting:
++    def test_select_indices(self):
++        from app.scene.spray.render import select_pcd_indices
++
++        assert select_pcd_indices(30) == list(range(10, 30, 3))
++        assert select_pcd_indices(10) == []
++        assert select_pcd_indices(0) == []
++
++    def test_small_image_filtered_recorded(self, tmp_path):
++        from app.scene.spray.render import RenderReport, account_frame
++
++        rep = RenderReport()
++        small = tmp_path / "s.jpg"
++        small.write_bytes(b"\x00" * 100)  # < 500KiB
++        account_frame(rep, storage_ns=BASE_TS, rendered=True, output_path=small)
++        assert rep.filtered_small == 1
++        assert not small.exists()  # 删除
++        assert rep.remaining == 0
++
++    def test_render_failed_counted(self, tmp_path):
++        from app.scene.spray.render import RenderReport, account_frame
++
++        rep = RenderReport()
++        account_frame(rep, storage_ns=BASE_TS, rendered=False, output_path=None)
++        assert rep.render_failed == 1
++
++    def test_insufficient_raises_failed(self, tmp_path):
++        from app.scene.spray.render import RenderReport, account_frame, finalize
++
++        rep = RenderReport()
++        ok = tmp_path / "ok.jpg"
++        ok.write_bytes(b"\x00" * (600 * 1024))
++        account_frame(rep, storage_ns=BASE_TS, rendered=True, output_path=ok)
++        with pytest.raises(Exception) as ei:
++            finalize(rep)  # remaining=1 < min_valid=3
++        assert "RENDER_INSUFFICIENT" in str(ei.value)
++
++    def test_real_render_unavailable_fail_closed(self, tmp_path):
++        # 开发机无 open3d：render_pcd_to_jpg 必须抛 RENDER_UNAVAILABLE（不 mock 当 PASS）
++        from app.scene.spray.pcd_io import build_binary_pcd
++        from app.scene.spray.render import RenderError, render_pcd_to_jpg
++
++        build_binary_pcd(tmp_path / "a.pcd", [(0.0, 0.0, 0.0)])
++        try:
++            import open3d  # noqa: F401
++
++            pytest.skip("open3d 在位，本机不测 RENDER_UNAVAILABLE 路径")
++        except Exception:
++            pass
++        with pytest.raises(RenderError) as ei:
++            render_pcd_to_jpg(tmp_path / "a.pcd", tmp_path / "o.jpg")
++        assert ei.value.code == "RENDER_UNAVAILABLE"
++
++
++# ===========================================================================
++# 缓存：完整身份键 + 版本（AC-17.3 缓存/恢复含参考图与规则版本）
++# ===========================================================================
++
++
++class TestCache:
++    def test_key_differs_on_ref_and_rule_change(self):
++        from app.scene.spray.cache import SprayCacheKey, key_digest
++
++        base = dict(
++            capability_version="spray-v1",
++            rules_revision="spray-rules-v1",
++            model_profile="vlm",
++            ref_ordered_hash="H",
++            preprocessing={"skip": 10},
++            source_fingerprint="s" * 64,
++            frames=((BASE_TS, "aa"),),
++            decoder_revision="d",
++            render_revision="r",
++            segment_params={"w": 15},
++        )
++        k0 = key_digest(SprayCacheKey(**base))
++        k1 = key_digest(SprayCacheKey(**{**base, "ref_ordered_hash": "OTHER"}))
++        k2 = key_digest(SprayCacheKey(**{**base, "rules_revision": "spray-rules-v2"}))
++        assert k0 != k1 and k0 != k2
++
++    def test_hit_requires_matching_count(self, tmp_path):
++        from app.scene.spray.cache import SprayResultCache
++
++        c = SprayResultCache(tmp_path)
++        c.save(digest="K", results=[{"storage_ns": 1, "label": "spray"}])
++        assert c.hit("K", expected_frame_count=1) is not None
++        assert c.hit("K", expected_frame_count=2) is None
++        assert c.hit("OTHER", expected_frame_count=1) is None
++
++    def test_no_dir_nonempty_completion(self, tmp_path):
++        # 缓存文件损坏 → load None（不复用），不靠"目录非空"判完成
++        from app.scene.spray.cache import SprayResultCache
++
++        c = SprayResultCache(tmp_path)
++        (tmp_path / "spray_model_results.json").write_text("{not json", encoding="utf-8")
++        assert c.load() is None
++        assert c.hit("K", expected_frame_count=1) is None
++
++
++# ===========================================================================
++# 参考图受控（§3 严格 7 文件清单）
++# ===========================================================================
++
++
++class TestReferences:
++    def test_real_refs_7_of_7(self):
++        if not REAL_REF_DIR.is_dir():
++            pytest.skip("真实参考图目录不可用")
++        from app.scene.spray.references import verify_references
++
++        v = verify_references(directory=REAL_REF_DIR)
++        assert len(v.paths) == 7
++        assert v.total_bytes == 15190041
++
++    def test_missing_dir(self):
++        from app.scene.spray.references import ReferenceError, verify_references
++
++        with pytest.raises(ReferenceError) as ei:
++            verify_references(directory="/nonexistent/refs/dir")
++        assert "REFERENCE_MISSING" in str(ei.value)
++
++    def test_wrong_bytes_rejected(self, tmp_path, monkeypatch):
++        from app.scene.spray import references as R
++
++        # 伪造 7 个字节数不符的文件
++        specs = list(R.REFERENCES)
++        for i, spec in enumerate(specs):
++            (tmp_path / spec["name"]).write_bytes(b"\xff\xd8\xff" + b"\x00" * 10)  # 字节数 != 清单
++        with pytest.raises(R.ReferenceError) as ei:
++            R.verify_references(directory=tmp_path)
++        assert "REFERENCE_MISMATCH" in str(ei.value)
++
++
++# ===========================================================================
++# 预检（§2/§3 部署预检：源码在但依赖缺失 → 明确 unavailable_reason）
++# ===========================================================================
++
++
++class TestPrecheck:
++    def test_dev_machine_unavailable_reasons(self):
++        # 开发机：decoder 共享库缺失 + 渲染依赖缺失 + 模型未配置 → 明确原因，不宣称 enabled
++        from app.scene.spray.adapter import precheck_summary
++
++        summary = precheck_summary()
++        assert summary["ok"] is False
++        reasons = summary["unavailable_reasons"]
++        assert any("DECODER" in r or "decoder" in r for r in reasons)
++        assert any("RENDER" in r or "渲染" in r for r in reasons)
++
++
++# ===========================================================================
++# 适用性：两路线选择 + 缺 topic NOT_APPLICABLE（AC-17.1）
++# ===========================================================================
++
++
++class TestApplicability:
++    def test_packet_topic_applicable(self, tmp_path):
++        from app.scene.spray.adapter import SprayAdapter
++
++        bag = build_packet_bag(tmp_path, 5)
++        req = make_request(bag, tmp_path / "w")
++        v = SprayAdapter().check_applicability(req)
++        assert v.applicable is True
++
++    def test_pointcloud_topic_applicable(self, tmp_path):
++        from app.scene.spray.adapter import SprayAdapter
++
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 5)
++        req = make_request(bag, tmp_path / "w")
++        v = SprayAdapter().check_applicability(req)
++        assert v.applicable is True
++
++    def test_missing_front_topics_not_applicable(self, tmp_path):
++        from app.scene.spray.adapter import SprayAdapter
++
++        bag = build_other_topics_bag(tmp_path)
++        req = make_request(bag, tmp_path / "w")
++        v = SprayAdapter().check_applicability(req)
++        assert v.applicable is False and v.reason
++
++    def test_explicit_pointcloud_route_on_packet_bag_not_applicable(self, tmp_path):
++        # 指定 pointcloud 路线但 bag 只有 packet → 缺该路线 topic = NOT_APPLICABLE
++        from app.scene.spray.adapter import SprayAdapter
++
++        bag = build_packet_bag(tmp_path, 5)
++        req = make_request(bag, tmp_path / "w", params={"route": "pointcloud"})
++        v = SprayAdapter().check_applicability(req)
++        assert v.applicable is False
++
++    def test_real_bag_packet_route(self):
++        real = Path("/home/wang/下载/1012/rosbag2_2026_10_12-15_58_23")
++        if not real.is_dir():
++            pytest.skip("真实小包不可用")
++        from app.scene.spray.adapter import SprayAdapter
++
++        req = make_request(real, Path("/tmp/spray_real_probe_work"))
++        v = SprayAdapter().check_applicability(req)
++        # 真实包含 /iv_packets_front_mid → packet 路线适用（解码需处理机，NOT_RUN 另报）
++        assert v.applicable is True
++
++
++# ===========================================================================
++# packet 解码：fake decoder（缺图 / 非零返回 / 序号歧义 / 成功）
++# ===========================================================================
++
++
++def _write_fake_decoder(path: Path, mode: str) -> Path:
++    shebang = "#!/usr/bin/env python3\n"
++    pcd_write = (
++        "def _w(p):\n"
++        "    p.write_text('# .PCD v0.7\\nVERSION 0.7\\nFIELDS x y z intensity\\nSIZE 4 4 4 4\\n"
++        "TYPE F F F F\\nCOUNT 1 1 1 1\\nWIDTH 1\\nHEIGHT 1\\nVIEWPOINT 0 0 0 1 0 0 0\\n"
++        "POINTS 1\\nDATA binary\\n', encoding='ascii')\n"
++        "    with p.open('ab') as f: f.write(b'\\x00'*16)\n"
++    )
++    if mode == "ok":
++        body = shebang + "import sys\nfrom pathlib import Path\n" + pcd_write + (
++            "out = Path(sys.argv[3]); out.mkdir(parents=True, exist_ok=True)\n"
++            "for i in range(12):\n"
++            "    _w(out / f'frame-{1700000000000+i:013d}.pcd')\n"
++        )
++    elif mode == "rc":
++        body = shebang + "import sys\nsys.stderr.write('decoder boom')\nsys.exit(3)\n"
++    elif mode == "count_mismatch":
++        body = shebang + "import sys\nfrom pathlib import Path\n" + pcd_write + (
++            "out = Path(sys.argv[3]); out.mkdir(parents=True, exist_ok=True)\n"
++            "for i in range(5):\n"
++            "    _w(out / f'frame-{1700000000000+i:013d}.pcd')\n"
++        )
++    path.write_text(body, encoding="utf-8")
++    path.chmod(0o755)
++    return path
++
++
++class TestPacketDecode:
++    def test_decoder_missing_unavailable(self, tmp_path):
++        from app.scene.spray.decode import DecodeError, decode_packet_route
++
++        bag = build_packet_bag(tmp_path, 3)
++        with pytest.raises(DecodeError) as ei:
++            decode_packet_route(bag, tmp_path / "w", tmp_path / "no_decoder.py")
++        assert ei.value.code == "DECODER_UNAVAILABLE"
++
++    def test_decoder_nonzero_rc_failed(self, tmp_path):
++        from app.scene.spray.decode import DecodeError, decode_packet_route
++
++        bag = build_packet_bag(tmp_path, 3)
++        dec = _write_fake_decoder(tmp_path / "dec.py", "rc")
++        with pytest.raises(DecodeError) as ei:
++            decode_packet_route(bag, tmp_path / "w", dec)
++        assert ei.value.code == "DECODER_FAILED"
++
++    def test_decoder_count_mismatch_failed(self, tmp_path):
++        from app.scene.spray.decode import DecodeError, decode_packet_route
++
++        bag = build_packet_bag(tmp_path, 12)  # 12 源消息，decoder 只出 5 PCD → 序号歧义
++        dec = _write_fake_decoder(tmp_path / "dec.py", "count_mismatch")
++        with pytest.raises(DecodeError) as ei:
++            decode_packet_route(bag, tmp_path / "w", dec)
++        assert ei.value.code == "DECODE_FAILED"
++
++    def test_decoder_success_maps_storage_ns(self, tmp_path):
++        from app.scene.spray.decode import decode_packet_route
++
++        bag = build_packet_bag(tmp_path, 12)  # 12 源消息，decoder 出 12 PCD → 序号映射
++        dec = _write_fake_decoder(tmp_path / "dec.py", "ok")
++        frames = decode_packet_route(bag, tmp_path / "w", dec)
++        assert len(frames) == 12
++        ns = [f.storage_ns for f in frames]
++        assert ns == sorted(ns)  # 源 storage ns 升序
++        assert all(f.pcd_path is not None and f.pcd_path.exists() for f in frames)
++        assert all(f.route == "packet" for f in frames)
++
++
++# ===========================================================================
++# 短包：冻结选帧后无有效 PCD → FAILED（AC-17.3 短包不补帧/不 NO_MATCH）
++# ===========================================================================
++
++
++class TestShortBag:
++    def test_short_pointcloud_failed_not_nomatch(self, tmp_path, monkeypatch):
++        from app.scene.spray.adapter import SprayAdapter
++
++        patch_refs(monkeypatch)
++        patch_render(monkeypatch)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 8)  # < 10 帧
++        req = make_request(bag, tmp_path / "w")
++        with pytest.raises(Exception) as ei:
++            SprayAdapter(model_client=DeterministicModel()).analyze(req)
++        assert "选帧后无有效" in str(ei.value) or "DECODE_FAILED" in str(ei.value)
++
++
++# ===========================================================================
++# 源不变 + 取消（AC-17.3）
++# ===========================================================================
++
++
++class TestSourceAndCancel:
++    def test_source_bag_unchanged_after_e2e(self, tmp_path, monkeypatch):
++        from app.scene.spray.adapter import SprayAdapter
++
++        patch_refs(monkeypatch)
++        patch_render(monkeypatch)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        before = {p.name: p.read_bytes() for p in bag.iterdir() if p.suffix == ".db3"}
++        # 解码层用 bag_io 只读（mode=ro）；analyze 全程不向原包写（30 帧全正常 → NO_MATCH，不抛）
++        SprayAdapter(model_client=DeterministicModel(always="正常")).analyze(make_request(bag, tmp_path / "w"))
++        after = {p.name: p.read_bytes() for p in bag.iterdir() if p.suffix == ".db3"}
++        assert before == after  # 原包不可变
++
++    def test_cancel_stops_before_write(self, tmp_path, monkeypatch):
++        from app.scene.spray.adapter import SprayAdapter
++        from app.scene.types import Cancellation
++
++        patch_refs(monkeypatch)
++        patch_render(monkeypatch)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        req = make_request(bag, tmp_path / "w", cancellation=Cancellation(flag=lambda: True))
++        with pytest.raises(Exception) as ei:
++            SprayAdapter(model_client=DeterministicModel()).analyze(req)
++        assert "CANCELLED" in str(ei.value)
++
++
++# ===========================================================================
++# 端到端：pointcloud 路线 decode→select→render→model→segment（AC-17.1/2/3）
++# ===========================================================================
++
++
++class TestE2E:
++    def test_hit_success_segments(self, tmp_path, monkeypatch):
++        """完整 adapter：decode→选帧→render→model→segment，已知命中 → SUCCESS + 可发布 spray 区间。"""
++        from app.scene.spray.adapter import SprayAdapter
++        from app.scene.types import SceneOutcome
++
++        patch_refs(monkeypatch)
++        patch_render(monkeypatch)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        req = make_request(bag, tmp_path / "w")
++        # 30 帧 → 选帧 [10,13,16,19,22,25,28]（7 帧）；模型按调用次序判 spray 块
++        model = DeterministicModel(spray_positions={0, 1, 2, 3})
++        out = SprayAdapter(model_client=model).analyze(req)
++        assert out.outcome == SceneOutcome.SUCCESS
++        pub = [s for s in out.segments if s.publish_target]
++        assert pub
++        for s in pub:
++            assert isinstance(s.start_ns, int) and isinstance(s.end_ns, int)
++            assert s.end_ns > s.start_ns
++            assert s.mapping_basis == "bag_storage_ns"
++        # 命中区间起点应贴近 spray 首帧往前 3s（lead），整数 ns 不 round 秒
++        first_spray_ns = BASE_TS + 10 * NANO  # 选中第 0 帧 = 原帧 10
++        assert any(s.start_ns <= first_spray_ns for s in pub)
++
++    def test_all_normal_nomatch(self, tmp_path, monkeypatch):
++        from app.scene.spray.adapter import SprayAdapter
++        from app.scene.types import SceneOutcome
++
++        patch_refs(monkeypatch)
++        patch_render(monkeypatch)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        req = make_request(bag, tmp_path / "w")
++        out = SprayAdapter(model_client=DeterministicModel(always="正常")).analyze(req)
++        assert out.outcome == SceneOutcome.NO_MATCH
++        assert not any(s.publish_target for s in out.segments)
++
++    def test_model_failed(self, tmp_path, monkeypatch):
++        from app.scene.spray.adapter import SprayAdapter
++
++        patch_refs(monkeypatch)
++        patch_render(monkeypatch)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        req = make_request(bag, tmp_path / "w")
++        with pytest.raises(Exception) as ei:
++            SprayAdapter(model_client=DeterministicModel(fail=True)).analyze(req)
++        assert "MODEL_FAILED" in str(ei.value)
++
++    def test_no_model_unavailable(self, tmp_path, monkeypatch):
++        from app.scene.spray.adapter import SprayAdapter
++
++        patch_refs(monkeypatch)
++        patch_render(monkeypatch)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        req = make_request(bag, tmp_path / "w")
++        # 未注入 client 且无 SPRAY_VLM_ENDPOINT → MODEL_UNAVAILABLE
++        monkeypatch.delenv("SPRAY_VLM_ENDPOINT", raising=False)
++        with pytest.raises(Exception) as ei:
++            SprayAdapter().analyze(req)
++        assert "MODEL_UNAVAILABLE" in str(ei.value)
++
++    def test_cache_reuse_no_second_model_call(self, tmp_path, monkeypatch):
++        from app.scene.spray.adapter import SprayAdapter
++
++        patch_refs(monkeypatch)
++        patch_render(monkeypatch)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        work = tmp_path / "w"
++        req = make_request(bag, work)
++        calls = []
++        m1 = DeterministicModel(always="正常", calls=calls)
++        SprayAdapter(model_client=m1).analyze(req)
++        n_after_first = len(calls)
++        assert n_after_first > 0
++        # 第二次：同 work_dir + 同身份键 → 缓存命中，不再调模型
++        calls2 = []
++        m2 = DeterministicModel(always="正常", calls=calls2)
++        SprayAdapter(model_client=m2).analyze(req)
++        log = json.loads((work / "render_log.json").read_text(encoding="utf-8"))
++        assert log["cache_reused"] is True
++        assert len(calls2) == 0  # 缓存命中未跑模型
++        assert n_after_first > 0
++
++    def test_source_invariant_e2e(self, tmp_path, monkeypatch):
++        from app.scene.spray.adapter import SprayAdapter
++
++        patch_refs(monkeypatch)
++        patch_render(monkeypatch)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        before = {p.name: p.read_bytes() for p in bag.iterdir() if p.suffix == ".db3"}
++        SprayAdapter(model_client=DeterministicModel(always="正常")).analyze(make_request(bag, tmp_path / "w"))
++        after = {p.name: p.read_bytes() for p in bag.iterdir() if p.suffix == ".db3"}
++        assert before == after
++
++
++# ===========================================================================
++# 多 DB3 / 乱序 bag（AC-17.3 解码层升序合并）
++# ===========================================================================
++
++
++class TestMultiAndOrder:
++    def test_multi_db3_pointcloud_decodes_sorted(self, tmp_path):
++        from app.scene.spray.decode import decode_pointcloud_route
++
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 12, multi=True)
++        frames = decode_pointcloud_route(str(bag), tmp_path / "w")
++        ns = [f.storage_ns for f in frames]
++        assert ns == sorted(ns)
++        assert len(ns) == 12
++
++    def test_out_of_order_bag_sorted(self, tmp_path):
++        from app.scene.spray.decode import decode_pointcloud_route
++
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 10, ooo=True)
++        frames = decode_pointcloud_route(str(bag), tmp_path / "w")
++        ns = [f.storage_ns for f in frames]
++        assert ns == sorted(ns)
++
++    def test_multi_db3_packet_topic_merges(self, tmp_path):
++        from app.scene.slope.bag_io import read_messages
++        from app.scene.spray.decode import PACKET_TOPIC
++
++        bag = build_packet_multi(tmp_path, 10)
++        msgs = read_messages(bag, topic=PACKET_TOPIC)
++        assert len(msgs) == 10
++        assert [m.timestamp_ns for m in msgs] == sorted(m.timestamp_ns for m in msgs)
+\ No newline at end of file

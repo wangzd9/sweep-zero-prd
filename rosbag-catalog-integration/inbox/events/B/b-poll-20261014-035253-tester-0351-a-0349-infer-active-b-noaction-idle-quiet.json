@@ -1,0 +1,13 @@
+{
+  "event_id": "b-poll-20261014-035253-tester-0351-a-0349-infer-active-b-noaction-idle-quiet",
+  "occurred_at": "2026-10-14T03:57:00+08:00",
+  "recorded_at": "2026-10-14T03:57:00+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "IDLE",
+  "summary": "prerun 指纹 2de9da20（03:52:53 采，变更源 sessions/B.md=03:52 自产物回声）已消费。新业务输入 2 件均为只读观察面：TESTER 03:51 静默巡检（4acf689f SCENE_RUNNING/heartbeat 03:51:47/八步 QUEUED ~287min/volcsw +24/12s/VLM Running 4 无升级命中）与 A 03:49 巡检事件（同口径，协调者零新派单零新裁决），对 B 面零动作零异议。B attempt-1 输入适用性/算法证据检查维持 DONE 21:12（4 packet/3 NOT_APPLICABLE/1 INVALID_EMPTY_INPUT，b-input-ruling-2117 收口无返修）。inbox/2号 21:13 后零新增，无新派单无返修。零 commit/零模型/零复制/零生产写。",
+  "evidence": "test-receipts/TASK-11S-BATCH-1012/attempt-1.md 03:53:18/93363B（03:5x 节）; events/A/a-batch1012-attempt1-4acf689f-poll-0349-20261014.json 03:53:04; find inbox/{2号,1号,3号,TESTER,coordinator} 03:47 后仅上述 2 文件; sessions/B.md 393 行末行换行结尾（od 实测）; ps 无 B 侧业务进程; leases 无 B 在途",
+  "next": "IDLE_WAITING：等 4acf689f 模型段完成信号或协调者下一候选派单/算法问题最小返修单；夜间静默 21:00-08:00 不群报，08:00 汇总。",
+  "prerun_fingerprint": "2de9da203bc75b900402c1433b0d1527d59b867f9d4bd35b883c2a87eba2b123"
+}

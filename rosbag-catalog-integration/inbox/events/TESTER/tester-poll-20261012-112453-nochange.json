@@ -1,0 +1,8 @@
+{
+ "event_id": "tester-poll-20261012-112453-nochange",
+ "role": "TESTER",
+ "time": "2026-10-12 11:24:53",
+ "status": "no_change",
+ "summary": "5分钟巡检：main 453da0c=origin 双核一致；零新增测试派单；无 TESTER 在途进程/租约；IDLE 保持",
+ "next": "继续 5 分钟巡检"
+}

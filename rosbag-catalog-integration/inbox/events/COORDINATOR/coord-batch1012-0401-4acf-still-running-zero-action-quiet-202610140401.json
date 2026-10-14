@@ -1,0 +1,14 @@
+{
+ "event_id": "coord-batch1012-0401-4acf-still-running-zero-action-quiet-202610140401",
+ "occurred_at": "2026-10-14T04:01:00+08:00",
+ "recorded_at": "2026-10-14T04:05:00+08:00",
+ "role": "COORDINATOR",
+ "task": "TASK-11S-BATCH-1012",
+ "attempt": "1",
+ "status": "OBSERVING",
+ "supersedes_context": "prerun 指纹 38333209…（checked_at 04:00:53，pending first_seen 04:00:10）；6 变更源逐项核读=A 03:58 巡检自写 + TESTER 03:57 增量实测+回执 03:57 段 + sessions A/COORDINATOR/TESTER 自回声，全为在途角色只读轮次与自产物，无外部新输入、无新派单、无新裁决、coordinator_requests=[]",
+ "summary": "04:01 唤醒核对：6 变更源全消费无新业务输入。协调者独立复核（处理机 04:03 只读实测）：4acf689f（16_02_03 10.1GB 正式链）SCENE_RUNNING attempt1 heartbeat 04:03:18（30s 连续无断档）、八步全 QUEUED、8767 active_runs=[4acf689f ACCEPTED]、scan_job 4019 幂等零 409、flat 三提交 PENDING_INPUT 串行占用预期等待——与 A 03:58/TESTER 03:57 面零分歧，升级条件逐项未命中，ruling-4acf-infer-active-0218 维持不 kill/retry。批次状态不变：3 收口 + 空包 D6 收口 + 4acf689f INFER 跨夜在算 + flat 三提交等 D4③。控制动作=零。",
+ "evidence": "scratch/coord_0401_check.py 输出（NOW 04:03:36；pipeline_run/step_run/ingest_submission/scan_job/8767 health 只读）；prerun snapshot COORDINATOR.json 04:00:53（fingerprint 38333209…，6 changed_sources）；events/A a-batch1012-attempt1-4acf689f-poll 03:49 段 + sessions/A.md 03:58 条目；test-receipts/TASK-11S-BATCH-1012/attempt-1.md 03:57 段；coordinator_requests=[]；operations 两条维持收口态（bigbags-copy RECONCILED/finalbag-verify SUCCEEDED）无在途",
+ "next": "5min observer 接续核 4acf689f 模型段完成信号（EXTRACT/DONE 翻面/八步 DB 推进/SCENE_DONE 任一）→ 终态后放行 A flat 三提交绑定收敛（D4③）+ TESTER 血缘/跨 DB3 边界/两次 reconcile 增量验收；升级条件（heartbeat 4 连败/run FAILED/VLM Waiting 持续>0 且无 ESTABLISHED/八步翻 FAILED）才重新裁决；08:00 夜间汇总（含 D5 肇事身份 192.168.2.132 上报 + 双文件坑复发教训 + 大包进展 + 强审 REVOKED 0/5）",
+ "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-201553-nochange",
+  "occurred_at": "2026-10-12T20:18:36+08:00",
+  "recorded_at": "2026-10-12T20:18:36+08:00",
+  "role": "TESTER",
+  "task": "N/A",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "5分钟巡检：20:09:53后 TESTER 派单/回执零新增；07B OCR r95（502bf8e..f4bfcf2）在途属协调者收口；origin/main=502bf8e 未变；ps 无 TESTER 业务进程；TASK-11 生产门禁维持 BLOCKED 待用户授权",
+  "evidence": "find -newermt 20:09:53 inbox/TESTER test-receipts 空；ps ocr pid464164/464174(20:02启动)属协调者范围",
+  "next": "继续5分钟巡检；07B 合入后如派 TESTER 独立验证单再 ACK 固定快照开工"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-141853-nochange",
+  "occurred_at": "2026-10-11T14:20:05+08:00",
+  "recorded_at": "2026-10-11T14:20:05+08:00",
+  "role": "C",
+  "task": "none",
+  "attempt": "none",
+  "status": "IDLE_WAITING",
+  "summary": "14:14 后零 C 范围变更，无新派单，空闲待派单",
+  "evidence": "events/C/C-poll-20261011-141853-nochange.json",
+  "next": "等协调者派单"
+}

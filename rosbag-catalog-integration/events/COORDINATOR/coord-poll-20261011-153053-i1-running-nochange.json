@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-153053-i1-running-nochange",
+  "occurred_at": "2026-10-11T15:30:53+08:00",
+  "recorded_at": "2026-10-11T15:30:53+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-05/I-1+TASK-08",
+  "attempt": "i1-1/attempt-1",
+  "status": "POLL_NO_CHANGE",
+  "summary": "15:17 后零合入零 OCR；1号 i1-1 已开工实测推进（wt-01-i1 定向 pytest 进程 2288332 在跑，无 ACK 文件/commit/回执，按 RUNNING 记账不催单）；2号 TASK-08 PENDING 待 ACK（wt-04a 未动）；main 62a85bf 双核不变；门禁仅 I-1 收口与 TASK-08 联调两条在途。",
+  "evidence": "sessions/COORDINATOR.md",
+  "next": "下轮核 1号 i1-1 ACK/交付与 2号 TASK-08 ACK"
+}

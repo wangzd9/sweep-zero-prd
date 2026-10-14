@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-140353-nochange",
+  "occurred_at": "2026-10-11T14:04:49+08:00",
+  "recorded_at": "2026-10-11T14:04:49+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "无C新派单；2号rework-9 ACK在途（非C）；main 65ca0be；空闲待派单",
+  "evidence": "sessions/C.md",
+  "next": "继续5分钟巡检"
+}

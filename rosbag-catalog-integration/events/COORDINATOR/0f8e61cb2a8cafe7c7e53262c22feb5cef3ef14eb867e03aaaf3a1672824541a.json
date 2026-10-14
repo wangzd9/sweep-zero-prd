@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-161553-t08-silent-window",
+  "occurred_at": "2026-10-11T16:24:58+08:00",
+  "recorded_at": "2026-10-11T16:24:58+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "巡检：16:10 后零业务变化；main f9bafb0=origin 双核；2号 TASK-08 联调 in-flight 但 wt-04a-t08 自 15:42:03 零文件变更（静默约 38min），B lease 空/tick 16:08 仍在跳/无 pytest 进程/无回执——不催单不接管，下轮核活，停滞 2 轮则记告警",
+  "evidence": "sessions/COORDINATOR.md 16:20 检查点; git rev-parse main f9bafb0; wt-04a-t08 find -newermt 15:42:04 零命中",
+  "next": "下轮核 2号 TASK-08 文件 mtime/进展事件/回执；停滞满 2 轮记活动停滞告警核 B 群会话，不自动接管"
+}

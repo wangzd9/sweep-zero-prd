@@ -1,0 +1,10 @@
+{
+  "role": "C",
+  "event_id": "C-poll-20261011-200353-nochange",
+  "type": "idle_poll",
+  "checked_at": "2026-10-11T20:03:53+08:00",
+  "task": null,
+  "status": "IDLE_POLL",
+  "summary": "巡检：inbox/3号 无 C 新派单（仍仅已收口 TASK-03B）；20:00 后共享根变更仅各角色 sessions/ticks 刷新，非 C 范围；main 0a8ca8a 未变、wt-03b 6f1a9ad 干净、无 C 在途进程；leases 无在途。",
+  "next": "保持空闲，5 分钟巡检节奏继续核查 inbox/3号/ 与 inbox/coordinator/ 新派单/返修"
+}

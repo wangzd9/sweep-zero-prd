@@ -1,0 +1,292 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-13T11:00:53.510422+08:00",
+  "role": "C",
+  "kind": "phase",
+  "start": "2026-10-13T08:00:00+08:00",
+  "end": "2026-10-13T11:00:00+08:00",
+  "artifact": "inbox/control/runtime/digests/2026-10-13/C-phase-1100.json",
+  "roles": [
+    {
+      "role": "C",
+      "start": "2026-10-13T08:00:00+08:00",
+      "end": "2026-10-13T11:00:00+08:00",
+      "totals_seconds": {
+        "working": 0,
+        "waiting": 3667.0,
+        "blocked": 0,
+        "idle": 0,
+        "unknown": 7133.0
+      },
+      "segments": [
+        {
+          "start": "2026-10-13T08:00:00+08:00",
+          "end": "2026-10-13T08:17:59+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T08:17:59+08:00",
+          "end": "2026-10-13T08:27:59+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "summary": "巡检：无C新派单；07B R4-01协调者裁决非原AC违例不返修+TESTER post-r已派(均非C)；16B保持NEEDS_REVIEW冻结",
+          "sources": [
+            "events/C/b32419fc9ecd7b424d9955c1ad16b76815adf29539d18a70fd49f6506008cc3c.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T08:27:59+08:00",
+          "end": "2026-10-13T08:44:08+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T08:44:08+08:00",
+          "end": "2026-10-13T08:54:08+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "summary": "16B 交付冻结不变 0208a73；窗口内协调者 r136 proxy OCR 第4次低负载重试 08:40 起跑在途（rc=0→一次最小返修单派C / rc=1→NEEDS_REVIEW 升级用户裁决）；无 C 新派单",
+          "sources": [
+            "events/C/77f66c4da983ff0dc12e5e13f761d56f80ecf7869a91053c9a1f11d9c000e795.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T08:54:08+08:00",
+          "end": "2026-10-13T09:03:53+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T09:03:53+08:00",
+          "end": "2026-10-13T09:13:53+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "summary": "16B 维持冻结：07B DONE 合入 main 4b9f30a（r136 裁决，非 C）；proxy OCR r136 第4次重试 08:52 rc=1（4/4 连败）→ NEEDS_REVIEW 升级用户裁决待答；无 C 新派单/返修单；wt-03b-t16b HEAD=0208a73 干净、无 C 在途进程",
+          "sources": [
+            "events/C/1a5f481c4d59a9ad2224d8179bb758d0537a65a4608326dbaf7ebf06e964259e.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T09:13:53+08:00",
+          "end": "2026-10-13T09:23:51+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T09:23:51+08:00",
+          "end": "2026-10-13T09:33:51+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "summary": "C 巡检无新派单；16A 已合入 main 6fb42c4（r138 验收，1号/协调者/测试者链非 C）；16B 维持 NEEDS_REVIEW 冻结等用户裁决 a/b/c/d",
+          "sources": [
+            "events/C/6d118fcf6fa9ac2b19882bfc797705305d89cb589c95ca1ba0fe32f86e337616.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T09:33:51+08:00",
+          "end": "2026-10-13T09:44:55+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T09:44:55+08:00",
+          "end": "2026-10-13T09:54:55+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "summary": "09:38 巡检：16A 已 DONE（r139：TESTER post-merge 09:32 PASS，main 6fb42c4，非 C）；无 C 新派单/返修单；16B 交付冻结 0208a73 维持 NEEDS_REVIEW=proxy OCR 4/4 连败等用户裁决（a/b/c/d），C 不自测不抢先返修",
+          "sources": [
+            "events/C/fcead19b7de646fcd6f7d3340d9cf5487ef375a88c57530a07b61846bc841a8e.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T09:54:55+08:00",
+          "end": "2026-10-13T10:48:53+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T10:48:53+08:00",
+          "end": "2026-10-13T11:00:00+08:00",
+          "category": "waiting",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "summary": "09:38 巡检：16A 已 DONE（r139：TESTER post-merge 09:32 PASS，main 6fb42c4，非 C）；无 C 新派单/返修单；16B 交付冻结 0208a73 维持 NEEDS_REVIEW=proxy OCR 4/4 连败等用户裁决（a/b/c/d），C 不自测不抢先返修",
+          "sources": [
+            "events/C/fcead19b7de646fcd6f7d3340d9cf5487ef375a88c57530a07b61846bc841a8e.json"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "event_id": "c-poll-20261013-091853-r138-16a-merged-16b-frozen",
+          "occurred_at": "2026-10-13T09:23:51+08:00",
+          "recorded_at": "2026-10-13T09:23:51+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "C 巡检无新派单；16A 已合入 main 6fb42c4（r138 验收，1号/协调者/测试者链非 C）；16B 维持 NEEDS_REVIEW 冻结等用户裁决 a/b/c/d",
+          "evidence": "sessions/C.md 09:22 条目",
+          "next": "等用户裁决 16B 选项 a/b/c/d",
+          "source": "events/C/6d118fcf6fa9ac2b19882bfc797705305d89cb589c95ca1ba0fe32f86e337616.json",
+          "source_mtime": "2026-10-13T09:23:51+08:00"
+        },
+        {
+          "event_id": "c-poll-20261013-085853-r137-07b-done-16b-escalated",
+          "occurred_at": "2026-10-13T09:03:53+08:00",
+          "recorded_at": "2026-10-13T09:03:53+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "16B 维持冻结：07B DONE 合入 main 4b9f30a（r136 裁决，非 C）；proxy OCR r136 第4次重试 08:52 rc=1（4/4 连败）→ NEEDS_REVIEW 升级用户裁决待答；无 C 新派单/返修单；wt-03b-t16b HEAD=0208a73 干净、无 C 在途进程",
+          "evidence": "sessions/C.md 09:00 条目; scratch/t16_ocr/b2_r136_retry_progress.txt; inbox/coordinator/TASK-07B/07b-done-merge-decision-20261013.md",
+          "next": "等用户裁决 16B proxy OCR 处置选项（a再试/b换审查方式/c已裁findings先行返修/d搁置）；无新单保持冻结不自测",
+          "source": "events/C/1a5f481c4d59a9ad2224d8179bb758d0537a65a4608326dbaf7ebf06e964259e.json",
+          "source_mtime": "2026-10-13T09:03:53+08:00"
+        },
+        {
+          "event_id": "c-poll-20261013-081353-r133-r401-adjudication-no-c-order",
+          "occurred_at": "2026-10-13T08:17:59+08:00",
+          "recorded_at": "2026-10-13T08:17:59+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "巡检：无C新派单；07B R4-01协调者裁决非原AC违例不返修+TESTER post-r已派(均非C)；16B保持NEEDS_REVIEW冻结",
+          "evidence": "sessions/C.md 08:13 条目",
+          "next": "等协调者proxy OCR解除后16B最小返修单",
+          "source": "events/C/b32419fc9ecd7b424d9955c1ad16b76815adf29539d18a70fd49f6506008cc3c.json",
+          "source_mtime": "2026-10-13T08:17:59+08:00"
+        },
+        {
+          "event_id": "c-poll-20261013-093853-t16a-done-t16b-frozen-user-ruling-pending",
+          "occurred_at": "2026-10-13T09:44:55+08:00",
+          "recorded_at": "2026-10-13T09:44:55+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "09:38 巡检：16A 已 DONE（r139：TESTER post-merge 09:32 PASS，main 6fb42c4，非 C）；无 C 新派单/返修单；16B 交付冻结 0208a73 维持 NEEDS_REVIEW=proxy OCR 4/4 连败等用户裁决（a/b/c/d），C 不自测不抢先返修",
+          "evidence": "sessions/C.md 09:4x 条目; TODO r139 段; HANDOFF r137",
+          "next": "等用户对 16B proxy OCR 处置裁决；裁决 c 则等一次最小返修单",
+          "source": "events/C/fcead19b7de646fcd6f7d3340d9cf5487ef375a88c57530a07b61846bc841a8e.json",
+          "source_mtime": "2026-10-13T09:44:55+08:00"
+        },
+        {
+          "event_id": "c-poll-20261013-083853-ocr16b-retry-inflight",
+          "occurred_at": "2026-10-13T08:44:08+08:00",
+          "recorded_at": "2026-10-13T08:44:08+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "16B 交付冻结不变 0208a73；窗口内协调者 r136 proxy OCR 第4次低负载重试 08:40 起跑在途（rc=0→一次最小返修单派C / rc=1→NEEDS_REVIEW 升级用户裁决）；无 C 新派单",
+          "evidence": "sessions/C.md#531",
+          "next": "等 16B proxy OCR 收口与返修单",
+          "source": "events/C/77f66c4da983ff0dc12e5e13f761d56f80ecf7869a91053c9a1f11d9c000e795.json",
+          "source_mtime": "2026-10-13T08:44:08+08:00"
+        }
+      ],
+      "delivery_records": [],
+      "unverified_sources": [
+        "events/C/C-poll-20261011-082853.md: 时间或内容待核对",
+        "events/C/c-poll-20261013-044353-v2done-t16b-await-resume.json: 时间或内容待核对",
+        "events/C/c-poll-20261013-051853-t16b-b1-3confirmed-b2-inflight.md: 时间或内容待核对",
+        "events/C/c-poll-20261013-055353-t16b-b2-split-fail-16a-incr-done.md: 时间或内容待核对",
+        "inbox/events/C/C-sessions-truncation-20261012-064054.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-042923-t16b2-fail-resume-pending.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-064353-r3ocr-6of6-done-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-065353-r130-t07b-r4-dispatch-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-072853-r132-b-r4-ocr-done-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-074353-r132-r4-ocr-done-no-c-order.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-092853-t16b-ocr4rc1-frozen-user-ruling-pending.md: 时间或内容待核对"
+      ]
+    }
+  ],
+  "current": {
+    "C": {
+      "schema_version": 1,
+      "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+      "role": "C",
+      "observed_at": "2026-10-13T11:00:53+08:00",
+      "control": "ACTIVE",
+      "confirmed_idle": false,
+      "classification_reasons": [
+        "unresolved or unclassified dispatch: inbox/3号/TASK-16B/attempt-1-dispatch.md"
+      ],
+      "tasks": [],
+      "events": {
+        "C": {
+          "event_id": "c-poll-20261013-093853-t16a-done-t16b-frozen-user-ruling-pending",
+          "occurred_at": "2026-10-13T09:44:55+08:00",
+          "recorded_at": "2026-10-13T09:44:55+08:00",
+          "role": "C",
+          "task": "TASK-16B",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "09:38 巡检：16A 已 DONE（r139：TESTER post-merge 09:32 PASS，main 6fb42c4，非 C）；无 C 新派单/返修单；16B 交付冻结 0208a73 维持 NEEDS_REVIEW=proxy OCR 4/4 连败等用户裁决（a/b/c/d），C 不自测不抢先返修",
+          "evidence": "sessions/C.md 09:4x 条目; TODO r139 段; HANDOFF r137",
+          "next": "等用户对 16B proxy OCR 处置裁决；裁决 c 则等一次最小返修单",
+          "source": "events/C/fcead19b7de646fcd6f7d3340d9cf5487ef375a88c57530a07b61846bc841a8e.json",
+          "source_mtime": "2026-10-13T09:44:55+08:00"
+        }
+      },
+      "dispatches": {
+        "C": {
+          "role": "C",
+          "source": "inbox/3号/TASK-16B/attempt-1-dispatch.md",
+          "status": "REVIEW_PENDING",
+          "mtime": 1791825023.8434546,
+          "summary": "# 派单：TASK-16B attempt-1 处理机执行接线·本机场景代理（v0.4 最小闭环） - status: REVIEW_PENDING - 派单时间：2026-10-12 22:45 +08:00 - 任务 … scene_publish_service`（执行编排独立模块，不改 app.scene 行为面——若发现必须改 app.scene，申报越界不擅改） - **A100 不运行场景代码、不存场景原包/切片/整包工作副本*"
+        }
+      },
+      "processes": {
+        "C": {
+          "state": "none"
+        }
+      },
+      "sources": {
+        "TODO.md": "2026-10-13T10:44:24+08:00"
+      },
+      "strong_review": null,
+      "fingerprint": "4f1831b032a4b6fae119f16d811cc529866bb64ca19ffdd39b9fcf9ce0cd5dda"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-072453-nochange",
+  "occurred_at": "2026-10-12T07:26:05+08:00",
+  "recorded_at": "2026-10-12T07:26:05+08:00",
+  "role": "TESTER",
+  "task": "none",
+  "attempt": "0",
+  "status": "POLL_NO_CHANGE",
+  "summary": "07:24:53 巡检：inbox/TESTER 无 PENDING 派单（TASK-10 v2 PASS 已验收，P0 收口）；main HEAD 453da0c 一致；ps 无 pytest/ocr/t10 存活业务进程；TESTER.lock 租约此前已释放（00:15），无未知 owner → 维持 IDLE",
+  "evidence": "none",
+  "next": "继续 5 分钟巡检"
+}

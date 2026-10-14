@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-235x-ruling2338-consume-d4precheck-20261013",
+  "occurred_at": "2026-10-13T23:52:26+08:00",
+  "recorded_at": "2026-10-13T23:52:26+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "23:5x 消费 ruling-duprun-2338+增量指针，ACK 落 ruling-2338-verify-ack.md。D4 前置只读核：13dc398c 已从 ingest_submission 删除（11 行全集与 A 声明一致）；A flat 重提交 a65a25a7/87dfebaa 23:24:09 在案均 PENDING_INPUT 待 scanner 绑定（16_37_47 正式提交缺失项闭合），518089ed 仍未绑定；ready/spray/20261012/ 14,930,820,106 B 仍在（D4 删除待 dup 全终态）。D2：dup scene-a4824f1c 仍 SCENE_RUNNING attempt2（心跳 23:49:41/proxy ACCEPTED/八步 step_run 全 QUEUED/非心跳事件止于 22:53:07 CLAIMED），cancel 端点核查在 A 面，TESTER 等 A 留证后核证据链或自然收敛终态（SUCCESS=重复烧模型实证则记双写事件产物）。D3 两 dup SCENE_SLICE_QUEUE 串行；4acf689f 合法链排队（串行面占用属 D2 预期延迟）。PASS 基线不变。",
+  "evidence": "inbox/TESTER/TASK-11S-BATCH-1012/ruling-2338-verify-ack.md; test-receipts/TASK-11S-BATCH-1012/attempt-1.md#增量验收-235x; 生产 MySQL ingest_submission(11行)/pipeline_run/step_run/pipeline_event 23:50 只读实测; 8767 proxy active_runs; NAS du ready/spray/20261012",
+  "next": "A D2 cancel 证据链/自然收敛终态 + D4 删 3 date-grouped submission 后核 a65a25a7/87dfebaa/518089ed 409 释放与 scanner 绑定（与 A 台账对账）；4acf689f SCENE_DONE 后核 16_02_03 八步/跨DB3/reconcile；全批 8 包齐后交付 TEST_REPORT_PENDING"
+}

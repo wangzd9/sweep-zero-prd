@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-163053-t08-stall-alert-round2",
+  "occurred_at": "2026-10-11T16:35:37+08:00",
+  "recorded_at": "2026-10-11T16:35:37+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "巡检：16:24 后零业务变化；main f9bafb0=origin 双核；2号 TASK-08 wt-04a-t08 自 15:42:03 零文件变更（静默约 49min）+ 无 pytest 业务进程 + 无回执，B tick 16:28 仍跳/cron 会话存活——停滞满 2 轮，记活动停滞告警（不催单不接管），下轮若仍零进展核实 B 群会话是否中断",
+  "evidence": "wt-04a-t08 find -newermt 15:42:04 零命中(仅 pyc 15:41/pytest_cache 15:42); ps 无 wt-04a-t08 pytest; receipts/ 无 TASK-08; ticks/B.json 16:28:53",
+  "next": "下轮核 2号 TASK-08 进展/回执；仍停滞则核 B 群会话与 cron 状态，不自动接管不重派"
+}

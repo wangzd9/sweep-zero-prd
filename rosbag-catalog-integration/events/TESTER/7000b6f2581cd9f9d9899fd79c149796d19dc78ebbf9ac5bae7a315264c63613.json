@@ -1,0 +1,12 @@
+{
+  "event_id": "20261011-184053-ocr-c1c2-r1-v3-alive-confirmed",
+  "occurred_at": "2026-10-11T18:36:50+08:00",
+  "recorded_at": "2026-10-11T18:36:50+08:00",
+  "role": "TESTER",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "IDLE_POLL",
+  "summary": "巡检核活在途 OCR C1C2-r1：v3 runner pid 2624619 存活、log/state 18:31:38 resume 持锁在途，上轮 runner-missing 关切解除；main 98f6c88 双核一致、wt-04a-t08c 仍 bf48a45 REVIEW_PENDING、无 TESTER PENDING、维持 IDLE",
+  "evidence": "scratch/t08c-ocr/c1c2-r1.log",
+  "next": "等协调者 C1C2-r1 收口裁决"
+}

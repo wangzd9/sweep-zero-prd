@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-114253-t16c-paused-ocr-c04-done-r146",
+  "occurred_at": "2026-10-13T11:43:00+08:00",
+  "recorded_at": "2026-10-13T11:43:00+08:00",
+  "role": "B",
+  "task": "TASK-16C",
+  "attempt": "1",
+  "status": "PAUSED",
+  "summary": "11:42:53 巡检（fingerprint 79f7a4d4，变更源仅 TODO.md=r146 协调者注记 11:43:09）：16C 维持用户暂停，B 零动作；16C 串行 OCR 链 4/7 收口（c04 api/sources.py rc=0 0 findings，c05 pipeline_detail.html 在途 chain pid 1682826 持 ocr.lock），返修单（C5 CONFIRMED CORRECTION+c03 时间契约）随 PAUSED 搁置不派；只读核对发现 TODO 行 22 TASK-07 owner 列仍为 r131 旧口径（07B 实际已 PASS 合入 4b9f30a 并 DONE），属协调者面滞后，本侧不代改；wt-04a-t16c HEAD=5c80857 冻结洁净，origin/main 6fb42c4 不变，16C 未合入。",
+  "evidence": "sessions/B.md 11:43 巡检条目；~/.hermes/cache/scratch/t16c_ocr/t16c_ocr_progress.txt c04 DONE 行；ps 1682826/1748741/1748751 存活；find inbox/2号 08:40 后零新增",
+  "next": "等协调者暂停口径下 OCR 全链收口处置；恢复且收问题 ID 返修单按 attempt 续 b/task-16c-scene-ui-minimal；空闲只读巡检不扩需求、不碰生产。"
+}

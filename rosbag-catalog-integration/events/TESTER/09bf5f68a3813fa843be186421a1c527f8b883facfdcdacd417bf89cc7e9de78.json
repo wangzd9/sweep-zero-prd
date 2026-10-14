@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-215953-nochange",
+  "occurred_at": "2026-10-12T22:10:17+08:00",
+  "recorded_at": "2026-10-12T22:10:17+08:00",
+  "role": "TESTER",
+  "task": "none",
+  "attempt": "none",
+  "status": "IDLE",
+  "summary": "5分钟巡检：无 TESTER 新派单/回执（21:54:53 上轮基线后零新增）；origin/main=502bf8e 未合入；21:59:38 新起 ocr --resume 批（pid 607381）属协调者 r101 面不接管；无 TESTER 在途业务进程；维持空闲待命。",
+  "evidence": "find -newermt 零新增；git fetch rev-parse origin/main=502bf8e；ps 607381 ocr --resume 属协调者面；lease owner 为本轮会话校验后续走",
+  "next": "继续 5 分钟巡检；07B 合入后如派 TESTER 独立验证单再 ACK 固定快照开工"
+}

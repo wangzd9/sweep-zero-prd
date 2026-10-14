@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261011-172153-nochange",
+  "occurred_at": "2026-10-11T17:23:00+08:00",
+  "recorded_at": "2026-10-11T17:23:00+08:00",
+  "role": "A",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE_NOCHANGE",
+  "summary": "5min巡检：main 98f6c88 零前移，17:17 后零新派单/返修/释放通知，三 worktree 冻结未动，c3-1 已闭环",
+  "evidence": "sessions/A.md#17:21",
+  "next": "等协调者释放槽并给出无冲突新单"
+}

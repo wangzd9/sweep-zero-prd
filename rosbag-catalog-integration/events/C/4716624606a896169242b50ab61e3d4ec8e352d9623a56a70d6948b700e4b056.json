@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-112853-nochange",
+  "occurred_at": "2026-10-12T11:34:04+08:00",
+  "recorded_at": "2026-10-12T11:34:04+08:00",
+  "role": "C",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "IDLE_POLL_NO_CHANGE",
+  "summary": "11:28 nochange：无 C 新派单（inbox/3号 最新仍 10-10 00:58 已收口）；非 C 在途=2号 B TASK-07A attempt-1 交付 REVIEW_PENDING（453da0c→f94d006）+ 协调者 r79 T07A-r1 OCR 持 ocr.lock 在途 + A/COORDINATOR 巡检租约；main 453da0c 双核；wt-03b 6f1a9ad 干净；无 C 在途进程；保持空闲待派单",
+  "evidence": "sessions/C.md 11:28 条目",
+  "next": "继续 5 分钟巡检"
+}

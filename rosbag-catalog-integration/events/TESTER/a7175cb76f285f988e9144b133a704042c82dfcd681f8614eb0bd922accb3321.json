@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-ruling2210-accept-202610132245590800",
+  "occurred_at": "2026-10-13T22:45:59+08:00",
+  "recorded_at": "2026-10-13T22:45:59+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "22:3x 消费裁决 ruling-doublewrite-2210：①3 dup FAILED run 无VLM/无伪切片 PASS（pipeline_event 四事件链+slices 树实测）；②16_33_10 空包拒绝可追溯 PASS（scanner missing rosbag2_bagfile_information 持续+scan_job failed:2+submission PENDING_INPUT 未绑定）；③A 续跑 flat 四包/④16_02_03 重拷 NOT_RUN（5 污染 submission 全在、A 租约 22:26 在途不代跑）。回执 22:3x 段已追加。",
+  "evidence": "test-receipts/TASK-11S-BATCH-1012/attempt-1.md#增量验收-223x; 处理机生产MySQL pipeline_event/scan_job 只读实测+docker logs rosbag-catalog-scanner-1",
+  "next": "A 续跑完成后逐包增量核③④（submission 身份/run 终态/产物/两次 reconcile/16_02_03 SHA=源）；全批齐后交付TEST_REPORT_PENDING"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs65-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T08:46:30+08:00",
+  "recorded_at": "2026-10-14T08:47:32+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第65轮只读观察（处理机 08:46 实测）：与 obs64 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜不 kill/retry）。scene-4acf689f SCENE_RUNNING attempt=1 error 空、lease 08:47:36 续租活跃；proxy pid 3495931 连续未重启 TIME 01:20:40（+3s）；checkpoint mtime 00:23:10 未翻、零新写；VLM ESTAB 在途、远端 Running 2-3/Waiting 单点1 即回0/POST 累计 184277 增长=推理活跃；资源面与 obs59-64 同量级。无升级条件命中。",
+  "evidence": "8180 http=200 SCENE_RUNNING lease 08:47:36；8767 active_runs=[4acf689f ACCEPTED]；18000 production ready；checkpoint mtime 2026-10-14 00:23:10.474817688；VLM log 08:45:08-08:46:08 八点采样；NAS 98T/70T/29T 71%；incoming/spray 仅 16_33_10；sessions 614->615 签名核验、旧镜像 obs65=0",
+  "next": "接续只读观察：模型段完成信号（checkpoint 翻面/八步 DB 推进/SCENE_DONE）或升级条件（heartbeat 连败/FAILED/VLM 持续排队）命中即取证申报协调者；串行释放后 flat 三提交绑定新 run 按 run 核账；16_33_10 D6 落 ledger 同步核。白天口径状态变化即时通报，无变化不报。"
+}

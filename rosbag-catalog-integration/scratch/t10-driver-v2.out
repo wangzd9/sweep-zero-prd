@@ -1,0 +1,104 @@
+01:57:44 [0] env set; DB=/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/t10-e2e.db; local_nas_root=/home/wang/.hermes/cache/scratch/t10-nasroot
+01:57:44 [0] SLOPE_VLM_ENDPOINT=http://192.168.2.45:8002/v1/chat/completions
+01:57:45 [0] copying real bag .db3+metadata into local NAS root: files=['1165414093_slope_20260818_105105_105120_0.db3']
+01:57:48 [0] copied 1 data files (byte-identical) into /home/wang/.hermes/cache/scratch/t10-nasroot/incoming/1165414093_slope_20260818_105105_105120
+effective settings: {"a100_enabled": false, "app_name": "ROSBag 数据追溯", "auto_retry_enabled": true, "auto_retry_max_retries": 2, "backend_url": "", "database_url": "sqlite:////home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/t10-e2e.db", "demo_data": false, "deployment_mode": "development", "display_timezone": "Asia/Shanghai", "environment": "test", "nas_final_root": "/test/final", "nas_ready_root": "/test/ready", "nas_scan_root": "/test/incoming", "nas_storage_root": "/test", "nvidia_nas_origin_root": "/test/nvidia_origin", "orchestrator_interval_seconds": 10, "phase0_work_root": "/home/wang/work/.local/rosbag-catalog/phase0-work", "scanner_interval_seconds": 600, "test_execution_mode": "mock"}
+01:57:50 [1a] create ingest submission (default profile, scene_slice + slope); fast_fingerprint=8f622686afb11d166130d792...
+01:57:50 [1a] submission frozen config_hash=0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0
+01:57:50 [1b] register source dir via /sources/register (incoming_path for 03B bind)
+01:57:50 [1b] source_id=3723682575DE4F949438A1B87E ingest={'matched': True, 'scheduled_purposes': ['scene_slice'], 'self_built': False, 'config_required': False}
+01:57:50 [1c2] applying documented harness precondition source_status=READY (app has no setter -> finding #1)
+01:57:50 [1d] consume purpose events -> create SCENE_SLICE run (frozen identity, no NULL-hash)
+01:57:50 [1d] no scene run from consume; falling back to explicit POST /scene-analysis-runs
+01:57:50 [1d] run_id=scene-8f45c0ae421e432f8935d2e8119f (frozen via 03B chain, config_hash from submission=0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0)
+01:57:50 [3] claim SCENE_SLICE_QUEUE run
+01:57:50 [3] claimed run=scene-8f45c0ae421e432f8935d2e8119f lease=410fdb7862814a02... attempt=1 gen=1 frozen_hash=a8ba9678eb3fcbb6338e403a63c29522beb0d729635b2adc7c4ecad3dc0e9a40
+01:57:50 [3] parent fp=8f622686afb11d166130d792c2045d8bd50f1552663301a25d27d6dea7515617 gen=1; running real VLM analyze on /mnt/nas_backup/data_slice/1165414093/slope/1165414093_slope_20260818_105105_105120 (work=/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/work)
+01:59:13 [3] analyze outcome=SUCCESS segments=1 err=None
+01:59:13 [4] publishable segments=1
+01:59:13 [4] derive_storage_offset = 100381744
+01:59:14 [4] published 1 slices
+01:59:14 [4] /results status=200
+01:59:14 [4] /complete-scene status=200 body={'pipeline_run_id': 'scene-8f45c0ae421e432f8935d2e8119f', 'scene_code': 'slope', 'outcome': 'SUCCESS', 'run_status': 'SCENE_DONE', 'run_finalized': True, 'switch': {'switched': True, 'current': True, 
+01:59:14 [5] bags/T10S22c76051fd384d17=200 lineage=404
+01:59:14 [5] source unchanged=False
+01:59:14 [DONE] evidence written to /home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/t10-e2e.json
+=== E2E COMPLETE ===
+{
+  "steps": {
+    "1a_submission": {
+      "status": 201,
+      "body": {
+        "submission_id": "06ae1204ab8e4d8b97375be25f1fdf8b",
+        "profile_id": "default",
+        "profile_version": 1,
+        "relative_path": "1165414093_slope_20260818_105105_105120",
+        "status": "PENDING_INPUT",
+        "row_version": 1,
+        "config_required": false,
+        "effective_config": {
+          "schema_version": "scene-config-v1",
+          "profile_id": "default",
+          "profile_version": 1,
+          "purposes": [
+            "scene_slice"
+          ],
+          "scenes": [
+            {
+              "scene_code": "slope",
+              "capability_version": "slope-v1",
+              "parameters": {
+                "segment_len": 15,
+                "overlap": 3,
+                "min_effective": 5
+              }
+            }
+          ],
+          "config_hash": "0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0"
+        },
+        "effective_config_hash": "0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0",
+        "bound_source_id": null,
+        "bound_source_generation": null
+      }
+    },
+    "1b_register": {
+      "status": 200,
+      "body": {
+        "source_id": "3723682575DE4F949438A1B87E",
+        "pipeline_run_id": null,
+        "created": true,
+        "summary": {
+          "path": "/test/incoming/1165414093_slope_20260818_105105_105120",
+          "name": "1165414093_slope_20260818_105105_105120",
+          "file_count": 1,
+          "topic_count": 22,
+          "message_count": 11279,
+          "duration_ns": 14980806397,
+          "total_size_bytes": 239415296
+        },
+        "ingest": {
+          "matched": true,
+          "scheduled_purposes": [
+            "scene_slice"
+          ],
+          "self_built": false,
+          "config_required": false
+        }
+      }
+    },
+    "1c2_ready_precondition": {
+      "source_status_before": "DISCOVERED",
+      "set_to": "READY",
+      "note": "harness precondition; app code has 0 setters of source_status=READY (finding #1)"
+    },
+    "1c_source_detail": {
+      "status": 200,
+      "body": {
+        "source_id": "3723682575DE4F949438A1B87E",
+        "bag": {
+          "bag_uid": "3723682575DE4F949438A1B87E",
+          "name": "1165414093_slope_20260818_105105_105120",
+          "status": "READY",
+          "relative_path": "incoming/1165414093_slope_20260818_105105_105120",
+          "started_at": "2026-08-18T10:51:05",
+          "duration_ns": 14

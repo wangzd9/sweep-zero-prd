@@ -1,0 +1,14 @@
+{
+  "event_id": "c-t11s-batch-1012-obs63-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T08:31:54+08:00",
+  "recorded_at": "2026-10-14T08:33:30+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs62（08:20-08:24 实测）后新一轮：prerun 08:28:53 指纹 9a72e969 changed_sources=sessions/C.md（obs62 落盘+08:23 勘误行自产，无他角色新输入）；ACK 21:07:41 在案不重复领取",
+  "summary": "C 第63轮只读观察（处理机 08:30-08:31 实测）：与 obs62 **零状态变化**——scene-4acf689f（16_02_03 正式链 source 91FFEEC1…/submission 24d60fee…）仍 SCENE_RUNNING attempt=1 lease_owner=platform-local，lease_expires_at 08:32:35→08:33:35 正常续租（heartbeat 活跃）、八步 QUEUED（阶段边界写口径，本轮未逐步复读）、proxy 8767 active_runs=[4acf689f ACCEPTED]、work 树 find -newermt 08:20=0 零新写、checkpoint.json mtime 2026-10-14 00:23:10 未翻（模型段完成信号未到）；VLM 面 llm-server /tmp/vllm_qwen38.log 08:31 末两行=POST /v1/chat/completions 200 OK 连续（推理活跃续证，与前轮采样口径一致）；proxy 容器 /proc/1/net/tcp ESTAB(state 01)=6 条（obs62 1 条 ESTAB 指向 192.168.2.45:8002，本轮 awk state 计数口径含 listen 侧差异，活跃连接非消失）；资源/入口面：NAS //192.168.2.77/public 98T/70T/29T 71% 不变、18000/health/ready=production ready、up 5 天 22:49、load 2.44/2.30/2.12 与 obs59-62 同量级（C 未起任何进程）、incoming/spray 仍仅 16_33_10 空包目录（D6 A 面不变）。本批 8 包无新终态。**无升级条件命中**（heartbeat 续租正常/run 未 FAILED/VLM 200 OK 活跃）。另核 08:10 后 inbox/3号 与 inbox/coordinator 零新增（find 实测），无 C 新派单/无返修单。C 全程只读（ssh curl 8180/8767/18000、find/stat/ls/df/uptime、docker exec 只读、llm-server 读 vllm log），未 kill/未删/未重启/未 retry/未改任何生产路径；canonical sessions/C.md 追加前末行换行已核验（612 行、ends_nl=True）、计算/校验在前共享文件最后写入；旧镜像 inbox/sessions/C.md 本轮未触。租约 owner C-cron-poll-20261014-082853-t11s-obs63（08:30:15 claim，token 7c0d9939 整体 JSON 解析 len=32）。白天口径：状态变化即时通报，本轮无变化不报进度。",
+  "evidence": "处理机 08:30:29-08:31:54 只读实测：8180 run status=SCENE_RUNNING lease_expires_at 08:33:35（obs62 后二次刷新，续租活跃）；8767/health ok active_runs=[scene-4acf689f ACCEPTED pid1]；work 树 /home/data-process/scene/work/scene-4acf689f… attempt-1/checkpoint.json mtime 00:23:10.474817688 未翻、find -newermt 08:20 零新写；llm-server tail -2=两行 POST 200 OK；NAS 98T/70T/29T 71%；load 2.44/2.30/2.12；18000 ready=production；incoming/spray ls 仅 rosbag2_2026_10_12-16_33_10",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按 ruling-4acf 口径（heartbeat 4 连败/FAILED/VLM Wait 持续>0）未命中不升级；③ 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核（A 面）",
+  "source": "sessions/C.md append + 处理机/llm-server 只读实测"
+}

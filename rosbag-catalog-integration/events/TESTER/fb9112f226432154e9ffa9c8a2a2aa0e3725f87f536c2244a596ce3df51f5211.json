@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-015453-sr-rework-notice",
+  "occurred_at": "2026-10-13T01:57:10+08:00",
+  "recorded_at": "2026-10-13T01:57:10+08:00",
+  "role": "TESTER",
+  "task": "TASK-07B",
+  "attempt": "r2",
+  "status": "IDLE_STANDBY",
+  "summary": "巡检：07B强审查SUCCEEDED=REWORK_REQUIRED（SR-01~04 CORRECTION + SR-05 VERIFICATION_GAP 指 TESTER 隔离MySQL真并发409）；TESTER 无新派单维持空闲待命，origin/main 502bf8e 未变；16A OCR 协调者在途",
+  "evidence": "reviews/strongmodel/runs/50c665e48cb3465c95d29da7bf1446ce/result.md",
+  "next": "等协调者裁决返修与 TESTER 验证派单"
+}

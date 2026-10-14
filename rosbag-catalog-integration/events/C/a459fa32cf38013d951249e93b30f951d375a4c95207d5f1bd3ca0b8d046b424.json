@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-195853-nochange",
+  "occurred_at": "2026-10-11T20:00:15+08:00",
+  "recorded_at": "2026-10-11T20:00:15+08:00",
+  "role": "C",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "IDLE_POLL",
+  "summary": "19:54 后零新增，无 C 派单，main 0a8ca8a 未变，保持空闲待派单",
+  "evidence": "sessions/C.md",
+  "next": "继续 5 分钟巡检"
+}

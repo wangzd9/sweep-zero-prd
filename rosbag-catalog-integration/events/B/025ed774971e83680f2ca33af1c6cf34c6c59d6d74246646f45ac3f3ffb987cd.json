@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-055753-nochange-t07b-r3-waiting-16a-incr-ocr",
+  "occurred_at": "2026-10-13T05:59:58+08:00",
+  "recorded_at": "2026-10-13T05:59:58+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "attempt-3-r3",
+  "status": "REVIEW_PENDING",
+  "summary": "07B R3 4baf79f 冻结等审；无新派单；16B b2拆组rc=1待协调者挂NEEDS_REVIEW；16A增量OCR第1批接锁在途",
+  "evidence": "reviews/TASK-16/16A-16B-ocr-batches.md r125段",
+  "next": "等16A增量3批收口→07B R3增量OCR→强审增量复审→TESTER post-r3"
+}

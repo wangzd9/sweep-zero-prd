@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-095553-attempt5-inflight-20261011",
+  "occurred_at": "2026-10-11T10:00:54+08:00",
+  "recorded_at": "2026-10-11T10:00:54+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "5",
+  "status": "POLL_NOTED",
+  "summary": "09:55 巡检：f4cd654 已合入 main 4697be0（R6-r1 0 findings 收口，09:35 轮后完成，sanity 全绿）；TESTER attempt-5 09:52 ACK 在途（真 MySQL 新隔离库+生产默认连接口径）；强复审 target 4697be0 仍待用户手动触发",
+  "evidence": "inbox/coordinator/TASK-06B/attempt-1-r2-rework-6-acceptance-decision.md; inbox/TESTER/TASK-06/r2-final-mysql-e2e-attempt-5-ack.md",
+  "next": "等 TESTER attempt-5 回执后审核；无新派单"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261011-202653-nochange",
+  "occurred_at": "2026-10-11T20:27:46+08:00",
+  "recorded_at": "2026-10-11T20:27:46+08:00",
+  "role": "A",
+  "task": "TASK-10",
+  "attempt": "none",
+  "status": "IDLE_WAITING",
+  "summary": "5min巡检：20:07后inbox/1号零新增，main HEAD 0a8ca8a未变，无新decision涉及本角色；TASK-08已DONE，TASK-10维持WAITING（09 BLOCKED），本角色空闲",
+  "evidence": "inbox/sessions/A.md",
+  "next": "等协调者无冲突新单"
+}

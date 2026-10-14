@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-ack-baseline-20261013",
+  "occurred_at": "2026-10-13T21:10:30+08:00",
+  "recorded_at": "2026-10-13T21:10:30+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "ACKED",
+  "summary": "11S-BATCH-1012 C 首轮 ACK+只读观察基线：独立ACK落盘；接收入口incoming/spray实测空0包+扫描树外暂存未创建→A尚未落任何1012包、本批run未启动；生产scene链在处理机(本机systemd无rosbag-scene-host unit/无8765-8767 LISTEN, C待A落包后按run只读接续); 本机root scene_host_proxy/orchestrator为本机Compose非C发起不接管; 3c9c496在库(HEAD 63bfcf8纯文档领先)",
+  "evidence": "inbox/3号/TASK-11S-BATCH-1012/attempt-1-ack.md; sessions/C.md 554行",
+  "next": "等待A上传落包/正式提交(runtime_tools冻结spec跨回合), C按run只读接续观察处理机装配/资源/租约/进度, 发现生产问题取证报协调者"
+}

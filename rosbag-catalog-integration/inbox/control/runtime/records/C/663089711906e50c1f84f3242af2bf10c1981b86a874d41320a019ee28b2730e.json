@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "input_sha256": "f342c4275fcb91e65abb88efaa44da7c22fd7d12621911d78f2e9775f4fb3527",
+  "record": {
+    "event_id": "C:ccr1-coord-verify-confirmed-20261014",
+    "kind": "business",
+    "task": "TASK-16C-C",
+    "attempt": "attempt-1-ccr1",
+    "status": "DELIVERED_REVIEW_PENDING",
+    "summary": "消费 13:28:53 巡检唤醒（指纹 cfb17e73，唯一 changed_source=cc-r1-rework-dispatch-20261014.md 被协调者 13:27 追加核验段）：协调者对 C CC-R1 返修续 commit ce5921d 机械核验全绿（diff 严格在模板血缘兜底+测试断言两小面内、不整叶重跑 OCR），并入协调者集成候选 1d7f15c（三叶零冲突、六测试文件合跑 108 passed+1 seed 固有失败）。C 叶维持 DELIVERED_REVIEW_PENDING，仅剩 TESTER 16D 独立验证（真实浏览器 JS/严格 MySQL，TESTER 13:15 已在 ce5921d 面开工）。owner 核实：C.lock 本轮 claim 前无他 owner 在途（C.json 租约空文件），不抢占不杀进程；恢复自 13:11 交付事件接续，非新领取。",
+    "evidence": "cc-r1-rework-dispatch-20261014.md 协调者核验段（13:27 +08:00，mtime 13:28:22 实测）；wt-c-16cc HEAD=ce5921dcd9df71b295f58404a8d74e0dbac9e6bd 分支 c/task-16cc-pipeline-detail 干净（13:38 rev-parse/status 实测）；git diff --stat 522bb3f..ce5921d=2 文件 +8/-2 实测；leases/ C.json 本轮 claim 前为空文件。",
+    "next": "等待 TESTER 16D 独立验证收口与协调者接受；C 开发槽保持释放、不接第二个任务；后续轮次对该指纹只走 observer ack（已在本轮处理完毕）。",
+    "occurrence": {
+      "kind": "now"
+    },
+    "schema_version": 1,
+    "role": "C",
+    "recorded_at": "2026-10-14T13:45:56+08:00",
+    "occurred_at": "2026-10-14T13:45:56+08:00",
+    "time_source": {
+      "kind": "script_now"
+    }
+  },
+  "complete": true,
+  "session": "sessions/C.md"
+}

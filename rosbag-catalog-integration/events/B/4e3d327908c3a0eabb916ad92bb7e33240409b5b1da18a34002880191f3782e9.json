@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-205253-nochange-t07b-ocr-bags-html-1low-detail-inflight-idle",
+  "occurred_at": "2026-10-12T20:56:32+08:00",
+  "recorded_at": "2026-10-12T20:56:32+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "T07B交付冻结等审；OCR bags.html 1 low + detail.html 在途；无新派单",
+  "evidence": "sessions/B.md",
+  "next": "等OCR收口与b3/low裁决"
+}

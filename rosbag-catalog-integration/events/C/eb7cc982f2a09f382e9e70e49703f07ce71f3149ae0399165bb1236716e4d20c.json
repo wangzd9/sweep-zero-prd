@@ -1,0 +1,12 @@
+{
+  "event_id": "eb7cc982f2a09f382e9e70e49703f07ce71f3149ae0399165bb1236716e4d20c",
+  "occurred_at": "2026-10-11T18:28:53+08:00",
+  "recorded_at": "2026-10-11T18:28:53+08:00",
+  "role": "C",
+  "task": "TASK-08",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "无C新派单；只读观察：OCR C1C2-r1 v2 runner(18:29:21 resume c56d992c)实测已无活进程，log停18:29:21/state 0字节/ocr.lock无holder，待协调者按§4裁决resume或重跑(硬截止19:10)；2号t08c-1 bf48a45仍REVIEW_PENDING未合入；main 98f6c88未变、wt-03b 6f1a9ad干净",
+  "evidence": "c1c2-r1.log mtime 2026-10-11 18:29:21；c1c2-r1-state.txt 0B；fuser ocr.lock 无holder；ps -p 2618840 不存在；inbox/3号 最新10-10 00:58；inbox/coordinator 最新17:01(1号范围)",
+  "next": "保持空闲待派单；OCR C1C2-r1 在途处置归协调者/2号范围，C不接管不催单"
+}

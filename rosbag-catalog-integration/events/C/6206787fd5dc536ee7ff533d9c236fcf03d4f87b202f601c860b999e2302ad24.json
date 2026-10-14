@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-050353-nochange-t16b-resume-b1-inflight",
+  "occurred_at": "2026-10-13T05:16:00+08:00",
+  "recorded_at": "2026-10-13T05:16:00+08:00",
+  "role": "C",
+  "task": "TASK-16",
+  "attempt": "2",
+  "status": "INFLIGHT",
+  "summary": "巡检05:03:53：C范围零新增、无C新派单；16B OCR resume b1存活（协调者范围C不接管）b2排队；main c2018dd/502bf8e零app面漂移；wt-03b 6f1a9ad干净；无C业务进程；保持空闲待16B收口",
+  "evidence": "ps1198826-26min",
+  "next": "下轮核b1收口"
+}

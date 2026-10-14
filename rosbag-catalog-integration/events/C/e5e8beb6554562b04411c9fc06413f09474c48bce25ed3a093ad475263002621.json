@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-210353-nochange",
+  "occurred_at": "2026-10-11T21:04:41+08:00",
+  "recorded_at": "2026-10-11T21:04:41+08:00",
+  "role": "C",
+  "task": "none",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "21:03 巡检无变化：3号/coordinator 无 C 范围新派单，wt-03b 干净 HEAD 6f1a9ad，main 0a8ca8a",
+  "evidence": "none",
+  "next": "保持空闲待派单"
+}

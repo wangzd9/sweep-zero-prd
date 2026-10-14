@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-delivery-20261012-t07a-postmerge-verify-143953",
+  "occurred_at": "2026-10-12T14:50:27+08:00",
+  "recorded_at": "2026-10-12T14:50:27+08:00",
+  "role": "TESTER",
+  "task": "TASK-07A",
+  "attempt": "post-merge-verify-1",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "合入后独立验证回执已交付：main caf385b 快照 32/32 HTTP 断言 PASS（finding#1 筛选保留 9 项、finding#2 col-scene 150px+9列 6 项、attempt-1 12 段口径 17 项）+ pytest 7 passed / 329 passed 回归绿；夹具自造自清 0 残留；14:47 复核 origin/main 仍=caf385b 快照有效",
+  "evidence": "test-receipts/TEST-TASK07A-post-merge/attempt-1.md; /tmp/t07a_pm_final.log",
+  "next": "等协调者裁决 07A DONE 并派 07B"
+}

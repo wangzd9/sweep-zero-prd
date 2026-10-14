@@ -1,0 +1,12 @@
+{
+  "event_id": "b-deliver-20261011-163256-task08",
+  "occurred_at": "2026-10-11T16:35:42+08:00",
+  "recorded_at": "2026-10-11T16:35:42+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "联调报告+回执交付：真MySQL 8.4.11全链路PASS，文件级55/10红（对照SQLite全绿），I-1回归项36 passed确认有效；发现C1秒精度比较/C2乐观UPDATE 0行/C3夹具uid越宽2类+1新同型根因，零业务改动，待协调者裁决回派",
+  "evidence": "reports/TASK-08/attempt-1.md;receipts/TASK-08/attempt-1.md",
+  "next": "等协调者审查与回派裁决；不占第二开发槽"
+}

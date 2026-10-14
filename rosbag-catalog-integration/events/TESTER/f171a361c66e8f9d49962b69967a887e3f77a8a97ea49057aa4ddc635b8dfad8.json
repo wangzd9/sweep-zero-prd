@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-023453-nochange-p0closed",
+  "occurred_at": "2026-10-12T02:36:35+08:00",
+  "recorded_at": "2026-10-12T02:36:35+08:00",
+  "role": "TESTER",
+  "task": "TASK-10",
+  "attempt": "2",
+  "status": "IDLE",
+  "summary": "P0收口待命：e2e-reverify-v2 PASS 已被协调者 ACCEPT，TASK-10 DONE（main 453da0c），停止派发不转 TASK-11；零 TESTER 新派单/进程/租约",
+  "evidence": "test-receipts/TEST-TASK10-e2e-reverify/attempt-2.md",
+  "next": "保持空闲，等待 TASK-11 授权或新派单"
+}

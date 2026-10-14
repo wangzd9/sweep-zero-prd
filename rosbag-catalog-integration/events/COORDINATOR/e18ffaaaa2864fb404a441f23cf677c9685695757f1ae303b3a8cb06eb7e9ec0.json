@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-1824-tester-final-report-rework-dispatched-20261010",
+  "occurred_at": "2026-10-10T18:41:13+08:00",
+  "recorded_at": "2026-10-10T18:41:13+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "r2-final-mysql-e2e",
+  "status": "REWORK_DISPATCHED",
+  "summary": "TESTER 终测交付 6 PASS/1 FAIL：S1 R2-01 FAIL=alembic_version VARCHAR(32) 容不下 33 字符 head revision 20261009_02_ingest_frozen_columns，MySQL upgrade head 必 1406（含本地栈/生产库影响面）；S2/S3/S4/B8c/B8a/r6 全 PASS（18:11 S3 新 FAIL 信号被推翻）；缺陷2=06B 夹具 _parent uid 超长。回派 1号 attempt-5-r2-final-s1-fix（幂等加宽迁移，revision ID ≤32）+ 2号 attempt-1-r2-final-fixture-fix（单文件单 commit），可并行；06 聚合门禁保持关闭，解锁路径=修复合入+OCR+TESTER 复测+强模型增量复审（用户手动）",
+  "evidence": "test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-1.md；inbox/1号/TASK-03B/attempt-5-r2-final-s1-fix.md；inbox/2号/TASK-06B/attempt-1-r2-final-fixture-fix.md",
+  "next": "等 1号/2号 ACK 与交付；交付后协调者串行 OCR 再合入"
+}

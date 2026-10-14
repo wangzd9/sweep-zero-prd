@@ -1,0 +1,20 @@
+{
+  "event_id": "TESTER:t16d-cc-r1-and-a-corr-verify-start-20261014-1315",
+  "kind": "business",
+  "task": "TASK-16D",
+  "attempt": "attempt-1",
+  "status": "PREP",
+  "summary": "消费两条新待验输入并开工增量验证：C 叶 CC-R1 返修 ce5921d（13:10 交付 REVIEW_PENDING，模板血缘兜底补 ol 开始标签+断言同步）与 A 叶勘误续 commit 563a91a（12:46，test_web 断言 1 行+MySQL 关键行为明确交 TESTER）。计划：专属 wt-tester-16d-A@563a91a；wt-tester-16d-C 从 522bb3f 前移 detached 到 ce5921d 做 C 返修面独立复跑与浏览器面；A 面查询/API+严格 MySQL 关键行为随后。",
+  "evidence": "receipts/TASK-16C-C/attempt-1.md CC-R1 段；receipts/TASK-16C-A/attempt-1.md 续单段；git log a/task-16c-a-query-api=563a91a c/task-16cc-pipeline-detail=ce5921d",
+  "next": "C 返修面 pytest+模板核→A 面查询/API+MySQL→Compose 栈逐叶重建浏览器取证→回执追加→event→release",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "TESTER",
+  "recorded_at": "2026-10-14T13:25:10+08:00",
+  "occurred_at": "2026-10-14T13:25:10+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

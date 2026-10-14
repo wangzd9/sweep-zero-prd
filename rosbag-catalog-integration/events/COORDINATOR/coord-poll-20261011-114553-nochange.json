@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-114553-nochange",
+  "occurred_at": "2026-10-11T11:47:20.000000+08:00",
+  "recorded_at": "2026-10-11T11:47:20.000000+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "11:35 后零业务变化：main HEAD b7cee07=origin/main 复核一致；唯一新增=B 11:43/C 11:41 例行 IDLE 心跳（非业务）；强复审 R2I-20261010-06 结果文件仍不存在，保持 READY_FOR_USER_TRIGGER 等用户手动触发；A/B/C/TESTER 全空闲、无在途 ocr/pytest",
+  "evidence": "git rev-parse HEAD=origin/main=b7cee07c71adf8fcfec5465247170f45f9c648e9; events/B 224e7949 (IDLE); events/C cfe36aa2 (IDLE); reviews/strongmodel 无 R2I-20261010-06-result.md（目录最新 11:22 pack target b7cee07）",
+  "next": "下轮核强复审结果文件与事件；06 聚合放行=强复审 PASS → 03/05/06 聚合 DONE → TASK-08 联调派单"
+}

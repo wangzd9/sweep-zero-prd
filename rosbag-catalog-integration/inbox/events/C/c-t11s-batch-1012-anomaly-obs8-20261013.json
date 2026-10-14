@@ -1,0 +1,14 @@
+{
+  "event_id": "c-t11s-batch-1012-anomaly-obs8-20261013",
+  "occurred_at": "2026-10-13T22:40:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "第8轮只读观察（obs7 22:16 后 ~24 分钟窗），接续 c-t11s-batch-1012-anomaly-obs7-20261013 异常链；prerun 22:33:53 指纹 7b15715a（changed=BATCH-STATUS.md + ruling-doublewrite-2210.md，协调者 22:10 双写冲突裁决）",
+  "summary": "消费协调者 22:10 裁决 ruling-doublewrite-2210.md：C 范围 18000 归因正式解除（非生产故障，系 C 在本开发机探错主机；生产 backend 在处理机侧 18000），C 继续只读观察。obs8 实测：① 处理机 18000/health/ready=production ready + 8767 active_runs=[]，与裁决一致，C 面异常链收口；② A 进入裁决续跑准备面：新 op 目录 finalbag-160203（22:30 仅 start.lock 未起跑）、本机/处理机均无拷贝进程、源 16_02_03 du=10105921766 完整在位未变；③ bigbags-copy 僵尸 RUNNING 记录同态未变（收口属 A 面裁决第1项，C 不代跑）；④ NAS find -newermt 22:25 零命中=批次零移动；staging 空、incoming/spray 仅 16_33_10、ready/spray 顶层5 flat + 20261012/ 4 date-grouped 副本并存（清除属 A 面）；⑤ 处理机 NAS 余量 29T(71%) load 0.50 无资源风险；⑥ leases/A.json 在途（1号自身巡检 22:26 claim，未到期不接管）；⑦ 账实核对申报：ready/spray/rosbag2_2026_10_12-16_58_28 目录 mtime 21:54 晚于 upload-ledger 末条 21:41:32（ledger mtime 21:43:56 未变）=该包 flat 落位晚于 ledger 记账，供 A 核账/TESTER 血缘取证，C 只申报不处置。C 全程只读（ssh curl/ps/du/stat/ls/cat），未 kill/未删/未重启/未改任何生产路径。",
+  "evidence": "ssh processing-machine: curl 127.0.0.1:18000/health/ready -> {\"status\":\"ready\",\"environment\":\"production\"}; curl 127.0.0.1:8767/health -> {\"status\":\"ok\",\"pid\":1,\"active_runs\":[]}; ps 无 cp -a/sha256sum/rsync; df /mnt/nas_backup 98T 70T 29T 71%; find /mnt/nas_backup/rosbag_scene_processing -newermt 22:25 零命中; ls operations/A: finalbag-160203/ 仅 start.lock(22:30), bigbags-copy result.json 仍 status=RUNNING pid=2520120; du -sb ~/下载/1012/rosbag2_2026_10_12-16_02_03 = 10105921766; stat upload-ledger.json mtime=2026-10-13 21:43:56; ls -la ready/spray 顶层 16_58_28 mtime=21:54; cat leases/A.json owner=cron-a-poll-d5cb80cf2fc5-20261013-222900 claimed 22:26:10",
+  "next": "等待 A 裁决处置面推进（16_02_03 finalbag op 起跑/污染 submission 清除/flat 续提交，均 A 面）；NAS find 有批次移动或 new op result.json 生成后 C 接续只读观察；大包跨夜继续不 kill/retry；夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]",
+  "source": "inbox/events/C/c-t11s-batch-1012-anomaly-obs8-20261013.json"
+}

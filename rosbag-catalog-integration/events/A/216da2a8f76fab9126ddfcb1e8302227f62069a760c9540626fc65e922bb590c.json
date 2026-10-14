@@ -1,0 +1,12 @@
+{
+  "event_id": "a-t11e-rerun-observation-run56-fail-20261012-1710",
+  "occurred_at": "2026-10-12T17:17:54+08:00",
+  "recorded_at": "2026-10-12T17:17:54+08:00",
+  "role": "A",
+  "task": "TASK-11",
+  "attempt": "t11e-external",
+  "status": "OBSERVED_EXTERNAL_DRIVER_FAIL",
+  "summary": "t11e 驱动复跑 run5/run6 均 FAIL 收口（complete-scene 409 / register 409），进程已退出，归属零申报，生产门禁维持 PRODUCTION BLOCKED",
+  "evidence": "inbox/events/A/a-t11e-run56-fail-20261012-1710.md; ~/.hermes/cache/scratch/t11e_run5.out; ~/.hermes/cache/scratch/t11e_run6.out",
+  "next": "协调者核 run5/run6 归属与处置；本角色不代判不清理"
+}

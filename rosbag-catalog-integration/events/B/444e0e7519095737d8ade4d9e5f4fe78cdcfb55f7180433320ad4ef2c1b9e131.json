@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-070253-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T07:04:16+08:00",
+  "recorded_at": "2026-10-12T07:04:16+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "POLL_NO_CHANGE",
+  "summary": "07:02 巡检零业务变化：无新派单/返修，main 453da0c 双核不变，wt-04a-t10d3 冻结 0943885，无本侧在途进程，维持 IDLE_WAITING",
+  "evidence": "sessions/B.md",
+  "next": "按需巡检与事件接续"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261011-093153-recover-nochange",
+  "occurred_at": "2026-10-11T09:35:39+08:00",
+  "recorded_at": "2026-10-11T09:35:39+08:00",
+  "role": "A",
+  "task": "none",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "上轮a-poll-20261011-092653租约遗留未释放且无心跳，核实进程已退出后按协议recover再claim；巡检无本角色新派单返修，main零前移",
+  "evidence": "/home/wang/.hermes/cache/scratch/a-recover-evidence-20261011-0934.txt",
+  "next": "继续5min巡检等协调者释放槽/新单"
+}

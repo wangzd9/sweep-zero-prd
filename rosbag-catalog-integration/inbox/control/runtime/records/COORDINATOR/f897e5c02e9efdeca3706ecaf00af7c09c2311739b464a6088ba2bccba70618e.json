@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "input_sha256": "b4e01cac557b39417e3169a656bce8ad0cc08d9ff3e6739ef76f72502185025c",
+  "record": {
+    "kind": "business",
+    "event_id": "COORDINATOR:coord-t16ca-r12-1489bc6-verified-incremental-ocr-started-20261014T1802",
+    "task": "TASK-16C-A",
+    "attempt": "attempt-1-r12-incremental",
+    "status": "REVIEW_PENDING",
+    "summary": "A 叶 R1-2（view_label 改新名）commit 1489bc6（17:40:26，+1/-1 仅 bag_search_service.py:664）协调者 18:01 机械核验独立复跑全绿（祖先链 4838ef8→1489bc6、diff 单行字面量、ruff 全绿、74 passed+1 seed 固有 bounded-query stash 同口径）。A 叶最终冻结 head=1489bc6，据此经唯一入口起跑单文件增量 OCR run 66ca40d3（base bd0db1d..1489bc6，b01=bag_search_service.py 单批，scene_result_query.py 与 tests 显式排除——前者已由补审 0aba25ee 16:24 覆盖且 seed..1489bc6 内容未变，R1/R1-2 均未触碰，diff --stat 独立核在案），18:02 SUBMITTED 独立 service 持 ocr.lock。收口后逐条裁决：零 CORRECTION 级 + TESTER 增量面（A-OCR-2 组合断言 + view_label 页面断言）→ A 叶接受 → 三叶固定集成候选（seed+A 1489bc6+B e399daf+C ce5921d）→ TESTER 16D 联合验收（大包按取消链证据口径）→ 16C 聚合。并发协调者会话 17:32 重复清理单已更正、F2 冲突已统一（17:30 ruling 补段为准）；B 叶 OCR 门禁满足（513ab61d 17:09 收口 1 finding 转 A 已闭环）、B 17:32 报空闲等联验。1012 大包 CANCELLED 已登记（前事件），flat 三提交推进条件具备但 owner=A/Codex 绑定线不抢跑。",
+    "evidence": "wt-01-t16ca git log 1489bc6（17:40:26）+ git diff 4838ef8..1489bc6 单行 view_label + 协调者独立 pytest/ruff 复跑（18:01）；receipts/TASK-16C-A/attempt-1.md R1-2 段 + inbox/1号/TASK-16C-A/ocr-r1-rework-ack-20261014.md；events/A a-t16ca-ocr-r12-chip-label-1489bc6-delivered-20261014T174026；reviews/TASK-16C-A/ocr-run-20261014-r12/spec.json（排除清单+preview 入选 1）+ start 返回 SUBMITTED unit 66ca40d3 MainPID 3994474 active",
+    "next": "run 66ca40d3 收口后逐条裁决（AWAITING_DECISION 非 PASS）；零 CORRECTION 级即 TESTER 16D A 叶增量面（MySQL/浏览器：A-OCR-2 组合断言+view_label 页面断言）→ A 叶接受决策落盘；随后重建三叶固定集成候选+全仓复跑 → 16D 联合验收 → 16C 聚合；16R fe17e8a..3c9c496 水雾债补审候选排本 run 收口+ocr.lock 空窗后经唯一入口串行",
+    "occurrence": {
+      "kind": "now"
+    },
+    "schema_version": 1,
+    "role": "COORDINATOR",
+    "recorded_at": "2026-10-14T18:03:54+08:00",
+    "occurred_at": "2026-10-14T18:03:54+08:00",
+    "time_source": {
+      "kind": "script_now"
+    }
+  },
+  "complete": true,
+  "session": "sessions/COORDINATOR.md"
+}

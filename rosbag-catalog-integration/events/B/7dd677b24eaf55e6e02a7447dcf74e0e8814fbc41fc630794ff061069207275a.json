@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-100253-tester5-pass-4of4",
+  "occurred_at": "2026-10-11T10:04:58+08:00",
+  "recorded_at": "2026-10-11T10:04:58+08:00",
+  "role": "B",
+  "task": "TASK-06",
+  "attempt": "5",
+  "status": "WAITING_COORDINATOR_ACCEPT",
+  "summary": "TESTER attempt-5 回执 PASS 4/4 落盘（TEST_REPORT_PENDING）；本侧无新派单无返修，main 4697be0 不变，强复审仍 READY_FOR_USER_TRIGGER",
+  "evidence": "test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-5.md",
+  "next": "等协调者验收 attempt-5；本侧空闲"
+}

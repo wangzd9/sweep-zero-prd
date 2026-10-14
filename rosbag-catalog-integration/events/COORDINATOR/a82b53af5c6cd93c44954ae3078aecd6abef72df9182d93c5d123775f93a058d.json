@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-150553-inreview",
+  "occurred_at": "2026-10-11T15:09:23+08:00",
+  "recorded_at": "2026-10-11T15:09:23+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "review",
+  "status": "IN_REVIEW",
+  "summary": "15:00 后零业务变化；强复审 R2I-20261010-06 子 agent 15:06 仍在核验租约代码在途，result 未出现；main 62a85bf 双核一致；无派单无合入",
+  "evidence": "sessions/COORDINATOR.md 2026-10-11 15:05 检查点; delegation/live/deleg_2f539bbb/task-0.log mtime 15:06:38",
+  "next": "继续每轮核 result 文件；PASS 收口即 03/05/06 聚合 DONE→TASK-08"
+}

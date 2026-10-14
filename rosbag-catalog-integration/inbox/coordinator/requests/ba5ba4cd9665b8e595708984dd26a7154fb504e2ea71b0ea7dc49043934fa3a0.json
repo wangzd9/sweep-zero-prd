@@ -1,0 +1,22 @@
+{
+  "schema": "coordinator-request/v1",
+  "request_id": "ba5ba4cd9665b8e595708984dd26a7154fb504e2ea71b0ea7dc49043934fa3a0",
+  "received_at": "2026-10-13T19:26:52+08:00",
+  "status": "HANDLED",
+  "message_id": "om_x100b63d51967f4a8dd4dafd06e79756",
+  "chat_id": "oc_b64dc5bf34ec1edcc8cce92ffd56604b",
+  "user_id": "ou_cb93c8e06b797e51a6f66a86f4c3fdaf",
+  "text": "我要求你调用大模型给我讲一下现在呢，强模型进展怎么样",
+  "context": {
+    "reply_to_message_id": null,
+    "reply_to_text": null,
+    "reply_to_author_id": null,
+    "media_urls": [],
+    "media_types": [],
+    "channel_context": null,
+    "message_type": "text"
+  },
+  "handled_at": "2026-10-13T20:47:25+08:00",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/control/PROGRESS-REQUESTS-CLOSE-20261013.md",
+  "evidence_sha256": "4aa614c3559864a0cb35913160830b4813ce50325b0fe9515fde4f8767eb72e8"
+}

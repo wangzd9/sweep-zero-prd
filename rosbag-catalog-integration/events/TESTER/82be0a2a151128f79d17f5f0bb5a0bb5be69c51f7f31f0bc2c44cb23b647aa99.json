@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-07b-post-r-ack-20261013-075953",
+  "occurred_at": "2026-10-13T08:02:53+08:00",
+  "recorded_at": "2026-10-13T08:02:53+08:00",
+  "role": "TESTER",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "ACKED",
+  "summary": "测试者 ACK 07B-post-r 合入后独立验证派单（target 62620a3，SR-05 真 MySQL 双连接 200/409 + R4 迁移面双库探针 + 定向回归）",
+  "evidence": "inbox/TESTER/TASK-07B/post-r-ack.md",
+  "next": "独立验证开工（长任务留进程检查点后释放控制租约）"
+}

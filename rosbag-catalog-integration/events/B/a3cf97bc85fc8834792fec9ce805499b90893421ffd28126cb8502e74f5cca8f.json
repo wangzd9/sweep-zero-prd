@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-221253-t07b-ocr-r101-ruling-b5-resume-inflight-idle",
+  "occurred_at": "2026-10-12T22:14:48+08:00",
+  "recorded_at": "2026-10-12T22:14:48+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "07B attempt-1 交付冻结等审；协调者 r101 findings 裁决落盘（b9-1 HIGH+b3 MEDIUM CONFIRMED，返修暂缓至 b5/b7 resume 收口后一次最小返修）；b5 最后一次 resume ps 实测在途；本侧 HEAD f4bfcf2 遵裁决不移动",
+  "evidence": "inbox/coordinator/TASK-07B/ocr-r101-findings-ruling.md",
+  "next": "等 b5/b7 收口与返修问题 ID 单；无新派单"
+}

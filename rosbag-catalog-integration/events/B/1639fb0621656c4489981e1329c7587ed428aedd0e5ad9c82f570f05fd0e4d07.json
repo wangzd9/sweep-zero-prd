@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-212753-t07b-ocr-b9b10-done-idle",
+  "occurred_at": "2026-10-12T21:29:52+08:00",
+  "recorded_at": "2026-10-12T21:29:52+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "巡检无变化 OCR r95 detached 收口 b9 1 low 加 round2 超时待核 b10 0 findings b5 b7 仍 FAILED 待 resume b3 medium 裁决",
+  "evidence": "scratch/t07b/ocr/remaining_progress.txt",
+  "next": "冻结等协调者收口与 b3 裁决"
+}

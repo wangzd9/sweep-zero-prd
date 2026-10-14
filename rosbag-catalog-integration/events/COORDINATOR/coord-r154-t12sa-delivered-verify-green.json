@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r154-t12sa-delivered-verify-green",
+  "occurred_at": "2026-10-13T13:40:00+08:00",
+  "recorded_at": "2026-10-13T13:40:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-A",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "r154 巡检（指纹 a1860727）：① A 交付冻结 12S-A attempt-1（head 77c395b，base 6fb42c4，5 文件 +1272/-32）→ 机械核验全绿（祖先关系 OK、git diff --stat 与回执清单逐文件一致、wt-01-t12sa 独立复跑 25 passed、ruff clean；4 个既有失败 base 复现与本单无关）→ 串行 OCR 排队等待：12S-B c01 链（pid 1897396，session 080bc21b 13:36 仍活跃推进，无 session_end/manifest 不判停止）持串行槽，c01 收口裁决后接 12S-A 批 → 12S-B 链 → TESTER 独立验证 → 合入；A 开发槽释放空闲待命（12S-C 依赖 16B+12S-A+B 未齐，不扩需求）。② C 已 ACK 16B attempt-2-r1（13:25，base 0208a73 六处修复+回归）开发中，租约在途不抢占，待回执。③ 强审授权 auth-24h-20261013 生效中（grant 6b2d83fb9，13:27:15–10-14 13:27:15，近60min 0/5、本授权累计 0、在途 0）；前次授权 last_call SR-07B-R4 SUCCEEDED（in 530310/out 8293/cached 471552，cost 未知）。",
+  "evidence": "inbox/1号/TASK-12S-A/attempt-1-receipt.md; git log/diff 77c395b; .venv pytest 25 passed 1.91s; ruff All checks passed; t12sb_ocr/progress.txt c01 START 13:28:15; ocr_session_status 080bc21b last_event llm_request 13:36:54Z; inbox/3号/TASK-16B/attempt-2-r1-ack.md 13:25; reviews/strongmodel/auth-24h-20261013.md",
+  "next": "下轮核 12S-B c01 收口 rc/findings → 逐条裁决 → c02 → 接 12S-A 增量 OCR 批；16B r1 回执落盘后机械核验；TESTER 待 12S-B 证据齐后派独立验证"
+}

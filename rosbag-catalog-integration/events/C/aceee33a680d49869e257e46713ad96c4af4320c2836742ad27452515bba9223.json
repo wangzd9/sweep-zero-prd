@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs3-20261013",
+  "occurred_at": "2026-10-13T21:23:18+08:00",
+  "recorded_at": "2026-10-13T21:24:33+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "11S-BATCH-1012 C 第3轮只读观察（夜间静默不群报）：changed_sources 消费=自产 obs2 event+sessions 自身+协调者 b-input-ruling-2117/BATCH-STATUS 21:19/manifest 21:18 口径更正（3 包 NEEDS_RUNTIME_RESULT→NOT_APPLICABLE，C 只入账不改）。新事实：A 上传已启动——incoming/spray/ 实测 2 包落位（rosbag2_2026_10_12-16_00_13 89653248+11718B、rosbag2_2026_10_12-16_31_25 25174016+10744B，mtime 21:21，字节与 manifest 完全一致）；staging spray-production-1012-20261013 0 文件（rename 已清）=A 短包已原子移入，正式提交证据尚未见；A 原生 execution pid2491657 17min 存活、租约 A.json owner A-batch-1012 pid2499583 21:10:42 claim 21:35 到期在途，C 不接管不双跑；NAS 余量 29T；ps 实测无 C 自发起业务进程；本批 run 未启动（scanner/ready 未见新登记），待 A 继续落空包与大包 operation",
+  "evidence": "incoming/spray ls -la 21:21 字节=manifest; staging 0 文件; leases/A.json 21:20 实测; ps -p 2491657 17:13; df 29T avail",
+  "next": "等 A 继续上传（空包 16_33_10 验拒绝路径+大包 operation）与正式提交；scanner/ready 出现本批登记后 C 按 run 只读接续处理机装配/资源/租约/进度（SCENE_EXEC_HOST 串行、大包跨夜不 kill/retry）；发现生产问题取证报协调者"
+}

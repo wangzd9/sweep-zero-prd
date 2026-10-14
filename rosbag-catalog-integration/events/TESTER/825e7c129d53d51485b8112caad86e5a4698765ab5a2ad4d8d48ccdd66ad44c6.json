@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-001453-nochange",
+  "occurred_at": "2026-10-13T00:19:57+08:00",
+  "recorded_at": "2026-10-13T00:19:57+08:00",
+  "role": "TESTER",
+  "task": "idle",
+  "attempt": "1",
+  "status": "NO_CHANGE",
+  "summary": "5分钟巡检：空闲待命，无 TESTER 派单/返修，origin/main 未变，07B R2 在 B 面 OCR 中",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/events/TESTER/tester-poll-20261013-001453-nochange.md",
+  "next": "保持空闲待命"
+}

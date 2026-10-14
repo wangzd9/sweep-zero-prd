@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-032853-nochange",
+  "occurred_at": "2026-10-13T03:31:49+08:00",
+  "recorded_at": "2026-10-13T03:31:49+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "C 巡检 nochange：03:19 后 C 范围零新增，无新派单/返修单；协调者 r115 推进 16A OCR 12/14（b12 source_service 在途），16B 3 批仍排队未起跑；16B attempt-1 交付 0208a73 保持冻结 REVIEW_PENDING",
+  "evidence": "sessions/C.md 03:30 条目",
+  "next": "等 16B 串行 OCR v2 收口与协调者后续派单"
+}

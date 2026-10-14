@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261014-093753-protocol-echo-b-done-idle",
+  "occurred_at": "2026-10-14T09:38:00+08:00",
+  "recorded_at": "2026-10-14T09:44:54+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "prerun fp a0d7f665: only PROTOCOL.md changed (09:34:47, coordinator sync of 2026-10-14 progress-query rule), no B dispatch/rework. B attempt-1 input-applicability check remains DONE 21:12; IDLE_WAITING",
+  "evidence": "sessions/B.md 09:38 entry (verify sha 4236c4b26e13949d); inbox/2号 find newer 04:00 = 0 files; leases: no B; ps: no B business processes",
+  "next": "await next coordinator dispatch; 11:00 phase summary per protocol"
+}

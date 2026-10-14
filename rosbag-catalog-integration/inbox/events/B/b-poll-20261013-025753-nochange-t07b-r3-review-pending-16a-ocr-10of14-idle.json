@@ -1,0 +1,15 @@
+{
+  "event_id": "b-poll-20261013-025753-nochange-t07b-r3-review-pending-16a-ocr-10of14-idle",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "3-r3",
+  "status": "REVIEW_PENDING",
+  "checked_at": "2026-10-13T02:57:53+08:00",
+  "owner": "cron-b-poll-6f7471d8747c-20261013-025753",
+  "summary": "R3 4baf79f 交付冻结维持；无 B 新派单/返修；协调者 r112 口径 16A v2 OCR 10/14，R3 增量 OCR 排 v2 全批后",
+  "evidence": [
+    "sessions/B.md",
+    "reviews/TASK-16/16A-16B-ocr-batches.md"
+  ],
+  "next": "等协调者 v2 收口→R3 增量 OCR→强审增量复审→TESTER 07B-post-r3→合入"
+}

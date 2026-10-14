@@ -1,0 +1,28 @@
+{
+  "state": "HARD_DEADLINE",
+  "updated_at": "2026-10-13T11:53:35.039995+00:00",
+  "pid": 2334237,
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/coordinator-ocr-8820b42da33944fda513a5aa6b05d2b4.service",
+  "run_id": "8820b42da33944fda513a5aa6b05d2b4",
+  "unit": "coordinator-ocr-8820b42da33944fda513a5aa6b05d2b4.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "app/services/scene_result_report_service.py",
+        "scripts/scene_host_proxy.py"
+      ],
+      "state": "HARD_DEADLINE",
+      "started_at": "2026-10-13T10:48:34.084246+00:00",
+      "pid": 2334326,
+      "process_start_ticks": "28877559",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-codex-spray-r3-review/3e65796b-a207-4131-8da4-d124531ccd52.jsonl",
+      "session_mtime": 1791892355.8847942,
+      "returncode": 1,
+      "ended_at": "2026-10-13T11:53:34.870389+00:00",
+      "duration_seconds": 3900.79
+    }
+  ],
+  "gate_decision": "NOT_EVALUATED",
+  "ended_at": "2026-10-13T11:53:35.039999+00:00"
+}

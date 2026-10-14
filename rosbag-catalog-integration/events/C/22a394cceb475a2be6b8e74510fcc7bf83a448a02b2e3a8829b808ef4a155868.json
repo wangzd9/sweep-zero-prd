@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-051853-t16b-b1-3confirmed-b2-inflight",
+  "occurred_at": "2026-10-13T05:23:48+08:00",
+  "recorded_at": "2026-10-13T05:23:48+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "C 范围零新派单；16B b1 resume 收口 rc=0 3 findings 全 CONFIRMED（H1 崩溃恢复重复计费/M1 fail 死代码+缺 manifest/M2 成功路径 evidence 跳过），已 spot 核对 0208a73 代码面相符；b2 proxy resume pid 1229080 在途持 ocr.lock；等协调者 b2 收口后合并最小返修单派 C；交付冻结不自测",
+  "evidence": "sessions/C.md 05:19 条目 + inbox/events/COORDINATOR/coord-poll-20261013-051053-r123-t16b-resume-b1-3findings.md",
+  "next": "等 b2 收口→16B findings 合并裁决→最小返修单 ACK 后最小修复"
+}

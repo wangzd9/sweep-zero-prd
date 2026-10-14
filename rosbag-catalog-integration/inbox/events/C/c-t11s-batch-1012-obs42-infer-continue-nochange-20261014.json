@@ -1,0 +1,13 @@
+{
+ "event_id": "c-t11s-batch-1012-obs42-infer-continue-nochange-20261014",
+ "occurred_at": "2026-10-14T05:27:00+08:00",
+ "role": "C",
+ "task": "TASK-11S-BATCH-1012",
+ "attempt": "1",
+ "status": "OBSERVING",
+ "supersedes_context": "obs41（05:16）后新一轮：prerun 05:23:53 指纹 45b39972 changed_sources=sessions/C.md 自产 obs41 行；ACK 21:07:41 在案不重复领取",
+ "summary": "C 第42轮只读观察（处理机+llm-server 05:26-05:27 实测）：与 obs41 零状态变化=模型段完成信号仍未到，INFER 持续活跃，大包跨夜继续不 kill/不 retry/不判卡死。① scene-4acf689f SCENE_RUNNING attempt=1 error 空、heartbeat 05:26:53 活跃、lease_owner=platform-local；② 8767 active_runs=[scene-4acf689f ACCEPTED pid1]；③ proxy pid 3495931 TIME 01:18:15（+7s 持续非零）；④ 八步全 QUEUED、checkpoint.json mtime 00:23:10 未变、attempt-1 树 15min 零新写；⑤ 提交 7 条台账不变（4 SCHEDULED+3 PENDING_INPUT flat+1 PENDING_INPUT 空包）；⑥ VLM 直证 Running 3→2→3→2、Waiting 全 0、prefix 91.4%、MM 87.8%、gen 58.1-133.9 tok/s、POST 200 连发；⑦ NAS 71%/load 0.66 低位。**无升级条件命中**。C 全程只读。",
+ "evidence": "处理机 05:26-05:27 只读实测：ssh curl 8180/8767（run 行+heartbeat 05:26:53+active_runs）、docker top（pid 3495931 TIME 01:18:15）、find -newermt 15min=0、stat checkpoint.json=00:23:10、mysql 只读查询（pipeline_run/step_run/ingest_submission 7 条）、ls incoming/spray 与 .upload-staging；llm-server 直连读 /tmp/vllm_qwen38.log 05:26:47-05:27:17 四点采样；df/uptime。canonical sessions/C.md 追加前末行换行核验+append 写入+旧镜像 obs42 签名=0 断言。租约 owner C-cron-poll-20261014-0524-t11s-obs42（05:27:05 claim，token 352ff3e8 整体 JSON 解析）",
+ "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按裁决 ruling-4acf-infer-active-0218=heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且 proxy 无 ESTAB；③ 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账（含 ruling-dup-slices-0038 观察面）；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+ "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

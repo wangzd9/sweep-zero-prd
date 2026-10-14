@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-033353-nochange",
+  "occurred_at": "2026-10-13T03:39:08+08:00",
+  "recorded_at": "2026-10-13T03:39:08+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "nochange: 无C新派单/返修单；16B交付0208a73冻结REVIEW_PENDING保持；OCR v2 pid 980094存活16A尾批b13/b14推进中（03:34 node批exclude含16A已收口12文件），16B三批仍排队未起跑；wt-03b-t16b干净HEAD 0208a73",
+  "evidence": "sessions/C.md 03:37 条目",
+  "next": "等16B串行OCR v2收口→协调者合入裁决→real栈冒烟（16A接受后）→TESTER 16D"
+}

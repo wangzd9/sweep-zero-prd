@@ -1,0 +1,74 @@
+{
+  "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-01-t16ca/2a49dd10-240e-4d42-85f8-15bf59df7f4a.jsonl",
+  "session_ids": [
+    "2a49dd10-240e-4d42-85f8-15bf59df7f4a"
+  ],
+  "last_event": {
+    "type": "review_item_failed",
+    "timestamp": "2026-10-14T07:14:47Z"
+  },
+  "terminal_state": null,
+  "manifest_schema": null,
+  "input": {},
+  "ocr_version": null,
+  "coverage_counts": {
+    "selected": 0,
+    "completed": 0,
+    "reused": 0,
+    "failed": 0,
+    "waived": 0
+  },
+  "coverage_complete": false,
+  "remaining_paths": [],
+  "gate_decision": "NOT_EVALUATED",
+  "parse_errors": [],
+  "manifest_failures": [],
+  "item_error_messages": {
+    "context canceled": 1
+  },
+  "llm_errors": [
+    {
+      "task": "plan_task",
+      "error": "context canceled",
+      "count": 1
+    }
+  ],
+  "repeated_tools": [
+    {
+      "file": "app/services/bag_search_service.py",
+      "tool": "file_read_diff",
+      "arguments_sha256_prefix": "4768d9d1ded5065c",
+      "count": 2
+    },
+    {
+      "file": "app/services/bag_search_service.py",
+      "tool": "code_search",
+      "arguments_sha256_prefix": "5dade11abb57f4c2",
+      "count": 2
+    },
+    {
+      "file": "app/services/bag_search_service.py",
+      "tool": "file_read",
+      "arguments_sha256_prefix": "b5a9f1980916a475",
+      "count": 2
+    }
+  ],
+  "request_characters": {
+    "count": 39,
+    "max": 148059,
+    "max_frozen_first_two": 25388,
+    "note": "字符统计只用于观察增长，不是OCR本地token估计或模型上下文长度。"
+  },
+  "model_usage": {
+    "responses": 38,
+    "total_prompt_tokens": 1168195,
+    "total_completion_tokens": 101593,
+    "max_prompt_tokens": 53915
+  },
+  "next_steps": [
+    "没有完整session_end/manifest；先核对实际PID及start identity，不能判停止或通过。",
+    "context canceled可能由客户端压缩/退出触发；需额外进程或服务端证据才能归因。",
+    "存在相同参数的重复工具调用；核对是否必要，不直接判模型无能力。"
+  ],
+  "batch_identity_matches": false
+}

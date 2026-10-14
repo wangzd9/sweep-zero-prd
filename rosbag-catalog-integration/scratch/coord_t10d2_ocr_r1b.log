@@ -1,0 +1,17 @@
+=== ocr preview ===
+
+Preview: 2 file(s) changed  |  +82  -12
+
+Will review (1):
+  [M]  app/services/scene_publish_service.py +35   -10  
+
+Excluded from review (1):
+  [M]  tests/test_scene_result_report.py (default_path)
+
+
+=== ocr run ===
+[ocr] Summary: 1 file(s) reviewed, 0 comment(s), ~69783 token(s) used (input: ~61930, output: ~7853), 2m1s elapsed
+[ocr] Session: 94c9673e-6606-4f36-9ec0-ade608633ebb
+Review complete: 0 finding(s) across 1 selected item(s).
+
+EXIT=0 elapsed=120s

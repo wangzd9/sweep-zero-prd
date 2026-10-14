@@ -1,0 +1,12 @@
+{
+  "event_id": "a-batch1012-attempt1-reconcile-finalbag-op-running-20261013",
+  "occurred_at": "2026-10-13T22:56:00+08:00",
+  "recorded_at": "2026-10-13T22:56:00+08:00",
+  "role": "A",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "21:52 BLOCKED 后 A 只读取证+授权内收尾：①冻结 op bigbags-copy 对账收口 RECONCILED（worker 2520120 身份实测消失+unit inactive，四包逐包结论落 result.json）；②新 op TASK-11S-BATCH-1012-attempt-1-finalbag-160203-163747verify 22:53:47 起跑 RUNNING（worker pid 2621308，16_37_47 源SHA核验+16_02_03 完整 flat 落位，CIFS ~25min 跨夜继续）；③生产 DB 全量核查明 21:52 裁决项：409 占用方=第二写者有效 flat 提交 13dc398c（source_metadata 含 vehicle_code=test，不撤回），3 个 date-grouped dup run 全 SCENE_FAILED fail-closed 于 12S-A 车辆绑定门禁（零模型烧零切片），16_37_47 flat 正式提交缺失待 A 补（契约内），16_02_03 全盘零副本由新 op 补齐（有效 flat 提交 24d60fee 已在案 A 不重复提交），空包 16_33_10 scanner 日志拒绝证据收口（missing rosbag2_bagfile_information + 零 run 创建）。",
+  "evidence": "operations/A/TASK-11S-BATCH-1012-attempt-1-bigbags-copy/result.json(status=RECONCILED); operations/A/TASK-11S-BATCH-1012-attempt-1-finalbag-160203-163747verify/result.json(RUNNING pid 2621308); DB ingest_submission/source_copy/pipeline_run/step 22:2x 只读实测; docker logs rosbag-catalog-scanner-1 16_33_10 FAILED 行; ready/spray du -sb 尺寸实测; sessions/A.md 22:5x 检查点条目",
+  "next": "下回合：op 终态后 16_37_47 正式 flat 提交（stable key 按 manifest source_metadata，POST 一次 409 如实保留）+ 台账 16_02_03/16_37_47 落账 + 收口回执 a-attempt-1.md；date-grouped 移除与 14_42_48 scanner 绑定观察维持协调者/C 面，A 不代删不代修。"
+}

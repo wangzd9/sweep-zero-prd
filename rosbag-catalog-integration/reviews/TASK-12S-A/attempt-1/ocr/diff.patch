@@ -1,0 +1,1538 @@
+diff --git a/app/api/ingest_submissions.py b/app/api/ingest_submissions.py
+index bba4ac0..a586875 100644
+--- a/app/api/ingest_submissions.py
++++ b/app/api/ingest_submissions.py
+@@ -30,6 +30,7 @@ from app.schemas.scene_config import (
+     IngestPurpose,
+     IngestSubmissionRequest,
+     SceneSelectionSchema,
++    SourceMetadataSchema,
+     check_json_field_size,
+     check_request_body_size,
+ )
+@@ -53,6 +54,10 @@ class IngestSubmissionPatchRequest(BaseModel):
+     purposes: list[IngestPurpose] | None = Field(default=None, max_length=2)
+     scenes: list[SceneSelectionSchema] | None = Field(default=None, max_length=16)
+     idempotency_key: str | None = Field(default=None, max_length=255)
++    # TASK-12S-A：可选原始信息块。缺省=不改；显式 null=删除该块（spray 入口
++    # 删除后被服务面必填校验 422）；提供块=整体覆盖（车辆/时区/批次/sensor
++    # profile 重解析，未绑定阶段受 row_version 乐观锁约束，绑定后 409 拒改）。
++    source_metadata: SourceMetadataSchema | None = None
+ 
+     def update_payload(self) -> dict:
+         """规范化为服务层 update dict（仅包含本次实际提供的字段）。"""
+@@ -69,6 +74,8 @@ class IngestSubmissionPatchRequest(BaseModel):
+                 }
+                 for s in (self.scenes or [])
+             ]
++        if "source_metadata" in provided:
++            out["source_metadata"] = self.source_metadata.snapshot_dict() if self.source_metadata is not None else None
+         return out
+ 
+ 
+@@ -119,7 +126,8 @@ def create_submission(request: Request, raw: bytes = Depends(_raw_body), db: Ses
+     if not body.relative_path:
+         raise HTTPException(422, "relative_path is required")
+     selection = body.to_selection()
+-    # 规范化选择（purposes/scenes）作为新写入 JSON 字段，受 64KiB 限额。
++    metadata = body.source_metadata.snapshot_dict() if body.source_metadata is not None else None
++    # 规范化选择（purposes/scenes）与 source_metadata 作为新写入 JSON 字段，受 64KiB 限额。
+     payload = {
+         "purposes": [p.value for p in selection.purposes] if selection.purposes is not None else None,
+         "scenes": [
+@@ -129,9 +137,13 @@ def create_submission(request: Request, raw: bytes = Depends(_raw_body), db: Ses
+         if selection.scenes is not None
+         else None,
+     }
++    if metadata is not None:
++        payload["source_metadata"] = metadata
+     _enforce_json_limit(payload)
+     key = idempotency_key(request, body.model_dump())
+-    response, status = ingest_service.create_submission(db, body.profile_id, body.relative_path, selection, key)
++    response, status = ingest_service.create_submission(
++        db, body.profile_id, body.relative_path, selection, key, metadata
++    )
+     # FastAPI 按返回值构造 Response；显式用 JSONResponse 携带 201（新建）/200（幂等回放）。
+     return JSONResponse(content=response, status_code=status)
+ 
+@@ -143,7 +155,7 @@ def patch_submission(
+     body = _parse_model(IngestSubmissionPatchRequest, raw)
+     update = body.update_payload()
+     if not update:
+-        raise HTTPException(422, "nothing to update: provide purposes and/or scenes")
++        raise HTTPException(422, "nothing to update: provide purposes, scenes and/or source_metadata")
+     _enforce_json_limit(update)
+     key = idempotency_key(request, body.model_dump())
+     return ingest_service.patch_submission(db, submission_id, body.row_version, update, key)
+diff --git a/app/schemas/scene_config.py b/app/schemas/scene_config.py
+index 3fb36ec..ca6e4ac 100644
+--- a/app/schemas/scene_config.py
++++ b/app/schemas/scene_config.py
+@@ -9,6 +9,7 @@ from __future__ import annotations
+ 
+ import json
+ from typing import Literal
++from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+ 
+ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+ 
+@@ -145,6 +146,50 @@ class SceneSelectionSchema(SceneConfigApiModel):
+         )
+ 
+ 
++class SourceMetadataSchema(SceneConfigApiModel):
++    """原始信息元数据块（TASK-12S-A，scene-input/v1，RAW-DATA-REQUIREMENTS.md §1）。
++
++    POST/PATCH ingest-submissions 的**可选**字段：旧 profile/旧提交不携带
++    该字段时行为零变化（AC-18.3）。spray 入口（scene-spray profile）必填
++    vehicle_code/collection_timezone/batch_id/sensor_profile。
++
++    约束（DESIGN §7.4 / SPRAY-INTEGRATION §4）：
++    - 严格 extra=forbid：未知字段拒绝，不静默吞掉调用方拼写错误；
++    - 序列化后 ≤64KiB（有界，路由层经 check_json_field_size 强制）；
++    - vehicle_code ≤64 字符，解析走既有 Vehicle.vehicle_code 唯一索引，
++      不建新表、不猜车（缺/未知车辆由服务面转 422）；
++    - collection_timezone 必须是合法 IANA 时区名（ZoneInfo 校验）；
++    - batch_id 非空；sensor_profile 引用服务端已登记的传感器配置
++      （当前=已批准 converter 绑定，registry 面）。
++    """
++
++    schema_version: str = Field(default="scene-input/v1", max_length=32)
++    vehicle_code: str | None = Field(default=None, min_length=1, max_length=64)
++    collection_timezone: str = Field(min_length=1, max_length=64)
++    batch_id: str = Field(min_length=1, max_length=128)
++    sensor_profile: str = Field(min_length=1, max_length=128)
++
++    @field_validator("schema_version")
++    @classmethod
++    def _check_schema_version(cls, value: str) -> str:
++        if value != "scene-input/v1":
++            raise ValueError(f"source_metadata.schema_version 必须是 scene-input/v1，收到 {value!r}")
++        return value
++
++    @field_validator("collection_timezone")
++    @classmethod
++    def _check_timezone(cls, value: str) -> str:
++        try:
++            ZoneInfo(value)
++        except (ZoneInfoNotFoundError, ValueError) as exc:
++            raise ValueError(f"collection_timezone 不是合法 IANA 时区名: {value!r}") from exc
++        return value
++
++    def snapshot_dict(self) -> dict:
++        """规范化为入库快照 dict（键序无关，供独立 hash 计算）。"""
++        return self.model_dump(mode="json")
++
++
+ class IngestSubmissionRequest(SceneConfigApiModel):
+     """POST /api/v1/ingest-submissions 请求体（DESIGN §7.1，路由归 TASK-03B）。"""
+ 
+@@ -153,6 +198,9 @@ class IngestSubmissionRequest(SceneConfigApiModel):
+     purposes: list[IngestPurpose] | None = Field(default=None, max_length=2)
+     scenes: list[SceneSelectionSchema] | None = Field(default=None, max_length=MAX_SCENE_SELECTIONS)
+     idempotency_key: str | None = Field(default=None, max_length=MAX_IDEMPOTENCY_KEY_LENGTH)
++    # TASK-12S-A：可选原始信息块。None=旧提交口径不变；spray 入口缺该块
++    # 由服务面按 profile 判定 422/待补（不猜车，AC-18.1）。
++    source_metadata: SourceMetadataSchema | None = None
+ 
+     @field_validator("relative_path")
+     @classmethod
+@@ -263,6 +311,7 @@ __all__ = [
+     "ResolvedSceneView",
+     "SceneSelectionSchema",
+     "SceneConfigApiModel",
++    "SourceMetadataSchema",
+     "check_json_field_size",
+     "check_request_body_size",
+ ]
+diff --git a/app/services/bootstrap.py b/app/services/bootstrap.py
+index 51ce469..68e8e11 100644
+--- a/app/services/bootstrap.py
++++ b/app/services/bootstrap.py
+@@ -215,13 +215,24 @@ def seed_default_ingest_profile() -> None:
+ 
+     TASK-16A：场景三根配置启用时同时种子 scene-isolated 入口（root_id=scene，
+     默认仅 scene_slice+slope）；未启用不种子（场景根不存在时入口无匹配面）。
++
++    TASK-12S-A（SPRAY-INTEGRATION §4）：同场景三根口径再种子 scene-spray 入口
++    （root=scene、窄前缀 spray、默认纯 scene_slice+spray）。spray 能力未接受时
++    种子行保持 enabled=False（绑定面 404 显式失败，不回退坡道/自建），
++    bootstrap 不崩（AC-18.3）；原 scene-isolated 坡道 profile 的
++    ID/version/default/hash 零变化（独立 profile_id，互不重写）。
+     """
+-    from app.services.ingest_service import seed_default_profile, seed_scene_isolated_profile
++    from app.services.ingest_service import (
++        seed_default_profile,
++        seed_scene_isolated_profile,
++        seed_scene_spray_profile,
++    )
+ 
+     with SessionLocal() as db:
+         seed_default_profile(db, "default")
+         if settings.scene_roots_configured():
+             seed_scene_isolated_profile(db, "scene-isolated")
++            seed_scene_spray_profile(db, "scene-spray")
+         db.commit()
+ 
+ 
+diff --git a/app/services/ingest_service.py b/app/services/ingest_service.py
+index 3d5a8a9..0e8932d 100644
+--- a/app/services/ingest_service.py
++++ b/app/services/ingest_service.py
+@@ -50,6 +50,32 @@ def scene_ingest_enabled() -> bool:
+     return os.getenv("SCENE_INGEST_ENABLED", "0").strip().lower() in {"1", "true", "yes", "on"}
+ 
+ 
++# TASK-12S-A（SPRAY-INTEGRATION §4）：scene-spray 入口与已批准 sensor profile。
++# 窄前缀 `spray` 只抢场景根下的 spray/ 子树，不抢 scene-isolated 坡道空前缀
++# （match_profile_for_incoming 两遍匹配：非空前缀先命中即返回）。
++SPRAY_PROFILE_ID = "scene-spray"
++SPRAY_SCENE_CODE = "spray"
++
++# 服务端已登记 sensor profile 名单（12S-A 供应的共享 env 字段口径，TODO §9.3）：
++# 不建新表不建注册 API，运维/12S-B 预检按逗号扩展；默认含 RAW-DATA-REQUIREMENTS
++# §3 示例的已批准前雷达 converter 绑定。空名单=fail closed（全部 UNKNOWN_SENSOR_PROFILE）。
++def approved_sensor_profiles() -> frozenset[str]:
++    raw = os.getenv("SPRAY_SENSOR_PROFILES", "seyond-front-mid-approved-v1")
++    return frozenset(item.strip() for item in raw.split(",") if item.strip())
++
++
++def _spray_capability_available() -> bool:
++    """spray 能力是否已被服务端登记且启用（12S-B 域）；任何读取故障→False。
++
++    profile 种子据此决定 enabled：能力未接受时 scene-spray 保持禁用，
++    bootstrap 不崩（AC-18.3）。
++    """
++    try:
++        return get_capability_read().enabled_capability(SPRAY_SCENE_CODE) is not None
++    except Exception:
++        return False
++
++
+ def _active_profile(db: Session, profile_id: str) -> IngestProfile | None:
+     """活动入口 = 该 profile_id 中 enabled 且 version 最大的行。"""
+     row = db.scalar(
+@@ -117,6 +143,11 @@ def match_profile_for_incoming(
+     TASK-16A（DESIGN §7.3.1）：root-aware。scan_root 缺省=旧自建 NAS_SCAN_ROOT；
+     场景根显式传 SCENE_NAS_SCAN_ROOT + root_id=scene。root_id 用于过滤入口集合
+     （场景入口不兜底自建，反之亦然），跨根空前缀不得命中。
++
++    TASK-12S-A（AC-18.3）：scene-spray 窄前缀隔离性由既有两遍匹配保证——
++    非空窄前缀优先于同根空兜底，active spray 入口只收自己 spray/ 子树；
++    disabled（能力未接受）spray 入口不进活动集，spray/ 路径回退同根兜底口径
++    不变（与既有 disabled 前缀语义一致，不额外拦截）。
+     """
+     from app.domain.scene_config import validate_relative_path
+ 
+@@ -332,6 +363,11 @@ def _intake_snapshot(row: IngestProfile) -> str:
+     接受提交时写入、绑定时补 bound_* 路径、恢复读快照。与 EffectiveConfig/
+     config_hash 分离：本快照描述"接收身份"（哪个环境/根/入口版本），不描述业务
+     配置，故不参与 effective_config_hash 计算、不重算已接受业务 hash。
++
++    TASK-12S-A（SPRAY-INTEGRATION §4）：source_metadata 非 None 时在同一快照内
++    追加 source_metadata 有界块 + source_metadata_hash 独立 hash。独立 hash 只
++    覆盖元数据块本身（规范 JSON 的 sha256），与 config_hash/EffectiveConfig 不
++    混用（AC-18.2）；旧提交（source_metadata=None）快照字节与 16A 口径完全一致。
+     """
+     root_id = row.intake_root_id or "self_built"
+     if root_id == "scene":
+@@ -340,31 +376,156 @@ def _intake_snapshot(row: IngestProfile) -> str:
+     else:
+         scan_root = settings.nas_scan_root
+         ready_root = settings.nas_ready_root
+-    return json.dumps(
+-        {
+-            "schema_version": "scene-intake/v1",
+-            "environment": settings.environment,
+-            "root_id": root_id,
+-            "scan_root": scan_root,
+-            "ready_root": ready_root,
+-            "profile_id": row.profile_id,
+-            "profile_version": row.version,
+-        },
+-        ensure_ascii=False,
+-        sort_keys=True,
++    snapshot = {
++        "schema_version": "scene-intake/v1",
++        "environment": settings.environment,
++        "root_id": root_id,
++        "scan_root": scan_root,
++        "ready_root": ready_root,
++        "profile_id": row.profile_id,
++        "profile_version": row.version,
++    }
++    return json.dumps(snapshot, ensure_ascii=False, sort_keys=True)
++
++
++def _source_metadata_hash(metadata: dict | None) -> str | None:
++    """TASK-12S-A：source_metadata 独立 hash（规范 JSON 的 sha256）。
++
++    与 config_hash/EffectiveConfig 分离：旧业务 hash 不变（AC-18.2）；
++    None=旧提交，恒返回 None（快照零变化）。
++    """
++    if metadata is None:
++        return None
++    body = json.dumps(metadata, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
++    return hashlib.sha256(body.encode("utf-8")).hexdigest()
++
++
++def _metadata_snapshot_block(row: IngestProfile, metadata: dict | None) -> str:
++    """16A 接收快照 + source_metadata 有界块/独立 hash（None 时与 16A 逐字节一致）。"""
++    snapshot = json.loads(_intake_snapshot(row))
++    if metadata is not None:
++        snapshot["source_metadata"] = metadata
++        snapshot["source_metadata_hash"] = _source_metadata_hash(metadata)
++    return json.dumps(snapshot, ensure_ascii=False, sort_keys=True)
++
++
++def resolve_source_metadata_vehicle(db: Session, metadata: dict | None, *, required: bool) -> int | None:
++    """TASK-12S-A：source_metadata → 稳定 vehicle_id（既有 Vehicle 唯一索引匹配）。
++
++    不建新表、不猜车、不自动建 Vehicle（AC-18.1 / RAW-DATA-REQUIREMENTS §1）：
++    - required（spray 入口）：缺块/缺 vehicle_code/未知车辆/未知 sensor profile
++      → 422（业务语义"不调度"；新提交拒绝，同幂等键不同元数据 409 由幂等账口径）；
++    - 非 required（旧入口）：metadata=None 恒 None（零变化）；携带块但缺
++      vehicle_code 也 422——一旦提供该块，其中引用的车辆/传感器必须可解析。
++    collection_timezone/batch_id/schema_version 的格式校验由 DTO 面（Pydantic）
++    完成，这里只核数据库与服务端名单可解析的事实。
++    """
++    if metadata is None:
++        if required:
++            raise HTTPException(
++                422,
++                "SOURCE_METADATA_REQUIRED: spray 入口必须携带 source_metadata"
++                "（vehicle_code/时区/批次/sensor profile）",
++            )
++        return None
++    from app.models import Vehicle
++
++    vehicle_code = metadata.get("vehicle_code")
++    if not isinstance(vehicle_code, str) or not vehicle_code.strip():
++        raise HTTPException(422, "VEHICLE_CODE_REQUIRED: source_metadata.vehicle_code 缺失（不猜车）")
++    vehicle = db.scalar(select(Vehicle).where(Vehicle.vehicle_code == vehicle_code.strip()))
++    if vehicle is None:
++        raise HTTPException(
++            422, f"UNKNOWN_VEHICLE: vehicle_code {vehicle_code.strip()!r} 未在 Vehicle 登记（不自动建车辆）"
++        )
++    sensor_profile = metadata.get("sensor_profile")
++    if not isinstance(sensor_profile, str) or not sensor_profile.strip():
++        raise HTTPException(422, "SENSOR_PROFILE_REQUIRED: source_metadata.sensor_profile 缺失")
++    if sensor_profile.strip() not in approved_sensor_profiles():
++        raise HTTPException(422, f"UNKNOWN_SENSOR_PROFILE: sensor_profile {sensor_profile.strip()!r} 未获服务端批准")
++    return vehicle.id
++
++
++def seed_scene_spray_profile(db: Session, profile_id: str = SPRAY_PROFILE_ID) -> IngestProfile | None:
++    """TASK-12S-A（SPRAY-INTEGRATION §4）：幂等种子 scene-spray 入口。
++
++    - root=scene、incoming_prefix=`spray`（窄前缀：只匹配场景根 spray/ 子树，
++      不抢 scene-isolated 坡道空前缀兜底，AC-18.3）；
++    - 默认纯 scene_slice + spray；
++    - spray 能力未登记/未启用（12S-B 域未接受）时保持 **enabled=False**：
++      入口可见（GET /ingest-profiles 不列禁用行属 _active_profile 口径），
++      绑定解析失败走既有 SCENE_DISABLED/404 通道，bootstrap 不崩（AC-18.3）；
++      能力可用后由下一次 bootstrap 幂等种子置 enabled=True（能力接受属
++      协调者/12S-B 面，本种子不做热翻转以外的写）。
++    - 已有**任意版本行**（含 enabled=False 的禁用行）则复用该 profile_id 的
++      version 最大行，不重复建版本（_active_profile 只查 enabled 行，禁用行存在
++      时再种子会撞 uq_ingest_profile_id_version 并漂移版本号）。能力可用时把
++      禁用行翻转为 enabled=True（只动 enabled 位）；能力回退（被移除/禁用）时
++      同步翻转回 False——enabled 位随能力可用性收敛，ID/version/default/hash
++      一经落库永不改写。与原 scene-isolated 坡道 profile"不改
++      ID/version/default/hash"同口径。
++    """
++    max_version = (
++        db.scalar(
++            select(IngestProfile.version)
++            .where(IngestProfile.profile_id == profile_id)
++            .order_by(IngestProfile.version.desc())
++            .limit(1)
++        )
++        or 0
++    )
++    existing = (
++        db.scalar(
++            select(IngestProfile)
++            .where(IngestProfile.profile_id == profile_id)
++            .order_by(IngestProfile.version.desc())
++            .limit(1)
++        )
++        if max_version
++        else None
+     )
++    available = _spray_capability_available()
++    if existing is not None:
++        if existing.enabled != available:
++            existing.enabled = available
++            db.flush()
++        return existing
++    row = IngestProfile(
++        profile_id=profile_id,
++        version=max_version + 1,
++        display_name="水雾接收（spray）",
++        incoming_prefix="spray",
++        default_purposes_json=json.dumps(["scene_slice"]),
++        default_scenes_json=json.dumps([SPRAY_SCENE_CODE]),
++        default_scene_parameters_json=json.dumps({}),
++        intake_root_id="scene",
++        enabled=available,
++    )
++    db.add(row)
++    db.flush()
++    return row
+ 
+ 
+ def create_submission(
+-    db: Session, profile_id: str, relative_path: str, selection: SubmissionSelection, key: str | None
++    db: Session,
++    profile_id: str,
++    relative_path: str,
++    selection: SubmissionSelection,
++    key: str | None,
++    metadata: dict | None = None,
+ ) -> tuple[dict, int]:
+     """新建提交（领域入参，由路由从 03A DTO 转换）。返回 (响应, http_status)。
+ 
+     幂等回放 200，新建 201。幂等 payload 是规范化的 {profile_id, relative_path,
+-    purposes, scenes}：同键同请求回放同一提交，同键不同请求 409（DESIGN §3.2.1）。
++    purposes, scenes, source_metadata}：同键同请求回放同一提交，同键不同请求
++    409（DESIGN §3.2.1；AC-18.2 同幂等键不同元数据 409 由此口径承载）。
++
++    TASK-12S-A：metadata（source_metadata 规范化 dict，None=旧提交）在**接受时**
++    解析车辆/传感器（不猜车：缺/未知 → 422，业务语义"不调度"），快照与独立
++    hash 随提交持久化；旧提交 metadata=None 全链零变化（AC-18.3）。
+     """
+     operation = "ingest-submission"
+-    payload = _idempotent_payload(profile_id, relative_path, selection)
++    payload = _idempotent_payload(profile_id, relative_path, selection, metadata)
+     replay = idempotent_replay(db, operation, key, payload)
+     if replay is not None:
+         return replay, 200
+@@ -377,6 +538,13 @@ def create_submission(
+     if row is None:
+         raise HTTPException(404, "ingest profile not found or disabled")
+ 
++    # TASK-12S-A：spray 入口必填 source_metadata 且车辆/传感器必须可解析；
++    # 旧入口可选（提供块时同样校验块内引用，不提供=零变化）。
++    # spray 入口 = incoming_prefix 为 spray（生产 profile_id 即 scene-spray；
++    # 按前缀语义判定，不绑死 profile_id 字面量，测试可用独立 profile_id）。
++    _spray_required = (row.incoming_prefix or "").strip() == SPRAY_SCENE_CODE
++    resolve_source_metadata_vehicle(db, metadata, required=_spray_required)
++
+     # 路径抢占：同入口同版本同相对路径已有活动（PENDING_INPUT）提交 → 409
+     claim = _path_claim_key(row.profile_id, row.version, relative_path)
+     existing = db.scalar(
+@@ -417,7 +585,7 @@ def create_submission(
+         effective_config_hash=effective.config_hash if effective else None,
+         frozen_capability_hashes_json=json.dumps(frozen_hashes, ensure_ascii=False, sort_keys=True),
+         config_required=config_required,
+-        intake_snapshot_json=_intake_snapshot(row),
++        intake_snapshot_json=_metadata_snapshot_block(row, metadata),
+     )
+     # 并发窗口：两个不同幂等键的 POST 都读到"无 PENDING 提交"，第二个 add/flush
+     # 撞 uq_ingest_submission_claim 唯一约束。用 savepoint 把它转成预期 409
+@@ -449,9 +617,16 @@ def create_submission(
+     return response, 201
+ 
+ 
+-def _idempotent_payload(profile_id: str, relative_path: str, selection: SubmissionSelection) -> dict:
+-    """规范化幂等 payload：枚举/领域对象转 JSON 安全值，键序无关。"""
+-    return {
++def _idempotent_payload(
++    profile_id: str, relative_path: str, selection: SubmissionSelection, metadata: dict | None = None
++) -> dict:
++    """规范化幂等 payload：枚举/领域对象转 JSON 安全值，键序无关。
++
++    TASK-12S-A：source_metadata 并入幂等口径——同键同元数据回放同一提交，
++    同键不同元数据 409（AC-18.2）。metadata=None（旧提交）保持旧 payload 字节
++    口径不变（新增键仅在非 None 时出现，旧键的旧提交 hash 不受影响）。
++    """
++    payload = {
+         "profile_id": profile_id,
+         "relative_path": relative_path,
+         "purposes": [p.value for p in selection.purposes] if selection.purposes is not None else None,
+@@ -468,6 +643,9 @@ def _idempotent_payload(profile_id: str, relative_path: str, selection: Submissi
+             else None
+         ),
+     }
++    if metadata is not None:
++        payload["source_metadata"] = metadata
++    return payload
+ 
+ 
+ def _effective_to_json(effective: EffectiveConfig) -> dict:
+@@ -488,11 +666,23 @@ def _effective_to_json(effective: EffectiveConfig) -> dict:
+     }
+ 
+ 
+-def patch_submission(db: Session, submission_id: str, row_version: int, update: dict, key: str | None) -> dict:
++def patch_submission(
++    db: Session,
++    submission_id: str,
++    row_version: int,
++    update: dict,
++    key: str | None,
++) -> dict:
+     """仅 PENDING_INPUT 可修改；携 row_version 乐观锁，绑定后 409（DESIGN §3.2.1）。
+ 
+-    update 是规范 payload 的子集（purposes/scenes 提供才覆盖，未提供保持原选择）；
+-    relative_path 不可修改（路径已锁定）。
++    update 是规范 payload 的子集（purposes/scenes/source_metadata 提供才覆盖，
++    未提供保持原选择）；relative_path 不可修改（路径已锁定）。
++
++    TASK-12S-A：source_metadata 绑定前可修订（row_version 约束，AC-18.2）；
++    显式 "source_metadata": None=删除该块（spray 入口删除后被必填校验 422，
++    旧入口删除后回零变化口径）。修订成功即重新解析车辆/传感器并刷新快照与
++    独立 hash；绑定后（status≠PENDING_INPUT）任何修改 409，不能把另辆车套给
++    已绑定 run。
+ 
+     幂等操作 scope 含 row_version（期望前置代次）：同一代次的重试回放首次响应；
+     成功 PATCH 后 row_version 已推进，新的修改（即使复用同一客户端 key）视为
+@@ -529,7 +719,11 @@ def patch_submission(db: Session, submission_id: str, row_version: int, update:
+         raise HTTPException(409, "profile no longer enabled; re-create submission")
+ 
+     merged_payload = json.loads(submission.selection_json or "{}")
+-    merged_payload.update({k: v for k, v in update.items() if k in ("purposes", "scenes")})
++    merged_payload.update({k: v for k, v in update.items() if k in ("purposes", "scenes", "source_metadata")})
++    # TASK-12S-A：元数据修订同样在**接受时**重解析（不猜车：改车/未知车 422；
++    # spray 入口删除块 422 必填）；成功后刷新快照与独立 hash，绑定前唯一修订口。
++    new_metadata = merged_payload.get("source_metadata")
++    resolve_source_metadata_vehicle(db, new_metadata, required=(row.incoming_prefix or "").strip() == SPRAY_SCENE_CODE)
+     selection = SubmissionSelection(
+         purposes=[IngestPurpose(p) for p in merged_payload["purposes"]]
+         if merged_payload.get("purposes") is not None
+@@ -562,6 +756,8 @@ def patch_submission(db: Session, submission_id: str, row_version: int, update:
+     # 事件必须携带"最近一次接受时刻"的能力 hash；bind 仍只读冻结值不重算）。
+     new_frozen_hashes_json = json.dumps(_frozen_capability_hashes(effective), ensure_ascii=False, sort_keys=True)
+     new_selection_json = json.dumps(merged_payload, ensure_ascii=False, sort_keys=True, default=str)
++    # TASK-12S-A：快照块随修订刷新（独立 hash 重算；旧提交无块时与 16A 口径一致）
++    new_intake_snapshot_json = _metadata_snapshot_block(row, new_metadata)
+     new_updated_at = now()
+     # F2（ocr 批A2 + 隔离库并发复测）：内容列与 row_version 必须写进【同一条】守卫
+     # UPDATE。旧实现先把内容列挂到 ORM 属性上 db.flush()（一条按主键的普通 UPDATE），
+@@ -586,6 +782,7 @@ def patch_submission(db: Session, submission_id: str, row_version: int, update:
+             frozen_capability_hashes_json=new_frozen_hashes_json,
+             config_required=new_config_required,
+             selection_json=new_selection_json,
++            intake_snapshot_json=new_intake_snapshot_json,
+             updated_at=new_updated_at,
+             row_version=IngestSubmission.row_version + 1,
+         )
+@@ -812,6 +1009,61 @@ def _emit_purpose_events(
+     return events
+ 
+ 
++def _apply_frozen_vehicle_binding(db: Session, submission: IngestSubmission, bag_uid: str) -> None:
++    """TASK-12S-A（AC-18.2）：绑定/恢复登记时重新应用 source_metadata 冻结车辆。
++
++    upsert_bag 的 rustdesk basename 匹配可能把目录名推断出的车辆套到该 bag 上
++    （或目录名无编号时清空为 UNMATCHED）；本函数在同一登记事务内、bind 阶段
++    用**冻结快照**里的 vehicle_code 覆盖回正确车辆——首登与恢复（重放 MOVING/
++    MOVED 标记）都走本口，恢复不被 basename 匹配清空。
++
++    口径：
++    - 快照无 source_metadata（旧提交）→ 零变化直接返回（AC-18.3）；
++    - vehicle_code 无法再解析（接受时已 422 过的车辆被删除，数据异常）→
++      ValueError 显式失败回滚登记事务，不把无法验证身份的包放进场景链；
++    - bag 已被运营 MANUAL 锁定车辆 → 不篡改历史 MANUAL（跳过，不冲突不覆盖）；
++    - bag 当前 MATCHED 到**另一辆**车（目录名与 source_metadata 矛盾）→
++      车辆冲突 409 fail-closed（RAW-DATA-REQUIREMENTS §1：相互矛盾不执行，
++      登记回滚、包停在接收侧待数据方澄清，不猜车）。
++    """
++    if not submission.intake_snapshot_json:
++        return
++    try:
++        snapshot = json.loads(submission.intake_snapshot_json)
++    except (TypeError, ValueError):
++        return
++    metadata = snapshot.get("source_metadata")
++    if not isinstance(metadata, dict):
++        return
++    vehicle_code = metadata.get("vehicle_code")
++    if not isinstance(vehicle_code, str) or not vehicle_code.strip():
++        return
++    from app.models import BagRecord, Vehicle
++
++    vehicle = db.scalar(select(Vehicle).where(Vehicle.vehicle_code == vehicle_code.strip()))
++    if vehicle is None:
++        # 接受时该 code 已解析成功；bind 时消失=车辆被删除，身份无法再验证。
++        raise ValueError(
++            f"SOURCE_METADATA_VEHICLE_CONFLICT: 冻结车辆 {vehicle_code!r} 已不存在，"
++            f"submission={submission.submission_id} 无法验证绑定身份（登记回滚）"
++        )
++    bag = db.scalar(select(BagRecord).where(BagRecord.bag_uid == bag_uid))
++    if bag is None:
++        raise ValueError(f"SOURCE_METADATA_VEHICLE_CONFLICT: 绑定目标 bag {bag_uid} 不存在（登记回滚）")
++    if bag.vehicle_link_status == "MANUAL":
++        # 运营显式锁定（含历史 MANUAL）：不得篡改，也不与冻结值冲突。
++        return
++    if bag.vehicle_link_status == "MATCHED" and bag.vehicle_id is not None and bag.vehicle_id != vehicle.id:
++        raise HTTPException(
++            409,
++            "SOURCE_METADATA_VEHICLE_CONFLICT: 目录名匹配车辆 "
++            f"{bag.vehicle.vehicle_code if bag.vehicle else bag.vehicle_id!r} 与 source_metadata 冻结车辆 "
++            f"{vehicle_code!r} 矛盾（不猜车，登记回滚待澄清）",
++        )
++    bag.vehicle = vehicle
++    bag.vehicle_link_status = "MATCHED"
++
++
+ def _bind_unmatched(root_id: str | None) -> dict:
+     return {
+         "matched": False,
+@@ -871,6 +1123,10 @@ def bind_ingest_for_registration(
+             submission.updated_at = now()
+             db.flush()
+         scheduled = json.loads(submission.bound_purposes_json or "[]")
++        # TASK-12S-A（AC-18.2）：恢复登记（重放 MOVING/MOVED）重新应用同一冻结
++        # 绑定——upsert_bag 的 basename 匹配可能在恢复轮次清空/改套车辆，这里
++        # 按快照覆盖回冻结车辆（MANUAL 不篡改，矛盾 409）。
++        _apply_frozen_vehicle_binding(db, submission, bag_uid)
+         return {
+             "matched": True,
+             "root_id": root_id,
+@@ -882,6 +1138,9 @@ def bind_ingest_for_registration(
+     if submission is None:
+         submission = _ensure_system_submission(db, profile_row, entry_relative)
+         db.flush()
++    # TASK-12S-A（AC-18.2）：绑定前验证/首登绑定时重新应用同一冻结车辆
++    # （系统兜底提交无 source_metadata=零变化；矛盾 409、MANUAL 不篡改）。
++    _apply_frozen_vehicle_binding(db, submission, bag_uid)
+     if submission.config_required or not submission.effective_config_json:
+         # 登记为待处理（bag 已 READY），不创建任务；用户后续补配置 + 显式重新分析。
+         submission.status = "BOUND"
+@@ -938,13 +1197,18 @@ def bind_ingest_for_registration(
+ 
+ 
+ __all__ = [
+-    "list_profiles",
+-    "seed_default_profile",
+-    "seed_scene_isolated_profile",
++    "SPRAY_PROFILE_ID",
++    "SPRAY_SCENE_CODE",
++    "approved_sensor_profiles",
++    "bind_ingest_for_registration",
+     "create_submission",
+-    "patch_submission",
+     "get_submission",
+-    "bind_ingest_for_registration",
++    "list_profiles",
+     "match_profile_for_incoming",
++    "patch_submission",
++    "resolve_source_metadata_vehicle",
+     "scene_ingest_enabled",
++    "seed_default_profile",
++    "seed_scene_isolated_profile",
++    "seed_scene_spray_profile",
+ ]
+diff --git a/tests/test_scene_spray_intake.py b/tests/test_scene_spray_intake.py
+new file mode 100644
+index 0000000..cfe2465
+--- /dev/null
++++ b/tests/test_scene_spray_intake.py
+@@ -0,0 +1,904 @@
++"""TASK-12S-A attempt-1：水雾原始信息绑定开发自测（TESTER 独立验证另跑）。
++
++覆盖 scene-input/v1 契约的开发侧口径（P0 本地，纯 SQLite + 生成数据）：
++- DTO：SourceMetadataSchema 严格 extra=forbid、schema_version 固定、
++  IANA 时区名校验；POST/PATCH ingest-submissions 可选携带（旧提交零变化）；
++- 服务面：vehicle_code 经既有 Vehicle 唯一索引解析成稳定 vehicle_id（不猜车、
++  不建新表、不自动建 Vehicle）；缺/未知车辆/未知 sensor profile 422；
++  独立 source_metadata_hash 与 config_hash 不混用；
++- scene-spray profile 种子：root=scene、窄前缀 spray、默认纯 scene_slice+spray；
++  spray 能力未接受时 enabled=False 且 bootstrap 不崩、能力可用后翻转启用；
++  原 scene-isolated 坡道 profile ID/version/default/hash 零变化；
++- 绑定：首登/恢复登记重新应用冻结车辆（不被 rustdesk 名称匹配清空）；
++  目录名与 source_metadata 车辆矛盾 409 回滚；MANUAL 不篡改；
++  旧提交（无块）车辆口径零变化；
++- 匹配：禁用的 spray 窄前缀路径不落坡道空前缀兜底（停待处理，不回退）；
++- API：同幂等键同元数据回放 200、不同元数据 409；未绑定 PATCH 修订受
++  row_version 约束、绑定后 409 拒改。
++"""
++
++import json
++import uuid
++from dataclasses import replace
++
++import pytest
++from fastapi import HTTPException
++from fastapi.testclient import TestClient
++from sqlalchemy import select
++
++from app.config import settings as real_settings
++from app.database import Base, SessionLocal, engine
++from app.domain.scene_config import IngestPurpose, SceneSelection, SubmissionSelection
++from app.models import (
++    BagRecord,
++    IngestProfile,
++    IngestSubmission,
++    PurposeScheduleEvent,
++    Vehicle,
++)
++from app.scene import reset_registry
++from app.scene.registry import CapabilityRegistry
++from app.scene.types import OutputLabel, ParameterSpec, SceneCapability, TopicRequirement
++from app.services import ingest_service, scene_intake, source_service
++
++UNIQUE = uuid.uuid4().hex[:10]
++
++# 与 test_scene_intake_isolation 同口径的场景三根契约值
++SCENE_INCOMING = "/test/scene/incoming"
++SCENE_READY = "/test/scene/ready"
++SELF_INCOMING = "/test/incoming"
++SELF_READY = "/test/ready"
++
++_BAG_METADATA = (
++    "rosbag2_bagfile_information:\n"
++    "  version: 5\n"
++    "  storage_identifier: sqlite3\n"
++    "  relative_file_paths: [part.db3]\n"
++    "  duration: {nanoseconds: 1}\n"
++    "  starting_time: {nanoseconds_since_epoch: 1}\n"
++    "  message_count: 1\n"
++    "  topics_with_message_count: []\n"
++)
++
++APPROVED_SENSOR = "seyond-front-mid-approved-v1"
++
++
++def _spray_capability(enabled: bool = True) -> SceneCapability:
++    return SceneCapability(
++        scene_code="spray",
++        capability_version="spray-v1",
++        display_name="水雾识别",
++        enabled=enabled,
++        disabled_reason=None if enabled else "12S-B 未接受",
++        adapter_key="ros2-spray-v1",
++        adapter_revision="0",
++        required_inputs=(TopicRequirement(topic="/iv_packets_front_mid", message_type="seyond/msg/SeyondScan"),),
++        preprocessing_key="spray-pcd-1hz",
++        parameter_schema=(ParameterSpec(name="window_size", type="int", default=15, minimum=5, maximum=300),),
++        defaults={"window_size": 15},
++        model_profile="vlm-spray-dual-pass",
++        rules_revision="spray-rules-v1",
++        output_labels=(
++            OutputLabel(label="spray", scene_tag="水雾", publish_target=True),
++            OutputLabel(label="normal", scene_tag="正常", publish_target=False),
++        ),
++    )
++
++
++@pytest.fixture()
++def db():
++    Base.metadata.create_all(engine)
++    with SessionLocal() as session:
++        yield session
++        # 先回滚未提交写事务（释放 SQLite 写锁），再按本文件 UNIQUE 前缀清理
++        # 各 API/hash/bind 测试 commit 的共享库数据，避免跨测试污染。
++        # 清理顺序：子表（事件/提交/profile）→ bag（按 vehicle 引用 + name 前缀双口径，
++        # bind 测试 bag name 是 rosbag2 时间戳格式 leaf，单 name 前缀删不净）→ vehicle。
++        session.rollback()
++        session.query(PurposeScheduleEvent).filter(
++            PurposeScheduleEvent.submission_id.in_(
++                select(IngestSubmission.submission_id).where(IngestSubmission.profile_id.like(f"t12sa-{UNIQUE}%"))
++            )
++        ).delete(synchronize_session=False)
++        session.query(IngestSubmission).filter(IngestSubmission.profile_id.like(f"t12sa-{UNIQUE}%")).delete(
++            synchronize_session=False
++        )
++        session.query(IngestProfile).filter(IngestProfile.profile_id.like(f"t12sa-{UNIQUE}%")).delete(
++            synchronize_session=False
++        )
++        _vehicle_ids = [
++            row[0]
++            for row in session.execute(
++                select(Vehicle.id).where(Vehicle.vehicle_code.like(f"t12sa-{UNIQUE}%"))
++            ).all()
++        ]
++        if _vehicle_ids:
++            session.query(BagRecord).filter(BagRecord.vehicle_id.in_(_vehicle_ids)).delete(
++                synchronize_session=False
++            )
++        session.query(BagRecord).filter(
++            BagRecord.name.like(f"rosbag2_{UNIQUE}%") | BagRecord.name.like(f"%-{UNIQUE}%")
++        ).delete(synchronize_session=False)
++        session.query(Vehicle).filter(Vehicle.vehicle_code.like(f"t12sa-{UNIQUE}%")).delete(synchronize_session=False)
++        # bootstrap 测试（seed_default_ingest_profile 走独立 session 且 commit）会
++        # 落全局 scene-spray（禁用）/scene-isolated（启用）种子行，必须清理：
++        # 残留会干扰后续场景根入口断言。其他测试文件的 TestClient lifespan 会
++        # 幂等重建这两个种子，删除安全。
++        session.query(PurposeScheduleEvent).filter(
++            PurposeScheduleEvent.submission_id.in_(
++                select(IngestSubmission.submission_id).where(
++                    IngestSubmission.profile_id.in_(["scene-spray", "scene-isolated"])
++                )
++            )
++        ).delete(synchronize_session=False)
++        session.query(IngestSubmission).filter(
++            IngestSubmission.profile_id.in_(["scene-spray", "scene-isolated"])
++        ).delete(synchronize_session=False)
++        session.query(IngestProfile).filter(
++            IngestProfile.profile_id.in_(["scene-spray", "scene-isolated"])
++        ).delete(synchronize_session=False)
++        from app.models import ApiIdempotency
++
++        session.query(ApiIdempotency).filter(ApiIdempotency.idempotency_key.like(f"k-{UNIQUE}%")).delete(
++            synchronize_session=False
++        )
++        # 收尾必须 commit：rollback 后再开新的隐式事务会让本 session 以写者身份
++        # 持库到 fixture 销毁，后续 TestClient 独立 session 的写操作撞 SQLite
++        # "database is locked"（本文件曾因此连环失败）。
++        session.commit()
++
++
++@pytest.fixture()
++def scene_settings(monkeypatch):
++    new_settings = replace(
++        real_settings,
++        scene_nas_scan_root=SCENE_INCOMING,
++        scene_nas_ready_root=SCENE_READY,
++        scene_slice_publish_root="/test/scene/slices",
++        scene_scanner_state_file=f"/tmp/scene-state-{UNIQUE}.json",
++        nas_scan_root=SELF_INCOMING,
++        nas_ready_root=SELF_READY,
++        nas_storage_root="/test",
++        nas_local_root=f"/tmp/nas-{UNIQUE}",
++    )
++    monkeypatch.setattr(ingest_service, "settings", new_settings)
++    monkeypatch.setattr(source_service, "settings", new_settings)
++    monkeypatch.setattr(scene_intake, "settings", new_settings)
++    return new_settings
++
++
++@pytest.fixture()
++def spray_available(monkeypatch):
++    """registry=文件既有能力 + spray 能力（模拟 12S-B 已登记/接受）；收尾还原。"""
++    from app.scene.registry import DEFAULT_CAPABILITIES_FILE, load_capabilities_file
++
++    base = load_capabilities_file(DEFAULT_CAPABILITIES_FILE)
++    reset_registry(CapabilityRegistry(base + (_spray_capability(enabled=True),)))
++    yield
++    reset_registry()
++
++
++@pytest.fixture()
++def spray_unavailable(monkeypatch):
++    """registry 无 spray 能力（当前 main 口径：12S-B 未建），保留文件其余能力；收尾还原。"""
++    from app.scene.registry import DEFAULT_CAPABILITIES_FILE, load_capabilities_file
++
++    reset_registry(CapabilityRegistry(load_capabilities_file(DEFAULT_CAPABILITIES_FILE)))
++    yield
++    reset_registry()
++
++
++def _make_vehicle(db, code: str, rustdesk_id: str | None = None) -> Vehicle:
++    vehicle = Vehicle(vehicle_code=code, display_name=f"t12sa {code}", rustdesk_id=rustdesk_id)
++    db.add(vehicle)
++    db.flush()
++    return vehicle
++
++
++def _metadata(**overrides) -> dict:
++    base = {
++        "schema_version": "scene-input/v1",
++        "vehicle_code": overrides.pop("vehicle_code", f"t12sa-{UNIQUE}-v1"),
++        "collection_timezone": "Asia/Shanghai",
++        "batch_id": "1012",
++        "sensor_profile": APPROVED_SENSOR,
++    }
++    base.update(overrides)
++    return base
++
++
++
++def _cleanup_committed() -> None:
++    """API/hash 测试用 commit 数据（TestClient 独立 session 需要已提交行），
++    收尾按本文件 UNIQUE 前缀删净共享库，避免跨测试污染。"""
++    from app.models import ApiIdempotency
++
++    with SessionLocal() as s:
++        s.query(PurposeScheduleEvent).filter(
++            PurposeScheduleEvent.submission_id.in_(
++                select(IngestSubmission.submission_id).where(IngestSubmission.profile_id.like(f"t12sa-{UNIQUE}%"))
++            )
++        ).delete(synchronize_session=False)
++        s.query(IngestSubmission).filter(IngestSubmission.profile_id.like(f"t12sa-{UNIQUE}%")).delete(
++            synchronize_session=False
++        )
++        s.query(IngestProfile).filter(IngestProfile.profile_id.like(f"t12sa-{UNIQUE}%")).delete(
++            synchronize_session=False
++        )
++        s.query(BagRecord).filter(BagRecord.name.like(f"rosbag2_{UNIQUE}%")).delete(synchronize_session=False)
++        s.query(Vehicle).filter(Vehicle.vehicle_code.like(f"t12sa-{UNIQUE}%")).delete(synchronize_session=False)
++        s.query(ApiIdempotency).filter(ApiIdempotency.idempotency_key.like(f"k-{UNIQUE}%")).delete(
++            synchronize_session=False
++        )
++        s.commit()
++
++
++def _api_client():
++    from app.main import app
++
++    with TestClient(app) as client:
++        yield client
++
++
++def _seed_spray_profile(db, *, incoming_prefix: str = "spray", profile_id: str | None = None) -> IngestProfile:
++    row = IngestProfile(
++        profile_id=profile_id or f"t12sa-{UNIQUE}-spray",
++        version=1,
++        display_name="spray",
++        incoming_prefix=incoming_prefix,
++        default_purposes_json=json.dumps(["scene_slice"]),
++        default_scenes_json=json.dumps(["spray"]),
++        default_scene_parameters_json=json.dumps({}),
++        intake_root_id="scene",
++        enabled=True,
++    )
++    db.add(row)
++    db.flush()
++    return row
++
++
++# ---------------------------------------------------------------------------
++# DTO 面
++# ---------------------------------------------------------------------------
++
++
++def test_source_metadata_dto_rejects_unknown_fields_and_bad_timezone():
++    from app.schemas.scene_config import SourceMetadataSchema
++
++    with pytest.raises(Exception):
++        SourceMetadataSchema(
++            schema_version="scene-input/v1",
++            vehicle_code="V1",
++            collection_timezone="Asia/Shanghai",
++            batch_id="b",
++            sensor_profile="s",
++            unknown_extra="nope",
++        )
++    with pytest.raises(Exception):
++        SourceMetadataSchema(
++            schema_version="scene-input/v1",
++            vehicle_code="V1",
++            collection_timezone="Not/AZone",
++            batch_id="b",
++            sensor_profile="s",
++        )
++    with pytest.raises(Exception):
++        SourceMetadataSchema(
++            schema_version="scene-input/v2",
++            vehicle_code="V1",
++            collection_timezone="Asia/Shanghai",
++            batch_id="b",
++            sensor_profile="s",
++        )
++    ok = SourceMetadataSchema(
++        schema_version="scene-input/v1",
++        vehicle_code="V1",
++        collection_timezone="Asia/Shanghai",
++        batch_id="b",
++        sensor_profile="s",
++    )
++    assert ok.snapshot_dict()["schema_version"] == "scene-input/v1"
++
++
++def test_submission_request_old_shape_still_valid_without_metadata():
++    from app.schemas.scene_config import IngestSubmissionRequest
++
++    legacy = IngestSubmissionRequest(
++        profile_id="default", relative_path="bag1", purposes=["self_built"]
++    )
++    assert legacy.source_metadata is None
++    with_extra = IngestSubmissionRequest(
++        profile_id="default",
++        relative_path="bag1",
++        purposes=["self_built"],
++        source_metadata={
++            "schema_version": "scene-input/v1",
++            "vehicle_code": "V1",
++            "collection_timezone": "Asia/Shanghai",
++            "batch_id": "b",
++            "sensor_profile": "s",
++        },
++    )
++    assert with_extra.source_metadata is not None
++
++
++# ---------------------------------------------------------------------------
++# 车辆/传感器解析（不猜车）
++# ---------------------------------------------------------------------------
++
++
++def test_resolve_vehicle_known_code_returns_stable_id(db, scene_settings):
++    vehicle = _make_vehicle(db, f"t12sa-{UNIQUE}-v1")
++    resolved = ingest_service.resolve_source_metadata_vehicle(db, _metadata(), required=False)
++    assert resolved == vehicle.id
++
++
++def test_resolve_vehicle_unknown_code_422(db, scene_settings):
++    with pytest.raises(HTTPException) as exc:
++        ingest_service.resolve_source_metadata_vehicle(db, _metadata(), required=False)
++    assert exc.value.status_code == 422
++    assert "UNKNOWN_VEHICLE" in str(exc.value.detail)
++    # 不自动建 Vehicle（不猜车）
++    assert db.scalar(select(Vehicle).where(Vehicle.vehicle_code == f"t12sa-{UNIQUE}-v1")) is None
++
++
++def test_resolve_vehicle_missing_code_422(db, scene_settings):
++    _make_vehicle(db, f"t12sa-{UNIQUE}-v1")
++    metadata = _metadata(vehicle_code=None)
++    with pytest.raises(HTTPException) as exc:
++        ingest_service.resolve_source_metadata_vehicle(db, metadata, required=False)
++    assert exc.value.status_code == 422
++    assert "VEHICLE_CODE_REQUIRED" in str(exc.value.detail)
++
++
++def test_resolve_metadata_missing_required_422(db, scene_settings):
++    with pytest.raises(HTTPException) as exc:
++        ingest_service.resolve_source_metadata_vehicle(db, None, required=True)
++    assert exc.value.status_code == 422
++    assert "SOURCE_METADATA_REQUIRED" in str(exc.value.detail)
++
++
++def test_resolve_metadata_missing_optional_zero_change(db, scene_settings):
++    assert ingest_service.resolve_source_metadata_vehicle(db, None, required=False) is None
++
++
++def test_resolve_unknown_sensor_profile_422(db, scene_settings, monkeypatch):
++    _make_vehicle(db, f"t12sa-{UNIQUE}-v1")
++    monkeypatch.setenv("SPRAY_SENSOR_PROFILES", "other-approved-v1")
++    with pytest.raises(HTTPException) as exc:
++        ingest_service.resolve_source_metadata_vehicle(db, _metadata(), required=False)
++    assert exc.value.status_code == 422
++    assert "UNKNOWN_SENSOR_PROFILE" in str(exc.value.detail)
++
++
++def test_independent_hash_separated_from_config_hash(db, scene_settings):
++    row = _seed_spray_profile(db)
++    metadata = _metadata()
++    block = json.loads(ingest_service._metadata_snapshot_block(row, metadata))
++    assert block["source_metadata"] == metadata
++    assert block["source_metadata_hash"] == ingest_service._source_metadata_hash(metadata)
++    # 16A 基础快照键不变，独立 hash 键不与 config_hash 混用
++    assert block["schema_version"] == "scene-intake/v1"
++    assert "config_hash" not in block
++    legacy = json.loads(ingest_service._metadata_snapshot_block(row, None))
++    assert legacy == json.loads(ingest_service._intake_snapshot(row))
++    assert legacy == json.loads(ingest_service._intake_snapshot(row))
++
++
++# ---------------------------------------------------------------------------
++# scene-spray profile 种子
++# ---------------------------------------------------------------------------
++
++
++def test_seed_scene_spray_disabled_without_capability(db, scene_settings, spray_unavailable):
++    row = ingest_service.seed_scene_spray_profile(db, f"t12sa-{UNIQUE}-spray")
++    assert row is not None
++    assert row.profile_id == f"t12sa-{UNIQUE}-spray"
++    assert row.version == 1
++    assert row.intake_root_id == "scene"
++    assert row.incoming_prefix == "spray"
++    assert json.loads(row.default_purposes_json) == ["scene_slice"]
++    assert json.loads(row.default_scenes_json) == ["spray"]
++    assert row.enabled is False  # 能力未接受→禁用，bootstrap 不崩
++    # 幂等再种子：不漂移版本、不撞唯一约束
++    again = ingest_service.seed_scene_spray_profile(db, f"t12sa-{UNIQUE}-spray")
++    assert again.version == 1 and again.id == row.id
++
++
++def test_seed_scene_spray_enabled_when_capability_registered(db, scene_settings, spray_available):
++    row = ingest_service.seed_scene_spray_profile(db, f"t12sa-{UNIQUE}-spray")
++    assert row.enabled is True
++    # 能力回退：下次 bootstrap 种子翻回禁用（只动 enabled 位）
++    reset_registry(CapabilityRegistry(()))
++    off = ingest_service.seed_scene_spray_profile(db, f"t12sa-{UNIQUE}-spray")
++    assert off.id == row.id and off.enabled is False and off.version == 1
++    # 能力恢复：再翻回启用
++    reset_registry(CapabilityRegistry((_spray_capability(),)))
++    on = ingest_service.seed_scene_spray_profile(db, f"t12sa-{UNIQUE}-spray")
++    assert on.id == row.id and on.enabled is True and on.version == 1
++
++
++def test_bootstrap_seeds_spray_without_crashing(db, scene_settings, spray_unavailable, monkeypatch):
++    from app.services import bootstrap
++    from app.services.bootstrap import seed_default_ingest_profile
++
++    # bootstrap 模块引用自己的 settings 名（scene_settings 只 patch 了 ingest/
++    # source/scene_intake 三模块），此处同步 patch 使场景三根契约值生效。
++    monkeypatch.setattr(bootstrap, "settings", scene_settings)
++    seed_default_ingest_profile()  # bootstrap 面不崩（AC-18.3）
++    with SessionLocal() as s:
++        spray = s.scalar(select(IngestProfile).where(IngestProfile.profile_id == "scene-spray"))
++        assert spray is not None and spray.enabled is False
++        # 原 scene-isolated 坡道 profile ID/version/default/hash 零变化
++        isolated = s.scalar(select(IngestProfile).where(IngestProfile.profile_id == "scene-isolated"))
++        assert isolated is not None
++        assert isolated.version == 1
++        assert isolated.incoming_prefix == ""
++        assert json.loads(isolated.default_scenes_json) == ["slope"]
++
++
++def test_disabled_spray_prefix_falls_back_to_slope_like_disabled(db, scene_settings, spray_unavailable):
++    """能力未接受（disabled）spray 窄前缀：回退同根坡道兜底，与既有 disabled
++    前缀语义一致（=test_disabled_profile_not_matched 口径），AC-18.3 不额外拦截。
++
++    AC-18.3"窄前缀不抢坡道"由 active 两遍匹配保证（见 test_active_spray_prefix_
++    matches_narrow_subtree_only）：active spray 只收 spray/ 子树、绝不命中坡道
++    路径；disabled spray 不在活动集，spray/ 子树落回坡道兜底（默认 slope 场景，
++    不会当 spray 处理）。此处验证 disabled 口径不回退到"停待处理"。
++    """
++    isolated = IngestProfile(
++        profile_id=f"t12sa-{UNIQUE}-isol",
++        version=1,
++        display_name="slope",
++        incoming_prefix="",
++        default_purposes_json=json.dumps(["scene_slice"]),
++        default_scenes_json=json.dumps(["slope"]),
++        default_scene_parameters_json=json.dumps({}),
++        intake_root_id="scene",
++        enabled=True,
++    )
++    disabled = IngestProfile(
++        profile_id=f"t12sa-{UNIQUE}-spray-dis",
++        version=1,
++        display_name="spray disabled",
++        incoming_prefix="spray",
++        default_purposes_json=json.dumps(["scene_slice"]),
++        default_scenes_json=json.dumps(["spray"]),
++        default_scene_parameters_json=json.dumps({}),
++        intake_root_id="scene",
++        enabled=False,
++    )
++    db.add_all([isolated, disabled])
++    db.flush()
++    # disabled spray 前缀不进活动集 → spray/ 子树回退坡道兜底（既有 disabled 口径）
++    hit = ingest_service.match_profile_for_incoming(
++        db, f"{SCENE_INCOMING}/spray/bag1", root_id="scene", scan_root=SCENE_INCOMING
++    )
++    assert hit is not None and hit[0].profile_id == f"t12sa-{UNIQUE}-isol"
++    # 坡道路径（非 spray 子树）同样命中坡道兜底
++    hit2 = ingest_service.match_profile_for_incoming(
++        db, f"{SCENE_INCOMING}/other/bag2", root_id="scene", scan_root=SCENE_INCOMING
++    )
++    assert hit2 is not None and hit2[0].profile_id == f"t12sa-{UNIQUE}-isol"
++
++
++def test_active_spray_prefix_matches_narrow_subtree_only(db, scene_settings, spray_available):
++    _seed_spray_profile(db)
++    hit = ingest_service.match_profile_for_incoming(
++        db, f"{SCENE_INCOMING}/spray/20261012/bag1", root_id="scene", scan_root=SCENE_INCOMING
++    )
++    assert hit is not None
++    assert hit[0].profile_id == f"t12sa-{UNIQUE}-spray"
++    assert hit[1] == "20261012/bag1"
++    # 场景根非 spray 子树不命中 spray 窄前缀（无其他场景入口时=未匹配）
++    assert ingest_service.match_profile_for_incoming(
++        db, f"{SCENE_INCOMING}/other/bag", root_id="scene", scan_root=SCENE_INCOMING
++    ) is None
++    # 跨根隔离：场景根 spray 窄前缀入口不得命中自建根同名路径（16A root 过滤口径）。
++    # 若自建根存在 default 空前缀兜底入口，命中的应是它而非场景 spray 入口。
++    hit2 = ingest_service.match_profile_for_incoming(
++        db, f"{SELF_INCOMING}/spray/bag", root_id=None, scan_root=SELF_INCOMING
++    )
++    if hit2 is not None:
++        assert hit2[0].intake_root_id in (None, "self_built"), f"场景 spray 入口跨根泄漏: {hit2[0].profile_id!r}"
++        assert hit2[0].profile_id != f"t12sa-{UNIQUE}-spray"
++
++
++# ---------------------------------------------------------------------------
++# API 面：提交/幂等/PATCH
++# ---------------------------------------------------------------------------
++
++
++def _post(client, profile_id, relative_path, key, metadata=None, scenes=None):
++    payload = {
++        "profile_id": profile_id,
++        "relative_path": relative_path,
++        "purposes": ["scene_slice"],
++        "scenes": scenes or [{"scene_code": "spray", "capability_version": "spray-v1", "parameters": {}}],
++        "idempotency_key": key,
++    }
++    if metadata is not None:
++        payload["source_metadata"] = metadata
++    return client.post("/api/v1/ingest-submissions", json=payload)
++
++
++def test_api_spray_submission_full_cycle(db, scene_settings, spray_available):
++    profile = _seed_spray_profile(db, profile_id=f"t12sa-{UNIQUE}-spray-api1")
++    _make_vehicle(db, f"t12sa-{UNIQUE}-v1")
++    db.commit()  # TestClient 走 get_db 独立 session，profile/vehicle 须已提交可见
++    client = next(_api_client())
++    metadata = _metadata()
++    created = _post(client, profile.profile_id, f"20261012/{UNIQUE}a", f"k-{UNIQUE}-1", metadata)
++    assert created.status_code == 201, created.text
++    sub_id = created.json()["submission_id"]
++    # 同键同元数据回放 → 200 同一提交（AC-18.2）
++    replay = _post(client, profile.profile_id, f"20261012/{UNIQUE}a", f"k-{UNIQUE}-1", metadata)
++    assert replay.status_code == 200 and replay.json()["submission_id"] == sub_id
++    # 同键不同元数据 → 409
++    conflict = _post(client, profile.profile_id, f"20261012/{UNIQUE}a", f"k-{UNIQUE}-1", _metadata(batch_id="9999"))
++    assert conflict.status_code == 409, conflict.text
++    # 未知车辆 → 422 不猜车（显式用一个从未登记的 code，避免命中默认车辆）
++    bad = _post(
++        client, profile.profile_id, f"20261012/{UNIQUE}b", f"k-{UNIQUE}-2",
++        _metadata(vehicle_code=f"t12sa-{UNIQUE}-ghost", batch_id="x"),
++    )
++    assert bad.status_code == 422 and "UNKNOWN_VEHICLE" in bad.text
++    # spray 入口缺 source_metadata → 422 必填
++    missing = _post(client, profile.profile_id, f"20261012/{UNIQUE}c", f"k-{UNIQUE}-3")
++    assert missing.status_code == 422 and "SOURCE_METADATA_REQUIRED" in missing.text
++    # 快照独立 hash 与 config_hash 分离
++    with SessionLocal() as s:
++        sub = s.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == sub_id))
++        snap = json.loads(sub.intake_snapshot_json)
++        assert snap["source_metadata_hash"] == ingest_service._source_metadata_hash(metadata)
++        assert sub.effective_config_hash is not None
++        assert snap["source_metadata_hash"] != sub.effective_config_hash
++        assert sub.config_required is False
++
++
++def test_api_spray_submission_unknown_sensor_422(db, scene_settings, spray_available):
++    profile = _seed_spray_profile(db, profile_id=f"t12sa-{UNIQUE}-spray-api2")
++    _make_vehicle(db, f"t12sa-{UNIQUE}-v1")
++    db.commit()
++    client = next(_api_client())
++    bad = _post(
++        client, profile.profile_id, f"20261012/{UNIQUE}s", f"k-{UNIQUE}-s",
++        _metadata(sensor_profile="unapproved-v9"),
++    )
++    assert bad.status_code == 422 and "UNKNOWN_SENSOR_PROFILE" in bad.text
++
++
++def test_api_old_profile_metadata_optional_zero_change(db, scene_settings, spray_available):
++    """旧（非 spray）profile：不带块零变化；带块同样校验块内引用。"""
++    legacy = IngestProfile(
++        profile_id=f"t12sa-{UNIQUE}-legacy",
++        version=1,
++        display_name="legacy",
++        incoming_prefix="legacy",
++        default_purposes_json=json.dumps(["scene_slice"]),
++        default_scenes_json=json.dumps(["test-capability"]),
++        default_scene_parameters_json=json.dumps({}),
++        intake_root_id="self_built",
++        enabled=True,
++    )
++    db.add(legacy)
++    db.commit()
++    client = next(_api_client())
++    resp = client.post(
++        "/api/v1/ingest-submissions",
++        json={
++            "profile_id": legacy.profile_id,
++            "relative_path": f"{UNIQUE}old",
++            "purposes": ["scene_slice"],
++            "scenes": [{"scene_code": "test-capability", "capability_version": "test-v1", "parameters": {}}],
++            "idempotency_key": f"k-{UNIQUE}-old",
++        },
++    )
++    assert resp.status_code == 201, resp.text
++    with SessionLocal() as s:
++        sub = s.scalar(
++            select(IngestSubmission).where(IngestSubmission.profile_id == legacy.profile_id)
++        )
++        snap = json.loads(sub.intake_snapshot_json)
++        assert "source_metadata" not in snap and "source_metadata_hash" not in snap
++    # 旧入口带块但车辆未知 → 同样 422（提供块即须可解析；显式用未登记 code）
++    resp2 = client.post(
++        "/api/v1/ingest-submissions",
++        json={
++            "profile_id": legacy.profile_id,
++            "relative_path": f"{UNIQUE}old2",
++            "purposes": ["scene_slice"],
++            "scenes": [{"scene_code": "test-capability", "capability_version": "test-v1", "parameters": {}}],
++            "idempotency_key": f"k-{UNIQUE}-old2",
++            "source_metadata": _metadata(vehicle_code=f"t12sa-{UNIQUE}-ghost", batch_id="b2"),
++        },
++    )
++    assert resp2.status_code == 422 and "UNKNOWN_VEHICLE" in resp2.text
++
++
++def test_api_patch_source_metadata_before_binding(db, scene_settings, spray_available):
++    profile = _seed_spray_profile(db, profile_id=f"t12sa-{UNIQUE}-spray-api3")
++    vehicle_a = _make_vehicle(db, f"t12sa-{UNIQUE}-v1")  # _metadata() 默认 code
++    vehicle_b = _make_vehicle(db, f"t12sa-{UNIQUE}-v2")
++    vehicle_gone = f"t12sa-{UNIQUE}-gone"  # 未登记 code
++    db.commit()
++    client = next(_api_client())
++    created = _post(client, profile.profile_id, f"20261012/{UNIQUE}p", f"k-{UNIQUE}-p", _metadata(batch_id="b1"))
++    assert created.status_code == 201, created.text
++    sub_id = created.json()["submission_id"]
++    # 未绑定修订车辆：row_version=1 正确 → 200，快照与独立 hash 刷新
++    patched = client.patch(
++        f"/api/v1/ingest-submissions/{sub_id}",
++        json={
++            "row_version": 1,
++            "source_metadata": _metadata(vehicle_code=vehicle_b.vehicle_code, batch_id="b1"),
++        },
++    )
++    assert patched.status_code == 200, patched.text
++    assert patched.json()["row_version"] == 2
++    with SessionLocal() as s:
++        sub = s.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == sub_id))
++        snap = json.loads(sub.intake_snapshot_json)
++        assert snap["source_metadata"]["vehicle_code"] == vehicle_b.vehicle_code
++        assert snap["source_metadata_hash"] == ingest_service._source_metadata_hash(
++            snap["source_metadata"]
++        )
++    # 旧 row_version → 409（乐观锁约束）
++    stale = client.patch(
++        f"/api/v1/ingest-submissions/{sub_id}",
++        json={"row_version": 1, "source_metadata": _metadata(vehicle_code=vehicle_a.vehicle_code, batch_id="b1")},
++    )
++    assert stale.status_code == 409 and "ROW_VERSION_CONFLICT" in stale.text
++    # 改回不存在的车辆 → 422（未绑定阶段也拒绝不猜车）
++    bad = client.patch(
++        f"/api/v1/ingest-submissions/{sub_id}",
++        json={"row_version": 2, "source_metadata": _metadata(vehicle_code=vehicle_gone, batch_id="b1")},
++    )
++    assert bad.status_code == 422 and "UNKNOWN_VEHICLE" in bad.text
++    # 显式删块（spray 必填）→ 422
++    removed = client.patch(
++        f"/api/v1/ingest-submissions/{sub_id}", json={"row_version": 2, "source_metadata": None}
++    )
++    assert removed.status_code == 422 and "SOURCE_METADATA_REQUIRED" in removed.text
++
++
++# ---------------------------------------------------------------------------
++# 绑定/恢复：冻结车辆应用（register 链，fake NAS 客户端）
++# ---------------------------------------------------------------------------
++
++
++class _FakeClient:
++    def __init__(self, bag_name):
++        self._bag_name = bag_name
++
++    def login(self):
++        return None
++
++    def logout(self):
++        return None
++
++    def list_dir(self, _path):
++        return [
++            {"name": "metadata.yaml", "isdir": False, "additional": {"size": 4}},
++            {"name": "part.db3", "isdir": False, "additional": {"size": 4}},
++        ]
++
++    def download_text(self, _path):
++        return _BAG_METADATA
++
++
++def _register(db, monkeypatch, ready_rel: str, root_id: str = "scene"):
++    # upsert_bag 的 bag.name = ready 路径末段（目录名），candidate_identifier 按
++    # 目录名解析 rustdesk 编号——测试用目录名末段编码车辆编号，与生产同口径。
++    bag_name = ready_rel.rsplit("/", 1)[-1]
++    monkeypatch.setattr(
++        source_service, "inspect_bag_directory", lambda path: {"path": path, "name": bag_name, "file_count": 2}
++    )
++    monkeypatch.setattr(source_service, "nas_client", lambda: _FakeClient(bag_name))
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    path = f"{SCENE_READY}/{ready_rel}"
++    return source_service.register_source(
++        db,
++        {"path": path, "fast_fingerprint": f"fp-{UNIQUE}-{ready_rel}", "root_id": root_id,
++         "incoming_path": f"{SCENE_INCOMING}/{ready_rel}"},
++        None,
++    )
++
++
++def _pending_spray_submission(db, profile_id, entry_rel, vehicle_code):
++    row = db.scalar(select(IngestProfile).where(IngestProfile.profile_id == profile_id))
++    selection = SubmissionSelection(
++        purposes=[IngestPurpose.SCENE_SLICE],
++        scenes=[SceneSelection(scene_code="spray", capability_version="spray-v1", parameters={})],
++        relative_path=entry_rel,
++    )
++    response, status = ingest_service.create_submission(
++        db, profile_id, entry_rel, selection, None, _metadata(vehicle_code=vehicle_code)
++    )
++    assert status == 201
++    return row, response
++
++
++def test_bind_first_registration_applies_frozen_vehicle(db, scene_settings, spray_available, monkeypatch):
++    """目录名无编号（basename 匹配不到车）→ 冻结车辆仍绑定（AC-18.2 不猜车）。"""
++    vehicle = _make_vehicle(db, f"t12sa-{UNIQUE}-n1")
++    profile_id = f"t12sa-{UNIQUE}-spray-n1"
++    _seed_spray_profile(db, profile_id=profile_id)
++    _pending_spray_submission(db, profile_id, f"20261012/{UNIQUE}n1", vehicle.vehicle_code)
++    # bag 目录名无编号段 → upsert 的 basename 匹配 UNMATCHED
++    result = _register(db, monkeypatch, f"spray/20261012/{UNIQUE}n1")
++    assert result["ingest"]["matched"] is True
++    with SessionLocal() as s:
++        bag = s.scalar(select(BagRecord).where(BagRecord.relative_path == f"scene/ready/spray/20261012/{UNIQUE}n1"))
++        assert bag is not None
++        assert bag.vehicle_id == vehicle.id  # 冻结车辆覆盖 UNMATCHED
++        assert bag.vehicle_link_status == "MATCHED"
++        sub = s.scalar(select(IngestSubmission).where(IngestSubmission.source_id == bag.bag_uid))
++        assert sub.status == "SCHEDULED"
++
++
++def test_bind_name_matches_same_vehicle_keeps_binding(db, scene_settings, spray_available, monkeypatch):
++    """目录名编号恰为冻结车辆 rustdesk_id → basename 与冻结一致（不冲突）。
++
++    bag 叶子名（rosbag2 时间戳格式）既是 candidate_identifier 的解析对象，也是
++    entry_relative 的末段——提交 relative_path 必须与之一致才能绑定。
++    """
++    vehicle = _make_vehicle(db, f"t12sa-{UNIQUE}-n2", rustdesk_id=f"rust-{UNIQUE}n2")
++    profile_id = f"t12sa-{UNIQUE}-spray-n2"
++    _seed_spray_profile(db, profile_id=profile_id)
++    leaf = f"rosbag2_2026_10_12-16_02_03-rust-{UNIQUE}n2"
++    _pending_spray_submission(db, profile_id, f"20261012/{leaf}", vehicle.vehicle_code)
++    result = _register(db, monkeypatch, f"spray/20261012/{leaf}")
++    assert result["ingest"]["matched"] is True
++    with SessionLocal() as s:
++        bag = s.scalar(select(BagRecord).where(BagRecord.relative_path == f"scene/ready/spray/20261012/{leaf}"))
++        assert bag.vehicle_id == vehicle.id
++        assert bag.vehicle_link_status == "MATCHED"
++
++
++def test_bind_name_contradicts_frozen_vehicle_409(db, scene_settings, spray_available, monkeypatch):
++    """目录名编号匹配到另一辆车 → 409 回滚，不猜车不篡改。"""
++    # 冻结车辆 = n3a（source_metadata.vehicle_code）；目录名编号 rust-{UNIQUE}n3
++    # 命中 n3b（另一辆车 rustdesk_id）→ basename 与冻结矛盾 → 409 fail-closed。
++    frozen = _make_vehicle(db, f"t12sa-{UNIQUE}-n3a")
++    _make_vehicle(db, f"t12sa-{UNIQUE}-n3b", rustdesk_id=f"rust-{UNIQUE}n3")
++    profile_id = f"t12sa-{UNIQUE}-spray-n3"
++    _seed_spray_profile(db, profile_id=profile_id)
++    leaf = f"rosbag2_2026_10_12-16_02_03-rust-{UNIQUE}n3"
++    _pending_spray_submission(db, profile_id, f"20261012/{leaf}", frozen.vehicle_code)
++    with pytest.raises(HTTPException) as exc:
++        _register(db, monkeypatch, f"spray/20261012/{leaf}")
++    assert exc.value.status_code == 409
++    assert "SOURCE_METADATA_VEHICLE_CONFLICT" in str(exc.value.detail)
++    with SessionLocal() as s:
++        # 登记回滚：无 bag、无 SCHEDULED 提交
++        bag_row = s.scalar(
++            select(BagRecord).where(BagRecord.relative_path == f"scene/ready/spray/20261012/{leaf}")
++        )
++        assert bag_row is None
++        assert s.scalar(
++            select(IngestSubmission).where(
++                IngestSubmission.profile_id == profile_id, IngestSubmission.status == "SCHEDULED"
++            )
++        ) is None
++
++
++def test_bind_manual_vehicle_not_tampered(db, scene_settings, spray_available, monkeypatch):
++    """运营 MANUAL 锁定的历史车辆不被冻结值覆盖（AC-18.2 不篡改 MANUAL）。"""
++    vehicle = _make_vehicle(db, f"t12sa-{UNIQUE}-n4a")
++    other = _make_vehicle(db, f"t12sa-{UNIQUE}-n4b")
++    # 预置 MANUAL bag（运营已显式锁定 other 车）
++    manual_bag = BagRecord(
++        bag_uid=f"MAN{UNIQUE.upper()}M000000000001",
++        name=f"rosbag2_{UNIQUE}manual",
++        relative_path=f"scene/ready/spray/20261012/{UNIQUE}n4",
++        vehicle=other,
++        vehicle_link_status="MANUAL",
++    )
++    db.add(manual_bag)
++    db.commit()
++    db.refresh(manual_bag)
++    profile_id = f"t12sa-{UNIQUE}-spray-n4"
++    _seed_spray_profile(db, profile_id=profile_id)
++    _pending_spray_submission(db, profile_id, f"20261012/{UNIQUE}n4", vehicle.vehicle_code)
++
++    class _ManualClient(_FakeClient):
++        def list_dir(self, _path):
++            return [
++                {"name": "metadata.yaml", "isdir": False, "additional": {"size": 4}},
++                {"name": "part.db3", "isdir": False, "additional": {"size": 4}},
++            ]
++
++    monkeypatch.setattr(
++        source_service,
++        "inspect_bag_directory",
++        lambda path: {"path": path, "name": f"rosbag2_{UNIQUE}manual", "file_count": 2},
++    )
++    monkeypatch.setattr(source_service, "nas_client", lambda: _ManualClient(f"rosbag2_{UNIQUE}manual"))
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    result = source_service.register_source(
++        db,
++        {
++            "path": f"{SCENE_READY}/spray/20261012/{UNIQUE}n4",
++            "fast_fingerprint": f"fp-{UNIQUE}-n4",
++            "root_id": "scene",
++            "incoming_path": f"{SCENE_INCOMING}/spray/20261012/{UNIQUE}n4",
++        },
++        None,
++    )
++    assert result["ingest"]["matched"] is True
++    with SessionLocal() as s:
++        bag = s.get(BagRecord, manual_bag.id)
++        assert bag.vehicle_id == other.id  # MANUAL 保持，不被冻结值篡改
++        assert bag.vehicle_link_status == "MANUAL"
++
++
++def test_recovery_registration_reapplies_frozen_binding(db, scene_settings, spray_available, monkeypatch):
++    """恢复登记（重放）：basename 匹配清空后仍按冻结快照恢复车辆（AC-18.2）。"""
++    vehicle = _make_vehicle(db, f"t12sa-{UNIQUE}-n5")
++    profile_id = f"t12sa-{UNIQUE}-spray-n5"
++    _seed_spray_profile(db, profile_id=profile_id)
++    _pending_spray_submission(db, profile_id, f"20261012/{UNIQUE}n5", vehicle.vehicle_code)
++    first = _register(db, monkeypatch, f"spray/20261012/{UNIQUE}n5")
++    assert first["ingest"]["matched"] is True
++    with SessionLocal() as s:
++        bag = s.scalar(select(BagRecord).where(BagRecord.relative_path == f"scene/ready/spray/20261012/{UNIQUE}n5"))
++        bag_uid = bag.bag_uid
++        # 模拟恢复轮次前 basename 匹配把车辆清空（无编号目录名 → UNMATCHED）
++        bag.vehicle = None
++        bag.vehicle_link_status = "UNMATCHED"
++        s.commit()
++    # 恢复登记：同 bag 重放（指纹相同 → 幂等路径不走，改同代次显式重登记）
++    second = source_service.register_source(
++        db,
++        {
++            "path": f"{SCENE_READY}/spray/20261012/{UNIQUE}n5",
++            "fast_fingerprint": f"fp-{UNIQUE}-spray-20261012/{UNIQUE}n5",
++            "root_id": "scene",
++            "incoming_path": f"{SCENE_INCOMING}/spray/20261012/{UNIQUE}n5",
++        },
++        None,
++    )
++    assert second["ingest"]["matched"] is True
++    with SessionLocal() as s:
++        bag = s.scalar(select(BagRecord).where(BagRecord.bag_uid == bag_uid))
++        assert bag.vehicle_id == vehicle.id  # 冻结绑定重新应用，不被清空
++        assert bag.vehicle_link_status == "MATCHED"
++
++
++def test_bind_legacy_submission_zero_vehicle_change(db, scene_settings, spray_available, monkeypatch):
++    """旧提交（无 source_metadata）：车辆口径=既有 basename 匹配，零变化（AC-18.3）。"""
++    profile_id = f"t12sa-{UNIQUE}-spray-n6"
++    _seed_spray_profile(db, profile_id=profile_id)
++    # 系统兜底提交（bind 时无用户提交 → _ensure_system_submission，无块）
++    result = _register(db, monkeypatch, f"spray/20261012/{UNIQUE}n6")
++    assert result["ingest"]["matched"] is True
++    with SessionLocal() as s:
++        bag = s.scalar(select(BagRecord).where(BagRecord.relative_path == f"scene/ready/spray/20261012/{UNIQUE}n6"))
++        assert bag.vehicle_id is None  # 无编号目录名 → UNMATCHED 保持
++        assert bag.vehicle_link_status == "UNMATCHED"
++        sub = s.scalar(select(IngestSubmission).where(IngestSubmission.source_id == bag.bag_uid))
++        snap = json.loads(sub.intake_snapshot_json or "{}")
++        assert "source_metadata" not in snap
++
++
++def test_hash_replay_same_metadata_same_hash(db, scene_settings, spray_available):
++    """hash 重放：同元数据独立 hash 可重放计算，改字段必变。"""
++    profile = _seed_spray_profile(db, profile_id=f"t12sa-{UNIQUE}-spray-replay")
++    vehicle = _make_vehicle(db, f"t12sa-{UNIQUE}-v1")
++    db.commit()
++    key = f"k-{UNIQUE}-replay"
++    metadata = _metadata(vehicle_code=vehicle.vehicle_code)
++    selection = SubmissionSelection(
++        purposes=[IngestPurpose.SCENE_SLICE],
++        scenes=[SceneSelection(scene_code="spray", capability_version="spray-v1", parameters={})],
++        relative_path="20261012/r1",
++    )
++    ingest_service.create_submission(db, profile.profile_id, "20261012/r1", selection, key, metadata)
++    sub = db.scalar(select(IngestSubmission).where(IngestSubmission.idempotency_key == key))
++    snap = json.loads(sub.intake_snapshot_json)
++    assert snap["source_metadata_hash"] == ingest_service._source_metadata_hash(metadata)
++    mutated = dict(metadata, batch_id="changed")
++    assert ingest_service._source_metadata_hash(mutated) != snap["source_metadata_hash"]
++    db.commit()
++    _cleanup_committed()
+\ No newline at end of file

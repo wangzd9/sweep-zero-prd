@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261012-142853-nochange",
+  "occurred_at": "2026-10-12T14:40:26+08:00",
+  "recorded_at": "2026-10-12T14:40:26+08:00",
+  "role": "C",
+  "task": "idle-poll",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "14:03:53后C范围零新增、无C新派单、main caf385b双核、wt-03b干净、空闲待派单",
+  "evidence": "sessions/C.md 14:28条目",
+  "next": "继续5分钟巡检"
+}

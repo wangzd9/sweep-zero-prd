@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-123753-nochange",
+  "occurred_at": "2026-10-11T12:39:49+08:00",
+  "recorded_at": "2026-10-11T12:39:49+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "12:32 后无新派单无返修；rework-8 合入 65ca0be 收口一致；main/origin 65ca0be 双核无变化；强复审 result 仍缺 READY_FOR_USER_TRIGGER",
+  "evidence": "sessions/B.md",
+  "next": "等强复审 R2I-20261010-06 用户手动触发→03/05/06 聚合 DONE→TASK-08"
+}

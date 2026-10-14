@@ -1,0 +1,95 @@
+=== R5-r1 start 2026-10-10 22:43:23 +0800 pid=964295 ===
+{
+  "status": "complete",
+  "llm": {
+    "provider": "vllm-local",
+    "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8"
+  },
+  "message": "Review complete: 0 finding(s) across 2 selected item(s).",
+  "summary": {
+    "files_reviewed": 2,
+    "comments": 0,
+    "total_tokens": 58815,
+    "input_tokens": 50909,
+    "output_tokens": 7906,
+    "elapsed": "2m9s"
+  },
+  "tool_calls": {
+    "total": 8,
+    "by_tool": {
+      "code_search": 4,
+      "file_read": 4
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [],
+  "groups": [
+    {
+      "label": "small change set",
+      "files": [
+        "alembic/versions/20261009_02_ingest_frozen.py",
+        "app/services/scene_result_report_service.py"
+      ]
+    }
+  ],
+  "session_id": "94bdf176-2e6e-4c80-a667-e8bce0c12c04",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "94bdf176-2e6e-4c80-a667-e8bce0c12c04",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "commit",
+      "requested_head": "5c854ea",
+      "resolved_base": "5f0124b4c5df1c7782d46b0bb956542537b729b1",
+      "resolved_head": "5c854ea7eb8a1bc696db4479ccb5ca00e62aa009",
+      "exact_range": "5f0124b4c5df1c7782d46b0bb956542537b729b1..5c854ea7eb8a1bc696db4479ccb5ca00e62aa009",
+      "source_artifact_sha256": "00703dcb3cd0c1790e2c181d3267ab11af4618e7ad078590d497b91dfb08d022"
+    },
+    "execution": {
+      "ocr_version": "v1.12.13",
+      "provider": "vllm-local",
+      "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8",
+      "configured_concurrency": 8,
+      "rule_config_sha256": "d5e28d02ed5cdf85b533907db24b47f1be02847db764a4ded208dbaf54380ae1",
+      "runtime_config_sha256": "3cf97d1b18c7594d2cab955a06b507c732a1363ee2c029e58e608660f57296ef"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "87d28e4a19c636ed52e08d5576e8fd6202090b244972b1edbd65fc350c297066",
+          "path": "app/services/scene_result_report_service.py",
+          "fingerprint": "597f07c539d8a9e24899bac02a1d612b9aee502a07f719454d54395fcd7e2221"
+        },
+        {
+          "item_id": "a7aa0a995baacedeedab6d9a8454e01f3c452158d90c03718c46c336b58d958f",
+          "path": "alembic/versions/20261009_02_ingest_frozen.py",
+          "fingerprint": "9714089f02df2e8b663b34818ca0ce463739b19130861d5c2dfac15fba99506e"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "87d28e4a19c636ed52e08d5576e8fd6202090b244972b1edbd65fc350c297066",
+          "path": "app/services/scene_result_report_service.py",
+          "fingerprint": "597f07c539d8a9e24899bac02a1d612b9aee502a07f719454d54395fcd7e2221"
+        },
+        {
+          "item_id": "a7aa0a995baacedeedab6d9a8454e01f3c452158d90c03718c46c336b58d958f",
+          "path": "alembic/versions/20261009_02_ingest_frozen.py",
+          "fingerprint": "9714089f02df2e8b663b34818ca0ce463739b19130861d5c2dfac15fba99506e"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 128613
+  }
+}
+
+=== exit=0 end 2026-10-10 22:45:32 +0800 ===

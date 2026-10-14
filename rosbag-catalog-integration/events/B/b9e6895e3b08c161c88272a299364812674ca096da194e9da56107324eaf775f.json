@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-024253-nochange-t07b-r3-frozen-idle",
+  "occurred_at": "2026-10-13T02:45:02+08:00",
+  "recorded_at": "2026-10-13T02:45:02+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "3-r3",
+  "status": "REVIEW_PENDING",
+  "summary": "R3交付冻结等审无业务变化；16A增量OCR r111 6/14 在途属协调者面",
+  "evidence": "sessions/B.md 02:47 条目",
+  "next": "等机械核验/R3增量OCR/强审增量复审/TESTER post-r3"
+}

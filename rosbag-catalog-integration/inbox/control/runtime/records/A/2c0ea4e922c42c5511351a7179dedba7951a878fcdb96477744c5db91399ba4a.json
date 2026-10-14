@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "input_sha256": "2c0c9862914d955bd8538fd19dc63852b4236a4da7b81f25d0ed9f12a2859741",
+  "record": {
+    "event_id": "A:a-t11s-bigbag-4acf689f-cancelling-not-converged-20261014",
+    "kind": "business",
+    "task": "TASK-11S-BATCH-1012",
+    "attempt": "attempt-1-readonly-observation",
+    "status": "IN_PROGRESS",
+    "summary": "大包 scene-4acf689f(16_02_03) 收敛只读核实(响应 BATCH-STATUS 17:50 口径'收敛面待 C/A 下轮核实')：处理机 8180 只读 GET 实测 8180 状态仍 SCENE_CANCELLING 未收敛 SCENE_CANCELLED，lease_expires_at 2026-10-14T16:23:55 仍 stale，八步中 INFER attempt1 status 仍 RUNNING(C obs78 17:41 见 INFER FAILED，本轮 8180 接口口径仍 RUNNING，两来源差异如实保留)，EXTRACT/PRECHECK DONE、PUBLISH/REGISTER/SEGMENT/VALIDATE/WRITE QUEUED，scene_outcomes 空。A 全程只读(ssh processing-machine curl 127.0.0.1:8180)，未 kill/未 retry/未重烧/未改任何生产路径。D4③ 收敛面(大包终态→flat 三提交串行绑定推进)仍未解锁，等 SCENE_CANCELLED 收敛或回 RUNNING 后配合 TESTER 大包验收面(取消链证据+产物完整性)。",
+    "evidence": "ssh processing-machine curl 'http://127.0.0.1:8180/api/v1/scene-analysis-runs/scene-4acf689f9a6a473da1fa2f2efc70' 实测(status=SCENE_CANCELLING/lease_expires_at=2026-10-14T16:23:55/INFER attempt1 RUNNING/scene_outcomes={}); BATCH-STATUS.md 17:50 协调者收敛面待 C/A 下轮核实口径; 只读核实为本轮巡检执行(发生时刻以脚本 recorded_at 系统时钟为准)",
+    "next": "等大包 SCENE_CANCELLED 收敛或回 RUNNING(A 持续只读下轮核实，不 kill/retry/重烧)；收敛后 D4③ flat 三提交串行绑定面解锁、配合 TESTER 大包取消链+产物完整性验收。本只读核实不改变 A 16C OCR 交付(1489bc6 已冻结)与 OCR/合入门禁。",
+    "occurrence": {
+      "kind": "now"
+    },
+    "schema_version": 1,
+    "role": "A",
+    "recorded_at": "2026-10-14T18:04:44+08:00",
+    "occurred_at": "2026-10-14T18:04:44+08:00",
+    "time_source": {
+      "kind": "script_now"
+    }
+  },
+  "complete": true,
+  "session": "sessions/A.md"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-013853-nochange",
+  "occurred_at": "2026-10-12T01:40:17+08:00",
+  "recorded_at": "2026-10-12T01:40:17+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "C idle: no new dispatch since 01:33; B t10-defect3 coding in-flight (coord event 01:38:28); main a77aa45=origin; wt-03b 6f1a9ad clean",
+  "evidence": "inbox/sessions/C.md 01:40 line; events/COORDINATOR/0bfb853e0d72af84d1b13b8422f513390ca30bb3031328ba7650dca384fbbc8b.json",
+  "next": "await dispatch; continue 5min poll"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-061853-r127-07br3-ocr-start-16b-frozen",
+  "occurred_at": "2026-10-13T06:21:51+08:00",
+  "recorded_at": "2026-10-13T06:21:51+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "06:19巡检：C零新派单；r127检查点在案（16A OCR 3/3闭环+07B R3 6批起跑pid 1307769+16B NEEDS_REVIEW冻结返修暂缓）；16B交付冻结不自测",
+  "evidence": "sessions/C.md 06:19 条目；HANDOFF r127",
+  "next": "等协调者 proxy OCR 裁决后 16B 合并返修单"
+}

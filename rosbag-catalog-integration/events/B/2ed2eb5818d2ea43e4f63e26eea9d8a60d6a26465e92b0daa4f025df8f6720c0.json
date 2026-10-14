@@ -1,0 +1,12 @@
+{
+  "event_id": "b20261010-2130-d3r1-ocr-abort-observed",
+  "occurred_at": "2026-10-10T21:31:32+08:00",
+  "recorded_at": "2026-10-10T21:31:32+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "WAITING_REVIEW",
+  "summary": "巡检核查：D3-r1 OCR session 5ee653d5 已 aborted（0 files/0 comments，21:19:23），pid 851050 已退出，ocr.lock FREE，无 ocr-d3-r1.log 落盘——OCR 未实际完成审查即中止，批次账仍记 RUNNING 待协调者裁决重启（化身不可自跑 OCR）",
+  "evidence": "ocr session list(wt-04a): 5ee653d5 aborted; pid 851050 gone; ocr.lock free; 批次目录仅 ocr-batches.md",
+  "next": "等协调者重跑 D3-r1；本侧冻结交付 4e2158e 不变"
+}

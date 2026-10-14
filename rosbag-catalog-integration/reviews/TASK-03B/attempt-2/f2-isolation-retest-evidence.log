@@ -1,0 +1,64 @@
+F2 隔离库并发复测（MySQL 8.4 双独立会话同代次竞争 patch_submission）
+=====================================================================
+环境：mysql 8.4.11（docker 容器 task02-mysql-ocr，127.0.0.1:3398/db=f2r3test）
+      复用协调者 reviews/TASK-03B/attempt-2/f2-isolation-evidence.log 的复现脚本
+      （两独立 sessionmaker + threading.Barrier(2) 并发调 patch_submission(sub_id, row_version=1, ...)）
+连接：pymysql 1.4.6 creator 直连（绕开 sqlalchemy 方言吞 ssl）
+
+复现脚本：/home/wang/.hermes/cache/scratch/f2_mysql_concurrency.py
+判定（顺序无关）：恰好 1 OK + 1 HTTP 409，row_version 推进到 2，无 EXC(StaleDataError/500)，内容不被覆盖。
+
+--------------------------------------------------------------
+[A] 修复前（base a8fac99，两条 UPDATE：ORM 内容 flush + 条件 row_version UPDATE）
+--------------------------------------------------------------
+命令：
+  cd /home/wang/.local/state/rosbag-scene/wt-03b
+  git show a8fac99:app/services/ingest_service.py > /tmp/orig.py  # 用原始实现跑
+  /home/wang/work/rosbag-catalog/.venv/bin/python <复现脚本>
+结果（协调者原证据 + 本次复跑一致）：
+  RESULT_A: EXC StaleDataError: UPDATE statement on table 'ingest_submission' expected to update 1 row(s); 0 were matched.
+  RESULT_B: OK
+  FINAL row_version: 2 status: PENDING_INPUT
+  F2_GUARD_VERDICT: FAIL   ← 409 分支不可达，输方 API 面 500
+逐条 UPDATE rowcount（RCTracer 抓 cursor.rowcount）：
+  [RC#1] rowcount=1 :: UPDATE ... SET selection_json=.., effective_config_json=.. WHERE id=1   # 赢家内容 flush
+  [RC#2] rowcount=1 :: UPDATE ... SET row_version=(row_version+1) WHERE submission_id.. AND row_version=1  # 赢家守卫
+  [RC#3] rowcount=0 :: UPDATE ... SET selection_json=.., effective_config_json=.. WHERE id=1   # 输方内容 flush → 0 affected
+  结论：StaleDataError 抛在【输方的内容 ORM flush（RC#3）】，persistence.py:_emit_update_statements
+        check_rowcount（enable_check_rowcount=True）判定"预期 1 行实际 0 行"→ 500。
+        traceback 定位：ingest_service.py:435 (db.flush) → session.py:flush → persistence.py:948 raise StaleDataError。
+        与 synchronize_session 策略无关（RC 抓包证明：输方根本没执行到条件 UPDATE）。
+
+--------------------------------------------------------------
+[B] 修复后（f11e617：内容列 + row_version+1 合并进单条守卫 UPDATE + synchronize_session='fetch'）
+--------------------------------------------------------------
+命令：
+  cd /home/wang/.local/state/rosbag-scene/wt-03b   # HEAD=f11e617
+  /home/wang/work/rosbag-catalog/.venv/bin/python /home/wang/.hermes/cache/scratch/f2_mysql_concurrency.py
+  （连跑 3 次确认稳定性）
+逐条 UPDATE rowcount：
+  [RC#1] rowcount=1 :: UPDATE ... SET row_version=(row_version+1), selection_json=.., effective_config_json=.. WHERE submission_id.. AND row_version=1  # 赢家单条守卫 UPDATE
+  [RC#2] rowcount=0 :: UPDATE ... （同上）                                                                                                              # 输方守卫 0 匹配
+  → 输方 rowcount==0 直达 409 分支，无内容 flush、无 StaleDataError
+结果（3 次一致）：
+  RESULT_A: HTTP 409 ROW_VERSION_CONFLICT: submission changed concurrently
+  RESULT_B: OK
+  FINAL row_version: 2 status: PENDING_INPUT
+  FINAL selection: {"purposes": ["scene_slice"], "scenes": [...]}   # 内容未被输方覆盖
+  F2_GUARD_VERDICT: PASS (1 OK + 1 HTTP 409, row_version=2, no exception)
+退出码：复现脚本本身 exit=0（PASS 分支）；pytest 回归 exit=0。
+
+--------------------------------------------------------------
+回归测试（单会话 monkeypatch，固化"内容不经 ORM flush / rowcount==0→409 可达"不变式）
+--------------------------------------------------------------
+tests/test_ingest_config.py::test_patch_concurrent_guard_zero_rows_returns_409
+  - monkeypatch db.execute：拦截守卫 UPDATE（ingest_submission 唯一 sa_update，SQL 含 "row_version + 1"）强制 rowcount=0
+  - monkeypatch db.flush：抛 StaleDataError（模拟 MySQL 内容 flush 0 affected 语义）
+  - 断言：HTTPException(409, ROW_VERSION_CONFLICT)；row_version 未被推进；内容未被败者覆盖
+红绿：
+  - 旧架构（a8fac99 服务实现）→ 守卫前调用 db.flush() → StaleDataError 冒泡、非 409 → FAILED（RED，已复跑确认）
+  - 新架构（f11e617）→ 内容并入守卫 UPDATE、守卫前无 flush → rowcount==0 → 409 → PASSED（GREEN）
+命令：
+  PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 .venv/bin/python -m pytest tests/test_ingest_config.py::test_patch_concurrent_guard_zero_rows_returns_409 -q
+</content>
+</invoke>

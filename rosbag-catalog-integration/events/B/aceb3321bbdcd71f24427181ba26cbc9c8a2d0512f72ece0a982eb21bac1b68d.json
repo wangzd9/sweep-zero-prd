@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-125753-nochange-t07a-ocr-bagsvc",
+  "occurred_at": "2026-10-12T13:00:26+08:00",
+  "recorded_at": "2026-10-12T13:00:26+08:00",
+  "role": "B",
+  "task": "TASK-07A",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "无新派单无返修；协调者OCR T07A-r1f-bagsvc批续审在途，本侧IDLE只读观察",
+  "evidence": "sessions/B.md@12:58; wt-04a-t07a f94d006; main 453da0c",
+  "next": "等T07A OCR收口→核验合入→TESTER验证"
+}

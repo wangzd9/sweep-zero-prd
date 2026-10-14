@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-181053-nochange-t08c-intermission",
+  "occurred_at": "2026-10-11T18:13:10+08:00",
+  "recorded_at": "2026-10-11T18:13:10+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "18:05后零业务交付 t08c-1编码间歇 18:02:27后无写入 7文件+91/-18未commit",
+  "evidence": "sessions/COORDINATOR.md",
+  "next": "等2号t08c-1交付后机械核验与OCR"
+}

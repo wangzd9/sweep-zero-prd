@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r155-t16b-a2r1-verify-green",
+  "occurred_at": "2026-10-13T13:45:00+08:00",
+  "recorded_at": "2026-10-13T13:45:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16B",
+  "attempt": "2-r1",
+  "status": "REVIEW_PENDING",
+  "summary": "r155：C attempt-2-r1 交付冻结 head 40ab818（base 0208a73，2 文件 +220/-11，6 修复 H1 TOCTOU 接原子返回值/H2 终态 post 前刷新 cur/H4 except Exception 扩失败收尾/H5 config_hash 快照比对 fail-fast 下限/H6 fsync-before-replace/L1 attempt 过滤 + 6 新回归）；协调者机械核验全绿（祖先关系 OK、numstat 43/10+177/1 与回执逐文件一致、零越界、wt 独立复跑 20 passed 12.16s、ruff/compileall clean）；增量 OCR 排队 --from 0208a73 --to 40ab818（单非测试文件小批，接 12S-B 链 c01/c02 后持 ocr.lock 串行）；收口链=增量 OCR 零 CORRECTION→强审 pack（6 修复范围，grant 6b2d83fb9 至 10-14 13:27:15，近 60min 0/5）→合入 main→重算 12S-C 依赖",
+  "evidence": "receipts/TASK-16B/attempt-2-r1.md; git merge-base/diff --numstat 0208a73..40ab818 @ wt-03b-t16b; pytest 20 passed; ruff All checks passed; reviews/TASK-16/16A-16B-ocr-batches.md r155 段",
+  "next": "下轮核 12S-B c01（pid 1897396，session 080bc21b）收口 rc/findings → 逐条裁决 → c02 → 16B r1 增量 OCR 批 → 12S-A 增量 OCR 批；TESTER 待 12S-B 证据齐后派独立验证；16B 收口后重算 12S-C 依赖"
+}

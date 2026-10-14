@@ -1,0 +1,12 @@
+{
+  "event_id": "a-batch1012-attempt1-closeout-verified-ledger-20261014",
+  "occurred_at": "2026-10-14T11:04:37+08:00",
+  "recorded_at": "2026-10-14T11:04:37+08:00",
+  "role": "A",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "post-release-closeout(10:49) A read-only verify + ledger closeout: three flat submissions a65a25a7/87dfebaa/518089ed all SCHEDULED gen1 path_claim_key NULL (source_id points to flat source_copy rows deleted_at NULL); outbox purpose_schedule_event id8/9/10 all CONSUMED error NULL (10:23:08-09 spray/spray-v1/scene-spray consistent); reused run three targets all SCENE_DONE attempt2 updated_at at existing terminal (23:54/00:01/00:07) not new = whole batch still 7 runs no model re-burn (created_runs=0/reused_runs=3); 16_02_03 D1 chain 24d60fee SCHEDULED bound 91FFEEC1 run 4acf689f still SCENE_RUNNING (PRECHECK/EXTRACT DONE INFER RUNNING rest QUEUED overnight no kill/retry); empty bag 16_33_10 D6 rejection traceable but submission still PENDING_INPUT no source/run (not submission terminal closeout). upload-ledger three flat add binding_closeout + 16_02_03 add submission_note; receipt add closeout section per-bag table. A side 1017/D4-3 binding face STOP for A (owner moved to Codex done), remaining face = read-only observe 4acf689f terminal to join TESTER verify, no kill/retry big bag/no dup re-burn/no re-upload/no direct DB edit.",
+  "evidence": "receipts/TASK-11S-BATCH-1012/a-attempt-1.md closeout section + upload-ledger.json binding_closeout/submission_note; processing-machine MySQL NOW 10:55:47 ingest_submission 3 rows + purpose_schedule_event id8-10 + pipeline_run 3 reuse runs; binding-repair.jsonl; live-step-repair.json",
+  "next": "wait 4acf689f terminal any outcome to join TESTER full-chain incremental verify; A maintain no kill/retry big bag/no dup re-burn/no re-upload/no direct DB edit"
+}

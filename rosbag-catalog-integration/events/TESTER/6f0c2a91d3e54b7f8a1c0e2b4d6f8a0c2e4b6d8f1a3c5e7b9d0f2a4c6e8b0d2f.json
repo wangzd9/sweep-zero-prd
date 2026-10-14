@@ -1,0 +1,10 @@
+{
+ "event_id": "tester-poll-20261012-065453-nochange",
+ "role": "TESTER",
+ "ts": "2026-10-12T06:54:53+08:00",
+ "task": "-",
+ "attempt": 0,
+ "status": "POLL_NO_CHANGE",
+ "summary": "06:40:53 后 TESTER 范围零新增、无 PENDING 派单；main 453da0c 双核一致，P0 收口维持 IDLE",
+ "next": "继续 5 分钟巡检"
+}

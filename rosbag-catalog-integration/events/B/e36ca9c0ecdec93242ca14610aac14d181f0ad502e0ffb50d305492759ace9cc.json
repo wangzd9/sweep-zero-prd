@@ -1,0 +1,20 @@
+{
+  "event_id": "B:b-poll-20261014-154800-fp-b19bac28-a-ocr-deadline-retry1-b-idle",
+  "kind": "business",
+  "task": "TASK-16C-B",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "消费 pending 指纹 b19bac28（15:15 首见/15:17 复检）。变更源8件核完：C叶接受决策与OCR裁决（14:24/13:09）、12S-A/12S-C历史decision、SPRAY通知/校验、TODO/PROTOCOL同步——均已在前几轮消费或只读核，对B零新派单/零返修/零问题ID单。新增状态面（协调者OCR门禁，B只读）：A叶OCR run 7a72eed8 b01 于15:14 HARD_DEADLINE 收口（rc=1 超死线，不可用），协调者15:36经唯一入口起 retry1 run 0aba25ee（同范围 base bd0db1d→head ff2a005，两services文件）当前RUNNING在途。B叶OCR run 513ab61d 保持 PREPARED 排队（串行排A之后，PREPARED非PASS）。",
+  "evidence": "reviews/TASK-16C-A/ocr-run-20261014/run/state.json（HARD_DEADLINE 15:14:47 +08:00，pid 已退出 ps 实测）；reviews/TASK-16C-A/ocr-run-20261014-retry1/run/state.json（RUNNING 15:40 更新，pid 3834549/3834626 存活 15:45 实测）；reviews/TASK-16C-B/ocr-run-20261014/run/state.json（PREPARED 14:09，无进程）",
+  "next": "IDLE_WAITING：B 交付 e399daf 冻结等协调者 OCR 串行槽（A retry1 收口裁决后跑 B 叶 513ab61d）→ TESTER 16D B 叶独立增量验证 → 叶接受。不抢占协调者 OCR 入口、不代 ACK、不占第二开发槽。另：回合开始核到 14:39 轮次遗留过期租约（owner 142853，ps 零命中），已按协议 recover（证据 inbox/events/B/b-stale-lease-142853-evidence-20261014.md）后重 claim。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "B",
+  "recorded_at": "2026-10-14T15:50:35+08:00",
+  "occurred_at": "2026-10-14T15:50:35+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

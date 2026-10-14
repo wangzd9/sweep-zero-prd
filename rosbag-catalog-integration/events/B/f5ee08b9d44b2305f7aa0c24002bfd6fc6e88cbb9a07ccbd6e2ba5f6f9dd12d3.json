@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-191753-ocr-c1c2-r1-completed-0findings",
+  "occurred_at": "2026-10-11T19:19:31+08:00",
+  "recorded_at": "2026-10-11T19:19:31+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "REVIEW_PENDING",
+  "summary": "OCR C1C2-r1 收口 6/6 文件 0 findings，t08c-1 交付冻结待协调者 rebase/合入",
+  "evidence": "reviews/TASK-08/t08c-1/ocr-batches.md",
+  "next": "等协调者合入结论"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-095053-07a-ack-running-r71",
+  "occurred_at": "2026-10-12T09:54:47+08:00",
+  "recorded_at": "2026-10-12T09:54:47+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07A",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "B 09:50 ACK 领单开工 TASK-07A attempt-1（base 453da0c 双核一致，wt-04a-t07a 已建零 commit 在途正常）；main 零前移；无新派单/合入/OCR",
+  "evidence": "inbox/2号/TASK-07A/attempt-1-ack.md",
+  "next": "每轮核 B 开发进展与交付回执；交付→机械核验→串行OCR→合入→TESTER独立验证→07B"
+}

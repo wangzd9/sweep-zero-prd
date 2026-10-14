@@ -1,0 +1,22 @@
+{
+  "schema": "coordinator-request/v1",
+  "request_id": "d0935282ba40b2d35e212c1c29939dcc1de98667a3c3f65d2d4d480deb1463a6",
+  "received_at": "2026-10-13T21:44:10+08:00",
+  "status": "HANDLED",
+  "message_id": "om_x100b63d71442d8a0c1e89a475fd12d2",
+  "chat_id": "oc_b64dc5bf34ec1edcc8cce92ffd56604b",
+  "user_id": "ou_cb93c8e06b797e51a6f66a86f4c3fdaf",
+  "text": "当前状态",
+  "context": {
+    "reply_to_message_id": null,
+    "reply_to_text": null,
+    "reply_to_author_id": null,
+    "media_urls": [],
+    "media_types": [],
+    "channel_context": null,
+    "message_type": "text"
+  },
+  "handled_at": "2026-10-13T22:33:07+08:00",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/coordinator/SPRAY-BATCH-1012-20261013/ruling-doublewrite-2210.md",
+  "evidence_sha256": "7c2f5b10eccf4dc5d5519d6389dece54e6659c693b92522953f805ef4648de33"
+}

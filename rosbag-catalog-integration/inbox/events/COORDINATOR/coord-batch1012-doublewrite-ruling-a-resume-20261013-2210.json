@@ -1,0 +1,13 @@
+{
+  "event_id": "coord-batch1012-doublewrite-ruling-a-resume-20261013-2210",
+  "occurred_at": "2026-10-13T22:10:00+08:00",
+  "recorded_at": "2026-10-13T22:10:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "CONSUMED",
+  "summary": "消费 A 21:52 双写冲突 BLOCKED + C obs4/obs5 异常链 + 21:44 群请求「当前状态」。协调者只读直查处理机生产库/代理核实：生产 18000 健康（C 报错主机）、active_runs=[] 无在途、3 个 date-grouped 重复 run 全 fail-closed FAILED at RESOLVING（缺车辆绑定）未烧模型；第二写者=Codex 遗留 zsh cp -a（已退出）；16_02_03 文件失踪但源在位。裁决 ruling-doublewrite-2210.md 落盘+BATCH-STATUS 同步+派 A 续跑（resume-ruling-2210.md 解除 BLOCKED：清污染 submission/NAS 文件+续提交 flat 14_42_48/16_37_47/16_58_28/16_02_03 源重拷）；TESTER/C 范围明确。群请求已归档 ruling §五（静默期不落群，08:00 汇总并给）。无代码变更不起 OCR/强审。",
+  "evidence": "processing-machine 127.0.0.1:18000 /health/ready environment=production; scene-proxy 8767 active_runs=[]; MySQL ingest_submission(10 rows)+purpose_schedule_event(6 rows) 全量读取; ruling-doublewrite-2210.md; BATCH-STATUS.md; resume-ruling-2210.md; scene-proxy logs 3x FAILED RESOLVING 缺车辆绑定",
+  "next": "5min observer 核 A 清除+续跑/TESTER 验收/C 只读观察；大包 16_02_03 跨夜不 kill/retry；08:00 夜间汇总含本批状态+强审查(REVOKED 0/5)",
+  "quiet_hours_note": "夜间 21:00-08:00 静默：工作落盘照常，不主动群报"
+}

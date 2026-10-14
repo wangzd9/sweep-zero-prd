@@ -1,0 +1,13 @@
+{
+  "event_id": "b-t12sb-s9b-owner-still-active-20261013-165100",
+  "occurred_at": "2026-10-13T16:51:30+08:00",
+  "recorded_at": "2026-10-13T16:51:30+08:00",
+  "role": "B",
+  "task": "TASK-12S-B",
+  "attempt": "1-rework-s9b",
+  "status": "WAITING_OWNER_INFLIGHT",
+  "summary": "S9b 让位观察续核（prerun 104fb976）：2号交互会话 owner 在途活跃未停滞——wt-04a-t12sb 未提交 diff 2 文件 +368/-54，decode.py mtime 16:42:45（晚于 16:40:42 上轮观察）；HEAD 仍 0320a8e，s9_head 未冻结；receipts/TASK-12S-B/attempt-1-rework.md mtime 15:20 未含 S9 段。12S-A 已合入 main 6c7d983 并推 origin（收口链首位 OCR 已清）；12S-C 92dcb52 维持 REVIEW_PENDING 待接线核验。本侧零提交零动作，不接管不催单；16:30 交付时限已过，顺延风险交协调者掌握。",
+  "evidence": "wt-04a-t12sb git diff HEAD --stat;stat decode.py mtime;git log main 6c7d983;git ls-remote origin main;inbox/coordinator/TASK-12S-A/attempt-1-ocr-closure-decision-20261013.md;sessions/B.md 16:51 条目",
+  "next": "下轮核对 2号会话是否冻结 s9_head + 回执 S9 段更新；若再无提交/写入/回执变化则标停滞告警交协调者",
+  "source": "events/B/b-t12sb-s9b-owner-still-active-20261013-165100.json"
+}

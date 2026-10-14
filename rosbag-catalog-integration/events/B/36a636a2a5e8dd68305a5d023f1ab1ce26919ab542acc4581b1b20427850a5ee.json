@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-050200-sessions-b-truncate-restored",
+  "occurred_at": "2026-10-12T05:37:32+08:00",
+  "recorded_at": "2026-10-12T05:37:32+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "sessions/B.md 0字节截断事故已按同轮read_file快照机械恢复（64条=快照62+新2，61个spot签名零缺，wc/grep独立核验）",
+  "evidence": "sessions/B.md#05:02",
+  "next": "维持IDLE_WAITING；恢复完整性=快照口径，待协调者抽查"
+}

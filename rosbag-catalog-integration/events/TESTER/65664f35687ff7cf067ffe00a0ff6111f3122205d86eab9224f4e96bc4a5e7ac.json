@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261011-155953-nochange",
+  "occurred_at": "2026-10-11T16:02:43+08:00",
+  "recorded_at": "2026-10-11T16:02:43+08:00",
+  "role": "TESTER",
+  "task": "IDLE",
+  "attempt": "-",
+  "status": "POLL_NO_CHANGE",
+  "summary": "巡检：15:55 后共享根无测试者范围新派单（仅 C nochange 事件+协调者 t08-running/i1-closed POLL_NO_CHANGE 事件+ticks/sessions）；main HEAD f9bafb0=origin/main 未再变，attempt-5 PASS 4/4 被测 app 行为面快照不变、证据不失效；inbox/TESTER 无 PENDING；docker 无 tester 容器残留。维持 IDLE。",
+  "evidence": "sessions/TESTER.md 15:59 心跳; git rev-parse HEAD f9bafb0b44e70e275ba0dd91ca3f0e078e002004",
+  "next": "等 2号 TASK-08 attempt-1 联调交付+协调者验收；TESTER 如有新派单届时 ACK 后开工"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "a-task16a-attempt3-rebase-delivered-20261013",
+  "occurred_at": "2026-10-13T08:56:05+08:00",
+  "recorded_at": "2026-10-13T08:56:05+08:00",
+  "role": "A",
+  "task": "TASK-16A",
+  "attempt": "3",
+  "status": "REVIEW_PENDING",
+  "summary": "attempt-3-rebase 交付冻结：rebase 3 commit 链到 main 3d2a075 + 迁移双头接线 down_revision 20261009_02 改 20261012_01_scene_manual（单头链 20261009_02 到 20261012_01_scene_manual 到 20261013_01_scene_intake）；alembic heads 单头 + SQLite 三往返 RC=0 + 16A 定向 56 passed + ruff 绿；全量 883 passed/4 failed（3=test_devflow 环境性 + 1=test_web /bags N+1=07B 域 main 既有失败非 16A 回归，纯 main 复跑同口径）；HEAD da304e2，零越界",
+  "evidence": "receipts/TASK-16A/attempt-3-rebase.md",
+  "next": "等协调者机械核验 + 增量 OCR + TESTER 16A 独立验证（真 MySQL 8.4 全链迁移往返）到 16A DONE"
+}

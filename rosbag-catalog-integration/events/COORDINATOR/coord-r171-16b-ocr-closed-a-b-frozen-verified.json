@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r171-16b-ocr-closed-a-b-frozen-verified",
+  "occurred_at": "2026-10-13T18:22:08+08:00",
+  "recorded_at": "2026-10-13T18:22:08+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16B/TASK-11S-PREP/TASK-12S-B",
+  "attempt": "2-r2 / r1 / s9b",
+  "status": "CHECKPOINT_ONLY_TAKEOVER",
+  "summary": "r171 在途回合检查点（prerun 17:50 唤醒，消费 pending 514f5380 批次；轮次内 18:00:49 用户授权 Codex 接管协调者，本回合只存检查点退出，不做新派单/裁决/起审/合入/生产动作）：读回事实供接管者接续——①16B r2 增量 OCR run 4492b7f6 17:42:30 收口 rc=0（manifest 1/1/0 指纹一致），3 findings 裁决=无阻塞 CORRECTION（裁决 reviews/TASK-16B/attempt-2-r2/ocr-verdict.md + inbox/coordinator/TASK-16B/ocr-r2-closure-decision-20261013.md，本回合读回前已落盘）；②强审 SR-16B-R2 call 005277e6e60a 18:0x 返回 REWORK_REQUIRED：R1-01/04/05 关闭、R1-02/R1-03 未关（result.md），接管者已派 r3（attempt-2-r3-dispatch.md 18:03:29，base e152465，TODO 16B 行已同步 REWORK_REQUIRED/r3 在案）；③A 11S-PREP r1 冻结 769d69f（祖先核 OK，deploy/scene 纯部署面，bash -n RC=0）与 B s9_head 冻结 f76e2a9（parent 0320a8e 单 commit 2 文件 +369/-54，wt 独立复跑 98 passed + ruff 绿）均已完成机械核验（本回合读回）；12S-B s9b 增量 OCR run 01407cec 在途（持 ocr.lock，spec f62a29c..f76e2a9），TESTER 16B-r2 独立验证 17:55 ACK 在途。零新 OCR 起跑、零强审新调用、零合入、零生产动作。",
+  "evidence": "reviews/TASK-16B/attempt-2-r2/ocr-verdict.md; inbox/coordinator/TASK-16B/ocr-r2-closure-decision-20261013.md; receipts/TASK-11S-PREP/attempt-1.md r1 段; receipts/TASK-12S-B/attempt-1-rework.md S9b 段; inbox/TESTER/TASK-16B-r2/attempt-1-ack.md; git show 769d69f/f76e2a9 + pytest 98 passed + ruff clean",
+  "next": "接管者（Codex 协调者）接续：等 C r3 ACK/交付（base e152465 续 commit）→机械核验→r3 增量 OCR→原授权两问题（R1-02/03）复审→TESTER r2 报告与 r3 独立核恢复→16B 收口；12S-B s9b OCR 01407cec 收口裁决→TESTER 1184/44 探针复验；A r1 部署面并入 G4 证据包；生产动作仍需原门禁+用户当次授权。"
+}

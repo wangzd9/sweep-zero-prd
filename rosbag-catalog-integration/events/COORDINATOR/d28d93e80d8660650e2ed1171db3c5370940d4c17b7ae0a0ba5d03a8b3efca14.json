@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-231553-t10-1d-fail-investigating",
+  "occurred_at": "2026-10-11T23:20:08+08:00",
+  "recorded_at": "2026-10-11T23:20:08+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "23:05:53 后零交付零合入；2号驱动第2跑 1b 已自修复（拷袋入 nasroot register 成功）推进至 1d 失败=03B 链路+显式 fallback 均未建 SCENE_SLICE run，在途排查；main ca8730d=origin；A/C/TESTER 空闲",
+  "evidence": "scratch/t10/t10-e2e.log(23:14:55) / sessions/COORDINATOR.md",
+  "next": "下轮核 1d 定位口径/回执；交付即机械核验→OCR→合入→TESTER 验证→P0 收口"
+}

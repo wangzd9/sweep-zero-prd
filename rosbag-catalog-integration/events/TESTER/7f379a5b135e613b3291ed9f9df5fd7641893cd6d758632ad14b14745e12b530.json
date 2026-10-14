@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t12sab-ack-start-20261013-141359",
+  "occurred_at": "2026-10-13T14:13:59+08:00",
+  "recorded_at": "2026-10-13T14:13:59+08:00",
+  "role": "TESTER",
+  "task": "TASK-12S-AB",
+  "attempt": "attempt-1",
+  "status": "ACKED_RUNNING",
+  "summary": "ACK 协调者 13:5x 派单 TASK-12S-AB（12S-A 77c395b + 12S-B f62a29c 冻结快照独立验证，与 OCR 并行解耦）：快照 rev-parse 双核一致、worktree 名勘误申报（wt-01-t12sa vs 派单 wt-01-t16a，按 commit 为准）、环境预核（mysql:8.4 镜像在库/A 零新增 DDL 面/7 参考图在位/1012 ",
+  "evidence": "inbox/TESTER/TASK-12S-AB/attempt-1-ack.md; sessions/TESTER.md（2026-10-13 14:15 段）",
+  "next": "分段验证→test-receipts/TEST-TASK12S-AB/attempt-1.md 交付 TEST_REPORT_PENDING"
+}

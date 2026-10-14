@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-021253-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T02:14:57+08:00",
+  "recorded_at": "2026-10-12T02:14:57+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "2",
+  "status": "IDLE_WAITING",
+  "summary": "TESTER v2 PASS+协调者 DONE 收口，P0 停止派发，本侧无新派单无返修",
+  "evidence": "test-receipts/TEST-TASK10-e2e-reverify/attempt-2.md; inbox/coordinator/TASK-10/e2e-reverify-v2-acceptance-decision.md",
+  "next": "IDLE_WAITING，仅按需巡检"
+}

@@ -1,0 +1,13 @@
+{
+  "event_id": "a-batch1012-attempt1-4acf689f-poll-0443-20261014",
+  "occurred_at": "2026-10-14T04:43:34+08:00",
+  "recorded_at": "2026-10-14T04:45:00+08:00",
+  "role": "A",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "04:4x 只读巡检（夜间静默不群报）：observer 唤醒 fingerprint 0a4ae644…，变更源=events/A 04:35 poll 事件回读+sessions/A.md 自回声，零协调者新派单/新裁决/新返修。生产实测（NOW 04:43:34）：scene-4acf689f（16_02_03 大包 10.1GB，24d60fee SCHEDULED 绑 91FFEEC1…）attempt1 仍 SCENE_RUNNING 正常推进（heartbeat 04:43:20 30s 连续，八步全 QUEUED，frozen 23:05 起约 5h38min，INFER 跨夜继续不 kill/retry）；scene run 7=6 DONE+1 RUNNING 无新终态；submission 面零变化（4 PENDING_INPUT=flat 三提交 source_id NULL 零 run + 空包 7a71e404 既定拒绝路径，串行占用预期等待）；scan_job 4027/4026 SUCCESS 幂等零 409 循环。本轮无可执行动作。",
+  "evidence": "sessions/A.md 04:4x 条目（377->378 行核验）; 处理机 pipeline_run/pipeline_event/step_run/ingest_submission/scan_job 只读 SELECT NOW 04:43:34; scratch/a_batch1012_check11_0443.out",
+  "next": "核 4acf689f 终态（任一 outcome）→串行释放后立即核 flat 三提交绑定/source_id/新 run 收敛并补 D4③ 回执给协调者",
+  "source": "inbox/events/A/a-batch1012-attempt1-4acf689f-poll-0443-20261014.json"
+}

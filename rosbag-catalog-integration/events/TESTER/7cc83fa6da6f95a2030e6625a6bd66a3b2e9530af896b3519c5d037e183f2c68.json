@@ -1,0 +1,20 @@
+{
+  "event_id": "TESTER:t16d-ccr1-and-a-corr-leaf-verify-delivered-20261014-1410",
+  "kind": "business",
+  "task": "TASK-16D",
+  "attempt": "attempt-1",
+  "status": "PREP",
+  "summary": "C 叶 CC-R1 返修 ce5921d 与 A 叶 563a91a 对应面独立验证完成（PASS）：C 返修面 pytest 16+15 passed rc=0、RED-GREEN 独立复核（旧模板还原目标用例 1 failed/恢复 1 passed 证断言非空转）、浏览器无血缘 SCENE_SLICE run 兜底 ol.lineage 开始标签在位+Console 零异常(hookAlive)+终态停刷新（T16DCC 夹具自清 0/0）；A 面严格 MySQL 8.4.11 隔离库探针 21/21 PASS（C7 非法日期 raise/422、全天截止 DATETIME(0) 边界 SQL 佐证、aware 换算、C5 双用途两筛选命中 UID 唯一、C6 分类真相、幂等；T16DMYSQL 自清）+Web/API 浏览器面（A 树重建栈，三 data_kind 筛选命中与 DB 一致、API 非法日期 422、双用途行内 data_kind 首值口径；T16DCA 自清）。均为对应面增量验证，非联合验收、不覆盖 seed 缺陷面。",
+  "evidence": "test-receipts/TEST-TASK16D/attempt-1.md A叶增量独立验证 与 C叶CC-R1返修面独立验证 段；scratch 探针与日志 t16d_ccr1_pytest.log/t16d_a_mysql.log/t16d_c2_stack.log/t16d_a2_stack.log",
+  "next": "等三叶（A 563a91a / B e399daf / C ce5921d）全部接受后协调者生成含 seed 固定集成 SHA 再联合验收；16D 准备面（8 类 fixture/seed 缺陷复现）在集成 SHA 后收口。原 11S 批次 4acf689f 终态并行线 TEST_REPORT_PENDING 不变。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "TESTER",
+  "recorded_at": "2026-10-14T14:25:46+08:00",
+  "occurred_at": "2026-10-14T14:25:46+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

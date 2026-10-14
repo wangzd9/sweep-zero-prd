@@ -1,0 +1,12 @@
+{
+  "event_id": "a-t11e-rerun-run7-inflight-20261012-1724",
+  "occurred_at": "2026-10-12T17:26:17+08:00",
+  "recorded_at": "2026-10-12T17:26:17+08:00",
+  "role": "A",
+  "task": "TASK-11",
+  "attempt": "observation-4",
+  "status": "OBSERVED_UNAUTHORIZED_RERUN",
+  "summary": "t11e 第7跑 17:18:41 在途（pid 269551/269574，父链 gateway 1366），run5/run6 已 FAIL 收口，共享根零归属申报，门禁 PRODUCTION BLOCKED 不变，不 kill 不代判不清理",
+  "evidence": "ps lstart + ~/.hermes/cache/scratch/t11e_run7.out + a-t11e-evidence-20261012-1627",
+  "next": "供协调者核第7跑归属与处置"
+}

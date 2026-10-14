@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-164753-nochange-t08-delivered-waiting-review",
+  "occurred_at": "2026-10-11T16:48:45+08:00",
+  "recorded_at": "2026-10-11T16:49:34+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "巡检 no-change：inbox/2号 无新派单/返修/审核结论（最新仍 15:32 attempt-1 dispatch/ack）；main/origin HEAD f9bafb0 不变；wt-04a-t08 冻结（HEAD=62a85bf base，git status 仅 .venv 软链）；receipts/TASK-08/attempt-1.md 16:32 冻结未变；无 pytest/t08 在途进程。TASK-08 attempt-1 维持 REVIEW_PENDING（交付冻结 16:32），等协调者审核+裁决 C1/C2/C3 回派。",
+  "evidence": "preflight checked_at 2026-10-11T16:47:53+08:00; find -newermt 16:42:53 业务目录仅各角色 ticks",
+  "next": "等协调者审核交付或回派 C1/C2/C3；收到返修/新单再启动"
+}

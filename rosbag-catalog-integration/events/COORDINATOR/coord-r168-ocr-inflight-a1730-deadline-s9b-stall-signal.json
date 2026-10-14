@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r168-ocr-inflight-a1730-deadline-s9b-stall-signal",
+  "occurred_at": "2026-10-13T17:32:00+08:00",
+  "recorded_at": "2026-10-13T17:32:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16B/TASK-11S-PREP/TASK-12S-B",
+  "attempt": "n/a",
+  "status": "POLL_HANDLED",
+  "summary": "r168 巡检（prerun 指纹 9221523f…，处理新指纹 d503e7f7…）：①16B r2 增量 OCR run 4492b7f6 持续活跃（worker pid 2185168 / ocr review pid 2185246 etime ~41min，b01 session jsonl 17:29:39 刷新），不重复起跑、不催；收口裁决→强审增量复审（授权 6b2d83fb 剩 4/5，期限 2026-10-14 13:27:15）→TESTER 收口→合入 16B。②A 11S-PREP r1 剩余面（r1-1 service 变量名一致性核对 / r1-2 SPRAY_MODEL_ENDPOINT→SPRAY_VLM_ENDPOINT / r1-3 发布时点固定 SHA 口径）冻结目标 17:30 已到未达：wt-01-t11sp HEAD 仍 d8f7206，env.example/DEPLOY-ENTRY.md 零改动，r1 ACK 未落，A 租约 16:17 已过期且无进程，17:1x 纠正单后 A 会话静默——17:30 证据盘点按'预核表+备份核验+维护窗口+副本实验成功区块'先行放行口径记录，r1 配置/文档面缺口明确挂账（17:40 硬线后若仍无冻结，17:45 生产放行盘点材料标注该缺口，不阻塞首包功能链但属发布前必须收口项）。③B s9_head 停滞信号触发：2号交互会话最后写入 decode.py 16:42:45 后 50min 无提交/无写入/无回执更新（receipts/TASK-12S-B/attempt-1-rework.md 仍 15:20 未含 S9 段），达 B 侧申报的停滞告警条件——不催不接管（交互会话 owner），12S-B 合入门禁维持关闭（s9_head 未冻结→OCR f62a29c..s9_head 无法占槽）；19:00 首包依赖 12S-B 风险如实申报。零新 OCR 起跑、零强审调用、零新派单、零合入。",
+  "evidence": "ocr_runtime.py status --run reviews/TASK-16B/attempt-2-r2/ocr（state RUNNING，b01 session_mtime 17:29:39）; ps 2185168/2185246 etime 40:46; git -C wt-01-t11sp log -1 = d8f7206 + diff 仅 scene-host.service 23+/14-; git -C wt-04a-t12sb log -1 = 0320a8e + diff 2 文件 +368/-54，decode.py mtime 16:42:45; inbox/1号/TASK-11S-PREP/attempt-1-r1-state-correction.md; inbox/coordinator/SPRAY-1900-20261013/a-status-check-1705.md",
+  "next": "下轮：核 A 是否 r1 冻结（新 head≠d8f7206 + r1 ACK/回执段）；核 B s9_head 是否冻结（HEAD 前移+回执 S9 段）——任一到达即接机械核验+OCR 串行队列；4492b7f6 收口→裁决→强审增量复审→TESTER 收口→合入 16B；17:45 生产放行盘点按双缺口（A r1 面、B s9_head）口径汇总"
+}

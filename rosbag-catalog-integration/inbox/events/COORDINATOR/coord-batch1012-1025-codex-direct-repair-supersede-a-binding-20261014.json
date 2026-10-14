@@ -1,0 +1,15 @@
+{
+  "event_id": "coord-batch1012-1025-codex-direct-repair-supersede-a-binding-20261014",
+  "occurred_at": "2026-10-14T10:25:00+08:00",
+  "recorded_at": "2026-10-14T10:26:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "SUPERSEDED_A_DISPATCH",
+  "supersedes_context": "prerun a4d95672 + 二次 pending b8851eaa（含 codex-direct-repair-20261014.md 10:07）；10:17 已消费 09:54 只读审计下 A 绑定派单 resume-ruling-binding-1017.md，本轮发现更晚的用户直接修复指令须 STOP 该派单",
+  "summary": "消费 codex-direct-repair-20261014.md（10:07，用户『直接处理问题』）：Codex 在隔离树 fix/spray-progress-20261014（分支已存在）单写修复三项——① 三份 flat 提交 a65a25a7/87dfebaa/518089ed 重登记恢复（正式 Backend API，先验证源代次/场景身份一致、复用既有终态 run、不新增模型执行、不直改生产 DB）；② 阶段上报缺口+空包终态隔离修复验证（未部署前不声称对在途生效）；③ scene-4acf689f 保持运行不重启/cancel/retry。**STOP 我 10:17 对 A 的绑定派单 resume-ruling-binding-1017.md（顶部加 ⛔ STOP 块），owner 转 Codex，A 停对这三份提交再上传/重提/retry**——避免 A 与 Codex 对同一三份提交形成第二写者双写（本批已出过一次 date-grouped 双写污染）。BATCH-STATUS 更正 A 行+三包行 owner=Codex，新增『缺陷修复（10:07 Codex 直接修复范围，隔离树单写）』节，约束改『代码变更（10:07 授权）』。",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/codex-direct-repair-20261014.md（10:07:25）；codex-progress-audit-20261014-0954.md（09:54:36 只读审计）；git branch --list 见 + fix/spray-progress-20261014；resume-ruling-binding-1017.md 顶部 STOP 块（10:25 写）；BATCH-STATUS.md A 行/14_42_48/16_37_47/16_58_28 行 owner=Codex 更正+『缺陷修复』节；sessions/COORDINATOR.md 10:25 条目（2693 行）",
+  "next": "等 Codex 修复回执（隔离树验证+flat 三提交绑定 outcome+阶段上报/空包终态修复证明）→ 核回执后派 TESTER 独立验收（flat 绑定 run 全链/两次 reconcile 幂等+修复项验证）→ 部署合入走既有门禁（独立测试+串行 OCR+按需强审，不自行批准/发布）；同步核 scene-4acf689f 模型段完成信号→终态后 TESTER 16_02_03 八步+跨 DB3 真实时间戳边界+两次 reconcile。白天 20min 报告 no_agent 投递，状态变化即时通报。",
+  "quiet_hours_note": "白天口径，状态变化即时通报",
+  "source": "inbox/events/COORDINATOR/coord-batch1012-1025-codex-direct-repair-supersede-a-binding-20261014.json"
+}

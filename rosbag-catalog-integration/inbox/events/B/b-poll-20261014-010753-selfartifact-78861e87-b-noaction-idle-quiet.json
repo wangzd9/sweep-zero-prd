@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261014-010753-selfartifact-78861e87-b-noaction-idle-quiet",
+  "occurred_at": "2026-10-14T01:13:00+08:00",
+  "recorded_at": "2026-10-14T01:13:00+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Consumed observer pending fp 78861e87 (checked_at 01:07:53, single changed source sessions/B.md = own 01:08 append self-artifact). No new business input: inbox/2号 zero new since 21:13 (only attempt-1 dispatch+ack, no dispatch/rework/problem-ID), SPRAY-BATCH-1012-20261013 no new files since 01:05, BATCH-STATUS.md 00:59:51 already consumed (B row still DONE 21:12, input-applicability ruling 4 packet / 3 NOT_APPLICABLE / 1 INVALID_EMPTY_INPUT stands unrefuted). B zero commit / zero model / zero copy / zero production write; ps shows no B business processes. Maintains IDLE_WAITING; quiet hours 21:00-08:00, no proactive group message; 08:00 digest includes C actor-identity escalation.",
+  "evidence": "prerun snapshot B.json (fingerprint 78861e87, changed_sources=[sessions/B.md]); stat sessions/B.md; find inbox/2号 -newermt 21:13 empty; find SPRAY-BATCH-1012-20261013 -newermt 01:05 empty; BATCH-STATUS.md mtime 00:59:51; claim/release normal (owner cron-b-poll-6f7471d8747c-20261014-010753, token JSON-parsed len=32); sessions/B.md 01:13 entry appended (dry-run verified, newline-terminated)",
+  "next": "IDLE_WAITING: await next coordinator dispatch; quiet hours until 08:00, 08:00 digest."
+}

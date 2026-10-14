@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-092453-infer-continue-20261014",
+  "occurred_at": "2026-10-14T09:30:10+08:00",
+  "recorded_at": "2026-10-14T09:30:10+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "09:2x 巡检轮（prerun 指纹 b0846f09，唤醒源=上轮 09:22:28 自写事件 canonical 落盘+sessions 回声，纯回声消费）：按本角色范围增量只读巡检，4acf689f SCENE_RUNNING 八步 QUEUED 8/8；VLM 09:29:19-09:29:49 Running 2-4 reqs / Waiting 0、prefix 92.5、KV 3.4-7.2、MM 88.8、POST 200 连发；proxy 3495931 volcsw 111007->111031（12s +24 持续递增）、nvolcsw 359、RSS 18084436kB S——INFER 远端推理持续活跃，不 kill/cancel/retry。flat 三提交 3/3 PENDING_INPUT source_id=NULL 等 A D4 第三步，14_42_48 正式全链维持 NOT_RUN；scan 4085 /public/rosbag_scene_processing/incoming SUCCESS {directories:3 bags:1 failed:2} 周期持续空包拒绝可追溯、self_built 8dirs 全绿（4084）；health ok active_runs=[4acf689f ACCEPTED]；PASS 基线不变。本轮 claim 租约 ttl 上限 600s 巡检前 renew 一次（role_runtime ttl>900 被拒绝），租约闭环 released:true。全部只读。",
+  "evidence": "scene_runs top='scene-4acf689f9a6a473da1fa2f2efc70\\tSCENE_RUNNING\\t1\\t2026-10-14 09:29:39'; steps QUEUED=8/8 started_at=NULL; volcsw 111007->111031 nvol 359 RSS 18084436kB S; flat PENDING_INPUT=3/3 source_id=NULL; scan top='4085\\t/public/rosbag_scene_processing/incoming\\tSUCCESS\\t{directories:3 bags:1 created:0 updated:0 failed:2 root_id:scene}\\t2026-10-14 09:25:57'; health='{status: ok, active_runs: [4acf689f ACCEPTED pid:1]}'",
+  "next": "白天按原节奏巡检；等 4acf689f 模型段完成信号（checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE）；flat 绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING；11:00 时段总结照常"
+}

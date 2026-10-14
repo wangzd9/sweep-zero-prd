@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r130-r3-ocr-6of6-closure-r4-dispatch-20261013064053",
+  "occurred_at": "2026-10-13T06:54:26+08:00",
+  "recorded_at": "2026-10-13T06:54:26+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07B",
+  "attempt": "4-r4",
+  "status": "REVIEW_PENDING",
+  "summary": "R3 增量 OCR 6/6 全收口；r3-1 迁移 2 findings 正式裁决（medium CORRECTION=downgrade 表存在守卫丢失+low documentation）；R4 最小返修单（仅迁移单文件）已派 B，待 ACK",
+  "evidence": "inbox/2号/TASK-07B/attempt-4-r4-dispatch.md",
+  "next": "B ACK+交付后机械核验→R4 增量 OCR→强审增量复审（期限内）→TESTER post-r→07B 合入"
+}

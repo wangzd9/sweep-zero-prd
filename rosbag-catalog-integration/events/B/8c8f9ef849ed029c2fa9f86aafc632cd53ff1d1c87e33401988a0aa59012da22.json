@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-145253-strongmodel-inreview",
+  "occurred_at": "2026-10-11T14:54:31+08:00",
+  "recorded_at": "2026-10-11T14:54:31+08:00",
+  "role": "B",
+  "task": "TASK-06",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "无新派单无返修；强复审 R2I-20261010-06 14:50 用户手动触发已起跑 IN_REVIEW，main=origin 62a85bf 双核一致；本侧空闲等待结果",
+  "evidence": "sessions/B.md",
+  "next": "等强复审结果收口 03/05/06 聚合 DONE 后接 TASK-08"
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "coordinator-request/v1",
+  "request_id": "2408c2feaa652e54f11d1c7ad3155c593e2ee2350a7dcc032ce24fc37a7d400d",
+  "received_at": "2026-10-13T21:04:43+08:00",
+  "status": "HANDLED",
+  "message_id": "om_x100b63d6885770a0df08cd527414a0f",
+  "chat_id": "oc_b64dc5bf34ec1edcc8cce92ffd56604b",
+  "user_id": "ou_cb93c8e06b797e51a6f66a86f4c3fdaf",
+  "text": "恢复了吗",
+  "context": {
+    "reply_to_message_id": null,
+    "reply_to_text": null,
+    "reply_to_author_id": null,
+    "media_urls": [],
+    "media_types": [],
+    "channel_context": null,
+    "message_type": "text"
+  },
+  "handled_at": "2026-10-13T21:09:53+08:00",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/coordinator/SPRAY-BATCH-1012-20261013/request-replies/2408c2feaa652e54f11d1c7ad3155c593e2ee2350a7dcc032ce24fc37a7d400d.md",
+  "evidence_sha256": "71e542d3a1642728fe06f3fba82a93d19cb4b5ebf8344e86273f3dadfd4283b3"
+}

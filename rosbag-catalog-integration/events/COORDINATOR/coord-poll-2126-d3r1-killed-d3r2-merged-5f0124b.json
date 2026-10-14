@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-2126-d3r1-killed-d3r2-merged-5f0124b-tester-dispatched-20261010",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1-defect3-reconcile-replay",
+  "status": "MERGED",
+  "occurred_at": "2026-10-10T21:47:00+08:00",
+  "summary": "D3-r1(5ee653d5)化身回合结束被杀(4组完成/无run manifest/--resume拒绝)→D3-r2(81a9e337)重跑0 findings→4e2158e --no-ff 合入 main 5f0124b(推origin)合入后sanity全绿→TESTER缺陷3复测已派(base 5f0124b,不重跑已PASS场景)",
+  "evidence": "reviews/TASK-06B/attempt-1-defect3-reconcile-replay/ocr-batches.md; inbox/TESTER/TASK-06/r2-final-mysql-e2e-defect3-retest.md; main 5f0124b",
+  "next": "TESTER复测PASS→强模型增量复审(用户手动)→03/05/06聚合DONE→TASK-08",
+  "recorded_at": "2026-10-10T21:47:00+08:00"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r157-ocr-runtime-handover-confirmed",
+  "occurred_at": "2026-10-13T14:0x:00+08:00",
+  "recorded_at": "2026-10-13T14:0x:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "r157 巡检（指纹 6ef5db02，流程交接回合）：① 消费 notice OCR-RUNTIME-FIX-20261013——Skill 1.5.0 重载+ocr-runtime.md 已读+PROTOCOL L70 新 OCR 规范在案；今后唯一入口 ocr_runtime.py prepare→start→status，禁裸 ocr review/terminal 后台/nohup/setsid/临时 runner/恢复 18002；本回合零新 OCR/强审起跑（Run Context 明示）。② 12S-B 旧链在途身份核：pid 1897396 chain.py 存活、node 1926290 c02 健康推进（session 96fa444e mtime 14:04 request_no 14 在动，--from 6fb42c4 --to f62a29c --exclude c01 5 文件，审辅助配置面 7 文件，13:51:20 START，无 session_end/manifest 不收口不判停止）；inbox/ocr.lock fuser 核 holder=1897396 单持有。③ 候选 PREPARED 包 reviews/TASK-12S-B/runtime-prepared-20261013（run_id bc32b979，start 被 LEGACY_OCR_BUSY 拒绝在案）manifest 核：base 6fb42c4821→head f62a29c211 与旧链逐字一致，b01 核心 5 文件+b02 辅助 7 文件=12 入选 tests 排除与 c01/c02 覆盖完全重合，endpoint 8002+model qwen3.8-27b-fp8 冻结；裁决=c02 自然收口后旧链 manifest+findings 为最终覆盖证据，候选包封存不盲跑（b01 与 c01 同身份已出 8 findings 全 CONFIRMED），仅旧链失败/覆盖缺口时按 ocr-runtime.md 显式 --reuse-run（授权 auth-24h-20261013 内，最多一次）。④ finish_legacy 一次性 service 在位（pid 1923120 active，旧链退出后仅纠正 18002 废弃 URL）。⑤ 强审只读：grant 6b2d83fb9 至 10-14 13:27:15，近 60min 0/5，本授权累计 0，在途 0，最近 a8febf1a SUCCEEDED（费用未知），本轮零新增。⑥ 收口链：c02 收口→S1-S8+c02 合并一次最小返修单派 B→交付冻结→机械核验→返修增量 OCR（固定入口）→TESTER 独立验证（12S-A/B 单 r156 已派并行）→合入→12S-B DONE→重算 12S-C；16B r1 增量 OCR 与 12S-A 增量 OCR 排队其后，新身份一律固定入口。",
+  "evidence": "notice inbox/coordinator/OCR-RUNTIME-20261013/notice.md; PROTOCOL.md L70; Skill ocr-runtime.md 1.5.0; ps 1897396/1926290/1926298 + fuser inbox/ocr.lock; ~/.opencodereview/sessions/...wt-04a-t12sb/96fa444e mtime 14:04; reviews/TASK-12S-B/runtime-prepared-20261013/{state.json,spec.json}; systemctl --user status ocr-legacy-endpoint-finish-20261013.service; sessions/COORDINATOR.md r157 段; reviews/TASK-16/16A-16B-ocr-batches.md r157 段; snapshot COORDINATOR.json fp 6ef5db02",
+  "next": "下轮核 c02 收口 rc/findings → 合并 S1-S8+c02 返修单派 B；候选包保持封存；16B/12S-A OCR 改固定入口"
+}

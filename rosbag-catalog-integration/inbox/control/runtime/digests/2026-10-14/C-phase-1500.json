@@ -1,0 +1,552 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-14T15:00:53.573026+08:00",
+  "role": "C",
+  "kind": "phase",
+  "start": "2026-10-14T11:00:00+08:00",
+  "end": "2026-10-14T15:00:00+08:00",
+  "artifact": "inbox/control/runtime/digests/2026-10-14/C-phase-1500.json",
+  "roles": [
+    {
+      "role": "C",
+      "start": "2026-10-14T11:00:00+08:00",
+      "end": "2026-10-14T15:00:00+08:00",
+      "totals_seconds": {
+        "working": 0,
+        "waiting": 6773.0,
+        "blocked": 0,
+        "idle": 0,
+        "unknown": 7627.0
+      },
+      "segments": [
+        {
+          "start": "2026-10-14T11:00:00+08:00",
+          "end": "2026-10-14T11:23:00+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "C 第75轮只读观察（处理机 10:43-10:52 实测）：消费 codex-repair-receipt-20261014.md（10:23）独立复测=flat 三提交绑定恢复落地——ingest_submission 实测 a65a25a7→FFDEE943/87dfebaa→9C9456B6/518089ed→ … 10:00 零新写；NAS 71% 不变、load 4.46 抬升（C 未起进程，如实归因 INFER+VLM 段）、incoming/spray 仍仅 16_33_10 空包。本批 8 包无新终态、无升级条件命中；绑定恢复属实质状态变化按白天口径即时通报。C 全程只读，未 kill/删/重启/retry/改生产",
+          "sources": [
+            "events/C/538922fa5bc78ffc2d047631a2d69908932021e6731004dee45378431afa66e9.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T11:23:00+08:00",
+          "end": "2026-10-14T11:25:10+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "C 第76轮只读观察（处理机 11:21-11:23 实测）：与 obs75 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜续跑不 kill/retry）。① scene-4acf689f（16_02_03 正式链 source 91FFEEC1…/submission 24d60fee…/av1）实测 SCENE_RUNNING attempt=1 error 空、lease_expires_at 11:25:15（11:23 查点 heartbeat 续租活跃，无 4 连败升级条件）、八步 PRECHECK/EXTRACT=DONE、INFER=RUNNING、PUBLISH/REGISTER/SEGMENT/",
+          "sources": [
+            "events/C/3132e279044297a18577e8b2a5b58f232ff7bd82b3045bc4ae1f84404f5e05b5.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T11:25:10+08:00",
+          "end": "2026-10-14T11:46:30+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "C 第75轮只读观察（处理机 10:43-10:52 实测）：消费 codex-repair-receipt-20261014.md（10:23）独立复测=flat 三提交绑定恢复落地——ingest_submission 实测 a65a25a7→FFDEE943/87dfebaa→9C9456B6/518089ed→ … 10:00 零新写；NAS 71% 不变、load 4.46 抬升（C 未起进程，如实归因 INFER+VLM 段）、incoming/spray 仍仅 16_33_10 空包。本批 8 包无新终态、无升级条件命中；绑定恢复属实质状态变化按白天口径即时通报。C 全程只读，未 kill/删/重启/retry/改生产",
+          "sources": [
+            "events/C/538922fa5bc78ffc2d047631a2d69908932021e6731004dee45378431afa66e9.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T11:46:30+08:00",
+          "end": "2026-10-14T12:12:00+08:00",
+          "category": "unknown",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "summary": "C 第76轮只读观察（处理机 11:21-11:23 实测）：与 obs75 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜续跑不 kill/retry）。① scene-4acf689f（16_02_03 正式链 source 91FFEEC1…/submission 24d60fee…/av1）实 …  不变、load 6.09/5.58/5.11（较 obs75 4.46 继续抬升，C 未起任何进程，如实归因 INFER+VLM 活跃段）、up 6 天 1:40、incoming/spray 仍仅 16_33_10 空包目录（D6 台账 A 面不变）。本批 8 包无新终态，无升级条件命中。11:00 时段总结",
+          "sources": [
+            "events/C/3132e279044297a18577e8b2a5b58f232ff7bd82b3045bc4ae1f84404f5e05b5.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T12:12:00+08:00",
+          "end": "2026-10-14T12:15:11+08:00",
+          "category": "waiting",
+          "task": "TASK-16C-C",
+          "attempt": "1",
+          "summary": "C TASK-16C-C attempt-1 冻结交付：base bd0db1d（seed 未接受）→ head 522bb3f，分支 c/task-16cc-pipeline-detail，worktree wt-c-16cc。OCR 遗留 8 条全处置：C1 删不可达 elif、C2 删死参数、C3+c05-03 共修 SCENE_TERMINAL_STATUSES 唯一来源+scene_terminal()（INPUT_INVALID 非场景终态）、C4 口径保持只回归确认、C8 retry-form DOM guard、C9 模型身份只取冻结快照无记录写未登记、c05-04 血缘 li 补 ol 容器、c05-05 NVID",
+          "sources": [
+            "events/C/28bfc6873baa6a7d90ae8e46b66f07c49ef1c7a6d1d5ebf0516946dcf4324ec9.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T12:15:11+08:00",
+          "end": "2026-10-14T13:03:53+08:00",
+          "category": "waiting",
+          "task": "TASK-16C-C",
+          "attempt": "1",
+          "summary": "C TASK-16C-C attempt-1 冻结交付：base bd0db1d（seed 未接受）→ head 522bb3f，分支 c/task-16cc-pipeline-detail，worktree wt-c-16cc。OCR 遗留 8 条全处置：C1 删不可达 elif、C2 删死参数、C3+c05-03  … ASK-16C-C/attempt-1.md；状态 REVIEW_PENDING 等 TESTER 独立验证（浏览器 JS/严格 MySQL/联合验收面）与协调者 OCR 串行裁决；C 未合入未部署未起 OCR。11S 原收尾观察面（obs76 11:21-11:23 在案）按 5 分钟巡检继续，本单释放 C 开",
+          "sources": [
+            "events/C/28bfc6873baa6a7d90ae8e46b66f07c49ef1c7a6d1d5ebf0516946dcf4324ec9.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T13:03:53+08:00",
+          "end": "2026-10-14T13:11:39+08:00",
+          "category": "unknown",
+          "task": "TASK-16C-C",
+          "attempt": "1",
+          "summary": "C TASK-16C-C attempt-1 冻结交付：base bd0db1d（seed 未接受）→ head 522bb3f，分支 c/task-16cc-pipeline-detail，worktree wt-c-16cc。OCR 遗留 8 条全处置：C1 删不可达 elif、C2 删死参数、C3+c05-03  … ASK-16C-C/attempt-1.md；状态 REVIEW_PENDING 等 TESTER 独立验证（浏览器 JS/严格 MySQL/联合验收面）与协调者 OCR 串行裁决；C 未合入未部署未起 OCR。11S 原收尾观察面（obs76 11:21-11:23 在案）按 5 分钟巡检继续，本单释放 C 开",
+          "sources": [
+            "events/C/28bfc6873baa6a7d90ae8e46b66f07c49ef1c7a6d1d5ebf0516946dcf4324ec9.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T13:11:39+08:00",
+          "end": "2026-10-14T13:11:57+08:00",
+          "category": "waiting",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "summary": "C CC-R1 返修冻结交付：续 commit 522bb3f→ce5921d（不新开 attempt，branch c/task-16cc-pipeline-detail，wt-c-16cc 干净仅 .venv 未跟踪）。修复面=模板数据血缘兜底 {% else %} 分支补 <ol class=\"lineage\"> 开始标签（c05-04 半修收口，li 文案/muted 不变）+ test_no_lineage_fallback_li_in_ol 同步断言兜底 li 位于开始标签之后、</ol> 之前。RED→GREEN 实测：新断言对 522bb3f 旧模板 FAILED（assert -1 != -1），修复后 1 pas",
+          "sources": [
+            "events/C/43f5a5697eeddf630a603745c259b3c54dabffd8574fc5356c31dfefe4a0ff48.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T13:11:57+08:00",
+          "end": "2026-10-14T13:28:53+08:00",
+          "category": "waiting",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "summary": "C CC-R1 返修冻结交付：续 commit 522bb3f→ce5921d（不新开 attempt，branch c/task-16cc-pipeline-detail，wt-c-16cc 干净仅 .venv 未跟踪）。修复面=模板数据血缘兜底 {% else %} 分支补 <ol class=\"lineage\"> … st_task16cc_scene_detail.py tests/test_task16c_ui_minimal.py -q = 31 passed（seed 固有失败不在本两文件内，原口径不计本账）。diff 严格在返修单两小面内，按口径不整叶重跑 OCR。回执 attempt-1.md 已补 CC-R1 返",
+          "sources": [
+            "events/C/43f5a5697eeddf630a603745c259b3c54dabffd8574fc5356c31dfefe4a0ff48.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T13:28:53+08:00",
+          "end": "2026-10-14T13:45:56+08:00",
+          "category": "unknown",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "summary": "C CC-R1 返修冻结交付：续 commit 522bb3f→ce5921d（不新开 attempt，branch c/task-16cc-pipeline-detail，wt-c-16cc 干净仅 .venv 未跟踪）。修复面=模板数据血缘兜底 {% else %} 分支补 <ol class=\"lineage\"> … st_task16cc_scene_detail.py tests/test_task16c_ui_minimal.py -q = 31 passed（seed 固有失败不在本两文件内，原口径不计本账）。diff 严格在返修单两小面内，按口径不整叶重跑 OCR。回执 attempt-1.md 已补 CC-R1 返",
+          "sources": [
+            "events/C/43f5a5697eeddf630a603745c259b3c54dabffd8574fc5356c31dfefe4a0ff48.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T13:45:56+08:00",
+          "end": "2026-10-14T13:48:09+08:00",
+          "category": "waiting",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "summary": "消费 13:28:53 巡检唤醒（指纹 cfb17e73，唯一 changed_source=cc-r1-rework-dispatch-20261014.md 被协调者 13:27 追加核验段）：协调者对 C CC-R1 返修续 commit ce5921d 机械核验全绿（diff 严格在模板血缘兜底+测试断言两小面内、不整叶重跑 OCR），并入协调者集成候选 1d7f15c（三叶零冲突、六测试文件合跑 108 passed+1 seed 固有失败）。C 叶维持 DELIVERED_REVIEW_PENDING，仅剩 TESTER 16D 独立验证（真实浏览器 JS/严格 MySQL，TESTER 13:15 已在 ce5921d",
+          "sources": [
+            "events/C/663089711906e50c1f84f3242af2bf10c1981b86a874d41320a019ee28b2730e.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T13:48:09+08:00",
+          "end": "2026-10-14T14:04:26+08:00",
+          "category": "waiting",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "summary": "消费 13:28:53 巡检唤醒（指纹 cfb17e73，唯一 changed_source=cc-r1-rework-dispatch-20261014.md 被协调者 13:27 追加核验段）：协调者对 C CC-R1 返修续 commit ce5921d 机械核验全绿（diff 严格在模板血缘兜底+测试断言两小面 … IEW_PENDING，仅剩 TESTER 16D 独立验证（真实浏览器 JS/严格 MySQL，TESTER 13:15 已在 ce5921d 面开工）。owner 核实：C.lock 本轮 claim 前无他 owner 在途（C.json 租约空文件），不抢占不杀进程；恢复自 13:11 交付事件接续，非新",
+          "sources": [
+            "events/C/663089711906e50c1f84f3242af2bf10c1981b86a874d41320a019ee28b2730e.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T14:04:26+08:00",
+          "end": "2026-10-14T14:04:47+08:00",
+          "category": "waiting",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "summary": "消费 13:58:53 巡检唤醒（指纹 36cc0aba，唯一 changed_source=inbox/coordinator/SPRAY-POST-V04-20261014/VALIDATION.md=协调者 13:55 落盘的水雾E/F后续规划文档校验（9项PASS全DEFERRED_AFTER_V04、无业务实现、明确不抢占现有owner），核实为协调者范围、非 C 新派单/返修单）。owner 核实：C.lock 0 字节历史收尾文件、leases 无 C .json 在途，本轮短占 claim 成功不抢占；恢复自 13:45 交付事件接续，wt-c-16cc HEAD=ce5921d 干净、ps 无 C 在途业务进程。状",
+          "sources": [
+            "events/C/92cef82646583b756a04b247e91bebbca75b0a9e92340f9c99c6b06cc592eeb0.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T14:04:47+08:00",
+          "end": "2026-10-14T14:29:42+08:00",
+          "category": "waiting",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "summary": "消费 13:58:53 巡检唤醒（指纹 36cc0aba，唯一 changed_source=inbox/coordinator/SPRAY-POST-V04-20261014/VALIDATION.md=协调者 13:55 落盘的水雾E/F后续规划文档校验（9项PASS全DEFERRED_AFTER_V04、无业务实 … 21d 干净、ps 无 C 在途业务进程。状态维持：C 叶返修 ce5921d 冻结交付待 TESTER 16D 独立验证（真实浏览器 JS/严格 MySQL）与协调者接受；V04-UI-RESUME 恢复入口 11:25 已生效并覆盖旧 UI 暂停，C 已按 TASK-16C-C 派单完成开发+CC-R1 返修",
+          "sources": [
+            "events/C/92cef82646583b756a04b247e91bebbca75b0a9e92340f9c99c6b06cc592eeb0.json"
+          ]
+        },
+        {
+          "start": "2026-10-14T14:29:42+08:00",
+          "end": "2026-10-14T15:00:00+08:00",
+          "category": "unknown",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "summary": "消费 14:23:53 巡检唤醒（指纹 80fe4e16，唯一 changed_source=协调者 14:23:38 落盘的 C 叶接受决策）：TASK-16C-C 流水线详情叶 ACCEPTED（开发叶收口）——OCR run e7a5580c 裁决+CC-R1 返修 ce5921d 协调者独立核+TESTER 1 …  复核、真实 headless Chrome 兜底 DOM 实证、Console 零异常）+集成候选 1d7f15c 零回归（1163 passed+4 seed 固有失败）。冻结链 ce5921d 可被父 16C 聚合消费；未合入主分支，父聚合仍待 A/B 叶+固定集成候选联合验收。C 开发槽保持释放，不接第二",
+          "sources": [
+            "events/C/b4b0e5dd96b549e9d4742c06260be81e11c94fc64946f3297ab75cf21aa716dc.json"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "event_id": "C:cron-poll-20261014-135853-v04resume-obs-nochange-wait-16d",
+          "kind": "business",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "status": "DELIVERED_REVIEW_PENDING",
+          "summary": "消费 13:58:53 巡检唤醒（指纹 36cc0aba，唯一 changed_source=inbox/coordinator/SPRAY-POST-V04-20261014/VALIDATION.md=协调者 13:55 落盘的水雾E/F后续规划文档校验（9项PASS全DEFERRED_AFTER_V04、无业务实现、明确不抢占现有owner），核实为协调者范围、非 C 新派单/返修单）。owner 核实：C.lock 0 字节历史收尾文件、leases 无 C .json 在途，本轮短占 claim 成功不抢占；恢复自 13:45 交付事件接续，wt-c-16cc HEAD=ce5921d 干净、ps 无 C 在途业务进程。状态维持：C 叶返修 ce5921d 冻结交付待 TESTER 16D 独立验证（真实浏览器 JS/严格 MySQL）与协调者接受；V04-UI-RESUME 恢复入口 11:25 已生效并覆盖旧 UI 暂停，C 已按 TASK-16C-C 派单完成开发+CC-R1 返修闭环。",
+          "evidence": "VALIDATION.md 13:55:29 +08:00 落盘（read_file 实测 17 行，全 DEFERRED_AFTER_V04/PASS 文档项）；leases/C.lock 0 字节实测；claim token 874c3d09 14:02:38 短占成功；wt-c-16cc HEAD=ce5921d（git rev-parse 实测）；13:45 事件 C:ccr1-coord-verify-confirmed-20261014 在案。",
+          "next": "继续等待 TESTER 16D 对 ce5921d 面的独立验证与协调者叶接受；C 开发槽保持释放不接第二任务；后续轮对该指纹走 observer ack。",
+          "occurrence": {
+            "kind": "now"
+          },
+          "schema_version": 1,
+          "role": "C",
+          "recorded_at": "2026-10-14T14:04:26+08:00",
+          "occurred_at": "2026-10-14T14:04:26+08:00",
+          "time_source": {
+            "kind": "script_now"
+          },
+          "source": "events/C/92cef82646583b756a04b247e91bebbca75b0a9e92340f9c99c6b06cc592eeb0.json",
+          "source_mtime": "2026-10-14T14:04:26+08:00"
+        },
+        {
+          "event_id": "c-t11s-batch-1012-obs76-infer-continue-nochange-20261014",
+          "occurred_at": "2026-10-14T11:23:00+08:00",
+          "recorded_at": "2026-10-14T11:24:36+08:00",
+          "role": "C",
+          "task": "TASK-11S-BATCH-1012",
+          "attempt": "1",
+          "status": "OBSERVING",
+          "summary": "C 第76轮只读观察（处理机 11:21-11:23 实测）：与 obs75 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜续跑不 kill/retry）。① scene-4acf689f（16_02_03 正式链 source 91FFEEC1…/submission 24d60fee…/av1）实测 SCENE_RUNNING attempt=1 error 空、lease_expires_at 11:25:15（11:23 查点 heartbeat 续租活跃，无 4 连败升级条件）、八步 PRECHECK/EXTRACT=DONE、INFER=RUNNING、PUBLISH/REGISTER/SEGMENT/VALIDATE/WRITE=QUEUED（与 10:23 步骤补报后口径一致）；② 8767/health ok active_runs=[4acf689f ACCEPTED pid1] 唯一在途、18000 ready=production；③ proxy 宿主 pid 3495931 LSTART Tue Oct 13 20:22:38 连续未重启、ELAPSED 15:00:39、TIME 01:22:14（obs75 01:22:05，+9s 持续非零）、RSS 18082680 同量级；④ work 树 checkpoint.json mtime 2026-10-14 00:23:10.474817688 +0800 未翻、find -newermt 25min=0 零新写（完成帧/ETA 仍未知）；⑤ VLM 通道容器 3376cd90f44e /proc/net/tcp 实测 1 条 ESTAB 8602A8C0:EDDA→2D02A8C0:1F42（192.168.2.45:8002，临时端口循环重建 BB60→EDDA 非通道消失）+1 TIME_WAIT 残迹；⑥ VLM 远端直证 llm-server /tmp/vllm_qwen38.log 11:21:10-11:22:20 八点十秒采样 Running 2-4 reqs、Waiting 仅 11:21:10 单点 1 即回 0（非持续>0）、prefix cache 95.9%、MM 88.5%、gen 35.9-191.3 tok/s=推理活跃续证；⑦ 资源/入口面 NAS 98T/70T/29T 71% 不变、load 6.09/5.58/5.11（较 obs75 4.46 继续抬升，C 未起任何进程，如实归因 INFER+VLM 活跃段）、up 6 天 1:40、incoming/spray 仍仅 16_33_10 空包目录（D6 台账 A 面不变）。本批 8 包无新终态，无升级条件命中。11:00 时段总结照常。",
+          "evidence": "处理机 ssh curl 8180 api/v1/scene-analysis-runs/scene-4acf689f（JSON 全字段）、8767/health、18000/health/ready、ps 3495931、docker exec 3376cd90f44e cat /proc/net/tcp state01=1到1F42、stat checkpoint.json mtime 1791908590/742B、find -newermt 25min=0、df 71%、uptime load 6.09、ls incoming/spray=16_33_10 仅；llm-server tail vllm log 八点采样 11:21:10-11:22:20。C 全程只读，未 kill/未删/未重启/未 retry/未改任何生产路径。",
+          "next": "① 4acf 模型段完成信号（checkpoint 翻面/INFER→DONE/后续步骤推进/SCENE_DONE）取证申报，升级条件=heartbeat 4 连败/run FAILED/VLM Waiting 持续>0 且无 ESTAB；② 16_33_10 提交层终态=隔离树修复待部署面跟踪；③ load 持续抬升如实记录不升级；④ 11:00 时段总结已覆盖，下一状态变化即时通报。",
+          "source": "events/C/3132e279044297a18577e8b2a5b58f232ff7bd82b3045bc4ae1f84404f5e05b5.json",
+          "source_mtime": "2026-10-14T11:24:36+08:00"
+        },
+        {
+          "event_id": "c-t16cc-attempt-1-delivered-frozen-20261014",
+          "occurred_at": "2026-10-14T12:12:00+08:00",
+          "recorded_at": "2026-10-14T12:13:32+08:00",
+          "role": "C",
+          "task": "TASK-16C-C",
+          "attempt": "1",
+          "status": "DELIVERED",
+          "summary": "C TASK-16C-C attempt-1 冻结交付：base bd0db1d（seed 未接受）→ head 522bb3f，分支 c/task-16cc-pipeline-detail，worktree wt-c-16cc。OCR 遗留 8 条全处置：C1 删不可达 elif、C2 删死参数、C3+c05-03 共修 SCENE_TERMINAL_STATUSES 唯一来源+scene_terminal()（INPUT_INVALID 非场景终态）、C4 口径保持只回归确认、C8 retry-form DOM guard、C9 模型身份只取冻结快照无记录写未登记、c05-04 血缘 li 补 ol 容器、c05-05 NVIDIA 契约按 pipeline_type 分流。自测：新 tests/test_task16cc_scene_detail.py 16 passed；全仓 1144 passed+4 failed（4 失败均在 seed 原 worktree 复现=seed 固有，与本增量无关）。回执 receipts/TASK-16C-C/attempt-1.md；状态 REVIEW_PENDING 等 TESTER 独立验证（浏览器 JS/严格 MySQL/联合验收面）与协调者 OCR 串行裁决；C 未合入未部署未起 OCR。11S 原收尾观察面（obs76 11:21-11:23 在案）按 5 分钟巡检继续，本单释放 C 开发槽。",
+          "evidence": "git log 522bb3f on bd0db1d；git diff --stat bd0db1d..522bb3f=3 files +441/-28；pytest tests/test_task16cc_scene_detail.py -q=16 passed（exit 0）；pytest tests/ -q=1144 passed 4 failed 10 skipped；seed worktree wt-v04-ui-resume-20261014 对照：test_devflow x3+test_web bag_search 同失败复现",
+          "next": "等 TESTER 16D 独立验证与协调者 OCR prepare/裁决；返修按协调者优先级回本分支 c/task-16cc-pipeline-detail 续 attempt-1。11S obs 面继续只读巡检（4acf 模型段完成信号取证、16_33_10 提交层终态=隔离树待部署跟踪）。",
+          "source": "events/C/28bfc6873baa6a7d90ae8e46b66f07c49ef1c7a6d1d5ebf0516946dcf4324ec9.json",
+          "source_mtime": "2026-10-14T12:13:32+08:00"
+        },
+        {
+          "event_id": "C:ccr1-coord-verify-confirmed-20261014",
+          "kind": "business",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "status": "DELIVERED_REVIEW_PENDING",
+          "summary": "消费 13:28:53 巡检唤醒（指纹 cfb17e73，唯一 changed_source=cc-r1-rework-dispatch-20261014.md 被协调者 13:27 追加核验段）：协调者对 C CC-R1 返修续 commit ce5921d 机械核验全绿（diff 严格在模板血缘兜底+测试断言两小面内、不整叶重跑 OCR），并入协调者集成候选 1d7f15c（三叶零冲突、六测试文件合跑 108 passed+1 seed 固有失败）。C 叶维持 DELIVERED_REVIEW_PENDING，仅剩 TESTER 16D 独立验证（真实浏览器 JS/严格 MySQL，TESTER 13:15 已在 ce5921d 面开工）。owner 核实：C.lock 本轮 claim 前无他 owner 在途（C.json 租约空文件），不抢占不杀进程；恢复自 13:11 交付事件接续，非新领取。",
+          "evidence": "cc-r1-rework-dispatch-20261014.md 协调者核验段（13:27 +08:00，mtime 13:28:22 实测）；wt-c-16cc HEAD=ce5921dcd9df71b295f58404a8d74e0dbac9e6bd 分支 c/task-16cc-pipeline-detail 干净（13:38 rev-parse/status 实测）；git diff --stat 522bb3f..ce5921d=2 文件 +8/-2 实测；leases/ C.json 本轮 claim 前为空文件。",
+          "next": "等待 TESTER 16D 独立验证收口与协调者接受；C 开发槽保持释放、不接第二个任务；后续轮次对该指纹只走 observer ack（已在本轮处理完毕）。",
+          "occurrence": {
+            "kind": "now"
+          },
+          "schema_version": 1,
+          "role": "C",
+          "recorded_at": "2026-10-14T13:45:56+08:00",
+          "occurred_at": "2026-10-14T13:45:56+08:00",
+          "time_source": {
+            "kind": "script_now"
+          },
+          "source": "events/C/663089711906e50c1f84f3242af2bf10c1981b86a874d41320a019ee28b2730e.json",
+          "source_mtime": "2026-10-14T13:45:56+08:00"
+        },
+        {
+          "event_id": "C:ccr1-delivered-frozen-ce5921d-20261014",
+          "kind": "business",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "status": "DELIVERED_REVIEW_PENDING",
+          "summary": "C CC-R1 返修冻结交付：续 commit 522bb3f→ce5921d（不新开 attempt，branch c/task-16cc-pipeline-detail，wt-c-16cc 干净仅 .venv 未跟踪）。修复面=模板数据血缘兜底 {% else %} 分支补 <ol class=\"lineage\"> 开始标签（c05-04 半修收口，li 文案/muted 不变）+ test_no_lineage_fallback_li_in_ol 同步断言兜底 li 位于开始标签之后、</ol> 之前。RED→GREEN 实测：新断言对 522bb3f 旧模板 FAILED（assert -1 != -1），修复后 1 passed；复跑 pytest tests/test_task16cc_scene_detail.py tests/test_task16c_ui_minimal.py -q = 31 passed（seed 固有失败不在本两文件内，原口径不计本账）。diff 严格在返修单两小面内，按口径不整叶重跑 OCR。回执 attempt-1.md 已补 CC-R1 返修段。",
+          "evidence": "git rev-parse ce5921dcd9df71b295f58404a8d74e0dbac9e6bd；git diff --stat 522bb3f..ce5921d=2 files +8/-2（app/templates/pipeline_detail.html +1、tests/test_task16cc_scene_detail.py +7/-2）；pytest 单测 stash RED/GREEN 实测在案；receipts/TASK-16C-C/attempt-1.md CC-R1 返修段；ACK inbox/3号/TASK-16C-C/cc-r1-ack.md 13:08",
+          "next": "等协调者在 ce5921d 上独立核 diff 与实际文件（超面则转增量 OCR，协调者唯一入口）；TESTER 16D 独立验证（浏览器 JS/严格 MySQL）在固定集成候选上收口，不互斥；c05-04 账交 16R 更新为「修复已交付待独立核」；C 开发槽释放，11S 只读观察面按 5 分钟巡检继续。",
+          "occurrence": {
+            "kind": "now"
+          },
+          "schema_version": 1,
+          "role": "C",
+          "recorded_at": "2026-10-14T13:11:39+08:00",
+          "occurred_at": "2026-10-14T13:11:39+08:00",
+          "time_source": {
+            "kind": "script_now"
+          },
+          "source": "events/C/43f5a5697eeddf630a603745c259b3c54dabffd8574fc5356c31dfefe4a0ff48.json",
+          "source_mtime": "2026-10-14T13:11:39+08:00"
+        }
+      ],
+      "delivery_records": [
+        {
+          "event_id": "C:cron-poll-20261014-135853-v04resume-obs-nochange-wait-16d",
+          "kind": "business",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "status": "DELIVERED_REVIEW_PENDING",
+          "summary": "消费 13:58:53 巡检唤醒（指纹 36cc0aba，唯一 changed_source=inbox/coordinator/SPRAY-POST-V04-20261014/VALIDATION.md=协调者 13:55 落盘的水雾E/F后续规划文档校验（9项PASS全DEFERRED_AFTER_V04、无业务实现、明确不抢占现有owner），核实为协调者范围、非 C 新派单/返修单）。owner 核实：C.lock 0 字节历史收尾文件、leases 无 C .json 在途，本轮短占 claim 成功不抢占；恢复自 13:45 交付事件接续，wt-c-16cc HEAD=ce5921d 干净、ps 无 C 在途业务进程。状态维持：C 叶返修 ce5921d 冻结交付待 TESTER 16D 独立验证（真实浏览器 JS/严格 MySQL）与协调者接受；V04-UI-RESUME 恢复入口 11:25 已生效并覆盖旧 UI 暂停，C 已按 TASK-16C-C 派单完成开发+CC-R1 返修闭环。",
+          "evidence": "VALIDATION.md 13:55:29 +08:00 落盘（read_file 实测 17 行，全 DEFERRED_AFTER_V04/PASS 文档项）；leases/C.lock 0 字节实测；claim token 874c3d09 14:02:38 短占成功；wt-c-16cc HEAD=ce5921d（git rev-parse 实测）；13:45 事件 C:ccr1-coord-verify-confirmed-20261014 在案。",
+          "next": "继续等待 TESTER 16D 对 ce5921d 面的独立验证与协调者叶接受；C 开发槽保持释放不接第二任务；后续轮对该指纹走 observer ack。",
+          "occurrence": {
+            "kind": "now"
+          },
+          "schema_version": 1,
+          "role": "C",
+          "recorded_at": "2026-10-14T14:04:26+08:00",
+          "occurred_at": "2026-10-14T14:04:26+08:00",
+          "time_source": {
+            "kind": "script_now"
+          },
+          "source": "events/C/92cef82646583b756a04b247e91bebbca75b0a9e92340f9c99c6b06cc592eeb0.json",
+          "source_mtime": "2026-10-14T14:04:26+08:00"
+        },
+        {
+          "event_id": "c-t16cc-attempt-1-delivered-frozen-20261014",
+          "occurred_at": "2026-10-14T12:12:00+08:00",
+          "recorded_at": "2026-10-14T12:13:32+08:00",
+          "role": "C",
+          "task": "TASK-16C-C",
+          "attempt": "1",
+          "status": "DELIVERED",
+          "summary": "C TASK-16C-C attempt-1 冻结交付：base bd0db1d（seed 未接受）→ head 522bb3f，分支 c/task-16cc-pipeline-detail，worktree wt-c-16cc。OCR 遗留 8 条全处置：C1 删不可达 elif、C2 删死参数、C3+c05-03 共修 SCENE_TERMINAL_STATUSES 唯一来源+scene_terminal()（INPUT_INVALID 非场景终态）、C4 口径保持只回归确认、C8 retry-form DOM guard、C9 模型身份只取冻结快照无记录写未登记、c05-04 血缘 li 补 ol 容器、c05-05 NVIDIA 契约按 pipeline_type 分流。自测：新 tests/test_task16cc_scene_detail.py 16 passed；全仓 1144 passed+4 failed（4 失败均在 seed 原 worktree 复现=seed 固有，与本增量无关）。回执 receipts/TASK-16C-C/attempt-1.md；状态 REVIEW_PENDING 等 TESTER 独立验证（浏览器 JS/严格 MySQL/联合验收面）与协调者 OCR 串行裁决；C 未合入未部署未起 OCR。11S 原收尾观察面（obs76 11:21-11:23 在案）按 5 分钟巡检继续，本单释放 C 开发槽。",
+          "evidence": "git log 522bb3f on bd0db1d；git diff --stat bd0db1d..522bb3f=3 files +441/-28；pytest tests/test_task16cc_scene_detail.py -q=16 passed（exit 0）；pytest tests/ -q=1144 passed 4 failed 10 skipped；seed worktree wt-v04-ui-resume-20261014 对照：test_devflow x3+test_web bag_search 同失败复现",
+          "next": "等 TESTER 16D 独立验证与协调者 OCR prepare/裁决；返修按协调者优先级回本分支 c/task-16cc-pipeline-detail 续 attempt-1。11S obs 面继续只读巡检（4acf 模型段完成信号取证、16_33_10 提交层终态=隔离树待部署跟踪）。",
+          "source": "events/C/28bfc6873baa6a7d90ae8e46b66f07c49ef1c7a6d1d5ebf0516946dcf4324ec9.json",
+          "source_mtime": "2026-10-14T12:13:32+08:00"
+        },
+        {
+          "event_id": "C:ccr1-coord-verify-confirmed-20261014",
+          "kind": "business",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "status": "DELIVERED_REVIEW_PENDING",
+          "summary": "消费 13:28:53 巡检唤醒（指纹 cfb17e73，唯一 changed_source=cc-r1-rework-dispatch-20261014.md 被协调者 13:27 追加核验段）：协调者对 C CC-R1 返修续 commit ce5921d 机械核验全绿（diff 严格在模板血缘兜底+测试断言两小面内、不整叶重跑 OCR），并入协调者集成候选 1d7f15c（三叶零冲突、六测试文件合跑 108 passed+1 seed 固有失败）。C 叶维持 DELIVERED_REVIEW_PENDING，仅剩 TESTER 16D 独立验证（真实浏览器 JS/严格 MySQL，TESTER 13:15 已在 ce5921d 面开工）。owner 核实：C.lock 本轮 claim 前无他 owner 在途（C.json 租约空文件），不抢占不杀进程；恢复自 13:11 交付事件接续，非新领取。",
+          "evidence": "cc-r1-rework-dispatch-20261014.md 协调者核验段（13:27 +08:00，mtime 13:28:22 实测）；wt-c-16cc HEAD=ce5921dcd9df71b295f58404a8d74e0dbac9e6bd 分支 c/task-16cc-pipeline-detail 干净（13:38 rev-parse/status 实测）；git diff --stat 522bb3f..ce5921d=2 文件 +8/-2 实测；leases/ C.json 本轮 claim 前为空文件。",
+          "next": "等待 TESTER 16D 独立验证收口与协调者接受；C 开发槽保持释放、不接第二个任务；后续轮次对该指纹只走 observer ack（已在本轮处理完毕）。",
+          "occurrence": {
+            "kind": "now"
+          },
+          "schema_version": 1,
+          "role": "C",
+          "recorded_at": "2026-10-14T13:45:56+08:00",
+          "occurred_at": "2026-10-14T13:45:56+08:00",
+          "time_source": {
+            "kind": "script_now"
+          },
+          "source": "events/C/663089711906e50c1f84f3242af2bf10c1981b86a874d41320a019ee28b2730e.json",
+          "source_mtime": "2026-10-14T13:45:56+08:00"
+        },
+        {
+          "event_id": "C:ccr1-delivered-frozen-ce5921d-20261014",
+          "kind": "business",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "status": "DELIVERED_REVIEW_PENDING",
+          "summary": "C CC-R1 返修冻结交付：续 commit 522bb3f→ce5921d（不新开 attempt，branch c/task-16cc-pipeline-detail，wt-c-16cc 干净仅 .venv 未跟踪）。修复面=模板数据血缘兜底 {% else %} 分支补 <ol class=\"lineage\"> 开始标签（c05-04 半修收口，li 文案/muted 不变）+ test_no_lineage_fallback_li_in_ol 同步断言兜底 li 位于开始标签之后、</ol> 之前。RED→GREEN 实测：新断言对 522bb3f 旧模板 FAILED（assert -1 != -1），修复后 1 passed；复跑 pytest tests/test_task16cc_scene_detail.py tests/test_task16c_ui_minimal.py -q = 31 passed（seed 固有失败不在本两文件内，原口径不计本账）。diff 严格在返修单两小面内，按口径不整叶重跑 OCR。回执 attempt-1.md 已补 CC-R1 返修段。",
+          "evidence": "git rev-parse ce5921dcd9df71b295f58404a8d74e0dbac9e6bd；git diff --stat 522bb3f..ce5921d=2 files +8/-2（app/templates/pipeline_detail.html +1、tests/test_task16cc_scene_detail.py +7/-2）；pytest 单测 stash RED/GREEN 实测在案；receipts/TASK-16C-C/attempt-1.md CC-R1 返修段；ACK inbox/3号/TASK-16C-C/cc-r1-ack.md 13:08",
+          "next": "等协调者在 ce5921d 上独立核 diff 与实际文件（超面则转增量 OCR，协调者唯一入口）；TESTER 16D 独立验证（浏览器 JS/严格 MySQL）在固定集成候选上收口，不互斥；c05-04 账交 16R 更新为「修复已交付待独立核」；C 开发槽释放，11S 只读观察面按 5 分钟巡检继续。",
+          "occurrence": {
+            "kind": "now"
+          },
+          "schema_version": 1,
+          "role": "C",
+          "recorded_at": "2026-10-14T13:11:39+08:00",
+          "occurred_at": "2026-10-14T13:11:39+08:00",
+          "time_source": {
+            "kind": "script_now"
+          },
+          "source": "events/C/43f5a5697eeddf630a603745c259b3c54dabffd8574fc5356c31dfefe4a0ff48.json",
+          "source_mtime": "2026-10-14T13:11:39+08:00"
+        }
+      ],
+      "unverified_sources": [
+        "events/C/2026-10-11-1045-nochange-poll.md: 时间或内容待核对",
+        "events/C/C-poll-20261011-082853.md: 时间或内容待核对",
+        "events/C/C-poll-20261011-141853-nochange.json: 时间或内容待核对",
+        "events/C/C-poll-20261011-152353-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261011-152853-nochange.json: 时间或内容待核对",
+        "events/C/C-poll-20261011-153353-nochange.json: 时间或内容待核对",
+        "events/C/C-poll-20261011-154853-nochange.json: 时间或内容待核对",
+        "events/C/C-poll-20261011-160353-nochange.json: 时间或内容待核对",
+        "events/C/C-poll-20261011-160853-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261011-170853-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261011-174853-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261011-204353-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261011-204853-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261011-214353-nochange.json: 时间或内容待核对",
+        "events/C/C-poll-20261011-225353-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261011-230853-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261012-000853-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261012-001353-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261012-041853-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261012-050353-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261012-051353-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261012-054353-nochange.md: 时间或内容待核对",
+        "events/C/C-poll-20261012-074853-nochange.md: 时间或内容待核对",
+        "events/C/b4b0e5dd96b549e9d4742c06260be81e11c94fc64946f3297ab75cf21aa716dc.json: 时间或内容待核对",
+        "events/C/c-poll-20261011-083353-nochange.md: 时间或内容待核对",
+        "events/C/c-poll-20261011-110853-nochange.md: 时间或内容待核对",
+        "events/C/c-poll-20261012-121353-nochange.md: 时间或内容待核对",
+        "events/C/c-poll-20261013-014353-nochange.json: 时间或内容待核对",
+        "events/C/c-poll-20261013-014853-nochange.json: 时间或内容待核对",
+        "events/C/c-poll-20261013-035853-nochange.json: 时间或内容待核对",
+        "events/C/c-poll-20261013-043353-nochange.json: 时间或内容待核对",
+        "events/C/c-poll-20261013-044353-v2done-t16b-await-resume.json: 时间或内容待核对",
+        "events/C/c-poll-20261013-051853-t16b-b1-3confirmed-b2-inflight.md: 时间或内容待核对",
+        "events/C/c-poll-20261013-055353-t16b-b2-split-fail-16a-incr-done.md: 时间或内容待核对",
+        "events/C/c-poll-20261013-063353-nochange-t16b-needs-review.md: 时间或内容待核对",
+        "events/C/c-poll-20261013-070353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-cron-poll-20261012-195853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261011-215853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261011-220353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261011-220853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261011-221353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261011-221853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261011-222853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261011-223853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261011-225853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261011-230853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261011-231853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-002853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-003353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-003853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-004353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-004853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-010353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-012853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-015353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-022853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-040353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-053353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-055853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-063353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-063853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-072353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-075353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-poll-20261012-095853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/C-sessions-truncation-20261012-064054.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261012-133353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261012-135353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261012-140853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261012-145353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261012-150353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261012-192853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261012-195853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261012-214853-nochange.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-042923-t16b2-fail-resume-pending.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-045353-nochange-t16b-resume-b1-inflight.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-054853-nochange-t16b-b2-split-rc1.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-061353-nochange-t16b-needs-review-held.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-064353-r3ocr-6of6-done-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-065353-r130-t07b-r4-dispatch-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-072853-r132-b-r4-ocr-done-16b-frozen.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-073353-nochange.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-074353-r132-r4-ocr-done-no-c-order.md: 时间或内容待核对",
+        "inbox/events/C/c-poll-20261013-092853-t16b-ocr4rc1-frozen-user-ruling-pending.md: 时间或内容待核对"
+      ]
+    }
+  ],
+  "current": {
+    "C": {
+      "schema_version": 1,
+      "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+      "role": "C",
+      "observed_at": "2026-10-14T15:00:53+08:00",
+      "control": "ACTIVE",
+      "confirmed_idle": false,
+      "classification_reasons": [
+        "unresolved or unclassified dispatch: inbox/3号/TASK-16C-C/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-16C-C/cc-r1-rework-dispatch-20261014.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-12S-C/active-correction.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-12S-C/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-12S-C/frame-mapping-contract-note.md",
+        "unresolved or unclassified dispatch: inbox/3号/TASK-16B/attempt-1-dispatch.md"
+      ],
+      "tasks": [],
+      "events": {
+        "C": {
+          "event_id": "C:t16cc-leaf-accepted-by-coordinator-20261014",
+          "kind": "business",
+          "task": "TASK-16C-C",
+          "attempt": "attempt-1-ccr1",
+          "status": "LEAF_ACCEPTED",
+          "summary": "消费 14:23:53 巡检唤醒（指纹 80fe4e16，唯一 changed_source=协调者 14:23:38 落盘的 C 叶接受决策）：TASK-16C-C 流水线详情叶 ACCEPTED（开发叶收口）——OCR run e7a5580c 裁决+CC-R1 返修 ce5921d 协调者独立核+TESTER 1 …  复核、真实 headless Chrome 兜底 DOM 实证、Console 零异常）+集成候选 1d7f15c 零回归（1163 passed+4 seed 固有失败）。冻结链 ce5921d 可被父 16C 聚合消费；未合入主分支，父聚合仍待 A/B 叶+固定集成候选联合验收。C 开发槽保持释放，不接第二任务。",
+          "evidence": "inbox/coordinator/TASK-16C-C/leaf-acceptance-decision-20261014.md（mtime 14:23:38 实测，22 行通读 …  mtime）；wt-c-16cc HEAD=ce5921d 干净（rev-parse 实测）；集成候选 wt-coord-intcheck-16c log 1d7f15c 在案。",
+          "next": "等待 A/B 叶收口与协调者固定集成候选；C 仅在返修/新单时行动，11S 只读观察面按 5 分钟巡检继续。",
+          "schema_version": "1",
+          "role": "C",
+          "recorded_at": "2026-10-14T14:29:19+08:00",
+          "occurred_at": "",
+          "time_source": "{'kind': 'unknown', 'reason': '历史发生时间未核实；recorded_at 只表示补录时间'}",
+          "source": "events/C/b4b0e5dd96b549e9d4742c06260be81e11c94fc64946f3297ab75cf21aa716dc.json",
+          "source_mtime": "2026-10-14T14:29:19+08:00",
+          "event_time_basis": "source_mtime",
+          "event_time_status": "unknown",
+          "sources": [
+            "events/C/b4b0e5dd96b549e9d4742c06260be81e11c94fc64946f3297ab75cf21aa716dc.json"
+          ]
+        }
+      },
+      "event_conflicts": [
+        {
+          "role": "C",
+          "event_id": "C-poll-20261011-160353-nochange",
+          "sources": [
+            "events/C/7f9ee125b8500d31a4638f071cdfebc812920b31b6b8a0078d538de7576c4d76.json",
+            "events/C/C-poll-20261011-160353-nochange.json"
+          ]
+        },
+        {
+          "role": "C",
+          "event_id": "c-poll-20261013-051853-t16b-b1-3confirmed-b2-inflight",
+          "sources": [
+            "events/C/22a394cceb475a2be6b8e74510fcc7bf83a448a02b2e3a8829b808ef4a155868.json",
+            "events/C/c-poll-20261013-051853-t16b-b1-3confirmed-b2-inflight.md"
+          ]
+        },
+        {
+          "role": "C",
+          "event_id": "C-poll-20261011-151353-strongmodel-pass",
+          "sources": [
+            "events/C/39e7d1d5a3851136c67fc8ee9c9c6f933564c3d0ed80b14a814efe1d1584679c.json",
+            "events/C/C-poll-20261011-151353-strongmodel-pass.json"
+          ]
+        },
+        {
+          "role": "C",
+          "event_id": "C-poll-20261011-141853-nochange",
+          "sources": [
+            "events/C/91e51e27dc17fe2d160b4beda55e73798b0b6a10cfbb75e463552b7616aa82b9.json",
+            "events/C/C-poll-20261011-141853-nochange.json"
+          ]
+        }
+      ],
+      "dispatches": {
+        "C": {
+          "role": "C",
+          "source": "inbox/3号/TASK-16C-C/cc-r1-rework-dispatch-20261014.md",
+          "status": "待核对",
+          "mtime": 1791955702.0519354,
+          "summary": "# TASK-16C-C 返修单 CC-R1（协调者，2026-10-14 13:00 +08:00） - 状态：REWORK_DISPATCHED。并入 C 的 TASK-16C-C attempt-1 同一冻结链（不 … ，不自动重试）。 - TESTER 独立验证（真实浏览器 JS/严格 MySQL/联合面）仍按 16D 原口径，在固定集成候选上收口；本返修不阻塞 TESTER 准备。 - 16R 盘点对 c05-04 的账随本返修闭合"
+        }
+      },
+      "processes": {
+        "C": {
+          "state": "none"
+        }
+      },
+      "sources": {
+        "TODO.md": "2026-10-14T14:27:28+08:00"
+      },
+      "strong_review": null,
+      "fingerprint": "56acccf291687940b2a2984e037be78595304fbda46634e3849dd59741c95007",
+      "coordinator_requests": [],
+      "operations": [],
+      "task_observations": []
+    }
+  }
+}

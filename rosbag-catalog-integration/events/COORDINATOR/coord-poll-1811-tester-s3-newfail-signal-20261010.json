@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-1811-tester-s3-newfail-signal-20261010",
+  "occurred_at": "2026-10-10T18:11:00+08:00",
+  "recorded_at": "2026-10-10T18:12:30+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "r2-final-mysql-e2e",
+  "status": "RUNNING",
+  "summary": "18:10 巡检：TESTER 深度探测推进（scratch 18:11 tester_r2_probes.py/out）——S2 outbox 方言 PASS（真实列值非字面量+poll→CONSUMED 终态+rowcount 0 行计入 errors 不静默+glog 证据）、S4 R2-05 契约端到端 PASS（创建事务内已分配 av 行、晚到旧版 409 DUPLICATE_CONFLICT 不倒退）；S3 switch_current 并发出现新 FAIL 信号（[new_first] current 指针=13 指向后 complete 者而非分配 id 大的版本；old_first 方向 PASS、全程无 1093），与 18:04 的 1406 fixture 疑因是不同问题面。定性权在测试者，不催单不预调。",
+  "evidence": "/home/wang/.hermes/cache/scratch/tester_r2_probes.out (18:11)；HANDOFF 18:08 检查点",
+  "next": "等 TESTER 交付 reports/TASK-06/r2-final-mysql-e2e.md；若 S3 定性为 06B 业务缺陷回派 2号最小返修，若 fixture/并发窗口问题则测试者修正重跑，门禁不变"
+}

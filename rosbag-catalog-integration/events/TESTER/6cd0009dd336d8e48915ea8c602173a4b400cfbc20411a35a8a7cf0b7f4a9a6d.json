@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-010x-4acf689f-running-proxy-19gib-progress-d4-wait-a-bind-20261014",
+  "occurred_at": "2026-10-14T01:11:08+08:00",
+  "recorded_at": "2026-10-14T01:11:08+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "01:0x 跨夜增量只读实测（消费 prerun 指纹 948923d8…，唤醒源=上轮 00:54 事件回声+ruling 00:39 增补回声+BATCH-STATUS+sessions，无新派单）：① 16_02_03 合法链 scene-4acf689f 01:04 实测 SCENE_RUNNING attempt1、heartbeat 01:04:00 活跃、八步仍全 QUEUED；**proxy 容器 01:05 docker stats 实测 19.47GiB RAM/24.57% CPU（00:52 为 10.97GiB/2.54%）=10GB 大包推进在算非卡死**（13min 增量对比）；② D4 第3步继续未达成：flat 三提交（a65a25a7/87dfebaa/518089ed）仍 PENDING_INPUT（ingest_submission 8 行 01:04 不变），scanner 409 近 40min 零出现（末次 00:15:33 指向已删路径，scan_job 3979–3983 全 SUCCESS failed:2=空包 16_33_10 拒绝同族），flat 绑定行未产生，绑定推进责任 A；③ dup 现场维持不删不并（slices 6 目录=FFDEE943×4+PASS 基线 2；ready/spray 7 flat、date-grouped 不在）；④ PASS 基线不变（15_58_23/16_00_13/16_31_25/16_33_10/16_37_47+16_58_28 SHA/16_02_03 SHA=源）。",
+  "evidence": "test-receipts/TASK-11S-BATCH-1012/attempt-1.md(01:0x段); 生产MySQL 01:04 实测 pipeline_run(4acf689f SCENE_RUNNING attempt1 heartbeat 01:04:00/6 SCENE_DONE)/step_run(八步全 QUEUED started NULL)/ingest_submission(8行 flat 三提交 PENDING_INPUT source_id 空)/scan_job(3979–3983 SUCCESS failed:2); scanner docker logs -t --since 40m 零 409 行、末行 01:05:38=空包 missing rosbag2_bagfile_information; docker stats rosbag-scene-proxy 19.47GiB/24.57%; 8767 active_runs=[4acf689f ACCEPTED]; NAS ready/spray 7 flat+slices 6 目录",
+  "next": "下轮核 4acf689f 八步推进（EXTRACT started_at 落值预期临近）+ SCENE_DONE 后跨 DB3 真实时间戳边界/产物/两次 reconcile（16_02_03 正式全链）; A flat 三提交 scanner 绑定行出现后核 14_42_48 正式全链（reconcile 并入 dup 同名 source 切片处置证据，0038 裁决口径）; 全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）"
+}

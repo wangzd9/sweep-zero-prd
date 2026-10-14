@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs78-scene-run-cancelled-after-oom-20261014",
+  "occurred_at": "2026-10-14T17:35:00+08:00",
+  "recorded_at": "2026-10-14T17:41:08+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 78 轮只读观察：scene-4acf689f（16_02_03 大包正式链）在 15:57:45 处理机 kernel OOM-kill 旧 proxy 容器（obs77 申报）后，8180 于 16:22 观测到 SCENE_CANCELLING；容器日志 09:14:25 UTC（=17:14:25 +08:00）确认 attempt 1 CANCELLED（INFER 阶段 decoder 收到取消信号）；取消确认两次 HTTP 409 task lease expired；8180 当前 status 仍滞留 SCENE_CANCELLING 未收敛 SCENE_CANCELLED，lease_expires_at 停 16:23:55（stale）。work 树 checkpoint.json 17:14:25 更新：EXTRACT/SEGMENT RUNNING、INFER FAILED（detail=CANCELLED: decoder 收到取消信号）、PUBLISH/REGISTER/VALIDATE/WRITE PENDING；slice-write 目录 + render_log.json + spray_model_results.json 自 15:27 起存在，= INFER 在取消前已产出结果。slices/test/spray 顶层仍为取消前 6 个发布切片目录（FFDEE943 x4 双写现场保留 + 051768B1/615A4A7B 各 1），无新 4acf689f 切片发布。NAS 71% 不变、load 0.67 回落、8767 active_runs 空。C 全程只读（curl 8180/8767、docker logs、stat/find/df/uptime），未 kill/retry/restart、未改任何生产路径。",
+  "evidence": "处理机 17:28-17:36 只读实测：docker logs ddcc7df81635 --timestamps 见 08:22:22Z cancellation observed + 09:14:25Z CANCELLED INFER decoder 取消信号 + cancel confirm 409 task lease expired x2；8180 run status=SCENE_CANCELLING attempt=1 error_message 空 lease_expires_at=16:23:55；checkpoint.json mtime=17:14:25 steps INFER FAILED / EXTRACT,SEGMENT RUNNING / 余 PENDING；8767/health active_runs=[]；slices/test/spray 6 目录不变；df NAS 98T/70T/29T 71%；uptime load 0.67/1.82/8.99",
+  "next": "下轮续核 SCENE_CANCELLING 是否收敛 SCENE_CANCELLED（或回 RUNNING 恢复原跨夜观察口径）；15:27 INFER 产出物（spray_model_results.json/render_log.json/slice-write）归属与 4acf 发布面，供协调者/TESTER 按 17:1x 通知口径调整大包验收面处置；C 只读不处置"
+}

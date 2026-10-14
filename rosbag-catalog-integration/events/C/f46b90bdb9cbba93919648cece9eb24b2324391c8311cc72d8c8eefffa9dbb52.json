@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-163353-task08-delivery-no-dispatch",
+  "occurred_at": "2026-10-11T16:36:52+08:00",
+  "recorded_at": "2026-10-11T16:36:52+08:00",
+  "role": "C",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "巡检核实2号TASK-08 attempt-1已交付REVIEW_PENDING（真MySQL全链路PASS，发现C1/C2/C3-lineage需协调者回派，均非C范围）；inbox/3号与coordinator无C新派单",
+  "evidence": "receipts/TASK-08/attempt-1.md;reports/TASK-08/attempt-1.md",
+  "next": "保持空闲待派单"
+}

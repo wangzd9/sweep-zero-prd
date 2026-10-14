@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t06b-r3-low-delivered-ack-20261010-1615",
+  "occurred_at": "2026-10-10T16:18:17+08:00",
+  "recorded_at": "2026-10-10T16:18:17+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-3",
+  "status": "REVIEW_PENDING",
+  "summary": "2号 86b2cc1 low 小修交付（1 文件 -2 死代码），核实零越界；f088c2b OCR 在途（session 88c0f2c2 活跃），收口后接 86b2cc1 增量 OCR，之后五笔同批合入+TESTER 派单",
+  "evidence": "receipts/TASK-06B/attempt-1-r2-rework-3.md; reviews/TASK-06B/attempt-1-rework/ocr-batches.md",
+  "next": "等 f088c2b OCR 收口（硬截止 16:30）"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-2013-defect3-dispatched-20261010",
+  "occurred_at": "2026-10-10T20:18:06+08:00",
+  "recorded_at": "2026-10-10T20:18:06+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1-defect3-reconcile-replay",
+  "status": "DISPATCHED",
+  "summary": "TESTER r2-final-mysql-e2e attempt-2 交付(被测 main 0f6aa87)裁决：S1 三AC全PASS(1406高阻塞解除,03聚合MySQL路径缺口收口)+套件39/40；残留1FAIL探针证实attempt-1误诊(非uid截断,child 22字符)=缺陷3(06B app面,reconcile幂等二次MySQL StaleDataError @service.py:928,行存在可更新但ORM计数0,疑似MySQL无CLIENT_FOUND_ROWS语义,SQLite恒1遮坑)→回派2号 attempt-1-defect3-reconcile-replay(幂等重放不得依赖UPDATE行计数语义,最小单commit)；2号r2-rework-4/r2-final-fixture-fix两单账目随6ee858b收口",
+  "evidence": "reports/TASK-06/r2-final-mysql-e2e-attempt-2.md; test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-2.md; inbox/coordinator/TASK-06B/attempt-2-mysql-e2e-defect3-decision.md; inbox/2号/TASK-06B/attempt-1-defect3-reconcile-replay.md",
+  "next": "2号ACK+交付→协调者验收+串行OCR→合入→TESTER新attempt复测本用例真MySQL PASS→强模型增量复审(用户手动,缺陷3建议纳入)→03/05/06聚合DONE→TASK-08"
+}

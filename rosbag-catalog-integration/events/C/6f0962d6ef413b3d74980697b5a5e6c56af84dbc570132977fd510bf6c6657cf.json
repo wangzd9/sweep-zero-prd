@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs53-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T07:04:00+08:00",
+  "recorded_at": "2026-10-14T07:05:58+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第53轮只读观察：与 obs52 零状态变化，scene-4acf689f SCENE_RUNNING lease 07:04:29 续租活跃，checkpoint 未翻/15min 零新写/jpg 1781 pcd 5373，VLM Running 2-4 Waiting 0 prefix 92.1% POST total 183245 推理活跃，无升级条件命中；全程只读",
+  "evidence": "8180 status=SCENE_RUNNING attempt=1 error 空 lease 07:04:29；8767 active_runs=[4acf689f ACCEPTED pid1]；pid 3495931 TIME 01:19:29；checkpoint mtime 00:23:10.474 未翻 find -newermt 15min=0；容器 ESTAB→192.168.2.45:8002；NAS 71%；vllm 日志 07:01-07:02 五点采样",
+  "next": "模型段完成信号（checkpoint 翻面/八步推进/SCENE_DONE）即取证申报；升级条件=heartbeat 4 连败/FAILED/VLM Wait 持续>0 且无 ESTAB"
+}

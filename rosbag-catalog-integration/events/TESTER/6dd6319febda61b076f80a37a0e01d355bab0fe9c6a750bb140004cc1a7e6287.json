@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-011x-4acf689f-running-proxy-386cpu-progress-d4-wait-a-bind-emptybag-reject-persistent-20261014",
+  "occurred_at": "2026-10-14T01:22:00+08:00",
+  "recorded_at": "2026-10-14T01:22:00+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "01:1x 跨夜增量只读实测（消费 prerun 指纹 f89a51ab...，唤醒源=上轮 01:11 事件回声，无新派单）：4acf689f SCENE_RUNNING attempt1 heartbeat 01:18:33、八步全 QUEUED、proxy 17.5GiB/386.59% CPU=71min 前置段多核在算非卡死；D4 第3步 flat 三提交仍 PENDING_INPUT 无真409，scan_job 3982-3987 failed:2=空包 16_33_10 01:15:38 持续拒绝可追溯；scene run 7=6DONE+1RUNNING 无新 run；dup 现场维持；PASS 基线不变。",
+  "evidence": "test-receipts/TASK-11S-BATCH-1012/attempt-1.md(01:1x段); 生产MySQL 01:19 实测 pipeline_run(4acf689f SCENE_RUNNING attempt1 heartbeat 01:18:33)/step_run(八步 QUEUED started NULL)/ingest_submission(8行 flat 三提交 PENDING_INPUT source_id 空)/pipeline_event(RESOURCE_HEARTBEAT 30s周期)/scan_job(3982-3987 scene SUCCESS failed:2); 8767 active_runs=[4acf689f stage:ACCEPTED pid:1]; docker stats 17.5GiB/386.59%; scanner logs 30m 无真409(唯一命中=时间戳微秒串); NAS slices/test/spray 6目录+ready/spray 7flat",
+  "next": "下轮核 4acf689f 八步推进(PRECHECK/EXTRACT started_at 落值预期临近)+SCENE_DONE 后跨DB3 真实时间戳边界/产物/两次 reconcile; A flat 三提交绑定行出现后核 14_42_48 正式全链(0038 口径); 全批 8 包齐后 TEST_REPORT_PENDING(含双写事件产物一节)"
+}

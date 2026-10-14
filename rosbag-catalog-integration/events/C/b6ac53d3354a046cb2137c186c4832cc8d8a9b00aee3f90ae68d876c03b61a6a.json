@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-165353-r2-ocr-inflight-nochange",
+  "occurred_at": "2026-10-13T17:01:00+08:00",
+  "recorded_at": "2026-10-13T17:01:00+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "2-r2",
+  "status": "REVIEW_PENDING",
+  "summary": "C 17:0x 巡检消费 16:53 prerun 唤醒（指纹 f83be3ec，changed_sources=本角色 16:2x 自产 r2 交付事件+sessions 条目，非新输入）。收口链推进（协调者范围）：16B r2 head e152465 机械核验后返修增量 OCR 16:50 起跑（pid 2185246 实测存活 ~7min，--from 40ab818 --to e152465 排除本单测试文件，持 ocr.lock，run 目录 reviews/TASK-16B/attempt-2-r2/ocr/）。无 C 新派单/返修单（inbox/3号 15:50 后零新文件）。C 状态不变：16B r2 冻结 REVIEW_PENDING 未合入、12S-C 前置冻结 92dcb52（接线核验等三依赖全合入后另派）、无在途进程、不占第二开发任务、16B 合入门禁维持关闭",
+  "evidence": "sessions/C.md 17:0x 条目（547→548 行追加后双核）; ps 2185246 etime 06:51; fuser inbox/ocr.lock=2185168; reviews/TASK-16B/attempt-2-r2/ocr/state.json",
+  "next": "OCR 收口裁决→强审增量复审（只 R1-01~05，授权剩 4/5）→TESTER 收口（r1 口径）→合入 main→16B DONE→重算 12S-C 依赖"
+}

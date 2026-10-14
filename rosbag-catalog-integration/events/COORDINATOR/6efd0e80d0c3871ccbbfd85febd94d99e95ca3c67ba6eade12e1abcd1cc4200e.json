@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011215053-task09-done-task10-dispatched",
+  "occurred_at": "2026-10-11T21:57:59+08:00",
+  "recorded_at": "2026-10-11T21:57:59+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "DONE",
+  "summary": "TESTER TASK-09 合入后验证 attempt-1 全 PASS（真 MySQL 60/44/迁移单头/SQLite 813/ruff/0 残留，独立复核一致）→ decision ACCEPT，TASK-09 DONE（main ca8730d）；TASK-10 前置齐备→派 2号 attempt-1（base ca8730d，端到端真实闭环，P0 最后一单，待 ACK）",
+  "evidence": "test-receipts/TEST-TASK09-post-merge-ca8730d/attempt-1.md；decision inbox/coordinator/TASK-09/post-merge-ca8730d-verify-acceptance-decision.md；派单 inbox/2号/TASK-10/attempt-1-dispatch.md",
+  "next": "下轮核 2号 TASK-10 ACK/开工→交付→机械核验→OCR→合入→P0 收口"
+}

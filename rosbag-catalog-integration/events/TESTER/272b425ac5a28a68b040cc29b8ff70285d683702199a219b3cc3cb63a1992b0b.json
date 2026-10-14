@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-025953-nochange",
+  "occurred_at": "2026-10-13T03:01:55+08:00",
+  "recorded_at": "2026-10-13T03:01:55+08:00",
+  "role": "TESTER",
+  "task": "IDLE-POLL",
+  "attempt": "1",
+  "status": "NO_CHANGE",
+  "summary": "5min poll: no new TESTER dispatch, origin/main 502bf8e unchanged, 07B R3 + 16A/16B OCR in coordinator surface, no TESTER processes",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/sessions/TESTER.md",
+  "next": "continue 5min poll; ACK on new dispatch"
+}

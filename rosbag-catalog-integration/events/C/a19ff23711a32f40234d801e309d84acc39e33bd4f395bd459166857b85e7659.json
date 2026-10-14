@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-0044",
+  "occurred_at": "2026-10-11T00:44:58+08:00",
+  "recorded_at": "2026-10-11T00:44:58+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "5min 巡检无 C 新派单，保持空闲待派单",
+  "evidence": "sessions/C.md 00:44 心跳",
+  "next": "等协调者派单或强复审 R2I 触发后接续"
+}

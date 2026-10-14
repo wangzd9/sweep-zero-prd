@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-144553-r84-t07a-done-07b-dispatched",
+  "occurred_at": "2026-10-12T15:16:18+08:00",
+  "recorded_at": "2026-10-12T15:16:18+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07",
+  "attempt": "07a-done",
+  "status": "DONE_07A_DISPATCHED_07B",
+  "summary": "TESTER 07A 合入后验证 32/32 PASS（回执14:29）→ 07A 裁决 DONE（强审查NOT_REQUIRED）→ 07B attempt-1 已派 B（base 502bf8e=origin=github 三核一致，待ACK）；r84 补落盘 decision/派单状态/TIMELINE/devlog/HANDOFF",
+  "evidence": "inbox/coordinator/TASK-07A/attempt-2-r1-done-decision-20261012.md; test-receipts/TEST-TASK07A-post-merge/attempt-1.md; inbox/2号/TASK-07B/attempt-1-dispatch.md",
+  "next": "核 B 07B ACK/交付→机械核验→串行OCR→强审查判定（写接口面大概率REVIEW_NOW）→合入→TESTER独立验证→07B DONE→派07C"
+}

@@ -1,0 +1,52 @@
+[ocr] Summary: 1 file(s) reviewed, 5 comment(s), ~1947336 token(s) used (input: ~1889613, output: ~57723), 19m56s elapsed
+[ocr] Session: 2d9c42b9-2b52-4a20-9c71-0b658924eff5
+Review complete: 5 finding(s) across 1 selected item(s).
+
+─── app/templates/pipeline_detail.html:14-14 ───
+[bug · medium] Cancelled scene runs break the trailing retry-script. `cancel_run` can move a
+`SCENE_SLICE` run from `SCENE_SLICE_QUEUE` to `CANCELLED` (pipeline_type stays `SCENE_SLICE`), and
+the new scene action branch renders no `.retry-form` for that state — but the script at the bottom
+(gated only on `run.pipeline_type != 'NVIDIA_CHUNK' and run.status in
+['FAILED','QUARANTINED','CANCELLED']`) unconditionally does
+`retryForm.querySelector('#retry-from')`, which throws an uncaught TypeError on the cancelled scene
+detail page. Before this change the generic retry form was rendered for that state, so this
+interaction is newly introduced. Guard the script (`if (retryForm) { ... }`) or add `and not
+is_scene` to its condition.
+
+
+
+─── app/templates/pipeline_detail.html:48-48 ───
+[maintainability · medium] No code path writes `model_endpoint` or `model_identity` into a scene
+run's `pipeline_config_snapshot_json` (the snapshot is built in `create_scene_run` with
+schema_version/purpose/scenes/effective_config_hash/... and later touched only by
+`record_scene_outcome`/`retry_run`), so this line will always render the "—（未登记）" fallback. If a
+registration path is planned in a follow-up, confirm it; otherwise consider displaying what the
+snapshot actually freezes (e.g. the per-scene `capability_config_hash` entries or the model profile
+reference), since that is the real "远端模型服务身份" data available today.
+
+
+
+─── app/templates/pipeline_detail.html:81-81 ───
+[maintainability · low] The web layer (`app/web/pipelines.py`) already computes and passes
+`scene_terminal` (SCENE_DONE / SCENE_FAILED / SCENE_PARTIAL_FAILED / CANCELLED / QUARANTINED /
+INPUT_INVALID), but the template never uses it and hardcodes the scene terminal statuses here
+instead. Two sources of truth will drift (e.g. `INPUT_INVALID` is in `scene_terminal` but not here).
+Prefer using the server-computed variable (or dropping the unused one).
+
+
+
+─── app/templates/pipeline_detail.html:67-67 ───
+[bug · low] This `<li>` has no `<ol>`/`<ul>` parent — the HTML parser implicitly inserts a `<ul>`
+around it, and the sibling branches render `<ol class="lineage">`. Use a `<p class="muted">` (or
+wrap in `<ol class="lineage">`) to keep the markup valid and visually consistent.
+
+
+
+─── app/templates/pipeline_detail.html:46-47 ───
+[maintainability · low] The "NVIDIA 任务契约" section just above is gated only on `bag.dataset_type ==
+'nvidia_physicalai'`, not on run type: a scene run whose source bag is an NVIDIA dataset would show
+an all-"—" contract block (the scene snapshot has no
+dataset_revision/code_revision/download_endpoint/chunk keys), contradicting the DESIGN §7.3.3 rule
+that the detail page branches by `pipeline_type`. Suggest adding `and not is_scene` to that gate.
+
+

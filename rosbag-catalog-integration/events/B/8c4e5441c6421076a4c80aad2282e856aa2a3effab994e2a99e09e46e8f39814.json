@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t06b-attempt2-r2-delivered-20261010-1504",
+  "occurred_at": "2026-10-10T15:05:35+08:00",
+  "recorded_at": "2026-10-10T15:05:35+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "2-r2-rework",
+  "status": "REVIEW_PENDING",
+  "summary": "B8c security high 小修交付：车辆段路径注入改受控口径（继承父包 Vehicle.vehicle_code），publish/complete/reconcile 三处同一口径+显式拒绝 ./. 段，4 例回归+路径不逃逸断言",
+  "evidence": "commit a07c181; receipts/TASK-06B/attempt-2-r2-rework.md; 定向100passed/全量810passed/ruff绿",
+  "next": "等协调者对新 head a07c181 B8c 复审无 high/critical 后同批 --no-ff 合入（f088c2b+c67600d）"
+}

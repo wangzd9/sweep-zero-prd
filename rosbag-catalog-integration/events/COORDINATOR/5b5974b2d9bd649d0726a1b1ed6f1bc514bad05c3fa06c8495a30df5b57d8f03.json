@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-082053-t11-cleanup-progress",
+  "occurred_at": "2026-10-12T08:27:20+08:00",
+  "recorded_at": "2026-10-12T08:27:20+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "08:10:53 后零新增业务文件；A 遵令停止维持实测（无第 9 跑，scratch/t11 零新文件、t11-run.log 无新起跑）；A 残留清理链推进中（a_t11_audit/db_audit/fkaudit/clean2 产物 08:12-08:23 落盘，ps 无 t11 驱动/清理进程在途，DB 残留 scoped T11 ids 删除阶段）；main 453da0c=origin 双核一致；第 8 跑授权归属存在状态冲突待核对（08:10 cron 轮判越权不采纳 vs 08:13 交互轮记用户授权测试通过，同一证据）；生产门禁维持未放行",
+  "evidence": "scratch/t11/t11-run.log; ~/.hermes/cache/scratch/a_t11_clean2.py; HANDOFF.md 08:13/08:10 checkpoints",
+  "next": "等 A 残留清理申报事件；第 8 跑归属冲突待用户/交互轮口径"
+}

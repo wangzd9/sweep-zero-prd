@@ -1,0 +1,537 @@
+diff --git a/scripts/scene_host_orchestrator.py b/scripts/scene_host_orchestrator.py
+index cff8b0f..6caf9bf 100644
+--- a/scripts/scene_host_orchestrator.py
++++ b/scripts/scene_host_orchestrator.py
+@@ -47,10 +47,14 @@ from dataclasses import dataclass, field
+ from pathlib import Path
+ from typing import Protocol
+ 
++# 12S-C 水雾正式接线：装载水雾适配器（import 本包即安装 ros2-spray-v1，对照 slope 包
++# 自注册口径）。dispatch 按 capability.adapter_key 路由到 SprayAdapter（EXTRACT/INFER/
++# SEGMENT 消费 12S-B 固定 SHA 产物，不复制逻辑）。slope/test-capability 注册不受影响（additive）。
+ from app.scene import get_registry
+ from app.scene.adapter import build_manifest, dispatch
+ from app.scene.slope.bag_io import BagIoError, read_topics
+ from app.scene.slope.writer import SliceWriterError, slice_bag_to_staging
++from app.scene.spray import SPRAY_ADAPTER_KEY
+ from app.scene.types import (
+     SceneManifest,
+     SceneOutcome,
+@@ -367,6 +371,20 @@ class SceneHostOrchestrator:
+                 f"能力未注册：{spec.scene_code}/{spec.capability_version}",
+                 step="PRECHECK",
+             )
++        # 12S-C 水雾正式接线（消费 12S-B 7 图 hash 受控预检产物）：spray 场景在烧模型/
++        # 解码前 fail-closed 核对 7 参考图（hash/字节/顺序/JPEG 可解码）。缺失=
++        # REFERENCE_MISSING→PRECHECK 阻塞（不冒充无命中、不进分析）。slope/test-capability
++        # 不受影响（additive，旧坡道 header 轴无回归）。
++        if cap.adapter_key == SPRAY_ADAPTER_KEY:
++            from app.scene.spray.precheck import check_references
++
++            ref = check_references()
++            if not ref.ok:
++                raise SceneExecError(
++                    f"PRECHECK_SPRAY_{ref.reason or 'REFERENCE_ERROR'}",
++                    f"水雾参考图受控预检未通过：{ref.detail}（处理机需备齐 7 图，fail-closed 不执行）",
++                    step="PRECHECK",
++                )
+         from app.scene.registry import config_hash
+ 
+         frozen = config_hash(cap.scene_code, cap.capability_version, spec.parameters)
+diff --git a/scripts/scene_host_proxy.py b/scripts/scene_host_proxy.py
+index 367c539..4efe9e2 100644
+--- a/scripts/scene_host_proxy.py
++++ b/scripts/scene_host_proxy.py
+@@ -409,6 +409,15 @@ def resolve_spec(
+             "快照未存提交参数无法还原，fail-closed 不执行（不烧模型）"
+         )
+     vehicle = (bag.get("vehicle") or {}).get("vehicle_code") or None
++    # 12S-C 水雾正式接线（消费 12S-A source_metadata 车辆绑定）：spray 入口提交时
++    # source_metadata.vehicle_code 必填（A 面 fail-closed 422 未调度），父包车辆绑定后
++    # 传递到子包发布根。代理侧若 spray run 缺车辆 = 父绑定链断裂（不猜车、不静默
++    # unassigned → 防子包落到错误车辆切片树/无目标空包）。slope 保持既有 lenient 口径
++    # （unassigned 兜底），旧坡道无回归（additive）。
++    if scene_code == "spray" and not vehicle:
++        raise SpecError(
++            "spray 场景缺车辆绑定（source_metadata.vehicle_code 未随父包传递），fail-closed 不执行（不猜车）"
++        )
+ 
+     spec = SceneExecSpec(
+         run_id=run_id,
+diff --git a/tests/test_scene_spray_wiring.py b/tests/test_scene_spray_wiring.py
+new file mode 100644
+index 0000000..acd04a7
+--- /dev/null
++++ b/tests/test_scene_spray_wiring.py
+@@ -0,0 +1,470 @@
++"""TASK-12S-C 水雾正式接线——模块级自测（9.6 卡清单）。
++
++前置口径（派单 attempt-1）：硬依赖 16B(40ab818)/12S-A(77c395b)/12S-B(f62a29c) 未全部
++接受合入 → 本测试做**模块级**验证（真实 dispatch→SprayAdapter（B 固定 SHA 产物）、
++真实 writer/publish（04B/06B 复用层）、PRECHECK 7 图 hash 受控预检、车辆绑定 fail-closed、
++offset=0 分支、旧坡道 header 轴一包恢复回归），**不做正式联调 PASS**（真链冒烟留接线核验单）。
++
++真实 VLM / 真实渲染不做：模型经确定性 DeterministicModel（B 面替身）、渲染经
++patch_render（open3d 处理机依赖本机缺失，不 mock 当真实渲染）。
++"""
++
++from __future__ import annotations
++
++import sys
++from dataclasses import replace
++from pathlib import Path
++
++import pytest
++
++ROOT = Path(__file__).resolve().parents[1]
++for _p in (ROOT, ROOT / "scripts", ROOT / "tests"):
++    if str(_p) not in sys.path:
++        sys.path.insert(0, str(_p))
++
++# 复用 12S-B 确定性替身（固定 SHA f62a29c 产物）
++from fake_vlm_server import FakeVlmServer  # noqa: E402
++from scene_fixture import make_source_bag  # noqa: E402
++
++# 复用 16B 编排 + 坡道夹具（旧坡道 header 轴回归）
++from scene_host_orchestrator import (  # noqa: E402
++    SceneExecError,
++    SceneExecSpec,
++    SceneHostOrchestrator,
++)
++from test_spray_adapter import (  # noqa: E402
++    DeterministicModel,
++    build_other_topics_bag,
++    build_pointcloud_bag,
++    patch_render,
++)
++
++from app.scene import CapabilityRegistry, get_registry  # noqa: E402
++from app.scene.adapter import _adapter_for  # noqa: E402
++from app.scene.spray import SPRAY_ADAPTER_KEY  # noqa: E402
++from app.scene.spray.adapter import SprayAdapter  # noqa: E402
++from app.scene.types import SceneOutcome  # noqa: E402
++from app.services import scene_publish_service  # noqa: E402
++
++
++# ---------------------------------------------------------------------------
++# 替身 / 受控注册表
++# ---------------------------------------------------------------------------
++class FakeReporter:
++    def __init__(self):
++        self.calls: list[tuple[str, dict]] = []
++
++    def report_results(self, **kw):
++        self.calls.append(("results", kw["child_bag_uids"]))
++        return {"ok": True}
++
++    def complete_scene(self, **kw):
++        self.calls.append(("complete", kw["child_bag_uids"]))
++        return {"ok": True}
++
++
++@pytest.fixture
++def spray_registry():
++    """把真实 config 里的 spray 能力翻成 enabled（dataclasses.replace，不新建能力描述）。
++
++    真实 config 起步 enabled=false（资产未核实，12S-B 口径）；模块级接线测试需验证
++    **dispatch 路由到 SprayAdapter** 这一 12S-C 消费面，故在受控测试注册表内启用。
++    不改变 param schema / output_labels / adapter_key（同一真实契约）。
++    """
++    reg = get_registry()
++    caps = list(reg.all())
++    out = []
++    for c in caps:
++        if c.scene_code == "spray":
++            out.append(replace(c, enabled=True, disabled_reason=None))
++        else:
++            out.append(c)
++    new_reg = CapabilityRegistry(tuple(out))
++    from app.scene import reset_registry
++
++    reset_registry(new_reg)
++    yield new_reg
++    reset_registry(reg)
++
++
++def _inject_spray_adapter(monkeypatch, model_client: DeterministicModel):
++    """dispatch 无 client 注入缝（_adapter_for 返回 cls()）→ 在 dispatch 边界注入
++    确定性模型客户端的 SprayAdapter，覆盖真实路由路径（adapter_key→SprayAdapter 类）。"""
++    import app.scene.adapter as A
++
++    def fake_adapter_for(capability):
++        if capability.adapter_key == SPRAY_ADAPTER_KEY:
++            return SprayAdapter(model_client=model_client)
++        return _adapter_for(capability)
++
++    monkeypatch.setattr(A, "_adapter_for", fake_adapter_for)
++
++
++def _spray_spec(tmp_path: Path, bag: Path, tag: str, reg: CapabilityRegistry, **over) -> SceneExecSpec:
++    eff = reg.effective_params("spray", None)
++    base = dict(
++        run_id=f"scene-spray-{tag}-001",
++        attempt=1,
++        source_id="SRC-SPRAY-001",
++        source_generation=1,
++        source_fingerprint="s" * 64,  # 夹具无 metadata → PRECHECK 代次核对如实跳过
++        source_path=str(bag),
++        scene_code="spray",
++        capability_version=eff.capability_version,
++        parameters=eff.parameters,
++        config_hash=eff.config_hash,
++        work_root=tmp_path / tag / "work",
++        publish_root=tmp_path / tag / "slices",
++        vehicle_key="spray-veh-01",
++        reporter=FakeReporter(),
++    )
++    base.update(over)
++    return SceneExecSpec(**base)
++
++
++@pytest.fixture
++def refs_and_render(monkeypatch):
++    # 7 图 hash 受控预检走真实清单：SPRAY_REFERENCE_DIR 指向已批准的 7 图受控目录
++    #（B 面 test_real_refs_7_of_7 已核验 hash/字节/顺序），PRECHECK 与 analyze 的
++    # verify_references 都经此真实校验（不 patch 掉预检产物，忠实消费 B 的 hash 门禁）。
++    from test_spray_adapter import REAL_REF_DIR
++
++    if not REAL_REF_DIR.is_dir() or len(list(REAL_REF_DIR.glob("*.jpg"))) < 7:
++        pytest.skip("7 图受控参考目录不可用（处理机/真实资产未就位）")
++    monkeypatch.setenv("SPRAY_REFERENCE_DIR", str(REAL_REF_DIR))
++    patch_render(monkeypatch)  # open3d 渲染本机缺失：确定性渲染替身（非真实渲染）
++
++
++# ===========================================================================
++# 1. 全链 SUCCESS：dispatch→SprayAdapter→writer→publish→register（B 固定 SHA 消费）
++# ===========================================================================
++class TestSprayFullChain:
++    def test_success_publishes_to_spray_slice_tree_and_registers(
++        self, tmp_path, monkeypatch, spray_registry, refs_and_render,
++    ):
++        _inject_spray_adapter(monkeypatch, DeterministicModel(spray_positions={0, 1, 2, 3}))
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        spec = _spray_spec(tmp_path, bag, "succ", spray_registry)
++        spec.publish_root.mkdir(parents=True)
++        manifest, steps = SceneHostOrchestrator(spray_registry).run(spec)
++
++        assert manifest.outcome.value == SceneOutcome.SUCCESS.value
++        assert manifest.scene_code == "spray"
++        # 八步全 DONE，步骤名不变（复用 16B 既有编排，无新旁路）
++        assert [s.name for s in steps] == [
++            "PRECHECK", "EXTRACT", "INFER", "SEGMENT", "WRITE", "VALIDATE", "PUBLISH", "REGISTER",
++        ]
++        assert all(s.status == "DONE" for s in steps)
++        # 可发布区间 = spray 命中段，mapping_basis 全 bag_storage_ns（整数 ns 分段，B 产物口径）
++        pubs = manifest.publishable_segments()
++        assert pubs
++        assert all(s.mapping_basis == "bag_storage_ns" for s in pubs)
++        assert all(isinstance(s.start_ns, int) and isinstance(s.end_ns, int) for s in pubs)
++        # 发布落受控根 veh/scene 语义 → spray 场景子树（scene_code 命名，06B 复用层口径）
++        pub_dir = spec.publish_root / "spray-veh-01" / "spray"
++        assert pub_dir.is_dir()
++        assert any(pub_dir.iterdir())
++        # REGISTER 经 Backend 回报（report_results + complete_scene），子包 uid 一致（复用 16B 机制）
++        calls = {c[0]: c[1] for c in spec.reporter.calls}
++        assert "results" in calls and "complete" in calls
++        assert set(calls["results"]) == {seg.slice_key for seg in pubs}
++
++    def test_offset_bag_storage_ns_reuses_zero_branch(self, tmp_path, spray_registry, refs_and_render, monkeypatch):
++        """mapping_basis=bag_storage_ns → derive_storage_offset 走 offset=0 分支（水雾无 header 偏移）。"""
++        _inject_spray_adapter(monkeypatch, DeterministicModel(spray_positions={0, 1, 2, 3}))
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        spec = _spray_spec(tmp_path, bag, "offset", spray_registry)
++        spec.publish_root.mkdir(parents=True)
++        manifest, _ = SceneHostOrchestrator(spray_registry).run(spec)
++        offset = scene_publish_service.derive_storage_offset(manifest, Path(spec.source_path))
++        assert offset == 0, "bag_storage_ns 分支必须返回 0（水雾无 header 偏移），不得推导/猜测"
++
++    def test_no_match_not_publish_complete_only(self, tmp_path, monkeypatch, spray_registry, refs_and_render):
++        _inject_spray_adapter(monkeypatch, DeterministicModel(always="正常"))
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        spec = _spray_spec(tmp_path, bag, "nomatch", spray_registry)
++        spec.publish_root.mkdir(parents=True)
++        manifest, _ = SceneHostOrchestrator(spray_registry).run(spec)
++        assert manifest.outcome.value == SceneOutcome.NO_MATCH.value
++        assert not manifest.publishable_segments()
++        # 无文件义务：只 complete，不 report
++        calls = {c[0]: c[1] for c in spec.reporter.calls}
++        assert "complete" in calls and "results" not in calls
++
++    def test_not_applicable_missing_front_topic_is_terminal(
++        self, tmp_path, monkeypatch, spray_registry, refs_and_render,
++    ):
++        _inject_spray_adapter(monkeypatch, DeterministicModel())
++        bag = build_other_topics_bag(tmp_path)  # 只后雷达+相机，无前雷达输入
++        spec = _spray_spec(tmp_path, bag, "na", spray_registry)
++        spec.publish_root.mkdir(parents=True)
++        manifest, steps = SceneHostOrchestrator(spray_registry).run(spec)
++        assert manifest.outcome.value == SceneOutcome.NOT_APPLICABLE.value
++        by_name = {s.name: s.status for s in steps}
++        assert by_name["EXTRACT"] == "DONE"
++        assert all(s.status in ("DONE", "PENDING") for s in steps)
++
++
++# ===========================================================================
++# 2. PRECHECK 消费 12S-B 7 图 hash 受控预检（fail-closed，不烧模型）
++# ===========================================================================
++class TestSprayPrecheckReferencesGate:
++    def test_missing_references_blocks_precheck_no_model_charge(self, tmp_path, monkeypatch, spray_registry):
++        # 不 patch_refs → 真实 verify_references 指向默认 SPRAY_REFERENCE_DIR（缺失/不可校验）
++        monkeypatch.delenv("SPRAY_REFERENCE_DIR", raising=False)
++        # 用一个**记录型**确定性客户端：若 PRECHECK 不拦截，模型会被调用 → 断言其未被调用
++        model = DeterministicModel()
++        called = {"n": 0}
++
++        orig = DeterministicModel.judge_frame
++
++        def spy(self, *a, **k):
++            called["n"] += 1
++            return orig(self, *a, **k)
++
++        monkeypatch.setattr(DeterministicModel, "judge_frame", spy)
++        _inject_spray_adapter(monkeypatch, model)
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        spec = _spray_spec(tmp_path, bag, "prefail", spray_registry)
++        spec.publish_root.mkdir(parents=True)
++        with pytest.raises(SceneExecError) as ei:
++            SceneHostOrchestrator(spray_registry).run(spec)
++        assert ei.value.step == "PRECHECK"
++        assert "PRECHECK_SPRAY_" in ei.value.code
++        assert called["n"] == 0, "PRECHECK 7 图未过不得进分析/烧模型（fail-closed）"
++        # 未进 PUBLISH：受控 slices 根下的车辆/场景子树未被创建
++        assert not (spec.publish_root / "spray-veh-01" / "spray").exists(), "PRECHECK 失败不得发布"
++
++
++# ===========================================================================
++# 3. 恢复/幂等（复用 16B 机制，水雾不新开旁路）
++# ===========================================================================
++class TestSprayRecoveryIdempotency:
++    def test_recovery_reuses_manifest_no_second_charge(self, tmp_path, monkeypatch, spray_registry, refs_and_render):
++        _inject_spray_adapter(monkeypatch, DeterministicModel(spray_positions={0, 1, 2, 3}))
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        spec = _spray_spec(tmp_path, bag, "rec", spray_registry)
++        spec.publish_root.mkdir(parents=True)
++        m1, _ = SceneHostOrchestrator(spray_registry).run(spec)
++        assert m1.outcome.value == SceneOutcome.SUCCESS.value
++
++        # 崩溃恢复：同一 work_root/checkpoint + 同 identity，新 orchestrator 重跑。
++        # 模型换记录型客户端：恢复重跑不应再请求模型（复用已落盘 manifest）。
++        model2 = DeterministicModel(spray_positions={0, 1, 2, 3})
++        calls2 = {"n": 0}
++        orig = DeterministicModel.judge_frame
++
++        def spy(self, *a, **k):
++            calls2["n"] += 1
++            return orig(self, *a, **k)
++
++        monkeypatch.setattr(DeterministicModel, "judge_frame", spy)
++        _inject_spray_adapter(monkeypatch, model2)
++        reporter2 = FakeReporter()
++        spec2 = _spray_spec(tmp_path, bag, "rec", spray_registry, reporter=reporter2)  # 同 work/publish/identity
++        m2, steps2 = SceneHostOrchestrator(spray_registry).run(spec2)
++        assert m2.outcome.value == SceneOutcome.SUCCESS.value
++        assert calls2["n"] == 0, "恢复重跑不应再请求模型（幂等/缓存，复用 16B 机制）"
++        assert m1.digest() == m2.digest(), "恢复重跑应得到同一 manifest 身份"
++        by_name = {s.name: s.status for s in steps2}
++        assert by_name["EXTRACT"] == "DONE" and by_name["REGISTER"] == "DONE"
++
++
++# ===========================================================================
++# 4. 失败归因（模型失败→INFER，不当 NO_MATCH）
++# ===========================================================================
++class TestSprayFailureAttribution:
++    def test_model_failed_is_infer_not_no_match(self, tmp_path, monkeypatch, spray_registry, refs_and_render):
++        _inject_spray_adapter(monkeypatch, DeterministicModel(fail=True))
++        bag = build_pointcloud_bag(tmp_path, ["normal"] * 30)
++        spec = _spray_spec(tmp_path, bag, "modfail", spray_registry)
++        spec.publish_root.mkdir(parents=True)
++        with pytest.raises(SceneExecError) as ei:
++            SceneHostOrchestrator(spray_registry).run(spec)
++        # MODEL_FAILED 归因 INFER（dispatch 映射），不当 NO_MATCH、不发布
++        assert ei.value.step in ("INFER", "SEGMENT")
++        assert "MODEL_FAILED" in ei.value.code
++        assert not (spec.publish_root / "spray-veh-01" / "spray").exists()
++
++
++# ===========================================================================
++# 5. 旧坡道 header 轴一包恢复回归（水雾 import 同进程，证明零回归）
++# ===========================================================================
++class TestOldSlopeHeaderAxisRecoveryRegression:
++    def test_slope_header_axis_crash_recovery_still_passes_with_spray_imported(self, tmp_path, monkeypatch):
++        """硬证据：装载水雾适配器（本单 import）后，旧坡道 header→存储轴 offset 推导 +
++        一包崩溃恢复重跑仍全链 SUCCESS 且不重复计费模型。本测试进程已 import
++        app.scene.spray（模块顶部经 scene_host_orchestrator），验证零回归。"""
++        import app.scene.spray  # noqa: F401  (确认已装载)
++        assert SPRAY_ADAPTER_KEY in __import__("app.scene.adapter", fromlist=["_ADAPTERS"])._ADAPTERS
++
++        reg = get_registry()
++        slope_eff = reg.effective_params("slope", None)
++        bag = make_source_bag(tmp_path, ["坡道"] * 30)
++
++        def slope_spec(tag, reporter):
++            return SceneExecSpec(
++                run_id=f"scene-slope-{tag}-001",
++                attempt=1,
++                source_id="SRC1",
++                source_generation=1,
++                source_fingerprint="a" * 64,
++                source_path=str(bag),
++                scene_code="slope",
++                capability_version=slope_eff.capability_version,
++                parameters=slope_eff.parameters,
++                config_hash=slope_eff.config_hash,
++                work_root=tmp_path / tag / "work",
++                publish_root=tmp_path / tag / "slices",
++                vehicle_key="veh1",
++                reporter=reporter,
++            )
++
++        server = FakeVlmServer(label_policy=lambda b: "坡道").start()
++        monkeypatch.setenv("SLOPE_VLM_ENDPOINT", server.endpoint)
++        spec1 = slope_spec("slope-rec", FakeReporter())
++        spec1.publish_root.mkdir(parents=True)
++        m1, _ = SceneHostOrchestrator(reg).run(spec1)
++        assert m1.outcome.value == SceneOutcome.SUCCESS.value
++        # header 轴 offset 推导真实存在（slope 帧带 header）→ 非 None
++        off1 = scene_publish_service.derive_storage_offset(m1, Path(spec1.source_path))
++        assert off1 is not None
++        first_req = server.stats()["requests"]
++        assert first_req > 0
++
++        # 恢复重跑（同 work/publish/identity）→ 不重复计费，同 manifest 身份
++        server2 = FakeVlmServer(label_policy=lambda b: "坡道").start()
++        monkeypatch.setenv("SLOPE_VLM_ENDPOINT", server2.endpoint)
++        spec2 = slope_spec("slope-rec", FakeReporter())
++        m2, steps2 = SceneHostOrchestrator(reg).run(spec2)
++        monkeypatch.delenv("SLOPE_VLM_ENDPOINT", raising=False)
++        server.stop()
++        server2.stop()
++        assert m2.outcome.value == SceneOutcome.SUCCESS.value
++        assert server2.stats()["requests"] == 0, "坡道恢复重跑不应再请求模型（旧 header 轴无回归）"
++        assert m1.digest() == m2.digest()
++        by_name = {s.name: s.status for s in steps2}
++        assert by_name["EXTRACT"] == "DONE" and by_name["REGISTER"] == "DONE"
++
++
++# ===========================================================================
++# 6. 元数据/车辆绑定消费 12S-A source_metadata（代理侧 fail-closed，不猜车）
++# ===========================================================================
++class TestProxyVehicleBindingConsumes12SA:
++    """12S-A 在提交面强制 source_metadata.vehicle_code（spray 入口 422 未调度）；父包车辆
++    绑定后传递。代理 resolve_spec 若 spray run 缺车辆 = 父绑定链断裂 → fail-closed 不执行
++    （不静默 unassigned）。slope 保持既有 lenient 口径（unassigned 兜底），旧坡道无回归。"""
++
++    def _cfg(self, tmp_path: Path) -> object:
++        from scene_host_proxy import ProxyConfig
++
++        (tmp_path / "pub").mkdir(exist_ok=True)
++        return ProxyConfig(
++            backend_url="http://unused", bind="127.0.0.1", port=0,
++            state_root=tmp_path / "state", work_root_base=tmp_path / "work",
++            publish_root=tmp_path / "pub", ready_root=str(tmp_path / "ready"),
++            min_free_bytes=0, cancel_poll_seconds=0.2, heartbeat_interval_seconds=0.2,
++            heartbeat_fail_budget=4, lease_ttl_seconds=120,
++        )
++
++    def _run_detail(self, run_id: str, scene_code: str, eff) -> dict:
++        return {
++            "pipeline_run_id": run_id, "pipeline_type": "SCENE_SLICE", "attempt": 1,
++            "source_id": "SRC1", "status": "SCENE_RUNNING",
++            "steps": [{"step_name": s, "attempt": 1, "status": "QUEUED"}
++                      for s in ("PRECHECK", "EXTRACT", "INFER", "SEGMENT", "WRITE",
++                                "VALIDATE", "PUBLISH", "REGISTER")],
++            "pipeline_config_snapshot": {
++                "schema_version": "scene-run/v1", "source_generation": 1,
++                "scenes": [{"scene_code": scene_code,
++                            "capability_version": eff.capability_version,
++                            "capability_config_hash": eff.config_hash}],
++            },
++        }
++
++    def _source_detail(self, vehicle_code: str | None) -> dict:
++        bag = {
++            "bag_uid": "SRC1", "relative_path": "source_bag", "source_generation": 1,
++            "fast_fingerprint": "f" * 64,
++        }
++        if vehicle_code is not None:
++            bag["vehicle"] = {"vehicle_code": vehicle_code}
++        else:
++            bag["vehicle"] = None
++        return {"source_id": "SRC1", "bag": bag,
++                "copies": [{"fingerprint": "f" * 64, "storage_type": "NAS",
++                            "path": "/ready/source_bag"}]}
++
++    def _fake_backend(self, run_detail: dict, source_detail: dict) -> object:
++        class _FB:
++            def run_detail(self, run_id):
++                return run_detail
++
++            def source_detail(self, source_id):
++                return source_detail
++
++        return _FB()
++
++    def _stage_spray_bags(self, tmp_path: Path) -> None:
++        """resolve_spec 要求 ready_root/relative_path 是目录（本机物理映射）。"""
++        from scene_host_proxy import resolve_spec  # noqa: F401  (确认导入面)
++
++        bag = build_pointcloud_bag(tmp_path / "bagbuild", ["normal"] * 2)
++        ready = tmp_path / "ready"
++        ready.mkdir(exist_ok=True)
++        dest = ready / "source_bag"
++        import shutil
++
++        if dest.exists():
++            shutil.rmtree(dest)
++        shutil.move(str(bag), str(dest))
++
++    def test_spray_missing_vehicle_fails_closed_no_guess(self, tmp_path, monkeypatch, spray_registry):
++        from scene_host_proxy import SpecError, resolve_spec
++
++        eff = spray_registry.effective_params("spray", None)
++        self._stage_spray_bags(tmp_path)
++        cfg = self._cfg(tmp_path)
++        fb = self._fake_backend(self._run_detail("scene-spray-1", "spray", eff), self._source_detail(None))
++        payload = {"pipeline_run_id": "scene-spray-1", "source_id": "SRC1", "attempt": 1,
++                   "lease_token": "tok-1"}
++        with pytest.raises(SpecError) as ei:
++            resolve_spec(cfg, fb, payload)
++        assert "spray" in str(ei.value) and "车辆" in str(ei.value)
++
++    def test_spray_with_vehicle_resolves_spec(self, tmp_path, monkeypatch, spray_registry):
++        from scene_host_proxy import resolve_spec
++
++        eff = spray_registry.effective_params("spray", None)
++        self._stage_spray_bags(tmp_path)
++        cfg = self._cfg(tmp_path)
++        fb = self._fake_backend(self._run_detail("scene-spray-2", "spray", eff), self._source_detail("spray-veh-01"))
++        payload = {"pipeline_run_id": "scene-spray-2", "source_id": "SRC1", "attempt": 1,
++                   "lease_token": "tok-1"}
++        spec, status = resolve_spec(cfg, fb, payload)
++        assert spec.scene_code == "spray"
++        assert spec.vehicle_key == "spray-veh-01", "父包车辆绑定应传递到 spec（A 消费面，非 unassigned）"
++        assert status == "SCENE_RUNNING"
++
++    def test_slope_missing_vehicle_still_lenient_no_regression(self, tmp_path, spray_registry):
++        """旧坡道：缺车辆保持 unassigned 兜底（lenient 口径），不因 spray fail-closed 收紧而回归。"""
++        from scene_fixture import make_source_bag
++        from scene_host_proxy import resolve_spec
++
++        reg = get_registry()
++        slope_eff = reg.effective_params("slope", None)
++        bag = make_source_bag(tmp_path / "bagbuild", ["坡道"] * 2)
++        ready = tmp_path / "ready"
++        ready.mkdir(exist_ok=True)
++        dest = ready / "source_bag"
++        import shutil
++
++        if dest.exists():
++            shutil.rmtree(dest)
++        shutil.move(str(bag), str(dest))
++        cfg = self._cfg(tmp_path)
++        fb = self._fake_backend(self._run_detail("scene-slope-9", "slope", slope_eff), self._source_detail(None))
++        payload = {"pipeline_run_id": "scene-slope-9", "source_id": "SRC1", "attempt": 1, "lease_token": "tok-1"}
++        spec, _ = resolve_spec(cfg, fb, payload)
++        assert spec.scene_code == "slope"
++        assert spec.vehicle_key == "unassigned", "slope 缺车辆维持 unassigned 兜底（旧坡道无回归）"
+\ No newline at end of file

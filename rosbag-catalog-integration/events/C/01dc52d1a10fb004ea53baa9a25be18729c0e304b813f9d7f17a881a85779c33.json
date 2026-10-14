@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261012-212853-nochange",
+  "occurred_at": "2026-10-12T21:33:31+08:00",
+  "recorded_at": "2026-10-12T21:33:31+08:00",
+  "role": "C",
+  "task": "IDLE",
+  "attempt": "1",
+  "status": "IDLE_NO_CHANGE",
+  "summary": "无C新派单；TASK-16B仍PLANNED未领取；07B r95 detached OCR 21:26:34跑完（b10 RC=0 0 findings，b9 cancelled FAILED），b5/b7/b9低负载resume与NEEDS_REVIEW裁决归协调者非C",
+  "evidence": "sessions/C.md 21:33行; scratch/t07b/ocr/remaining_progress.txt tail == r95 detached done ==",
+  "next": "保持空闲待派单；等协调者r101+核账与裁决"
+}

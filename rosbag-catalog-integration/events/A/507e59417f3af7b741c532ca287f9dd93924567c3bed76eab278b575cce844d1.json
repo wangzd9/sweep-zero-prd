@@ -1,0 +1,20 @@
+{
+  "event_id": "A:a-t16ca-attempt1-correction-ff2a005-delivered-20261014T131827",
+  "kind": "business",
+  "task": "TASK-16C-A",
+  "attempt": "attempt-1-correction",
+  "status": "REVIEW_PENDING",
+  "summary": "勘误续单执行完毕：tests/test_web.py:364 当前可用切片→切片、366 全部/历史→全部（B 叶 e399daf 改名连带，协调者集成候选复跑失配证据在案），续 commit ff2a005 冻结交付（同 branch/worktree，base 仍 bd0db1d2 链）；复跑 74 passed+1 failed（seed 固有失败 no such table 同口径，不计本账）；同函数其余断言无失配未扩面；回执补 attempt-1 勘误段",
+  "evidence": "commit ff2a0055c75655f2f91f273a80af99633c9fbebf; ACK inbox/1号/TASK-16C-A/shared-test-assert-transfer-correction-ack-20261014.md; receipt receipts/TASK-16C-A/attempt-1.md 勘误段; worktree wt-01-t16ca",
+  "next": "等协调者重建集成候选 wt-coord-intcheck-16c（A ff2a005 + B e399daf + seed）；A 叶 OCR 以 ff2a005 为最终冻结 head（当前被协调者工具链版本门禁阻塞，恢复后串行提交）+ TESTER 独立验证（MySQL 关键行为）；门禁不变",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "A",
+  "recorded_at": "2026-10-14T13:23:06+08:00",
+  "occurred_at": "2026-10-14T13:23:06+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

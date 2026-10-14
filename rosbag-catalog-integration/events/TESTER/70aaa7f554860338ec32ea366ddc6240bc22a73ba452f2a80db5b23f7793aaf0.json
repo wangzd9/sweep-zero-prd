@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-103953-nochange",
+  "occurred_at": "2026-10-12T10:51:05+08:00",
+  "recorded_at": "2026-10-12T10:51:05+08:00",
+  "role": "TESTER",
+  "task": "poll",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "5min poll: no new dispatch since 10:24:53; main 453da0c matches origin; no TESTER lease/process; T10 DONE closed, TASK-11 production gate BLOCKED",
+  "evidence": "none",
+  "next": "继续5分钟巡检"
+}

@@ -1,0 +1,13 @@
+{
+  "event_id": "coord-r151-t16b-proxy-ocr-retry9-still-inflight-contract-fix-consumed",
+  "occurred_at": "2026-10-13T13:03:00+08:00",
+  "recorded_at": "2026-10-13T13:03:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16B / TASK-12S-A / TASK-12S-B",
+  "attempt": "r151-poll",
+  "status": "OBSERVED",
+  "summary": "r151 巡检（指纹 cedab330，checked_at 13:00:53，唤醒源=ocr-contract-fix-20261013.md 12:52 落盘+TODO r150 段+本侧 r150 事件）：① 已消费 OCR 工作流修复通知（Skill 1.4.1）——第 9 轮 40e90fea 保留不重复启动，与 r150 延长观察口径一致；修复未新增 OCR/强审查/部署授权，16B 门禁维持关闭。② 第 9 次 OCR 仍未收口且健康：pid 1810468/1810491 etime ~35:53，session 40e90fea 持续写（最后事件 13:00:44+08，正在提交 code_comment；104 tool_call/73 llm_request，max prompt 77568 tokens，usage 3.4M in/99.6K out），末条=幂等键 HIGH finding（{run_id}:16b-status:{target} 缺 attempt → 409 卡 SCENE_RUNNING），已进入收尾产出阶段；ocr_session_status.py 诊断=无 session_end/manifest，不能判停止或通过 → 维持 r150 延长观察至自然收口（不机械 kill 超硬截止进程）。③ 12S-A（A）12:40 后无回执落盘，12S-B（B）继续开发，执行者面不接管。④ 强审查 EXPIRED（11:33:12 已过）零新增，滚动60min 0/5，本授权累计 2 次（SR-07B-R4 SUCCEEDED，530310 in/8293 out+4334 reasoning，费用未知）。",
+  "evidence": "ps 1810468/1810491 etime 35:53; ~/.opencodereview/sessions/...wt-03b-t16b/40e90fea…jsonl 最后 llm_response ts 2026-10-13T05:00:44Z 含幂等键 HIGH finding; ocr_session_status.py 输出（无 session_end/manifest，model_usage 3398446 in/99593 out）; inbox/coordinator/TASK-16B/ocr-contract-fix-20261013.md 12:52; TODO r150 段; find inbox 12:40 后零新增派单/回执",
+  "next": "下轮再核第 9 次 rc 收口（progress b2_r144_maxtok9_progress.txt 出现 'DONE rc='）：rc=0→16B findings 全合并（b1 H1/M1/M2+b3 2+proxy 含本次幂等键 HIGH）一次最小返修单派 C→16B 解冻走门禁链；rc=1→9/9 连败维持冻结不再自动第 10 次、升级用户 a/b/c；12S-A 回执落盘后机械核验；12S-B 交付后 OCR 排队（ocr.lock 第9次占用中）→TESTER→合入",
+  "source": "inbox/events/COORDINATOR/coord-r151-t16b-proxy-ocr-retry9-still-inflight-contract-fix-consumed.json"
+}

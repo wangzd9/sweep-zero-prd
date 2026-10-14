@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-071253-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T07:14:51+08:00",
+  "recorded_at": "2026-10-12T07:14:51+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "07:07 后零业务变化，无新派单无返修，P0 维持停止派发",
+  "evidence": "origin/main 453da0c 双核；wt-04a-t10d3 HEAD=0943885 冻结；HANDOFF r50 口径一致",
+  "next": "仅按需巡检与事件接续；TASK-11 生产门禁未放行不自行启动"
+}

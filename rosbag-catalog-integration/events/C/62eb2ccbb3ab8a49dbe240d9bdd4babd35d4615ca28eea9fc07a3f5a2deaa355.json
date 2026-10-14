@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-232353-nochange",
+  "occurred_at": "2026-10-11T23:24:54+08:00",
+  "recorded_at": "2026-10-11T23:24:54+08:00",
+  "role": "C",
+  "task": "none",
+  "attempt": "none",
+  "status": "IDLE",
+  "summary": "23:19后零C范围新增：inbox/3号与inbox/coordinator无新单、main ca8730d双核一致、wt-03b 6f1a9ad干净、leases无在途、无C业务进程；2号TASK-10第2跑1d新失败(no SCENE_SLICE run via 03B chain)排查中属2号/协调者范围；C保持空闲待派单",
+  "evidence": "none",
+  "next": "等待协调者派单"
+}

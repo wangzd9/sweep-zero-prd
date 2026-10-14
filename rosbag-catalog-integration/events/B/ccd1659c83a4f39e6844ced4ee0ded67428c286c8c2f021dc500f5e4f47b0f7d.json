@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t12sb-s9b-owner-inflight-standdown-20261013-164000",
+  "occurred_at": "2026-10-13T16:40:42+08:00",
+  "recorded_at": "2026-10-13T16:41:00+08:00",
+  "role": "B",
+  "task": "TASK-12S-B",
+  "attempt": "1-rework-s9b",
+  "status": "STANDING_DOWN_OWNER_INFLIGHT",
+  "summary": "12S-B S9b（帧映射契约，0320a8e 漏项）：本侧 cron 轮次核实同逻辑角色 2号交互会话已在 16:03 ACK 同一 S9b 单并正在 wt-04a-t12sb 实现在途未提交（decode.py +200/tests +217→12 文件 +378/-74，mtimes 16:37→16:40:42 本回合内推进，HEAD 仍 0320a8e）→ 本侧零业务动作/零提交/零 HEAD 移动让位（同角色在途不抢占）。本侧只读地面真值锚独立实跑：纯 stdlib SeyondScan CDR 解析只读真实小包 1184 消息 0 错→44 is_last_scan 帧边界；镜像 packet2pointcloud 实跑 rc=0 出 44 PCD 与 44 帧 ms 0 失配；首/末帧字段与协调者独立 rclpy 探针 44/44 EXACT_MATCH_ALL_44；原包 sha256 未变（前导 2 条+尾部 20 条非 is_last 残缺边均在真实包存在）",
+  "evidence": "sessions/B.md 16:40 巡检/让位条目;wt-04a-t12sb git diff HEAD --stat(12 files +378/-74);inbox/2号/TASK-12S-B/attempt-1-rework-s9b-{dispatch,ack,nudge}.md;evidence scratch s9_anchor_check EXACT_MATCH_ALL_44",
+  "next": "等 2号会话 S9b 续 commit 冻结 s9_head+回执更新 → 协调者机械核验 → 增量 OCR(f62a29c..s9_head 排队首位) → TESTER 增量复验 → 合入 12S-B；本侧仅只读核查，下轮若 2号仍无提交/无回执则标停滞告警交协调者"
+}

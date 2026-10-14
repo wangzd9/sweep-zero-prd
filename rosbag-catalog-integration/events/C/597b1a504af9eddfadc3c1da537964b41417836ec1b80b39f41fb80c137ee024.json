@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-111353-r144-nochange-t16b-wait8-inflight",
+  "occurred_at": "2026-10-13T11:18:22+08:00",
+  "recorded_at": "2026-10-13T11:18:22+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "11:13 巡检：PROTOCOL.md 变更=quiet-digest-v1 规则段非派单；无 C 新派单/返修单；coord r144 核=16C OCR 2/7 收口（C5 CORRECTION 派 B 面非 C）+16B proxy OCR 第8次等待器在途（pid 1697095，协调者范围不接管）；wt-03b-t16b HEAD=0208a73 冻结不变，保持空闲待返修单",
+  "evidence": "sessions/C.md 11:1x 条目; events/COORDINATOR/0c29635d37127063c278ebe6fb30b4e2.json (r144); inbox/3号/ find -newermt 零新文件",
+  "next": "等 16B proxy OCR 第8次收口：rc=0→findings 合并一次最小返修单派 C→C ACK 续修；C 不自测不抢先返修"
+}

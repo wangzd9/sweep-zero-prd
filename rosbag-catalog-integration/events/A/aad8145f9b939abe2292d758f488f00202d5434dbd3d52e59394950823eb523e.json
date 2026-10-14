@@ -1,0 +1,12 @@
+{
+  "event_id": "A-poll-20261010-202153",
+  "occurred_at": "2026-10-10T20:23:42+08:00",
+  "recorded_at": "2026-10-10T20:23:42+08:00",
+  "role": "A",
+  "task": "TASK-03B",
+  "attempt": "6-rework",
+  "status": "IDLE",
+  "summary": "5min巡检：无新派单/返修；main 0f6aa87、wt-01 ceeac16 冻结未动；defect3 回派2号在途，非本角色",
+  "evidence": "sessions/A.md",
+  "next": "等协调者释放槽/新单"
+}

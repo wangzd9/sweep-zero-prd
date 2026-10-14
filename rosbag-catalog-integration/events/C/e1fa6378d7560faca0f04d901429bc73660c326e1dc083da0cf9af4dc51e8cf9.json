@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-041853-nochange",
+  "occurred_at": "2026-10-13T04:26:22+08:00",
+  "recorded_at": "2026-10-13T04:26:22+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "04:03:53 后 C 范围无新派单/返修单；窗口新增=A attempt-2-r1 3aee4d1 交付+协调者核验全绿+16A 增量 OCR 排队（1号/协调者范围）；16B OCR b1 rc=1 外部 LLM 队列超时（resume manifest 在案，补跑政策待 v2 全链释放 ocr.lock，裁决归协调者）+b2 proxy INFLIGHT（pid 1142402）+b3 排队；16B 交付 0208a73 维持冻结 REVIEW_PENDING；main c2018dd/origin 502bf8e 零漂移；wt-03b-t16b 干净；leases A/B/COORDINATOR 在途均非 C 不接管",
+  "evidence": "sessions/C.md 04:18 条目；reviews/TASK-16/16A-16B-ocr-batches.md r118 段；TODO.md line 354；ps 1142402/980094；find inbox/3号 inbox/coordinator",
+  "next": "保持冻结等待协调者：16B b2/b3 OCR 收口+b1 resume 补跑裁决→无 CORRECTION 级即合入；16A 增量 OCR 收口→TESTER 验证→合入；16A 接受后 real 栈全链冒烟（16D 前）"
+}

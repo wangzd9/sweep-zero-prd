@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs71-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T09:30:00+08:00",
+  "recorded_at": "2026-10-14T09:30:49+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第71轮只读观察（处理机 09:28-09:30 实测）：与 obs70 零状态变化=模型段完成信号仍未到，INFER 持续活跃，大包跨夜续跑不 kill/retry。scene-4acf689f（16_02_03 正式链 source 91FFEEC1 / submission 24d60fee）SCENE_RUNNING attempt=1 error 空、lease_owner=platform-local、lease_expires_at 09:28:08（09:27:00 查点，heartbeat 续租活跃）、八步全 QUEUED 未翻面、frozen_at 2026-10-13T23:05:30 不变；8767/health ok active_runs=[scene-4acf689f ACCEPTED pid1] 唯一在途；proxy 宿主 pid 3495931 LSTART 10月13 20:22:38 连续未重启、ELAPSED 13:05:22、TIME 01:21:07（obs70 01:21:01，+6s 持续非零）、RSS 18084608 同量级；work 树 checkpoint.json mtime 2026-10-14 00:23:10.474817688 未翻、find -newermt 08:55=0 零新写；VLM 远端直证 llm-server /tmp/vllm_qwen38.log 09:26:49-09:27:59 六点十秒采样 Running 2-4 reqs、Waiting 全程 0、prefix cache 92.2-92.4%、MM cache 88.8%、gen 61-178 tok/s（prompt 峰值 3574 tok/s）=推理活跃续证；资源/入口面 NAS 98T/70T/29T 71% 不变、up 5 天 23:46、load 0.89/1.23/1.75（较 obs70 回落，C 未起任何进程）、incoming/spray 仍仅 16_33_10 空包目录（D6 A 面不变）。本批 8 包无新终态；无升级条件命中（heartbeat 续租正常/run 未 FAILED/VLM Waiting 全程 0）。C 全程只读，未 kill/未删/未重启/未 retry/未改任何生产路径。租约 owner C-cron-poll-20261014-092353-t11s-obs71（token 整体 JSON 解析 len=32）。",
+  "evidence": "处理机 09:28-09:30 只读实测：curl 8180/8767、stat checkpoint.json、find -newermt、ps -p 3495931、df -h、uptime、ls incoming/spray、llm-server vllm log 六点采样；canonical sessions/C.md 620→621 行 obs71 sig=1 追加验证通过",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件=heartbeat 4 连败/FAILED/VLM Waiting 持续>0 且 proxy 无 ESTAB；③ 串行释放后 flat 三提交 a65a25a7/87dfebaa/518089ed 绑定新 run 按 run 核账；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。白天口径：状态变化即时通报，无变化不报进度；11:00 定时总结照常。"
+}

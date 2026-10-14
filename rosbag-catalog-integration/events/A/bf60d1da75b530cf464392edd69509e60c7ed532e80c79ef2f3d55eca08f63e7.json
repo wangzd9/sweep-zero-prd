@@ -1,0 +1,12 @@
+{
+  "event_id": "a-c31-deliver-20261011-1657",
+  "occurred_at": "2026-10-11T16:57:35+08:00",
+  "recorded_at": "2026-10-11T16:57:35+08:00",
+  "role": "A",
+  "task": "TASK-08",
+  "attempt": "c3-1",
+  "status": "REVIEW_PENDING",
+  "summary": "C3-lineage 夹具 bag_uid 越宽最小修复交付：3 处 uid 27→26+len<=26 assert（含 OTHERCHILD 同族收敛）+ FK PRAGMA 用例 SQLite 方言守卫（1406 修复后揭开的预存失败，非本单引入）；SQLite 11 passed+ruff 绿；真 MySQL 8.4.11 STRICT 隔离库文件级 RC=0，容器即毁 0 残留",
+  "evidence": "receipts/TASK-08/c3-lineage-c3-1.md, reports/TASK-08/c3-lineage-c3-1.md, commit f656507",
+  "next": "等协调者审核合入（纯测试交付 OCR 预期 0 入选）；08 收口=两单合入+9 红文件全绿复核"
+}

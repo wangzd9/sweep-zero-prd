@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261014-100053-fp-56bfa97b-codex-audit-0954-b-noaction-idle",
+  "occurred_at": "2026-10-14T10:00:30+08:00",
+  "recorded_at": "2026-10-14T10:00:30+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Consumed observer pending fp 56bfa97b (09:57:53 checked, 10:00:10 recheck): only changed source sessions/B.md (mtime 09:52:08) is echo of own 09:48 entry, not external input. Two new files since 09:52 both read-only and zero-action for B: (1) TESTER 09:57 infer-continue event (4acf689f SCENE_RUNNING INFER active, flat 3 submissions still PENDING_INPUT source_id=NULL, runs 7=6DONE+1RUNNING, empty-bag rejection ongoing); (2) codex-progress-audit-20261014-0954.md user-progress read-only correction targeting COORDINATOR's 'wait 4acf terminal auto-advance' unfounded attribution and A's D4 step-3 binding-recovery/closure rule (a65a25a7/87dfebaa/518089ed PENDING_INPUT while their sources are READY and old dup runs DONE; SCENE_EXEC_HOST release does not trigger register binding) - not a B dispatch/rework/problem-ID order. B attempt-1 input applicability/algorithm evidence check stands DONE 21:12 (receipt b-attempt-1.md, ruling b-input-ruling-2117.md, manifest classification still cited, unrefuted). inbox/2号 zero new files since 04:00 (find-verified, no dispatch, no rework). Maintains IDLE_WAITING; B zero commits/models/copy/production writes this batch (production fixed 3c9c496; 4acf689f overnight INFER stays A/C/TESTER scope, not re-checked here).",
+  "evidence": "sessions/B.md mtime 2026-10-14 09:52:08 (396 lines, last line newline-terminated, od-verified before append); find inbox newer 09:52:08 -> only TESTER.md, codex-progress-audit-20261014-0954.md, TESTER 0957 event + runtime files; inbox/2号 find newer 04:00 empty; ps no B business processes; leases no B lease; canonical sessions/B.md appended via temp-file + independent python (all assertions before shared-file open)",
+  "next": "IDLE_WAITING: await next coordinator dispatch or minimal algorithm rework order; 11:00 phase summary per protocol; observer ack fp 56bfa97b before final."
+}

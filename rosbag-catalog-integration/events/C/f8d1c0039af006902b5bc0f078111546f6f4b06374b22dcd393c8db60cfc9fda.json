@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-080853-nochange",
+  "occurred_at": "2026-10-13T08:11:35+08:00",
+  "recorded_at": "2026-10-13T08:11:35+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "FROZEN_REVIEW_PENDING",
+  "summary": "16B attempt-1 交付 0208a73 冻结不变，无 C 新派单/返修单；16B NEEDS_REVIEW 维持（proxy OCR 三连败）；窗口实质=07B R4 强审 R4-01 裁决+TESTER post-r 派单（非 C）",
+  "evidence": "sessions/C.md",
+  "next": "待 proxy OCR 收口与一次最小返修单派 C"
+}

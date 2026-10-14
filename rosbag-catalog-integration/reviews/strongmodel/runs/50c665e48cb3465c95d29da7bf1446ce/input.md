@@ -1,0 +1,211 @@
+---
+name: complex-task-reviewer
+description: 复杂任务强模型纠错审查：用户手动提交或协调者在有效授权内通过Codex提交已完成功能/增量返修包时使用。按既定需求审真实代码和证据；不自动扩充任务、开发、合并或部署。
+metadata:
+  version: "1.2.0"
+---
+
+# 复杂任务独立审查者
+
+
+你是按需工作的独立审查者，优先发现业务逻辑、跨模块契约、状态机、幂等、并发、恢复、错误发布和错误成功判定的问题。不是全程监督者，也不替代运行验证或弱 OCR。
+
+## 功能纠错边界
+
+- 默认审查已完成开发与常规测试的功能批次，按包内冻结的需求/AC、环境和阶段判断正确性。实现前契约审查仅在用户明确要求时进行。
+- 每项发现标为 `CORRECTION`（原功能缺陷）、`VERIFICATION_GAP`（已有AC缺必要证据）或 `OUT_OF_SCOPE`（范围外建议）。前两类必须指出对应需求/AC或它直接蕴含的不变量；疑点标待验证。
+- 阻塞项必须给预期/实际行为、触发、证据、错误后果、最小修复边界和解除条件；不能靠泛化风险或严重度标签增加任务。
+- 只补保证原功能正确所需的修复与验证。新功能、未来规模、偏好式重构和额外质量标准不成为本轮要求；范围外建议单列且默认不派单、不阻塞，不因它们降级PASS。
+- 必要上下游可以查，但须说明与当前错误的因果关系。模块不承担后续真实样本/生产阶段的验收；原有阶段门禁继续保留。
+- 已有问题关闭且原AC满足就结束，不持续寻找无关改进。
+
+## 审查流程
+
+1. 读取审查包的 review_id、冻结需求/AC基线、已交付行为、具体待裁决问题、非范围、作用门禁、实际 base/target、契约版本及证据 commit。材料不足或快照不一致先明确与原AC相关的缺口，不只根据协调者摘要下结论。
+2. 核对完整变更文件清单与可定位 diff，阅读关键实际代码、必要上下游和测试/成功条件修改；大材料按调用链取用，不机械截断文件或重读全部历史。
+3. 核实成功前提、异常分类、状态/事务/释放顺序、并发唯一身份与当前版本、重试、文件与数据库一致性、时间精度/边界和 mock 掩盖的问题。疑点与确认缺陷分开；未执行测试如实写未执行。
+4. 按 [结果模板](assets/result.md) 输出可执行问题：问题 ID/分类/严重度、对应需求/AC、预期与实际行为、代码位置及证据、触发、后果、最小修复边界、必要验证、阻塞与解除条件。避免风格清单、泛化架构扩张和整段重写。
+5. 结论使用 PASS / PASS_WITH_FOLLOWUPS / REWORK_REQUIRED / INSUFFICIENT_EVIDENCE。声明通过的是契约、模块合入、集成、工程闭环或生产门禁；不能用模块通过替代缺真实时间映射/样本/故障证据的闭环。
+6. 默认把结果写到约定路径；没有文件访问能力输出完整结果供保存并说明未写文件。不能编辑业务代码、合并或部署。
+
+## 增量与费用
+
+- 返修审查只看前轮问题 ID、修复 diff、对应测试及受影响上下文，复用有效的已接受材料。新发现只有证明破坏本批既定行为时才成为纠错项；无关建议不扩入复审范围。
+- 结果绑定实际 commit 与契约版本；新逻辑不继承旧 PASS。非阻塞跟进要有 owner/阶段/解除条件。
+- token/费用不可获取写未知，不猜测准确率或费用；记录确认缺陷、核实误报、遗漏、返修轮数及重复阅读情况。
+- 审查由用户手动触发，或由协调者在用户明确授权的自定义时段/当前任务范围内通过限额脚本触发。自动起跑绑定grant_id/call_id，每次复审占额度；本审查者不续授权、不调用其他模型、不调起下一轮。
+- Codex只读入口不能写约定文件时，返回完整最终结果，由调用脚本保存；不得声称自己已落盘。调用成功不代替协调者核验问题或批准。
+
+
+You are a read-only reviewer authorized by the user. No code edits, model delegation, merges, deployments or extra review calls.
+
+{"review_id": "SR-07B-A2R2-20261013", "grant_id": "31dcbabe5720469c9fae7614188d625e", "call_id": "50c665e48cb3465c95d29da7bf1446ce", "base": "502bf8ec79690cf01e130cb0591121eb10e96af5", "target": "68b51887d0ff94275f2dd9f61b1f76fa0907fd9d", "task": "TASK-07B", "gate": "TASK-07B 合入门禁（main 冻结 c2018dd，07B 未合入；不波及 16A/16B/生产门禁）", "risk": "R2 并发写重构（守卫 UPDATE+rollback+幂等重放+审计顺序）弱OCR行级无法核验跨语句事务语义；具体风险 R1-R4 见包 §2", "question": "R1 守卫前 flush 对象回滚完整性 / R2 withdraw ORM 赋值+守卫写回幂等自洽 / R3 幂等重放在守卫前口径 / R4 synchronize_session=fetch 会话同步面——是否满足冻结 AC？逐项给分类与证据", "AC": "AC-04 四要素+模型原结果保留+下架语义（包 §2 不变量 1-6）"}
+
+Return the complete independent result as your final message; the wrapper writes it. Do not try to write a result file in the read-only sandbox. Freeze existing requirements; OUT_OF_SCOPE suggestions do not block.
+
+The following is the frozen review package. Read actual code in this detached snapshot and the cited verification evidence; do not merely trust the summary.
+
+# SR-07B-A2R2-20261013 强模型审查包
+
+## 1. 身份与门禁
+
+| 字段 | 值 |
+|---|---|
+| review_id | SR-07B-A2R2-20261013 |
+| review_type | PRE_MERGE |
+| scope | TASK-07B（REQ-04/AC-04 人工纠错/下架）attempt-1 主体 `5fa0942..f4bfcf2` + R2 最小返修 `68b5188`；审查面=写接口并发/幂等/审计语义（service+api），页面/迁移面已由弱 OCR 覆盖 |
+| gate | 07B 合入门禁（main `c2018dd` 冻结中）；07C/16C 派单不冻结（页面 owner 交接等 07B 合入） |
+| base / target | base `502bf8e`（=origin/main 当时头，07A 后 1 个纯 changelog 文档 commit）/ target `68b5188`（分支 `scene/task-07b-manual-revision-withdraw` @ `wt-04a-t07b`，3 commit：`5fa0942`→`f4bfcf2`→`68b5188`） |
+| integration_candidate | 单分支不适用；16A/16B 为并行分支（未合入），与本包 target 文件面零交集（16A 独占 config/scanner/ingest 域，16B 独占 scripts/ 新文件），合并顺序=07B 先 |
+| contract_version / semantic_hash | DESIGN §7.2（TASK-07B 派单冻结口径）+ §4.1（bag_scene=有效标签投影）；包内代码材料 SHA 见 §4 |
+| requirements_baseline | TODO §8 无 07B 变更；AC-04=PATCH/POST 四要素（row_version/原因/幂等键/操作者）、保留模型原结果、下架不删文件退出默认可用检索 all 可见标注、父包 422；派单 `inbox/2号/TASK-07B/attempt-1-dispatch.md` + R2 返修单 `attempt-2-r2-dispatch.md`（R2-1~R2-10 问题 ID 单） |
+| delivery_status | 已交付冻结 REVIEW_PENDING；R2 自测：定向 8 passed / 全量 857 passed+4 failed（devflow×3+web 性能计时×1，base stash 复现=环境性）/ ruff 绿 / 页面实测 10/10 PASS；真 MySQL 并发守卫 409 口径留 TESTER（R2-3 未执行项申报） |
+| trigger_decision | REVIEW_NOW——R2 核心是并发写语义重构（读比对乐观锁→单条守卫 UPDATE `row_version+1`，输方 409），弱 OCR 只能行级审、无法核验跨语句事务顺序与幂等/审计交互的语义正确性；具体风险见 §2 |
+| invocation | AUTHORIZED_CODEX——用户 2026-10-12 11:36 群内授权「审查授权未来24小时自动调用」（grant `31dcbabe…`，至 2026-10-13 11:33:12，scope=本项目 REVIEW_NOW 批次，滚动 60min 限 5、在途串行；调用时由 strong_review.py 再核期限/额度） |
+| package_status | READY_FOR_REVIEW（本文件生成不代替调用授权核验） |
+| suggested_result_path | `reviews/TASK-07B/attempt-2-r2/strong-review/SR-07B-A2R2-20261013/result.md` |
+
+## 2. 目标、不变量与非范围
+
+必须成立（冻结 AC，不可借审查新增）：
+1. 纠错/下架写成功时：`row_version` 单调 +1 恰好一次；审计行 `scene_manual_revision` 恰好一条；MANUAL evidence 恰好一行（`bag_scene_label_evidence`）；`bag_scene` 关联不重复插入。
+2. 真并发同代次（相同 `row_version`）两请求：恰一方 200、另一方 409（不得 500/StaleDataError，不得双写审计）。
+3. 幂等键重放：同 (bag, action, idempotency_key, payload) → 返回原响应 200，不重复推进 row_version/审计。
+4. 模型原结果保留：MODEL evidence 行与 scene_segment 判定永不覆盖/删除；`original_judgment_ref` 记录首次纠错时的模型投影。
+5. 下架不删文件、不新增 bag status 枚举；availability 转 WITHDRAWN 后退出默认可用检索、all 视图仍可见带标注（07A 已接受面，本批不改）。
+6. 父包（非切片）422；非 dict/非法 JSON body 422（R2-2，不得 500）。
+
+触发风险（待强模型回答）：
+- R1：`revise_scene_labels` 中 `db.flush()`（Scene 插入）+ evidence/审计写入发生在守卫 UPDATE（L293）**之前**、`db.commit()`（L305）在守卫**之后**：守卫 rowcount==0 路径执行 `db.rollback()` 后抛 409——此前 flush 的未提交对象与已写行是否全部回滚干净？反向：守卫成功后 commit 失败，有无半写窗口？
+- R2：`withdraw_slice` 对 ORM 对象先赋 `bag.availability = "WITHDRAWN"` 再走守卫 UPDATE `values(availability=bag.availability)`——已下架重试（already=True，值不变）时 row_version 仍推进，与幂等「同版本重放 400/200 原响应」的边界是否自洽（重复同 idempotency_key 重放 vs 无 key 重放下架两路径）？
+- R3：`_replay_or_none` 在守卫之前执行——重放命中时不验 row_version（直接返回原响应）是否符合派单幂等口径（幂等优先于乐观锁）？payload 比对字段缺失（如 operator 变化）是否误判重放？
+- R4：`_guarded_bump_row_version` 用 `synchronize_session="fetch"`——同 session 内 `bag` 对象 row_version 是否会与 DB 失同步影响后续读取（本函数后无读取，但审计行已引用 expected）？
+
+非范围：页面布局/样式（弱 OCR 已覆盖）、迁移 DDL（真 MySQL 往返已实证）、真实 VLM/NAS/生产（独立门禁）、16A/16B 并发分支接线（各自 OCR+强审）、性能/扩展性/重构偏好。
+
+## 3. 变更地图与调用链
+
+完整文件清单（target `68b5188` vs base `502bf8e`，实测 12 文件 +1544/-4，含 R2 增量 +330/-21）：
+- `app/api/scene_manual_revision.py`（新增，两路由+`_parse_json_object` R2-2 守卫）
+- `app/services/scene_manual_revision_service.py`（新增，核心；R2-3/R2-4/R2-9 改动面）
+- `app/models.py`（+`SceneManualRevision` 审计表、`BagSceneLabelEvidence.label_source` 等字段）
+- `app/api/__init__.py`（路由注册）、`alembic/versions/20261012_01_scene_manual.py`（迁移含 downgrade）
+- `app/templates/detail.html`（纠错/下架入口；R2-1 选项域 {slope,flat,unknown}）、`app/templates/bags.html`（R2-10）、`app/static/bag-search.css`（R2-5/R2-8）、`app/static/bag-detail.css`、`app/web/bags.py`（列表/详情查询面）
+- `tests/test_task07b_manual_revision.py`、`tests/test_task07b_r2_revision.py`（5 R2 用例）
+
+调用链：`PATCH /bags/{uid}/scene-labels` → `revise_scene_labels` → `_replay_or_none`(幂等) → `_check_reason`/`_VALID_LABELS`(422) → `_require_scene_slice`(404/422 父包) → row_version 读比对(409 前置快路径) → `_model_label_ref` → MANUAL evidence upsert（`.order_by(id).limit(1)` R2-4）→ `bag_scene` 关联插入 → `_audit_row` → **`_guarded_bump_row_version`（守卫 UPDATE，输方 rollback+409 R2-3）** → `_store_idempotency` → commit。`POST /bags/{uid}/withdraw` → `withdraw_slice` 同构（availability 写回守卫 values）。
+
+重点位置：`app/services/scene_manual_revision_service.py` L194-213（守卫）、L246-305（revise 全程）、L316-362（withdraw 全程）、`app/api/scene_manual_revision.py` L8-24（JSON 守卫）。
+完整 diff 可定位：`git -C /home/wang/work/rosbag-catalog diff 502bf8e..68b5188`（快照 worktree 内 rev-parse 双核）。
+
+## 4. 真实代码材料
+
+`_guarded_bump_row_version`（L194-213，R2-3 核心）：
+
+```python
+def _guarded_bump_row_version(db: Session, bag: BagRecord, expected: int, availability: str | None) -> None:
+    """R2-3（对齐 ingest_service.update_submission F2 先例）：单条守卫 UPDATE
+    ``… WHERE id=… AND row_version=:expected`` 推进 row_version（+可选 availability），
+    输方 rowcount==0 → rollback + 409。消除读比对+ORM 自增在真并发下的
+    lost-update / StaleDataError 500；409 前不落审计、不落 evidence 变更。"""
+    values: dict = {"row_version": BagRecord.row_version + 1, "updated_at": now()}
+    if availability is not None:
+        values["availability"] = availability
+    result = db.execute(
+        sa_update(BagRecord)
+        .where(BagRecord.id == bag.id, BagRecord.row_version == expected)
+        .values(**values)
+        .execution_options(synchronize_session="fetch")
+    )
+    if result.rowcount == 0:
+        # 权威守卫拒绝：并发同代次请求已在读比对与写入窗口间推进 row_version。
+        db.rollback()
+        raise HTTPException(409, "ROW_VERSION_CONFLICT: bag changed concurrently, reload row_version and retry")
+```
+
+`revise_scene_labels` 尾部顺序（L280-305，R1 风险面）：
+
+```python
+    if linked is None:
+        db.execute(bag_scene.insert().values(bag_id=bag.id, scene_id=scene.id))
+    _audit_row(db, bag=bag, bag_row_version=expected, scene_code=scene_code,
+               action="REVISE", operator=operator, reason=reason,
+               idempotency_key=key, original_label_ref=original_ref)
+    _guarded_bump_row_version(db, bag, expected, availability=None)
+    response = {"bag_uid": bag_uid, "scene_code": scene_code, "action": "REVISE",
+                "corrected_label": corrected_label, "model_label_ref": original_ref,
+                "row_version": expected + 1, "operator": operator, "reason": reason}
+    _store_idempotency(db, f"scene-revise:{bag_uid}", key, payload, response)
+    db.commit()
+```
+
+`withdraw_slice` 关键段（R2 风险面）：
+
+```python
+    already = bag.availability == "WITHDRAWN"
+    previous = bag.availability
+    if not already:
+        bag.availability = "WITHDRAWN"
+    _audit_row(db, bag=bag, bag_row_version=expected, scene_code=scene_code,
+               action="WITHDRAW", operator=operator, reason=reason,
+               idempotency_key=key, original_label_ref=previous)
+    # 守卫 UPDATE 写回目标 availability（已下架重试=WITHDRAWN 不变、row_version 仍推进，
+    # 保持既有幂等语义：重复同版本 409、新版本重放下架 200 且版本单调）
+    _guarded_bump_row_version(db, bag, expected, availability=bag.availability)
+    ...
+    _store_idempotency(db, f"scene-withdraw:{bag_uid}", key, payload, response)
+    db.commit()
+```
+
+MANUAL evidence 查询（R2-4）：
+
+```python
+    ev = db.scalar(
+        select(BagSceneLabelEvidence)
+        .where(BagSceneLabelEvidence.bag_uid == bag_uid,
+               BagSceneLabelEvidence.scene_id == scene.id,
+               BagSceneLabelEvidence.label_source == "MANUAL")
+        .order_by(BagSceneLabelEvidence.id)
+        .limit(1)
+    )
+```
+
+`_parse_json_object`（R2-2，api 文件）：
+
+```python
+async def _parse_json_object(request: Request) -> dict:
+    try:
+        data = await request.json()
+    except Exception:
+        raise HTTPException(422, "body must be a valid JSON object")
+    if not isinstance(data, dict):
+        raise HTTPException(422, "body must be a JSON object")
+    return data
+```
+
+完整函数体在快照 `68b5188` 内可直接读（`app/services/scene_manual_revision_service.py` 422 行）。
+
+## 5. 验证证据
+
+| evidence / target 关系 | 环境 | 命令/退出码 | 关键断言 | 证据路径 | 未执行项 |
+|---|---|---|---|---|---|
+| target `68b5188` 本体 | wt-04a-t07b, Python 3.10 | `pytest tests/test_task07b_r2_revision.py tests/test_task07b_manual_revision.py -q` RC=0 | **8 passed**（含 R2 守卫 409/limit(1)/422 五新语义+既有 3） | `receipts/TASK-07B/attempt-2-r2.md` | — |
+| target 全量 | 同上 | `pytest tests/ -q --ignore=tests/test_devflow.py`（协调者 r107 独立复跑 2026-10-13 01:2x） | **836 passed / 1 failed**；failed=`test_bag_search_page_has_bounded_query_count_and_response_time`（web 性能计时，B 申报 base 复现环境性，非 R2 文件面） | 协调者 r107 巡检记录 | 真并发双会话（SQLite 单连接 TestClient 无法建模行锁） |
+| R2-3 真并发守卫 409 口径 | — | **未执行**（B 申报留项） | 派 TESTER 真 MySQL 8.4 隔离库双连接 | — | **本审查不得替代该测试，仅在语义层裁决 R1-R4** |
+| 真 MySQL 迁移往返（attempt-1 面） | mysql:8.4 隔离容器 | upgrade/边界 INSERT/超宽 1406/downgrade/re-upgrade RC=0 | 审计表 DDL 生效 | `scratch/t07b/mysql_roundtrip_out.txt`（attempt-1） | — |
+| 页面实测（R2-1/5/6/9/10 面） | uvicorn 127.0.0.1:18771 + 临时 SQLite | 10/10 PASS | 选项域 3 值、徽章 flex-start、审计时间 local 口径 | `receipts/TASK-07B/attempt-2-r2.md` §三 | — |
+| ruff | 同上 | `ruff check` 3 改动 py 文件 RC=0 | All checks passed | 回执 | — |
+
+## 6. 弱模型 OCR 与待裁决风险
+
+- 已确认并修复（R2，`68b5188`）：b9-1 HIGH 选项域对齐 / b3 MEDIUM 422 守卫 / b5-1 守卫 UPDATE / b5-2 limit(1) / b7-1 徽章布局 + LOW 6（required/尾换行/var(--red)/时间口径/bags.html 三元）。
+- R2 增量 OCR 5/5 全收口（rc=0，账 `reviews/TASK-07B/attempt-2-r2/ocr-batches.md`）：新 findings 仅 3 low 全在 api 文件（尾换行 R2-7 遗漏 + `raise from exc` maintainability 建议），**无 CORRECTION 级**；r2b2 有 1 条 `review_round_failed` WARNING（round2 LLM deadline，findings 已产出，协调者判偶发非阻塞）。
+- 未覆盖：跨语句事务顺序与并发语义（弱 OCR 行级能力边界）→ 本包 R1-R4。
+- 待强模型裁决：R1 守卫前 flush 对象的回滚完整性；R2 withdraw ORM 赋值+守卫写回的幂等自洽；R3 幂等重放在守卫前的口径正确性；R4 synchronize_session="fetch" 的 session 同步面。
+
+## 7. 强模型输出要求
+
+逐项输出：问题 ID/分类/严重级别、对应既定需求/AC（§2 编号）、预期与实际行为、代码位置及证据（快照内行号）、触发条件、后果、最小修复边界、必要验证、阻塞门禁及解除条件。
+分类 CORRECTION / VERIFICATION_GAP / OUT_OF_SCOPE；范围外建议单列，默认不派单、不阻塞、不降级 PASS。只纠正 07B 原功能；问题关闭且原 AC 满足即收口。
+疑点证据不足标「待验证」；不得虚构运行结果、修改代码、合并或部署；R2-3 真并发测试由 TESTER 承担，审查只给语义层结论与测试口径建议。
+总体结论：PASS / PASS_WITH_FOLLOWUPS / REWORK_REQUIRED / INSUFFICIENT_EVIDENCE；作用范围=07B 模块合入门禁（不波及 16A/16B/生产门禁）。

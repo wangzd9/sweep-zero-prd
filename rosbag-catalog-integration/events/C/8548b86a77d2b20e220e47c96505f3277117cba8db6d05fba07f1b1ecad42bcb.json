@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-100353",
+  "occurred_at": "2026-10-11T10:05:36+08:00",
+  "recorded_at": "2026-10-11T10:05:36+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "无新派单；TESTER attempt-5 交付 PASS 4/4 待协调者验收（非 C 范围）",
+  "evidence": "sessions/C.md",
+  "next": "保持空闲待派单"
+}

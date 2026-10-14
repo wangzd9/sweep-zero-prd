@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-000053-t10-evidence-accepted-rework-dispatched",
+  "occurred_at": "2026-10-12T00:07:33+08:00",
+  "recorded_at": "2026-10-12T00:07:33+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "REVIEW_PENDING_ACCEPTED_REPORT_REWORK_DISPATCHED",
+  "summary": "2号TASK-10取证单REVIEW_PENDING交付(业务代码0改动):独立VLM analyze SUCCESS 138.8s/54帧,端到端断在2真实P0缺口;协调者独立机械核验两缺陷均属实(全仓READY setter 0命中/derive bit恒定vs实测NOT_CONSTANT)→ACCEPT_REPORT,TASK-10维持RUNNING;回派t10-defect1-source-ready(1号,03B)+t10-defect2-storage-offset(2号,06B优先)base ca8730d并行",
+  "evidence": "receipts/TASK-10/attempt-1.md; reports/TASK-10/attempt-1.md; scratch/t10/t10-run.log:48-55; app/services/scene_publish_service.py:77-114; app/services/source_service.py:215/459; inbox/1号/TASK-03B/t10-defect1-source-ready.md; inbox/2号/TASK-06B/t10-defect2-storage-offset.md",
+  "next": "核1号/2号ACK与两笔最小返修交付→机械核验→串行OCR→合入→E2E复跑(scratch/t10_e2e.py)全绿→TASK-10 DONE→P0收口"
+}

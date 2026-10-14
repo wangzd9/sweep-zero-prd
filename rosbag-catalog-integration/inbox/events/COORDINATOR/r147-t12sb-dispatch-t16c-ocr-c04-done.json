@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r147-t12sb-dispatch-t16c-ocr-c04-done",
+  "occurred_at": "2026-10-13T11:58:00+08:00",
+  "recorded_at": "2026-10-13T11:58:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-B",
+  "attempt": "attempt-1-dispatch",
+  "status": "DISPATCHED",
+  "summary": "r147 巡检（fingerprint b9865afe）：B 槽空闲（16C 用户暂停）→ 派 TASK-12S-B 水雾能力 attempt-1 给 B（inbox/2号/TASK-12S-B/attempt-1-dispatch.md，base 6fb42c4，spray 适配器+注册/两路线/预处理冻结/双pass归一/整数ns分段/manifest缓存/7图受控/能力登记 enabled=false/只读1012小包有界渲染模型探针；禁新迁移、不写 12S-A DTO 面与 16B scripts 与 16C 冻结面，文件边界零交集已核）。12S-B=RUNNING 待 ACK。16C OCR c04 sources.py 11:33:15 rc=0 0 findings（4/7），c05 pipeline_detail.html 在途（pid 1682826 持 ocr.lock）；16B 第 8 次等待器 pid 1733066 存活，c07 收口后自动接跑。12S-A A 开发中待回执。TODO 面修正：TASK-07 行首 🏃→✅（07A/07B DONE 滞后）。",
+  "evidence": "inbox/2号/TASK-12S-B/attempt-1-dispatch.md; TODO.md §9.2 12S-B 行 r147 注; sessions/COORDINATOR.md r147 检查点; scratch/t16c_ocr/t16c_ocr_progress.txt c04 行; ps 1682826/1748741/1733066; strong_review.py status EXPIRED",
+  "next": "核 B 12S-B ACK/开工；A 12S-A 回执；16C OCR c05-c07 取证收口（全链 rc 与 findings 落账）；16B 第 8 次收口核 rc；16C 恢复/16B 处置决定等用户"
+}

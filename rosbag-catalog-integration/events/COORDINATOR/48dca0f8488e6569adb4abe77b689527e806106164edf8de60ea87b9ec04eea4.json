@@ -1,0 +1,12 @@
+{
+  "event_id": "coordinator-poll-20261011211553-task09-retry-500-deterministic",
+  "occurred_at": "2026-10-11T21:17:13+08:00",
+  "recorded_at": "2026-10-11T21:17:13+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "巡检：2号 TASK-09 真实样本主跑 EXIT=0 后对 row20/row21 做 500 确定性重试（21:16 retry json 落盘，同帧 1787021491199936487 两次 500，MODEL_UNAVAILABLE 口径），row19 阳性 SUCCESS/row22 flat NO_MATCH 不变；wt-04a-t09 仍未 commit、无交付回执，重试进程已结束无在途 python；main 0a8ca8a=origin 未动，无 OCR 在途；等 2号 commit+回执后机械核验",
+  "evidence": "/home/wang/.hermes/cache/scratch/t09-real/t09-real-verify-retry.json; events/COORDINATOR/coordinator-poll-20261011210553-task09-runner-done.json",
+  "next": "等 2号交付回执 → 机械核验(含图像 content 非空) → 串行 OCR → 合入 → 09 DONE → 派 TASK-10"
+}

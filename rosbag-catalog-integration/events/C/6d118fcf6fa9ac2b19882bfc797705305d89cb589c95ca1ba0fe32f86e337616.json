@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-091853-r138-16a-merged-16b-frozen",
+  "occurred_at": "2026-10-13T09:23:51+08:00",
+  "recorded_at": "2026-10-13T09:23:51+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "C 巡检无新派单；16A 已合入 main 6fb42c4（r138 验收，1号/协调者/测试者链非 C）；16B 维持 NEEDS_REVIEW 冻结等用户裁决 a/b/c/d",
+  "evidence": "sessions/C.md 09:22 条目",
+  "next": "等用户裁决 16B 选项 a/b/c/d"
+}

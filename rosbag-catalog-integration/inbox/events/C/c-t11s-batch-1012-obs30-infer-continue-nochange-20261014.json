@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs30-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T03:31:00+08:00",
+  "recorded_at": "2026-10-14T03:34:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第30轮只读观察（处理机 03:30-03:32 实测，prerun 指纹 a5bf2054 changed_sources=sessions/C.md 自产 obs29 行；ACK 21:07:41 在案不重复领取）：与 obs29 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜不 kill/retry）：scene-4acf689f（16_02_03 正式链 source 91FFEEC1…）仍 SCENE_RUNNING attempt=1 error 空、lease_expires_at 03:32:15→03:33:45 两轮续租活跃、8767 active_runs=[4acf689f ACCEPTED pid1]、八步 DB 全 QUEUED（阶段边界写口径）；work 树 attempt-1 02:00 后零新文件（最后写 jpg frame_001787 @01:30:53）、checkpoint.json mtime 00:23:10 未翻；pid 3495931 %CPU 17 TIME 01:16:51 持续非零；容器 /proc/net/tcp4 实测 ESTAB 2D02A8C0:1F42（192.168.2.45:8002）VLM 通道在途；VLM 远端直证（llm-server 直连 /tmp/vllm_qwen38.log 03:30:55-03:31:35 十秒采样）Running 2-4 reqs、Waiting 0→2→2→2→0（非持续>0 同前轮口径）、prefix cache 93.6%、MM cache 85.5%、POST /v1/chat/completions 200 连发=推理活跃续证。incoming/spray 仍仅 16_33_10 空包（D6 A 面）、flat 三提交 a65a25a7/87dfebaa/518089ed 仍无新绑定 run（SCENE_EXEC_HOST 串行占用属预期）、load 0.10/0.09/0.09 低位、生产栈 7 容器全 Up。**无升级条件命中**（heartbeat 无连败/run 未 FAILED/VLM Waiting 非持续>0）。C 全程只读（ssh curl 8180/8767、docker top/exec cat、host find/stat、llm-server 读 log、uptime），未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "处理机 03:30-03:32 只读实测：8180 scene-4acf689f status=SCENE_RUNNING attempt=1 error_message 空 lease_expires_at=2026-10-14T03:32:15（03:32 复测 03:33:45 续租）；8767/health status=ok active_runs=[4acf689f ACCEPTED pid1]；docker top rosbag-scene-proxy pid 3495931 %CPU 17 TIME 01:16:51；容器 /proc/net/tcp ESTAB 2D02A8C0:1F42（192.168.2.45:8002）在案；work /home/data-process/scene/work/scene-4acf689f…/attempt-1 find -type f -newermt 2026-10-14 02:00 = 0、最新文件 jpg/frame_001787.jpg 1791912653=01:30:53、checkpoint.json mtime 00:23:10；llm-server tail Running 4/2/4/4/4/4 Waiting 0/0/2/2/2/0 03:30:55-03:31:35、prefix 93.6%、POST 200 连发；uptime load 0.10/0.09/0.09；docker ps 7 容器（scanner/orchestrator/backend/scene-proxy/bag-cleanup-worker/frontend/mysql）全在；/public 于 processing-machine 本地不可见（NAS 经容器/后端挂载，与 obs26-29 口径一致，incoming/spray 面由后端挂载核，本轮无新增观测通道）",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻转/八步 DB 推进/SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按 ruling-4acf-infer-active-0218：heartbeat 4 连败/FAILED/VLM Waiting 持续>0；③ 串行释放后 flat 三提交绑定新 run 按 run 核账（含 ruling-dup-slices-0038 观察面）；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总"
+}

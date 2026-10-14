@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r169-parallelnudge-b-frozen-ack-wait",
+  "occurred_at": "2026-10-13T17:42:00+08:00",
+  "recorded_at": "2026-10-13T17:42:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-B/TASK-11S-PREP/TASK-16B",
+  "attempt": "n/a",
+  "status": "POLL_HANDLED",
+  "summary": "r169 巡检（prerun 指纹 9221523f 处理中，pending 前移至 180e39f6）：消费新输入两份——①用户侧 observed-progress-1736（A 续接会话 17:09:53 启动后 17:34 仍有活动，进度保留不因无 commit 终止；要求按 state-correction 续接集中完成 r1 剩余装配，重点=scene-proxy.yaml 受审 Compose 文件实际来源及安装方式须明确，含固定镜像身份与挂载）；②并行协调者回合 17:3x 已向 B 发 s9b-nudge2（17:33 实测 S9b 改动已完成未提交 +368/-54，上一会话 16:58 止于 632s 真实断言运行未到 commit/回执；本轮只做复跑定向回归+冻结 commit+回执 S9b 段，17:45 前冻结目标）。两催办单口径一致不重复下发、不接管。16B r2 OCR 4492b7f6 维持活跃（17:29 session 刷新，etime >40min）不催。17:30 停止点已过未放行：G4 副本面 16:55:22 轮成功在案，但 A r1 装配面（env.example 变量名/DEPLOY-ENTRY 固定 SHA/scene-proxy.yaml 来源）与 B s9_head 冻结均未达 → 17:45 生产放行盘点按双缺口口径汇总，19:00 首包功能链（16B 合入+12S-B 合入+12S-C 接线核验）顺延风险已申报。零新 OCR 起跑、零强审调用、零新派单、零合入。",
+  "evidence": "inbox/1号/TASK-11S-PREP/observed-progress-1736.md; inbox/2号/TASK-12S-B/attempt-1-rework-s9b-nudge2.md; ocr_runtime.py status 4492b7f6 RUNNING",
+  "next": "下轮：核 B s9_head 是否冻结（HEAD 前移+回执 S9b 段，17:45 目标）与 A r1 冻结（head≠d8f7206+r1 ACK+回执段+scene-proxy.yaml 来源明确）；任一到达接机械核验+OCR 串行队列（4492b7f6 收口后 s9_head 批首位）；4492b7f6 收口→裁决→强审增量复审（授权 6b2d83fb 剩 4/5）→TESTER 收口→合入 16B；17:45 放行盘点按双缺口口径执行"
+}

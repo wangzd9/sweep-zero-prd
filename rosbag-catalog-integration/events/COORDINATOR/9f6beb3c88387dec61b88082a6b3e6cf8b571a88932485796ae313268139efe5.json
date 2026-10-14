@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-095053-r140-t16b-retry5-user-ruling-executing",
+  "occurred_at": "2026-10-13T10:09:14+08:00",
+  "recorded_at": "2026-10-13T10:09:14+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "16B proxy OCR 第5次（用户 09:3x 群内裁决「第5次用最优方式」）：fresh 09:52:50 START（修正根因参数 OCR_LLM_TIMEOUT=900+拆组 20000/timeout 60，pid 1628377）09:58:03 rc=1（scene_host_proxy.py LLM 请求 context compaction cancelled，1 of 9，budget_exceeded=false，基础设施失败非审查驳回）→ 第6次=resume session a810dbf5 在途（b2_r140_resume6.py pid 1640457，09:59:09 START，参数逐项一致，独占 ocr.lock，硬截止 10:59:09）=完成第5次授权尝试的断点续审（b1 fresh败 resume成先例）；resume rc=0→findings 全合并一次最小返修单派 C→16B 解冻；rc=1→ NEEDS_REVIEW 冻结升级用户不第三次。其余：16A DONE main 6fb42c4（TESTER post-merge 09:32 PASS，强审 NOT_REQUIRED）、B=16C RUNNING（wt-04a-t16c 7 文件 M 开发中）、A/TESTER 空闲、16D WAITING、main=origin=6fb42c4 双核一致、F-040 待用户批准",
+  "evidence": "scratch/t16_ocr/b2_r139_retry5.log（09:58:03 rc=1 逐行）; scratch/t16_ocr/b2_r140_resume6_progress.txt（09:59:09 START）; ps/fuser 实测 pid 1640457 独占 ocr.lock; TODO §8 16B 行 r140 段; HANDOFF r140 检查点",
+  "next": "r141+ 核 resume 收口（硬截止 10:59:09）：rc=0→返修单派 C；rc=1→升级用户；监 B 16C 交付"
+}

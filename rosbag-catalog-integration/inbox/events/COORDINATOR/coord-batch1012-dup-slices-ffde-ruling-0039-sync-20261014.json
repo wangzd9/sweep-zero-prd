@@ -1,0 +1,14 @@
+{
+  "event_id": "coord-batch1012-dup-slices-ffde-ruling-0039-sync-20261014",
+  "occurred_at": "2026-10-14T00:39:30+08:00",
+  "recorded_at": "2026-10-14T00:39:30+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "TRACKING",
+  "supersedes_context": "prerun 00:35:53 指纹 79600d0b 唤醒；变更源核对=B batchstatus-0027plus-sync-idle（00:33:30，消费自身 pending 后维持 IDLE_WAITING 零动作）+ sessions/B.md、sessions/COORDINATOR.md 自写回声；新实质输入=C obs16-nochange（00:37，零状态变化）+ TESTER 00:24 报『dup FFDEE943×4 处置等协调者裁决』（本回合裁决落点）",
+  "summary": "① 本回合唯一待裁决项收口：dup `scene-a4824f1c` attempt-2 SUCCESS 真实发布的 `slices/test/spray/FFDEE943…` 顶层 4 子包（~202MB×4，23:54）——裁决 `ruling-dup-slices-0038.md`：**不删不并不新开清理任务**；14_42_48 与正式链 source 按内容哈希同源，正式 `a65a25a7` run 验收时把发布幂等对已存在同名 source 切片的处置并入两次 reconcile 核账（不预判）；TEST_REPORT 设『双写事件产物』一节如实登记，不计入验收交付物；若正式 run 暴露真实缺陷按缺陷流程保留现场最小返修。② TESTER 00:33 独立复核 D4 删除面闭合（date-grouped 三行不在/ready 顶层 7 flat/4acf689f SCENE_RUNNING 八步 attempt1 全 QUEUED、dispatched 后 ~25min 静默未判卡死）口径确认并入。③ C obs16 与 obs15 零状态变化：七 run 六 SCENE_DONE + `scene-4acf689f`（16_02_03 正式链）SCENE_RUNNING lease 续租活跃（heartbeat 00:34:58）、flat 三提交仍未绑定（A 面 D4③ 推进中）、incoming/spray 仅 16_33_10 空包（D6 台账已补 00:04 A 在案）、NAS 71%/load 1.25 无风险。④ A 租约 00:30:48 已过期释放，A 面 D4③（flat 三提交 409 释放核+绑定推进）待其下轮 poll 领取，不代跑不催。B 维持 IDLE_WAITING（DONE 21:12 无返修）。无新派单、无 OCR（无代码变更）、强审 REVOKED 不续。夜间静默 21:00-08:00 不群报；08:00 汇总含 D5 肇事身份 192.168.2.132 上报用户。",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/ruling-dup-slices-0038.md（本回合新建）; BATCH-STATUS.md（TESTER 行+14_42_48 行 00:39 口径同步）; inbox/TESTER/TASK-11S-BATCH-1012/ruling-2338-verify.md（00:39 增补节）; events/C/c-t11s-batch-1012-obs16-nochange-20261014.json; sessions/TESTER.md 00:2x/00:33 段; control/runtime/leases/A.json（expires 00:30:48 已过期）",
+  "next": "5min observer 接续：① A poll 领取后 D4③ flat 三提交 409 释放核+scanner 绑定新 run（C 按 run 核账、TESTER 全链验收）；② `scene-4acf689f` 八步 EXTRACT 推进/终态（跨 DB3 大包，不超窗 kill/retry）；③ TESTER 按 ruling 口径登记 dup 双写产物；④ 08:00 夜间汇总（D5 肇事身份 192.168.2.132 上报用户+本批全链收口）",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

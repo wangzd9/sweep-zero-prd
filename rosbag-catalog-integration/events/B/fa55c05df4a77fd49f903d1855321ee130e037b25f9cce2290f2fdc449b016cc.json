@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t12sb-rework-delivered-20261013-152000",
+  "occurred_at": "2026-10-13T15:21:13+08:00",
+  "recorded_at": "2026-10-13T15:21:13+08:00",
+  "role": "B",
+  "task": "TASK-12S-B",
+  "attempt": "1-rework",
+  "status": "REVIEW_PENDING",
+  "summary": "12S-B attempt-1-rework 交付冻结：c01+c02 OCR 16 findings 一次最小返修（S1–S8/T1–T8 共17条全部实质修复，无豁免），base f62a29c→0320a8e（8文件+980/-78）；新增定向40用例全绿/spray域94/全仓977+4(base既有零新增)/ruff clean；真实decode/render/VLM NOT_RUN口径不变",
+  "evidence": "receipts/TASK-12S-B/attempt-1-rework.md;commit 0320a8e96c76e126de15c61d0671afb88ae8988f",
+  "next": "等协调者机械核验→返修增量OCR(固定入口ocr_runtime.py --from f62a29c --to 0320a8e)→TESTER独立验证(B侧快照更新0320a8e)→合入main→12S-B DONE"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs31-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T03:42:00+08:00",
+  "recorded_at": "2026-10-14T03:45:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第31轮只读观察（处理机 03:41-03:42 实测，prerun 指纹 8205f08c changed_sources=sessions/C.md 自产 obs30 行；快照 12S-C/16B 旧单均 DONE 已接受不领取；ACK 21:07:41 在案不重复领取）：与 obs30 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜不 kill/retry）：scene-4acf689f（16_02_03 正式链 source 91FFEEC1…）实测 SCENE_RUNNING attempt=1 error_message 空、lease_expires_at 03:44:16 续租活跃、八步 DB 全 QUEUED（阶段边界写口径）；proxy 8767 active_runs=[scene-4acf689f ACCEPTED pid1]；work 树 attempt-1 find -newermt 15min 零命中、checkpoint.json mtime 00:23:10.47 未翻；pid 3495931 %CPU 17.5 ETIME 07:19:28 TIME 01:16:59（+8s 持续非零）RSS 18213940；容器 /proc/1/net/tcp 1 条 ESTAB 8602A8C0:EB5C→2D02A8C0:1F42（192.168.2.45:8002，临时端口再重建非通道消失）；VLM 远端直证（llm-server /tmp/vllm_qwen38.log 03:41:45-03:42:05 十秒采样）Running 4/4/3、Waiting 0 连续、prefix cache 93.7%、MM 85.8%、POST 200 连发。incoming/spray 仍仅 16_33_10 空包（D6 A 面）、flat 三提交仍无新绑定 run（串行预期）、NAS 98T/70T/29T 71%、load 0.56 低位、8 容器全 Up。**无升级条件命中**（heartbeat 无连败/run 未 FAILED/VLM Waiting 非持续>0）。C 全程只读，未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "处理机 03:41-03:42 只读实测：8180 scene-4acf689f9a6a473da1fa2f2efc70 status=SCENE_RUNNING attempt=1 error_message 空 lease_expires_at=2026-10-14T03:44:16 lease_owner=platform-local 八步全 QUEUED；8767/health active_runs=[scene-4acf689f ACCEPTED pid1]；docker top rosbag-scene-proxy pid 3495931 %CPU 17.5 ETIME 07:19:28 TIME 01:16:59 RSS 18213940；容器 /proc/1/net/tcp ESTAB 8602A8C0:EB5C→2D02A8C0:1F42（192.168.2.45:8002）；work /home/data-process/scene/work/scene-4acf689f…/attempt-1 find -type f -newermt '15 minutes ago'=0、checkpoint.json mtime 2026-10-14 00:23:10.474817688 +0800；llm-server 直连 log 03:41:45-03:42:05 Running 4/4/3 Waiting 0 prefix 93.7% MM 85.8% POST 200 连发；df /mnt/nas_backup 98T/70T/29T 71%；uptime load 0.56/0.32/0.19；docker ps 8 容器全 Up（harbor-log/rosbag-catalog backend healthy/bag-cleanup-worker/frontend/mysql/orchestrator/scanner/rosbag-scene-proxy）；ls incoming/spray 仅 rosbag2_2026_10_12-16_33_10",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻转/八步 DB 推进/SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按 ruling-4acf-infer-active-0218：heartbeat 4 连败/FAILED/VLM Waiting 持续>0；③ 串行释放后 flat 三提交绑定新 run 按 run 核账（含 ruling-dup-slices-0038 观察面）；④ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-134853-nochange",
+  "occurred_at": "2026-10-11T13:50:27+08:00",
+  "recorded_at": "2026-10-11T13:50:27+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "POLL_NO_CHANGE",
+  "summary": "13:44 后共享根无 C 范围变更，无新派单，保持空闲待派单",
+  "evidence": "sessions/C.md",
+  "next": "继续检查本角色派单"
+}

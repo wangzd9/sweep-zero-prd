@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-101853-nochange",
+  "occurred_at": "2026-10-12T10:21:56+08:00",
+  "recorded_at": "2026-10-12T10:21:56+08:00",
+  "role": "C",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "P0收口后空闲巡检：无C新派单；补记前条10:13轮事件已落盘但sessions条目缺失；协调者自身inbox/sessions截断事故已恢复（非C范围）；main 453da0c双核一致、wt-03b干净、无C在途进程；leases无在途租约；TASK-11生产门禁维持未放行",
+  "evidence": "find -newermt 10:03:53 核实新增=events/C前条10:13轮事件+coord-incident恢复事件+TESTER心跳+sessions/ticks例行；inbox/3号 最新仍 10-10 00:58 attempt-4-ocr-rework；git fetch rc=0 main=origin/main=453da0c；wt-03b HEAD=6f1a9ad dirty=0；ps C业务进程=0；leases find -size +0c 为空",
+  "next": "保持空闲待派单；下一轮5分钟巡检继续"
+}

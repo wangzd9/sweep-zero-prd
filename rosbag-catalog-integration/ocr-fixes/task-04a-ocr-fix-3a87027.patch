@@ -1,0 +1,293 @@
+diff --git a/app/scene/adapter.py b/app/scene/adapter.py
+index 2327e5b..7e744fd 100644
+--- a/app/scene/adapter.py
++++ b/app/scene/adapter.py
+@@ -38,7 +38,9 @@ _ADAPTERS: dict[str, type[SceneAdapter]] = {}
+ def register_adapter(adapter_key: str, cls: type[SceneAdapter]) -> None:
+     """维护者安装适配器实现；同一 key 不得重复注册到不同实现。"""
+     if adapter_key in _ADAPTERS and _ADAPTERS[adapter_key] is not cls:
+-        raise CapabilityError(f"适配器 {adapter_key} 已注册到 {cls.__name__}，拒绝覆盖")
++        raise CapabilityError(
++            f"适配器 {adapter_key} 已注册到 {_ADAPTERS[adapter_key].__name__}，拒绝覆盖为 {cls.__name__}"
++        )
+     _ADAPTERS[adapter_key] = cls
+ 
+ 
+@@ -126,7 +128,7 @@ def dispatch(
+         else:
+             output = adapter.analyze(request)
+     except CapabilityError as exc:
+-        output = AnalysisOutput(outcome=SceneOutcome.FAILED, error_code=type(exc).__name__, error_detail=str(exc))
++        output = AnalysisOutput(outcome=SceneOutcome.FAILED, error_code=exc.code, error_detail=str(exc))
+     except Exception as exc:  # 适配器内部错误一律 FAILED，不吞成无命中
+         output = AnalysisOutput(
+             outcome=SceneOutcome.FAILED,
+@@ -203,7 +205,7 @@ class TestCapabilityAdapter(SceneAdapter):
+ 
+     def preprocess(self, request: SceneRunRequest) -> None:
+         if request.cancellation.is_cancelled():
+-            raise CapabilityError("ADAPTER_CANCELLED")
++            raise CapabilityError("适配器被取消", code="ADAPTER_CANCELLED")
+ 
+     def check_applicability(self, request: SceneRunRequest) -> ApplicabilityVerdict:
+         marker = Path(request.source_path) / "applicability_error.txt"
+diff --git a/app/scene/registry.py b/app/scene/registry.py
+index fd8b08f..60942f2 100644
+--- a/app/scene/registry.py
++++ b/app/scene/registry.py
+@@ -11,11 +11,13 @@ from __future__ import annotations
+ 
+ import hashlib
+ import json
++import re
+ from dataclasses import dataclass
+ from pathlib import Path
+ from typing import Any
+ 
+ from app.scene.types import (
++    CROSS_FIELD_CONSTRAINTS,
+     INTERFACE_VERSION,
+     CapabilityDisabledError,
+     CapabilityError,
+@@ -98,6 +100,18 @@ def _topic_from_yaml(entry: Any, index: int) -> TopicRequirement:
+     )
+ 
+ 
++def _version_key(version: str) -> tuple:
++    """能力版本排序键：提取版本号中最后一个数字段比较，
++    避免字典序在多位版本号上选错 latest（slope-v9 vs slope-v10）。
++
++    无数字的版本（如 slope-rules）按字符串排序，同组内稳定可比较。
++    """
++    matches = re.findall(r"\d+", version)
++    if matches:
++        return (0, int(matches[-1]), version)
++    return (1, 0, version)
++
++
+ def capability_from_yaml(entry: Any) -> SceneCapability:
+     """把一条受版本控制的能力配置解析成不可变 SceneCapability。"""
+     if not isinstance(entry, dict):
+@@ -114,11 +128,26 @@ def capability_from_yaml(entry: Any) -> SceneCapability:
+     spec_by_name = {s.name: s for s in specs}
+     if set(defaults_raw) != set(spec_by_name):
+         raise CapabilityError("defaults 必须与 parameter_schema 一一对应")
+-    defaults = {name: spec_by_name[name].default for name in spec_by_name}
++    # YAML defaults 值必须与 schema default 一致，否则拒绝：
++    # 防止配置漂移在运行时静默生效（OCR 2026-10-08 审查发现）。
++    defaults: dict[str, Any] = {}
++    for name, spec in spec_by_name.items():
++        raw_default = defaults_raw[name]
++        expected = _coerce_parameter(spec, raw_default)
++        if expected != spec.default:
++            raise CapabilityError(f"defaults.{name}={raw_default} 与 parameter_schema 默认值 {spec.default} 不一致")
++        defaults[name] = spec.default
+     labels = tuple(_label_from_yaml(o, i) for i, o in enumerate(entry.get("output_labels") or []))
+     if enabled and not any(o.publish_target for o in labels):
+         raise CapabilityError(f"能力 {scene_code}/{version} 启用但没有任何可发布标签")
+     disabled_reason = entry.get("disabled_reason")
++    raw_constraints = entry.get("parameter_constraints") or []
++    if not isinstance(raw_constraints, list):
++        raise CapabilityError("parameter_constraints 必须是列表")
++    constraints = tuple(str(c) for c in raw_constraints)
++    unknown_constraints = [c for c in constraints if c not in CROSS_FIELD_CONSTRAINTS]
++    if unknown_constraints:
++        raise CapabilityError(f"未知跨字段约束：{', '.join(unknown_constraints)}")
+     return SceneCapability(
+         scene_code=scene_code,
+         capability_version=version,
+@@ -131,6 +160,7 @@ def capability_from_yaml(entry: Any) -> SceneCapability:
+         preprocessing_key=str(entry.get("preprocessing_key") or "").strip(),
+         parameter_schema=specs,
+         defaults=defaults,
++        parameter_constraints=constraints,
+         model_profile=str(entry.get("model_profile") or "").strip(),
+         rules_revision=str(entry.get("rules_revision") or "").strip(),
+         output_labels=labels,
+@@ -144,7 +174,13 @@ def load_capabilities_file(path: Path | str = DEFAULT_CAPABILITIES_FILE) -> tupl
+     file_path = Path(path)
+     if not file_path.exists():
+         return ()
+-    document = yaml.safe_load(file_path.read_text(encoding="utf-8")) or {}
++    try:
++        raw_text = file_path.read_text(encoding="utf-8")
++        document = yaml.safe_load(raw_text) or {}
++    except (OSError, UnicodeDecodeError, yaml.YAMLError) as exc:
++        raise CapabilityError(f"能力配置文件读取或解析失败：{exc}", code="CONFIG_LOAD_ERROR") from exc
++    if not isinstance(document, dict):
++        raise CapabilityError("能力配置顶层必须是映射", code="CONFIG_LOAD_ERROR")
+     if document.get("interface_version") not in (None, INTERFACE_VERSION):
+         raise CapabilityError(
+             f"能力配置 interface_version={document.get('interface_version')!r} 与 {INTERFACE_VERSION!r} 不兼容"
+@@ -206,7 +242,7 @@ class CapabilityRegistry:
+             enabled = [c for c in candidates if c.enabled]
+             if not enabled:
+                 raise CapabilityDisabledError(f"场景 {scene_code} 没有启用版本")
+-            cap = max(enabled, key=lambda c: c.capability_version)
++            cap = max(enabled, key=lambda c: _version_key(c.capability_version))
+         if not cap.enabled:
+             raise CapabilityDisabledError(
+                 f"能力 {cap.scene_code}/{cap.capability_version} 未启用：{cap.disabled_reason or '无原因'}"
+@@ -227,6 +263,12 @@ class CapabilityRegistry:
+         for name, spec in specs.items():
+             value = raw.get(name, spec.default)
+             result[name] = _coerce_parameter(spec, value)
++        # 声明式跨字段约束（如 slope: overlap < segment_len）：
++        # 在冻结 config_hash 之前校验，非法组合返回 422 语义而不是执行面才发现。
++        for constraint_name in capability.parameter_constraints:
++            constraint = CROSS_FIELD_CONSTRAINTS[constraint_name]
++            if not constraint(result):
++                raise CapabilityError(f"参数组合不满足约束 {constraint_name}", code="INVALID_PARAMETERS")
+         return result
+ 
+     def effective_params(
+diff --git a/app/scene/types.py b/app/scene/types.py
+index 9b64715..f47c0a7 100644
+--- a/app/scene/types.py
++++ b/app/scene/types.py
+@@ -16,7 +16,7 @@ GET /api/v1/scene-capabilities 返回的 slope 描述不代表现网可执行。
+ from __future__ import annotations
+ 
+ from dataclasses import dataclass, field
+-from datetime import datetime
++from datetime import datetime, timezone
+ from enum import Enum
+ from typing import Any, Literal
+ 
+@@ -30,12 +30,23 @@ MAX_SEGMENTS_PER_BATCH = 100
+ 
+ 
+ class CapabilityError(Exception):
+-    """能力注册表/参数校验错误。"""
++    """能力注册表/参数校验错误。
++
++    code 携带结构化错误类别（如 ADAPTER_CANCELLED），dispatch 用
++    exc.code 记入 error_code，不把类名当错误码。
++    """
++
++    def __init__(self, message: str, code: str = "CAPABILITY_ERROR"):
++        super().__init__(message)
++        self.code = code
+ 
+ 
+ class CapabilityDisabledError(CapabilityError):
+     """能力未启用。"""
+ 
++    def __init__(self, message: str):
++        super().__init__(message, code="CAPABILITY_DISABLED")
++
+ 
+ class SceneOutcome(str, Enum):
+     """场景运行结果语义，与任务状态分开记录（DESIGN §2.2）。"""
+@@ -67,6 +78,15 @@ class ParameterSpec:
+     description: str = ""
+ 
+ 
++# 声明式跨字段约束：YAML 以 parameter_constraints 引用，实现必须与注册表同批审查。
++# 核心分派不出现场景名称分支，约束按能力声明生效（AC-10）。
++CROSS_FIELD_CONSTRAINTS: dict[str, Any] = {
++    "overlap_lt_segment_len": lambda params: (
++        params["overlap"] < params["segment_len"] if "overlap" in params and "segment_len" in params else True
++    ),
++}
++
++
+ @dataclass(frozen=True)
+ class OutputLabel:
+     """输出标签到场景标签词表的映射；publish_target 表示是否可发布。"""
+@@ -95,6 +115,7 @@ class SceneCapability:
+     preprocessing_key: str = ""
+     parameter_schema: tuple[ParameterSpec, ...] = ()
+     defaults: dict[str, Any] = field(default_factory=dict)
++    parameter_constraints: tuple[str, ...] = ()
+     model_profile: str = ""
+     rules_revision: str = ""
+     output_labels: tuple[OutputLabel, ...] = ()
+@@ -131,6 +152,7 @@ class SceneCapability:
+                 for p in self.parameter_schema
+             ],
+             "defaults": dict(self.defaults),
++            "parameter_constraints": list(self.parameter_constraints),
+             "model_profile": self.model_profile,
+             "rules_revision": self.rules_revision,
+             "output_labels": [
+@@ -308,7 +330,8 @@ class SceneAdapter:
+ 
+ def _utc_now_iso() -> str:
+     # 契约层保持确定性：manifest 时间戳由调用方传入，这里只兜底。
+-    return datetime.now(tz=datetime.fromtimestamp(0).astimezone().tzinfo).isoformat()
++    # 统一 UTC，避免宿主时区影响 digest 与下游时间解析。
++    return datetime.now(timezone.utc).isoformat()
+ 
+ 
+ class SceneManifest:
+diff --git a/config/scene_capabilities.yaml b/config/scene_capabilities.yaml
+index 89aba10..a629f2e 100644
+--- a/config/scene_capabilities.yaml
++++ b/config/scene_capabilities.yaml
+@@ -52,6 +52,8 @@ capabilities:
+       segment_len: 15
+       overlap: 3
+       min_effective: 5
++    parameter_constraints:
++      - overlap_lt_segment_len
+     model_profile: vlm-front-camera-slope
+     rules_revision: slope-rules-v1
+     # 输出标签 → 场景标签词表映射；flat 仅保存分析证据，不发布为目标切片
+diff --git a/tests/test_scene_capability_contract.py b/tests/test_scene_capability_contract.py
+index 8d3b42d..01c8902 100644
+--- a/tests/test_scene_capability_contract.py
++++ b/tests/test_scene_capability_contract.py
+@@ -179,6 +179,52 @@ class TestCapabilityRegistry:
+         with pytest.raises(CapabilityError, match="超过上限"):
+             reg.effective_params("test-capability", {"expect_frames": 1001})
+ 
++    # ---- 2026-10-08 OCR 审查回归（协调者合入修复） ----
++
++    def test_latest_version_prefers_numeric_suffix(self, tmp_path):
++        """多位版本号按数字后缀排序，字典序不得选中 slope-v9 当 latest。"""
++        entry = _test_capability()
++        v9 = dict(entry, scene_code="multi", adapter_key="multi-v9", capability_version="multi-v9")
++        v10 = dict(entry, scene_code="multi", adapter_key="multi-v10", capability_version="multi-v10")
++        reg = _make_registry(tmp_path, [v9, v10])
++        assert reg.resolve("multi").capability_version == "multi-v10"
++
++    def test_defaults_must_match_schema_default(self, tmp_path):
++        """YAML defaults 与 parameter_schema default 不一致时拒绝，不静默漂移。"""
++        entry = _test_capability()
++        entry["defaults"] = {"expect_frames": 5}  # schema default=1
++        with pytest.raises(CapabilityError, match="不一致"):
++            _make_registry(tmp_path, [entry])
++
++    def test_cross_field_constraint_rejects_invalid_combo(self, tmp_path):
++        """声明 overlap<segment_len：非法组合在冻结 config_hash 前被拒。"""
++        entry = _slope_capability_entry()
++        entry["scene_code"] = "slopex"  # 避免与 _make_registry 默认 slope-v1 重复注册
++        entry["adapter_key"] = "slopex-v1"
++        entry["parameter_constraints"] = ["overlap_lt_segment_len"]
++        reg = _make_registry(tmp_path, [entry])
++        # segment_len 下限 5、overlap 上限 60：该组合合法单参但违反跨字段约束
++        with pytest.raises(CapabilityError, match="overlap_lt_segment_len") as excinfo:
++            reg.effective_params("slopex", {"segment_len": 5, "overlap": 60})
++        assert excinfo.value.code == "INVALID_PARAMETERS"
++        # 合法组合（overlap 60 < segment_len 300）通过
++        ok = reg.effective_params("slopex", {"segment_len": 300, "overlap": 60})
++        assert ok.parameters == {"segment_len": 300, "overlap": 60, "min_effective": 5}
++
++    def test_unknown_constraint_name_rejected(self, tmp_path):
++        entry = _test_capability()
++        entry["parameter_constraints"] = ["no_such_constraint"]
++        with pytest.raises(CapabilityError, match="未知跨字段约束"):
++            _make_registry(tmp_path, [entry])
++
++    def test_malformed_yaml_raises_capability_error(self, tmp_path):
++        """配置文件损坏时收敛为 CapabilityError（CONFIG_LOAD_ERROR），不裸抛 YAMLError。"""
++        path = tmp_path / "broken.yaml"
++        path.write_text("capabilities: [unclosed", encoding="utf-8")
++        with pytest.raises(CapabilityError) as excinfo:
++            CapabilityRegistry.from_file(path)
++        assert excinfo.value.code == "CONFIG_LOAD_ERROR"
++
+ 
+ # ---------------------------------------------------------------------------
+ # 分派与四类结果语义（AC-03/AC-10）

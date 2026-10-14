@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-125353-ocr-contract-fix-round9-inflight",
+  "occurred_at": "2026-10-13T12:59:00+08:00",
+  "recorded_at": "2026-10-13T13:03:38+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "12:53 唤醒巡检：窗口唯一 C 变更源=inbox/coordinator/TASK-16B/ocr-contract-fix-20261013.md（12:52 maintenance_notification to COORDINATOR：OCR 工作流修复+诊断器 ocr_session_status.py，第9轮 40e90fea 保留不要重复启动，未新增授权不放行 16B）——无 C 新派单/返修单；16B proxy OCR 第9轮在途核实（ps：runner b2_r144_maxtok9.py pid 1810468+node/ocr 存活 etime 约30min，12:26:35 START 直连8002+max-tokens 0+medium）；诊断器实测 40e90fea jsonl 无 terminal_state/manifest（NOT_EVALUATED）58 responses 持续写入（12:54 仍增）非停滞；硬截止 12:50（r149 口径）已过约6min 仍 INFLIGHT，按协议不接管不 kill 不重复启动，收口后 rc=0→findings 合并最小返修单派 C→16B 解冻 / rc=1→9/9 连败 NEEDS_REVIEW 维持冻结升级用户 a/b/c；16B 交付冻结 0208a73 维持 REVIEW_PENDING",
+  "evidence": "sessions/C.md 12:57 条目; ps aux 1810468/1810491/1810499; ocr_session_status.py 40e90fea 诊断; TODO r149 段",
+  "next": "等第9轮收口（硬截止已过在途，处置上报协调者）；rc=0 后等一次最小返修单 ACK 续修；rc=1 维持冻结升级用户"
+}

@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-13T15:00:53.495612+08:00",
+  "role": "B",
+  "kind": "phase",
+  "start": "2026-10-13T11:00:00+08:00",
+  "end": "2026-10-13T15:00:00+08:00",
+  "artifact": "inbox/control/runtime/digests/2026-10-13/B-phase-1500.json",
+  "roles": [
+    {
+      "role": "B",
+      "start": "2026-10-13T11:00:00+08:00",
+      "end": "2026-10-13T15:00:00+08:00",
+      "totals_seconds": {
+        "working": 0,
+        "waiting": 6203.0,
+        "blocked": 0,
+        "idle": 0,
+        "unknown": 8197.0
+      },
+      "segments": [
+        {
+          "start": "2026-10-13T11:00:00+08:00",
+          "end": "2026-10-13T11:22:53+08:00",
+          "category": "waiting",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "summary": "ad37ae1 界面最小补齐三件交付：data_kind 四类谓词/双用途双标、GET /api/v1/bags 集合路由、场景八步详情（快照 scene_outcomes 第一真相+终态停刷新+无 A100 面）；15 新用例全绿、全仓 876 passed（4 failed 均 base 既有）",
+          "sources": [
+            "events/B/6ac33b1670861220d6f7458f52fa0c5e028241737709022980f15f50cdd05c0a.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T11:22:53+08:00",
+          "end": "2026-10-13T11:27:53+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T11:27:53+08:00",
+          "end": "2026-10-13T11:32:30+08:00",
+          "category": "waiting",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "summary": "ad37ae1 界面最小补齐三件交付：data_kind 四类谓词/双用途双标、GET /api/v1/bags 集合路由、场景八步详情（快照 scene_outcomes 第一真相+终态停刷新+无 A100 面）；15 新用例全绿、全仓 876 passed（4 failed 均 base 既有）",
+          "sources": [
+            "events/B/6ac33b1670861220d6f7458f52fa0c5e028241737709022980f15f50cdd05c0a.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T11:32:30+08:00",
+          "end": "2026-10-13T11:37:53+08:00",
+          "category": "unknown",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "summary": "11:27:53 巡检（fingerprint d1e20609，变更源仅 TODO.md=r144 OCR 口径注记）：16C 维持用户暂停（10:47 界面增量暂停），交付/在途证据保存不返修不合入；无 B 新派单/返修（inbox/2号 零新增）；16C 串行 OCR c03 scene_result_query.py 11:28:51 收口 rc=0 4 findings（c01 4/c02 2 含 C5 medium CONFIRMED CORRECTION 维持 r144 口径），c04 api/sources.py ps 实测在途（node 1743630/opencodereview 1743638，父 168282",
+          "sources": [
+            "inbox/events/B/b-poll-20261013-112753-t16c-paused-ocr-c03-done-c04-inflight.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T11:37:53+08:00",
+          "end": "2026-10-13T11:43:00+08:00",
+          "category": "unknown",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "summary": "11:27:53 巡检（fingerprint d1e20609，变更源仅 TODO.md=r144 OCR 口径注记）：16C 维持用户暂停（10:47 界面增量暂停），交付/在途证据保存不返修不合入；无 B 新派单/返修（inbox/2号 零新增）；16C 串行 OCR c03 scene_result_query … 638，父 1682826 持 ocr.lock）——协调者门禁面只读观察；TESTER 独立验证维持 10:46-10:47 PASS 口径；wt-04a-t16c HEAD=5c80857 冻结洁净不移动，origin/main 6fb42c4 不变 16C 未合入（暂停）；leases 无 B 残留 own",
+          "sources": [
+            "inbox/events/B/b-poll-20261013-112753-t16c-paused-ocr-c03-done-c04-inflight.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T11:43:00+08:00",
+          "end": "2026-10-13T11:47:53+08:00",
+          "category": "unknown",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "summary": "11:42:53 巡检（fingerprint 79f7a4d4，变更源仅 TODO.md=r146 协调者注记 11:43:09）：16C 维持用户暂停，B 零动作；16C 串行 OCR 链 4/7 收口（c04 api/sources.py rc=0 0 findings，c05 pipeline_detail.html 在途 chain pid 1682826 持 ocr.lock），返修单（C5 CONFIRMED CORRECTION+c03 时间契约）随 PAUSED 搁置不派；只读核对发现 TODO 行 22 TASK-07 owner 列仍为 r131 旧口径（07B 实际已 PASS 合入 4b9f30a 并 DO",
+          "sources": [
+            "inbox/events/B/b-poll-20261013-114253-t16c-paused-ocr-c04-done-r146.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T11:47:53+08:00",
+          "end": "2026-10-13T11:48:30+08:00",
+          "category": "unknown",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "summary": "11:42:53 巡检（fingerprint 79f7a4d4，变更源仅 TODO.md=r146 协调者注记 11:43:09）：16C 维持用户暂停，B 零动作；16C 串行 OCR 链 4/7 收口（c04 api/sources.py rc=0 0 findings，c05 pipeline_detail.h … SED 搁置不派；只读核对发现 TODO 行 22 TASK-07 owner 列仍为 r131 旧口径（07B 实际已 PASS 合入 4b9f30a 并 DONE），属协调者面滞后，本侧不代改；wt-04a-t16c HEAD=5c80857 冻结洁净，origin/main 6fb42c4 不变，16C 未",
+          "sources": [
+            "inbox/events/B/b-poll-20261013-114253-t16c-paused-ocr-c04-done-r146.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T11:48:30+08:00",
+          "end": "2026-10-13T11:52:53+08:00",
+          "category": "unknown",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "summary": "11:47:53 巡检（fingerprint c6e96f54，变更源=TODO.md 11:44:52 刷新+本侧 11:43 r146 事件）：已核 TODO r146 注记口径与 r146 事件一致，无新约束、无 B 新派单/返修/裁决单（inbox/2号|coordinator|decision 11:43 后 find 零新增）；16C 串行 OCR 链 progress 实测维持 4/7 收口（c01 4 findings/c02 2 findings C5 CONFIRMED CORRECTION/c03 4 findings 时间契约 CORRECTION 候选/c04 0 findings），c05 pipeli",
+          "sources": [
+            "inbox/events/B/b-poll-20261013-114753-t16c-paused-ocr-c05-inflight-r146-verified.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T11:52:53+08:00",
+          "end": "2026-10-13T12:07:53+08:00",
+          "category": "unknown",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "summary": "11:47:53 巡检（fingerprint c6e96f54，变更源=TODO.md 11:44:52 刷新+本侧 11:43 r146 事件）：已核 TODO r146 注记口径与 r146 事件一致，无新约束、无 B 新派单/返修/裁决单（inbox/2号|coordinator|decision 11:43  …  时间契约 CORRECTION 候选/c04 0 findings），c05 pipeline_detail.html 在途（chain pid 1682826 存活，16B 第 8 次等待器 pid 1733066 将在 c07 后自动接跑）——均协调者门禁面只读观察；返修单随 PAUSED 搁置不派，本侧零",
+          "sources": [
+            "inbox/events/B/b-poll-20261013-114753-t16c-paused-ocr-c05-inflight-r146-verified.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T12:07:53+08:00",
+          "end": "2026-10-13T13:12:00+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        },
+        {
+          "start": "2026-10-13T13:12:00+08:00",
+          "end": "2026-10-13T14:27:53+08:00",
+          "category": "waiting",
+          "task": "TASK-12S-B",
+          "attempt": "1",
+          "summary": "12S-B attempt-1 交付冻结：spray 能力适配器 base 6fb42c4→f62a29c（13文件+3136行），两路线+冻结选帧+双pass归一+整数ns分段+身份键缓存+7参考图受控+预检；spray 54 passed/场景域142/全仓937+4(base既有)；ruff clean/merge-tree零冲突；真实decode/render/VLM NOT_RUN(依赖缺失)；1012只读bag packet路线适用",
+          "sources": [
+            "events/B/d744c521047cc15e252c3e502e6a7549d3c2ff13c931f5ad5f65095463bac364.json"
+          ]
+        },
+        {
+          "start": "2026-10-13T14:27:53+08:00",
+          "end": "2026-10-13T15:00:00+08:00",
+          "category": "unknown",
+          "task": "",
+          "attempt": "",
+          "summary": "",
+          "sources": [
+            ""
+          ]
+        }
+      ],
+      "events": [
+        {
+          "event_id": "b-t12sb-attempt1-delivered-20261013-131200",
+          "occurred_at": "2026-10-13T13:12:00+08:00",
+          "recorded_at": "2026-10-13T13:11:24+08:00",
+          "role": "B",
+          "task": "TASK-12S-B",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "12S-B attempt-1 交付冻结：spray 能力适配器 base 6fb42c4→f62a29c（13文件+3136行），两路线+冻结选帧+双pass归一+整数ns分段+身份键缓存+7参考图受控+预检；spray 54 passed/场景域142/全仓937+4(base既有)；ruff clean/merge-tree零冲突；真实decode/render/VLM NOT_RUN(依赖缺失)；1012只读bag packet路线适用",
+          "evidence": "receipts/TASK-12S-B/attempt-1.md;commit f62a29c211ac846342dd79b2937962f8cb3c172c",
+          "next": "等协调者机械核验→串行OCR(16C链持ocr.lock)→TESTER独立验证→合入main",
+          "source": "events/B/d744c521047cc15e252c3e502e6a7549d3c2ff13c931f5ad5f65095463bac364.json",
+          "source_mtime": "2026-10-13T13:11:24+08:00"
+        },
+        {
+          "event_id": "b-poll-20261013-112753-t16c-paused-ocr-c03-done-c04-inflight",
+          "occurred_at": "2026-10-13T11:32:30+08:00",
+          "recorded_at": "2026-10-13T11:32:30+08:00",
+          "role": "B",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "status": "PAUSED",
+          "summary": "11:27:53 巡检（fingerprint d1e20609，变更源仅 TODO.md=r144 OCR 口径注记）：16C 维持用户暂停（10:47 界面增量暂停），交付/在途证据保存不返修不合入；无 B 新派单/返修（inbox/2号 零新增）；16C 串行 OCR c03 scene_result_query.py 11:28:51 收口 rc=0 4 findings（c01 4/c02 2 含 C5 medium CONFIRMED CORRECTION 维持 r144 口径），c04 api/sources.py ps 实测在途（node 1743630/opencodereview 1743638，父 1682826 持 ocr.lock）——协调者门禁面只读观察；TESTER 独立验证维持 10:46-10:47 PASS 口径；wt-04a-t16c HEAD=5c80857 冻结洁净不移动，origin/main 6fb42c4 不变 16C 未合入（暂停）；leases 无 B 残留 owner。",
+          "evidence": "sessions/B.md 11:32 巡检条目；~/.hermes/cache/scratch/t16c_ocr/t16c_ocr_progress.txt c03 DONE 行；ps ocr review --from 6fb42c4 --to 5c80857 --exclude …api/sources.py 在途",
+          "next": "等协调者暂停口径下 16C OCR 全链收口处置（C5 CORRECTION 是否出返修单/或随暂停搁置）；恢复且收问题 ID 返修单按 attempt 续 b/task-16c-scene-ui-minimal；空闲只读巡检不扩需求、不碰生产。",
+          "source": "inbox/events/B/b-poll-20261013-112753-t16c-paused-ocr-c03-done-c04-inflight.json",
+          "source_mtime": "2026-10-13T11:33:27+08:00"
+        },
+        {
+          "event_id": "b-poll-20261013-114753-t16c-paused-ocr-c05-inflight-r146-verified",
+          "occurred_at": "2026-10-13T11:48:30+08:00",
+          "recorded_at": "2026-10-13T11:48:30+08:00",
+          "role": "B",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "status": "PAUSED",
+          "summary": "11:47:53 巡检（fingerprint c6e96f54，变更源=TODO.md 11:44:52 刷新+本侧 11:43 r146 事件）：已核 TODO r146 注记口径与 r146 事件一致，无新约束、无 B 新派单/返修/裁决单（inbox/2号|coordinator|decision 11:43 后 find 零新增）；16C 串行 OCR 链 progress 实测维持 4/7 收口（c01 4 findings/c02 2 findings C5 CONFIRMED CORRECTION/c03 4 findings 时间契约 CORRECTION 候选/c04 0 findings），c05 pipeline_detail.html 在途（chain pid 1682826 存活，16B 第 8 次等待器 pid 1733066 将在 c07 后自动接跑）——均协调者门禁面只读观察；返修单随 PAUSED 搁置不派，本侧零动作。",
+          "evidence": "sessions/B.md 11:47 巡检条目（248 行）；~/.hermes/cache/scratch/t16c_ocr/t16c_ocr_progress.txt c04 DONE 11:33:15 行；ps 1682826/1733066 存活；find inbox/2号|coordinator|decision 11:43 后零新增；wt-04a-t16c HEAD=5c80857 冻结洁净",
+          "next": "等协调者 OCR 链 c05-c07 收口+findings 汇总裁决；16C 恢复且收问题 ID 返修单按 attempt 续 b/task-16c-scene-ui-minimal（C5+c03 时间契约同族面一次最小返修）；空闲只读巡检不扩需求、不碰生产。",
+          "source": "inbox/events/B/b-poll-20261013-114753-t16c-paused-ocr-c05-inflight-r146-verified.json",
+          "source_mtime": "2026-10-13T11:51:26+08:00"
+        },
+        {
+          "event_id": "b-poll-20261013-114253-t16c-paused-ocr-c04-done-r146",
+          "occurred_at": "2026-10-13T11:43:00+08:00",
+          "recorded_at": "2026-10-13T11:43:00+08:00",
+          "role": "B",
+          "task": "TASK-16C",
+          "attempt": "1",
+          "status": "PAUSED",
+          "summary": "11:42:53 巡检（fingerprint 79f7a4d4，变更源仅 TODO.md=r146 协调者注记 11:43:09）：16C 维持用户暂停，B 零动作；16C 串行 OCR 链 4/7 收口（c04 api/sources.py rc=0 0 findings，c05 pipeline_detail.html 在途 chain pid 1682826 持 ocr.lock），返修单（C5 CONFIRMED CORRECTION+c03 时间契约）随 PAUSED 搁置不派；只读核对发现 TODO 行 22 TASK-07 owner 列仍为 r131 旧口径（07B 实际已 PASS 合入 4b9f30a 并 DONE），属协调者面滞后，本侧不代改；wt-04a-t16c HEAD=5c80857 冻结洁净，origin/main 6fb42c4 不变，16C 未合入。",
+          "evidence": "sessions/B.md 11:43 巡检条目；~/.hermes/cache/scratch/t16c_ocr/t16c_ocr_progress.txt c04 DONE 行；ps 1682826/1748741/1748751 存活；find inbox/2号 08:40 后零新增",
+          "next": "等协调者暂停口径下 OCR 全链收口处置；恢复且收问题 ID 返修单按 attempt 续 b/task-16c-scene-ui-minimal；空闲只读巡检不扩需求、不碰生产。",
+          "source": "inbox/events/B/b-poll-20261013-114253-t16c-paused-ocr-c04-done-r146.json",
+          "source_mtime": "2026-10-13T11:44:53+08:00"
+        }
+      ],
+      "delivery_records": [],
+      "unverified_sources": [
+        "events/B/b-ack-20261012-232800-task07b-a2r2.md: 时间或内容待核对",
+        "events/B/b-deliver-20261012-233000-task07b-a2r2.md: 时间或内容待核对",
+        "events/B/b-incident-20261012-125600.md: 时间或内容待核对",
+        "events/B/b-poll-20261011-123253-rework8-merged-65ca0be.json: 时间或内容待核对",
+        "events/B/b-poll-20261011-142253-r9-accept-booked.json: 时间或内容待核对",
+        "events/B/b-poll-20261012-085253-t11-run8-integrated-a-cleanup-b-idle.md: 时间或内容待核对",
+        "events/B/b-poll-20261012-113753-t07a-ocr-inflight-idle.md: 时间或内容待核对",
+        "events/B/b-poll-20261013-082253-tester-postr-pass-waiting-merge.md: 时间或内容待核对",
+        "events/B/tester-attempt4-pass-20261010-2257.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-054753-restore-spotcheck-passed.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-124753.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-143253-t07a-tester-postmerge-pass-b-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-175753-t07b-delivered-ocr-b1-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-182253-t07b-ocr-b3-b4-done-b5-inflight-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-185753-t07b-ocr-b3-2findings-b6-cancelled-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261012-222753-t07b-ocr-b5-rc0-core-timeout-b7-resume-inflight.json: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-011253-t07b-ocr-r2b4-stalled-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-060253-t07b-r3-frozen-16a-ocr-done-16b-needsreview-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-063753-r3-ocr-6of6-done-medium-pending-ruling.md: 时间或内容待核对",
+        "inbox/events/B/b-poll-20261013-073253-t07b-r4-ocr-done-strongreview-pending-idle.md: 时间或内容待核对",
+        "inbox/events/B/b-repair-20261013-014853-sessions-append-glue.md: 时间或内容待核对"
+      ]
+    }
+  ],
+  "current": {
+    "B": {
+      "schema_version": 1,
+      "project": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+      "role": "B",
+      "observed_at": "2026-10-13T15:00:53+08:00",
+      "control": "ACTIVE",
+      "confirmed_idle": false,
+      "classification_reasons": [
+        "assigned nonterminal task: TASK-16C",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-16C/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-08/attempt-1-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-08/c1c2-second-precision-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-12S-B/attempt-1-rework-dispatch.md",
+        "unresolved or unclassified dispatch: inbox/2号/TASK-12S-B/attempt-1-dispatch.md"
+      ],
+      "tasks": [
+        {
+          "task": "TASK-16C",
+          "state": "**PAUSED（2026-10-13用户暂停界面增量；现有交付/在途证据保存， … 谓词面+C8 场景页脚本面修复后需复测）；wt `5c80857` 冻结保存不变",
+          "progress": "场景八步详情、三视图/类型谓词、正式查询 API、旧界面兼容",
+          "owner": "**PAUSED（2026-10-13用户暂停界面增量；现有交付/在途证据保存，协调者安全检查点交接 … 据面 1 齐（C5 谓词面+C8 场景页脚本面修复后需复测）；wt `5c80857` 冻结保存不变"
+        }
+      ],
+      "events": {
+        "B": {
+          "event_id": "b-t12sb-attempt1-delivered-20261013-131200",
+          "occurred_at": "2026-10-13T13:12:00+08:00",
+          "recorded_at": "2026-10-13T13:11:24+08:00",
+          "role": "B",
+          "task": "TASK-12S-B",
+          "attempt": "1",
+          "status": "REVIEW_PENDING",
+          "summary": "12S-B attempt-1 交付冻结：spray 能力适配器 base 6fb42c4→f62a29c（13文件+3136行），两路线+冻结选帧+双pass归一+整数ns分段+身份键缓存+7参考图受控+预检；spray 54 passed/场景域142/全仓937+4(base既有)；ruff clean/merge-tree零冲突；真实decode/render/VLM NOT_RUN(依赖缺失)；1012只读bag packet路线适用",
+          "evidence": "receipts/TASK-12S-B/attempt-1.md;commit f62a29c211ac846342dd79b2937962f8cb3c172c",
+          "next": "等协调者机械核验→串行OCR(16C链持ocr.lock)→TESTER独立验证→合入main",
+          "source": "events/B/d744c521047cc15e252c3e502e6a7549d3c2ff13c931f5ad5f65095463bac364.json",
+          "source_mtime": "2026-10-13T13:11:24+08:00"
+        }
+      },
+      "dispatches": {
+        "B": {
+          "role": "B",
+          "source": "inbox/2号/TASK-12S-B/attempt-1-rework-addendum-S9.md",
+          "status": "DISPATCHED",
+          "mtime": 1791874523.479575,
+          "summary": "# ⚠️ SUPERSEDED（2026-10-13 14:5x 协调者 r159）：本文件与 r160 并行回合的 `attempt-1-rework-s9-dispatch.md` 主题重复，**以 r160 s9- … an_ends[]` 含每帧 scan 结束 message_id + storage_ns + packet_count（首帧 message_id=4，packet_count=2）。 ## S9 [HIGH·COR"
+        }
+      },
+      "processes": {
+        "B": {
+          "state": "none"
+        }
+      },
+      "sources": {
+        "TODO.md": "2026-10-13T14:53:54+08:00"
+      },
+      "strong_review": null,
+      "fingerprint": "e8efd682f14e78c0bf88e59fdcc1278779f3b5430ce19e73e02908b317ad2fec"
+    }
+  }
+}

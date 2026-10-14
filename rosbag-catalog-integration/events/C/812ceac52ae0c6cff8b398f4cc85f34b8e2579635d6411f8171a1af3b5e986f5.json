@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261013-104853-r143-nochange-t16b-needs-review-user-ruling-pending",
+  "occurred_at": "2026-10-13T10:53:00+08:00",
+  "recorded_at": "2026-10-13T10:53:55+08:00",
+  "role": "C",
+  "task": "TASK-16B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "10:48 巡检：reason=new_or_unacknowledged_change=16B 既有 REVIEW_PENDING 派单未分类项非新单；无 C 新派单/返修单；r143 政策=16B proxy OCR 7/7 连败维持 NEEDS_REVIEW 冻结、合入门禁关闭、不自动第 8 次、升级用户 a/b/c；C 交付冻结 0208a73 不变，保持空闲待用户裁决",
+  "evidence": "sessions/C.md 10:5x 条目; TODO r143 段; wt-03b-t16b rev-parse 0208a73",
+  "next": "等用户对 16B proxy OCR 处置裁决（a 修隧道或换方式/b 更小拆组/c 已裁 findings 先行返修/搁置）；裁决 c 则等一次最小返修单"
+}

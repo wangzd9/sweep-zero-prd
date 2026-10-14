@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-093053-rework6-delivered-r6r1-ocr",
+  "occurred_at": "2026-10-11T09:36:25+08:00",
+  "recorded_at": "2026-10-11T09:36:25+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "2号 rework-6 f4cd654 09:29 交付 REVIEW_PENDING（3 文件 +156/-8，app 面仅 :582 一行整数除截断；协调者独立复跑定向 71 passed RC=0 + ruff 绿）；R6-r1 增量 OCR 09:35 起跑在途（session 03d83550，入选 1 文件 +6/-1，硬截止 10:05）；main 6d30a68 不变",
+  "evidence": "receipts/TASK-06B/attempt-1-r2-rework-6.md",
+  "next": "R6-r1 收口：无 high/critical 即 --no-ff 合入 main（推 origin）→ TESTER rework-6 复测派单 → 强复审 target 更新（用户手动）"
+}

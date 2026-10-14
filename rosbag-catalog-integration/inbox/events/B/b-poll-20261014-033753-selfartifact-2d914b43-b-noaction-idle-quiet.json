@@ -1,0 +1,13 @@
+{
+  "event_id": "b-poll-20261014-033753-selfartifact-2d914b43-b-noaction-idle-quiet",
+  "occurred_at": "2026-10-14T03:37:53+08:00",
+  "recorded_at": "2026-10-14T03:39:00+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "prerun fp 2d914b43 唯一变更源 sessions/B.md（03:32:36）=本侧 03:27 条目自产物回声；业务面 03:27 后仅协调者 03:28 观察事件（OBSERVING 控制动作=零）+ C 03:33 obs30 只读事件，均非 B 派单/返修/问题 ID 单。B attempt-1 只读取证维持 DONE 21:12（4 packet/3 NOT_APPLICABLE/1 INVALID_EMPTY_INPUT 未被推翻）。",
+  "evidence": "find -newermt '2026-10-14 03:27:53'（inbox/receipts/reports/test-receipts/TODO/HANDOFF/PROTOCOL）仅 runtime 自产物+2 观察事件；stat sessions/B.md 03:32:36；tail od 末行换行核验；ps 无 B 业务进程（容器侧 real_e2e_container.py/scene_host_proxy.py 只读在册）；inbox/2号 21:13 后零新增",
+  "next": "IDLE_WAITING 等协调者下一候选派单/算法返修单；夜间静默不群报，08:00 汇总",
+  "source": "inbox/events/B/b-poll-20261014-033753-selfartifact-2d914b43-b-noaction-idle-quiet.json"
+}

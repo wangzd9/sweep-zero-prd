@@ -1,0 +1,18 @@
+{
+  "event_id": "C:t16cc-leaf-accepted-by-coordinator-20261014",
+  "kind": "business",
+  "task": "TASK-16C-C",
+  "attempt": "attempt-1-ccr1",
+  "status": "LEAF_ACCEPTED",
+  "summary": "消费 14:23:53 巡检唤醒（指纹 80fe4e16，唯一 changed_source=协调者 14:23:38 落盘的 C 叶接受决策）：TASK-16C-C 流水线详情叶 ACCEPTED（开发叶收口）——OCR run e7a5580c 裁决+CC-R1 返修 ce5921d 协调者独立核+TESTER 16D 独立验证 PASS（pytest 16+15 复跑、RED→GREEN 复核、真实 headless Chrome 兜底 DOM 实证、Console 零异常）+集成候选 1d7f15c 零回归（1163 passed+4 seed 固有失败）。冻结链 ce5921d 可被父 16C 聚合消费；未合入主分支，父聚合仍待 A/B 叶+固定集成候选联合验收。C 开发槽保持释放，不接第二任务。",
+  "evidence": "inbox/coordinator/TASK-16C-C/leaf-acceptance-decision-20261014.md（mtime 14:23:38 实测，22 行通读）；test-receipts/TEST-TASK16D/attempt-1.md C 叶+CC-R1 段（14:14:09 mtime）；wt-c-16cc HEAD=ce5921d 干净（rev-parse 实测）；集成候选 wt-coord-intcheck-16c log 1d7f15c 在案。",
+  "next": "等待 A/B 叶收口与协调者固定集成候选；C 仅在返修/新单时行动，11S 只读观察面按 5 分钟巡检继续。",
+  "schema_version": 1,
+  "role": "C",
+  "recorded_at": "2026-10-14T14:29:19+08:00",
+  "occurred_at": null,
+  "time_source": {
+    "kind": "unknown",
+    "reason": "历史发生时间未核实；recorded_at 只表示补录时间"
+  }
+}

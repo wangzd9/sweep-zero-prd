@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t16cc-attempt-1-delivered-frozen-20261014",
+  "occurred_at": "2026-10-14T12:12:00+08:00",
+  "recorded_at": "2026-10-14T12:13:32+08:00",
+  "role": "C",
+  "task": "TASK-16C-C",
+  "attempt": "1",
+  "status": "DELIVERED",
+  "summary": "C TASK-16C-C attempt-1 冻结交付：base bd0db1d（seed 未接受）→ head 522bb3f，分支 c/task-16cc-pipeline-detail，worktree wt-c-16cc。OCR 遗留 8 条全处置：C1 删不可达 elif、C2 删死参数、C3+c05-03 共修 SCENE_TERMINAL_STATUSES 唯一来源+scene_terminal()（INPUT_INVALID 非场景终态）、C4 口径保持只回归确认、C8 retry-form DOM guard、C9 模型身份只取冻结快照无记录写未登记、c05-04 血缘 li 补 ol 容器、c05-05 NVIDIA 契约按 pipeline_type 分流。自测：新 tests/test_task16cc_scene_detail.py 16 passed；全仓 1144 passed+4 failed（4 失败均在 seed 原 worktree 复现=seed 固有，与本增量无关）。回执 receipts/TASK-16C-C/attempt-1.md；状态 REVIEW_PENDING 等 TESTER 独立验证（浏览器 JS/严格 MySQL/联合验收面）与协调者 OCR 串行裁决；C 未合入未部署未起 OCR。11S 原收尾观察面（obs76 11:21-11:23 在案）按 5 分钟巡检继续，本单释放 C 开发槽。",
+  "evidence": "git log 522bb3f on bd0db1d；git diff --stat bd0db1d..522bb3f=3 files +441/-28；pytest tests/test_task16cc_scene_detail.py -q=16 passed（exit 0）；pytest tests/ -q=1144 passed 4 failed 10 skipped；seed worktree wt-v04-ui-resume-20261014 对照：test_devflow x3+test_web bag_search 同失败复现",
+  "next": "等 TESTER 16D 独立验证与协调者 OCR prepare/裁决；返修按协调者优先级回本分支 c/task-16cc-pipeline-detail 续 attempt-1。11S obs 面继续只读巡检（4acf 模型段完成信号取证、16_33_10 提交层终态=隔离树待部署跟踪）。"
+}

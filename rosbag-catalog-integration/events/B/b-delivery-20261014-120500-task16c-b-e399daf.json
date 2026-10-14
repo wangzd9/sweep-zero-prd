@@ -1,0 +1,13 @@
+{
+  "event_id": "b-delivery-20261014-120500-task16c-b-e399daf",
+  "occurred_at": "2026-10-14T12:05:00+08:00",
+  "recorded_at": "2026-10-14T12:06:00+08:00",
+  "role": "B",
+  "task": "TASK-16C-B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "B 交付冻结 e399daf（seed bd0db1d 之上单 commit，bags.html 三处+新测试 11 用例）：tab 显示名=切片/原始数据/全部（URL 值保留）、NVIDIA 空数据行车辆列—、不相容组合明确空集；自测 11 passed + 全量 1106 passed（剔除申报面）+ ruff 绿。越界申报：tests/test_web.py:366 旧标签断言需 A 单写改「原始数据」；test_web bounded 环境性失败 seed 同口径非引入。OCR 遗留本叶面：C5 消费侧验证、其余归 A/C 叶。",
+  "evidence": "git -C wt-04a-t16cb show e399daf --stat；pytest 输出（11 passed / 1106 passed,10 skipped,26 deselected）；ruff check+format 绿",
+  "next": "等协调者机械核验→串行 OCR（新 SHA e399daf）→TESTER 独立浏览器验证→合入；收返修单按 attempt 续 wt-04a-t16cb",
+  "source": "receipts/TASK-16C-B/attempt-1.md"
+}

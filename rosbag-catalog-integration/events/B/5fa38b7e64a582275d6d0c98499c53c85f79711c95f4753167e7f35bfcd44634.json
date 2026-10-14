@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-105253-nochange",
+  "occurred_at": "2026-10-11T10:55:43+08:00",
+  "recorded_at": "2026-10-11T10:55:43+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "10:52:53 巡检：无新派单无返修，main 4697be0 不变，强复审 R2I-20261010-06 仍等用户手动触发，与 10:47 巡检一致",
+  "evidence": "sessions/B.md",
+  "next": "等协调者派单或用户手动触发强复审"
+}

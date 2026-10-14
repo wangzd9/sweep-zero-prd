@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-0940-r6-ocr-merge-4697be0-20261011",
+  "occurred_at": "2026-10-11T09:50:55+08:00",
+  "recorded_at": "2026-10-11T09:50:55+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-6",
+  "status": "MERGED",
+  "summary": "R6-r1 0 findings 收口→f4cd654 验收合入 main 4697be0（推 origin，sanity 全绿）→TESTER attempt-5 已派→强复审 target 更新 4697be0",
+  "evidence": "inbox/coordinator/TASK-06B/attempt-1-r2-rework-6-acceptance-decision.md; reviews/TASK-06B/attempt-1-r2-rework-6/ocr-batches.md; inbox/TESTER/TASK-06/r2-final-mysql-e2e-attempt-5.md",
+  "next": "TESTER attempt-5 PASS+强复审（用户手动）→03/05/06 聚合 DONE→TASK-08"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-012553-t10-defect3-ack-running",
+  "occurred_at": "2026-10-12T01:30:35+08:00",
+  "recorded_at": "2026-10-12T01:30:35+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "t10-defect3-publish-bounds/1",
+  "status": "RUNNING_ACKED",
+  "summary": "2号 t10-defect3-publish-bounds 01:20 ACK 已开工（base a77aa45 fetch 双核一致，wt-04a-t10d3 新建，2 app 文件已改未 commit=编码在途独立核）；main 不变 a77aa45；TESTER 第 1 跑 FAIL 回执在案，等 #3 合入后复跑 v2；TASK-10 维持 RUNNING",
+  "evidence": "inbox/2号/TASK-10/t10-defect3-publish-bounds-ack.md + wt-04a-t10d3 git status 独立核 + test-receipts/TEST-TASK10-e2e-reverify/attempt-1.md",
+  "next": "核 2号交付回执→机械核验→串行 OCR→合入 main（核 base 漂移）→TESTER 复跑 v2→TASK-10 DONE→P0 收口"
+}

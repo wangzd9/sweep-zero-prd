@@ -1,0 +1,444 @@
+{
+  "at": "2026-10-14T11:00:22.821123+08:00",
+  "roles": {
+    "COORDINATOR": {
+      "jobs": {
+        "poll_job_id": {
+          "id": "14ae4556629a",
+          "enabled": true,
+          "schedule": {
+            "kind": "cron",
+            "expr": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+            "display": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *"
+          },
+          "no_agent": false,
+          "script": "/home/wang/.hermes/scripts/five-roles/coordinator-poll.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": [
+            {
+              "id": "8d6b62a6ba014de98378ce795a1b2d01",
+              "status": "completed",
+              "pid": 3406135,
+              "claimed_at": "2026-10-14T09:55:53.087875+08:00",
+              "started_at": "2026-10-14T09:55:53.295310+08:00",
+              "finished_at": "2026-10-14T10:59:38.790093+08:00",
+              "error": null
+            },
+            {
+              "id": "258083704d4d4757901078b34836e99a",
+              "status": "completed",
+              "pid": 3393488,
+              "claimed_at": "2026-10-14T09:45:53.098677+08:00",
+              "started_at": "2026-10-14T09:45:53.314201+08:00",
+              "finished_at": "2026-10-14T09:52:19.480726+08:00",
+              "error": null
+            }
+          ]
+        },
+        "report_job_id": {
+          "id": "99bb6c6cacc6",
+          "enabled": true,
+          "schedule": {
+            "kind": "cron",
+            "expr": "0,20,40 8-20 * * *",
+            "display": "0,20,40 8-20 * * *"
+          },
+          "no_agent": true,
+          "script": "/home/wang/.hermes/scripts/five-roles/coordinator-report.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": [
+            {
+              "id": "816c00c7451744df919660d42f419265",
+              "status": "completed",
+              "pid": 3458330,
+              "claimed_at": "2026-10-14T10:40:53.097370+08:00",
+              "started_at": "2026-10-14T10:40:53.319641+08:00",
+              "finished_at": "2026-10-14T10:40:55.798938+08:00",
+              "error": null
+            },
+            {
+              "id": "924f91ec278c4bf38b2598ca1e1aa503",
+              "status": "completed",
+              "pid": 3434797,
+              "claimed_at": "2026-10-14T10:20:53.098339+08:00",
+              "started_at": "2026-10-14T10:20:53.302667+08:00",
+              "finished_at": "2026-10-14T10:20:55.854457+08:00",
+              "error": null
+            }
+          ]
+        },
+        "morning_report_job_id": {
+          "id": "fd8d7006309c",
+          "enabled": true,
+          "schedule": {
+            "kind": "cron",
+            "expr": "0 8 * * *",
+            "display": "0 8 * * *"
+          },
+          "no_agent": true,
+          "script": "/home/wang/.hermes/scripts/five-roles/coordinator-morning.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": [
+            {
+              "id": "9f11fb2f1f91437eb02292f1f0f72ba5",
+              "status": "completed",
+              "pid": 3275770,
+              "claimed_at": "2026-10-14T08:00:53.107079+08:00",
+              "started_at": "2026-10-14T08:00:53.364589+08:00",
+              "finished_at": "2026-10-14T08:00:56.213122+08:00",
+              "error": null
+            }
+          ]
+        }
+      },
+      "session_mtime": "2026-10-14T10:58:20.546546+08:00",
+      "session_tail": "实质变化 final [SILENT]，20min 报告与 11:00 时段总结继续。前一条 08:35 见上）\n## 2026-10-14 08:51 巡检（prerun 指纹 bab73a48，6 变更源全为 TESTER/C 自产观察回声，NO_ACTION，恢复交接 ACK 21:07:41 在案不重复领取）\n\n- **状态：批次与 08:47 口径零实质变化。** `scene-4acf689f`（16_02_03 正式链 10.1GB 大包）SCENE_RUNNING attempt1，模型段约606min 持续 INFER（C obs66 08:50 与 TESTER 08:47:51 实测：heartbeat 续租正常、八步 QUEUED 8/8、VLM Running 1-3/Waiting 单点即回 0、ESTAB 192.168.2.45:8002 在途、work 树零新写）——大包跨夜继续，不 kill/不 retry/不判卡死。\n- **flat 三提交** `a65a25a7`(14_42_48)/`87dfebaa`(16_37_47)/`518089ed`(16_58_28) 仍 PENDING_INPUT source_id=NULL，等 A 面 D4③ 绑定，14_42_48 正式全链维持 NOT_RUN；scan 4077 failed:2 空包拒绝周期可追溯；run 7=6DONE+1RUNNING 无新 run；PASS 基线不变。\n- **控制动作=零**：零派单/零 OCR/强审 REVOKED 0/5 不续/零合入/零生产写；在途身份仅 C obs66 短租约（08:50:02 claim 正常节奏），无双会话；coordinator_requests 空。\n- **下一步：** observer 接续核 4acf689f 模型段完成信号（八步 DB 推进/SCENE_DONE）→ 终态后放行 A D4③ + TESTER 全链增量验收；白天口径无实质变化不报进度（本轮 final [SILENT]）。\n- 事件 `coord-batch1012-0851-obs66-echoes-infer-continue-noaction-202610140851` 已落盘。前一条 08:47 见上。\n- 最后更新：2026-10-14 08:57 +08:00（TASK-11S-BATCH-1012 / COORDINATOR，prerun 08:55:53 指纹 17b2dc1b，3 变更源全核读=纯自回声：本角色 08:51 自产事件 `coord-batch1012-0851-obs66-echoes-infer-continue-noaction-202610140851` （inbox/events/ 副本）+ sessions/C.md（C obs66 08:50 canonical 记账，08:51 轮已核）+ sessions/COORDINATOR.md（08:51 自写）。零外部新输入、coordinator_requests 空、无新派单/裁决/返修；在途身份仅 C obs66 短租约节奏、无双会话。批次维持 08:51 口径：`scene-4acf689f`（16_02_03 正式链）SCENE_RUNNING attempt1 模型段 ~610min 持续 INFER，跨夜续跑不 kill/不 retry（ruling-4acf-infer-active-0218 有效，升级条件逐项未命中）；flat 三提交 `a65a25a7`/`87dfebaa`/`518089ed` PENDING_INPUT 等 A 面 D4③ 绑定，14_42_48 正式全链 NOT_RUN；空包 16_33_10 拒绝周期可追溯；run 7=6DONE+1RUNNING；PASS 基线不变。控制动作=零（零派单/零 OCR/强审 REVOKED 0/5 不续/零合入/零生产写）。本轮纯回声消费不另落事件文件（避免自触发循环）；observer ack 本轮指纹 17b2dc1b；白天口径无实质变化 final [SILENT]，5min observer 接续。前一条 08:51 见上）\n"
+    },
+    "A": {
+      "jobs": {
+        "poll_job_id": {
+          "id": "d5cb80cf2fc5",
+          "enabled": true,
+          "schedule": {
+            "kind": "cron",
+            "expr": "1,6,11,16,21,26,31,36,41,46,51,56 * * * *",
+            "display": "1,6,11,16,21,26,31,36,41,46,51,56 * * * *"
+          },
+          "no_agent": false,
+          "script": "/home/wang/.hermes/scripts/five-roles/a-poll.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": [
+            {
+              "id": "f68e896b6a6a403c9f58fc3a26f24742",
+              "status": "running",
+              "pid": 3423888,
+              "claimed_at": "2026-10-14T10:11:53.088788+08:00",
+              "started_at": "2026-10-14T10:11:53.301976+08:00",
+              "finished_at": null,
+              "error": null
+            },
+            {
+              "id": "7e2637f2d9c94e39bfac39372d77a66e",
+              "status": "completed",
+              "pid": 3407335,
+              "claimed_at": "2026-10-14T09:56:53.090478+08:00",
+              "started_at": "2026-10-14T09:56:53.351765+08:00",
+              "finished_at": "2026-10-14T10:08:53.717572+08:00",
+              "error": null
+            }
+          ]
+        },
+        "report_job_id": {
+          "id": "169849556cc2",
+          "enabled": true,
+          "schedule": {
+            "kind": "cron",
+            "expr": "0 11,15,18 * * *",
+            "display": "0 11,15,18 * * *"
+          },
+          "no_agent": true,
+          "script": "/home/wang/.hermes/scripts/five-roles/a-report.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": [
+            {
+              "id": "fb7bae0a1e724f3290a4bc52c6657010",
+              "status": "completed",
+              "pid": 2272607,
+              "claimed_at": "2026-10-13T18:00:53.097553+08:00",
+              "started_at": "2026-10-13T18:00:53.386079+08:00",
+              "finished_at": "2026-10-13T18:00:55.878735+08:00",
+              "error": null
+            },
+            {
+              "id": "1b47c43eeb2f4c4ba16af61fdd32e6ec",
+              "status": "completed",
+              "pid": 2021521,
+              "claimed_at": "2026-10-13T15:00:53.108793+08:00",
+              "started_at": "2026-10-13T15:00:53.404155+08:00",
+              "finished_at": "2026-10-13T15:00:59.073070+08:00",
+              "error": null
+            }
+          ]
+        },
+        "retired_idle_report_job_id": {
+          "id": "2ebfb183de3a",
+          "enabled": false,
+          "schedule": {
+            "kind": "cron",
+            "expr": "4 0-23/2 * * *",
+            "display": "4 0-23/2 * * *"
+          },
+          "no_agent": true,
+          "script": "/home/wang/.hermes/scripts/five-roles/a-idle-report.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": []
+        }
+      },
+      "lease": {
+        "owner": "cron-a-poll-d5cb80cf2fc5-20261014-101400-r4",
+        "claimed_at": "2026-10-14T10:56:48+08:00",
+        "expires_at": 1791946908.981591,
+        "pid": null,
+        "process_start": null
+      },
+      "session_mtime": "2026-10-14T10:52:48.429116+08:00",
+      "session_tail": " `created_runs=0/reused_runs=3/errors=[]` 一致），4acf689f 仍 SCENE_RUNNING（heartbeat 10:29:12 30s 连续，INFER 段跨夜继续不 kill/retry）；④ 其余 6 scene run 全 SCENE_DONE 无变化，scan_job 4095/4094（10:16）SUCCESS 幂等，scanner state 现仅旧 dated 16_00_13 的 MOVE_CONFLICT 残留项（flat 三包零恢复记录，1017 口径一致）。**A 未执行绑定操作**（Codex 单写面已完成，A 重复 register 会产生同 idempotency 幂等 no-op 但违反 codex-direct-repair「A 暂勿 retry」，故仅核实）。下一步：等 4acf689f 终态（任一 outcome）→核 flat 三提交是否按 SCHEDULED 依次创建正式 run（TESTER 验收面）；本核实节补进 `receipts/TASK-11S-BATCH-1012/a-attempt-1.md`『1017 绑定更正回合』；若协调者要求 A 独立复核绑定契约（entry_relative/claim 释放）再逐包深挖。写前核 canonical sessions/A.md 末行 09:59 条目以 `release\\n` 结尾 384 行，条目先落 scratch 临时文件后独立 python 追加防接缝/反引号事故；claim（observer 唤醒）→只读核实+记账→release\n- 终态：2026-10-14 10:4x CST（1017 更正回合收口，白天群报口径；claim/release 走独立短租约）。消费协调者 BATCH-STATUS 10:43 同步 + `codex-repair-receipt-20261014.md` 10:23 回执 + role-audit：**`resume-ruling-binding-1017.md` 对 A 已 STOP**——flat 三提交重登记恢复 owner 由 A 转 Codex（隔离树 `fix/spray-progress-20261014` 单写经正式 API，用户 10:07「直接处理问题」授权）。**Codex 10:23 已完成**：`a65a25a7`→`scene-a4824f1c`(SUCCESS)/`87dfebaa`→`scene-eb4397c3`(NOT_APPLICABLE)/`518089ed`→`scene-24ab78bb`(NOT_APPLICABLE)，全 SCHEDULED gen1、事件 CONSUMED、`created_runs=0/reused_runs=3/errors=[]`（复用既有终态 run 未重烧，全批仍 7 run）。A 本回合只读核实（10:29:25 实测）与 Codex 回执相互印证：bound_ready_path 全 flat、source_id 指向 flat source_copy 行、register `created:false` 无新源/无改库、40min 零新建 run、4acf689f 仍 SCENE_RUNNING（heartbeat 10:29:12）未动。**A 侧零剩余绑定动作**（10:2x 核实时未做任何 A 侧重登记写/重试，无冲突）。下一步：等 4acf689f 终态（任一 outcome）→配合 TESTER 全链增量验收（14_42_48 正式验收以 `a65a25a7` 绑定 run 复用结果为准，含两次 reconcile 幂等核账，TESTER 域）；A 维持不重上传/不改库/不重烧 dup/不 kill 4acf689f。观测 ack 本轮新 pending 指纹 829abd94（含本角色自回声 + 协调者 10:43 BATCH-STATUS/role-audit，均已核）。写前核 canonical sessions/A.md 末行 10:2x 条目以 release 换行结尾 386 行，临时文件+python append 防接缝/反引号事故。\n"
+    },
+    "B": {
+      "jobs": {
+        "poll_job_id": {
+          "id": "6f7471d8747c",
+          "enabled": true,
+          "schedule": {
+            "kind": "cron",
+            "expr": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *",
+            "display": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"
+          },
+          "no_agent": false,
+          "script": "/home/wang/.hermes/scripts/five-roles/b-poll.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": [
+            {
+              "id": "d0808e516c704dee896ade79f24e5af1",
+              "status": "running",
+              "pid": 3466003,
+              "claimed_at": "2026-10-14T10:47:53.097659+08:00",
+              "started_at": "2026-10-14T10:47:53.305793+08:00",
+              "finished_at": null,
+              "error": null
+            },
+            {
+              "id": "de3f5dc5b2d949e789a6e52c5b754974",
+              "status": "completed",
+              "pid": 3443010,
+              "claimed_at": "2026-10-14T10:27:53.107292+08:00",
+              "started_at": "2026-10-14T10:27:53.351645+08:00",
+              "finished_at": "2026-10-14T10:42:11.035497+08:00",
+              "error": null
+            }
+          ]
+        },
+        "report_job_id": {
+          "id": "7c1cf5029635",
+          "enabled": true,
+          "schedule": {
+            "kind": "cron",
+            "expr": "0 11,15,18 * * *",
+            "display": "0 11,15,18 * * *"
+          },
+          "no_agent": true,
+          "script": "/home/wang/.hermes/scripts/five-roles/b-report.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": [
+            {
+              "id": "bbc4ee71b426493cbfcc2d144da6210d",
+              "status": "completed",
+              "pid": 2272608,
+              "claimed_at": "2026-10-13T18:00:53.110240+08:00",
+              "started_at": "2026-10-13T18:00:53.411249+08:00",
+              "finished_at": "2026-10-13T18:00:55.774662+08:00",
+              "error": null
+            },
+            {
+              "id": "dfbbf194ef6b49fcb155338f4949ca9d",
+              "status": "completed",
+              "pid": 2021523,
+              "claimed_at": "2026-10-13T15:00:53.122213+08:00",
+              "started_at": "2026-10-13T15:00:53.426804+08:00",
+              "finished_at": "2026-10-13T15:00:55.802204+08:00",
+              "error": null
+            }
+          ]
+        },
+        "retired_idle_report_job_id": {
+          "id": "6d1518e6c697",
+          "enabled": false,
+          "schedule": {
+            "kind": "cron",
+            "expr": "8 0-23/2 * * *",
+            "display": "8 0-23/2 * * *"
+          },
+          "no_agent": true,
+          "script": "/home/wang/.hermes/scripts/five-roles/b-idle-report.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": []
+        }
+      },
+      "lease": {
+        "owner": "cron-b-poll-6f7471d8747c-20261014-104900",
+        "claimed_at": "2026-10-14T10:54:05+08:00",
+        "expires_at": 1791946745.315886,
+        "pid": 3473573,
+        "process_start": "34670680"
+      },
+      "session_mtime": "2026-10-14T10:59:40.035022+08:00",
+      "session_tail": "单）**，不占开发槽。事件 `b-poll-20261014-104800-fp-63b99bfa-batchstatus-1036-codex-repair-scope-a-stop-b-noaction-idle` 落盘；observer ack 指纹 63b99bfa 于本轮 final 前执行。下一步：等下一轮有效输入；11:00 时段总结按协议生成（更正口径：A 绑定恢复单已 STOP、Codex 隔离树单写修复面）。\n- 接续 2026-10-14 10:56 +08:00（cron poll 6f7471d8747c，prerun 指纹 2146dac9 10:45:10 首见/10:47:53 复检，wake=new_or_unacknowledged_change，白天正常）：**B 收尾增补已执行并交付——用户恢复后原任务收尾（12S-D 适用性/真值缺口清单）**：变更源=① `BATCH-STATUS.md`（10:36 Codex 修复范围同步，上轮已消费）；② 用户恢复交接+新派单 `inbox/2号/TASK-11S-BATCH-1012/post-release-closeout-20261014.md`（10:49:02，入口 `inbox/control/POST-SPRAY-CLOSEOUT-20261014.md`）——要求用已交付输入分类与当前 run outcome 补齐 12S-D 适用性/真值缺口清单（NOT_APPLICABLE≠真阴性、test≠真实采集车），只补证据与资料引用，不重跑模型/不加契约/不改算法UI。执行：只读核 `production-snapshot.json`（10:37:40 生产 API 快照，7 runs+8 submissions+7 originals+scan_jobs）与 10:23 Codex 绑定恢复回执口径（三 flat 提交复用既有终态 run，created_runs=0/reused_runs=3），逐包 runtime 佐证 attempt-1 输入分类**无一被推翻**；产出 `receipts/TASK-11S-BATCH-1012/b-attempt-1.md` §六收尾段（6.1 逐包 source/run/attempt/outcome 登记、6.2 五项缺口清单：真阴性/真实车/多DB3阳性终态/空包提交层终态/批量容量、6.3 已证/缺证小结）。关键事实：NOT_APPLICABLE 三包=路由阴性（缺 /iv_packets_front_mid 且无后雷达替代）非算法真阴性；originals 中 `14_42_48`/`16_37_47`/`16_58_28` `vehicle_link_status=MANUAL`（10:23 正式登记恢复链），MATCHED×4；空包 `16_33_10` scanner 拒绝持续（scan_jobs 4097/4099 failed:2）但 submission 恒 PENDING_INPUT 无失败终态=Codex 隔离树修复面未部署。B 侧零 commit/零模型/零复制/零生产写；追加前核验 canonical `sessions/B.md` 400 行且末行换行结尾（od 实测），追加走临时文件+独立 python（校验全部在前、共享文件 open 最后）。claim/release 正常（owner `cron-b-poll-6f7471d8747c-20261014-104900`，token 68b8a148 JSON 整体解析）。事件 `b-closeout-20261014-1056-postrelease-gaplist-delivered` 落盘；observer ack 指纹 2146dac9 于本轮 final 前执行。**状态：收尾增补 DONE 交付，释放槽 → IDLE_WAITING**（原 attempt-1 DONE 保持；缺口 1/2/5 外部素材/协调者收口面、缺口 3 随 `scene-4acf689f` 终态 TESTER 核收、缺口 4 随隔离树门禁处置，B 不新开任务）。下一步：等下一轮有效输入；11:00 时段总结按协议生成。\n"
+    },
+    "C": {
+      "jobs": {
+        "poll_job_id": {
+          "id": "f01517c16f2f",
+          "enabled": true,
+          "schedule": {
+            "kind": "cron",
+            "expr": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
+            "display": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *"
+          },
+          "no_agent": false,
+          "script": "/home/wang/.hermes/scripts/five-roles/c-poll.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": [
+            {
+              "id": "04ad818056514a6b902735274fb864ce",
+              "status": "running",
+              "pid": 3449953,
+              "claimed_at": "2026-10-14T10:33:53.099768+08:00",
+              "started_at": "2026-10-14T10:33:53.347471+08:00",
+              "finished_at": null,
+              "error": null
+            },
+            {
+              "id": "7337a0f94aba40708b0cefafc38f2972",
+              "status": "completed",
+              "pid": 3409782,
+              "claimed_at": "2026-10-14T09:58:53.097831+08:00",
+              "started_at": "2026-10-14T09:58:53.297901+08:00",
+              "finished_at": "2026-10-14T10:31:36.805611+08:00",
+              "error": null
+            }
+          ]
+        },
+        "report_job_id": {
+          "id": "b99cc17222c3",
+          "enabled": true,
+          "schedule": {
+            "kind": "cron",
+            "expr": "0 11,15,18 * * *",
+            "display": "0 11,15,18 * * *"
+          },
+          "no_agent": true,
+          "script": "/home/wang/.hermes/scripts/five-roles/c-report.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": [
+            {
+              "id": "e071c79bf2c5485c9ff9f9e30eb890f0",
+              "status": "completed",
+              "pid": 2272609,
+              "claimed_at": "2026-10-13T18:00:53.123440+08:00",
+              "started_at": "2026-10-13T18:00:53.438757+08:00",
+              "finished_at": "2026-10-13T18:00:58.106161+08:00",
+              "error": null
+            },
+            {
+              "id": "95c17532f040448493fce607c9de9527",
+              "status": "completed",
+              "pid": 2021524,
+              "claimed_at": "2026-10-13T15:00:53.135803+08:00",
+              "started_at": "2026-10-13T15:00:53.502842+08:00",
+              "finished_at": "2026-10-13T15:00:56.959631+08:00",
+              "error": null
+            }
+          ]
+        },
+        "retired_idle_report_job_id": {
+          "id": "83a2aaa9a279",
+          "enabled": false,
+          "schedule": {
+            "kind": "cron",
+            "expr": "12 0-23/2 * * *",
+            "display": "12 0-23/2 * * *"
+          },
+          "no_agent": true,
+          "script": "/home/wang/.hermes/scripts/five-roles/c-idle-report.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": []
+        }
+      },
+      "session_mtime": "2026-10-14T10:59:51.620813+08:00",
+      "session_tail": "essing-machine curl 8180/8767、docker exec mysql SELECT stdin 口径、docker exec cat /proc/net/tcp、ps/stat/find/df/uptime/ls、ssh llm-server 读 vllm log），未 kill/未删/未重启/未 retry/未改任何生产路径；canonical sessions/C.md 追加前末行换行+obs75 去重预核验通过（624 行 ends \\n、obs75 条目行=0，计算/校验在前、共享文件最后写入、临时条目文件+独立 python append）、旧镜像 inbox/sessions/C.md 本轮未触。租约 owner C-cron-poll-20261014-103353-t11s-obs75（10:52:17 claim，token 整体 JSON 解析 len=32）。事件 c-t11s-batch-1012-obs75-flat-binding-recovered-4acf-steps-advanced-20261014 落 canonical events/C/ 后 release+observer ack 本轮 prerun 指纹 2a3e0fba。11:00 时段总结照常。前一条 10:17（obs74）见上）\n- 最后更新：2026-10-14 10:57 +08:00（TASK-11S-BATCH-1012 / C / attempt-1 收尾增补 ACK，prerun 10:33:53 指纹 2a3e0fba 处理中（obs75）observer 已刷新新指纹 5e9d6064 changed_sources 含新派单 `inbox/3号/TASK-11S-BATCH-1012/post-release-closeout-20261014.md`（10:49:02，入口 `inbox/control/POST-SPRAY-CLOSEOUT-20261014.md`）；**消费收尾增补并 ACK**（ACK 落 `post-release-closeout-20261014-ack.md`，沿用 attempt-1 原 ACK 21:07:41 不重复领取）：obs75 实测（10:43-10:52）正覆盖增补验收面——4acf689f 正式八步口径更新为 PRECHECK/EXTRACT DONE+INFER RUNNING+余 QUEUED（不再称全 QUEUED）、心跳续租活跃/lease 10:53:44/error 空、proxy pid 3495931 连续未重启+VLM 通道 1 ESTAB、llm-server Running 3-4/Waiting 1→0 非持续>0 不命中升级条件、**完成帧/ETA 无持久证据写未知**（checkpoint 00:23:10 未翻+find 10:00 后零新写）、NAS 71% 不变/load 4.46 抬升如实归因、flat 三提交 SCHEDULED 绑定恢复独立复测闭环（10:23:08/09）、16_33_10 提交层终态隔离=隔离树未部署跟踪面；回执收尾段落 `receipts/TASK-11S-BATCH-1012/c-attempt-1.md`（原文件不存在，本轮新建，C 自身回执权限内），不代写主状态、不 kill/cancel/retry/重启/改参数。obs75 租约 C-cron-poll-20261014-103353-t11s-obs75（token 整体 JSON 解析 len=32，obs75 事件+sessions 追加后已 release）；本收尾 ACK/回执/本条目在新短租约 C-cron-poll-20261014-105600-t11s-closeout 内写入。本条目追加后 observer ack 新指纹 5e9d6064（本轮 prerun 2a3e0fba 已随新 pending 失效，不消费旧指纹）。下一步：11:00 时段总结照常；4acf 模型段完成信号取证申报；收尾增补产物已交付，等协调者/TESTER 验收面，无新派单不扩范围。前一条 10:52（obs75）见上）\n"
+    },
+    "TESTER": {
+      "jobs": {
+        "poll_job_id": {
+          "id": "167580c0500b",
+          "enabled": true,
+          "schedule": {
+            "kind": "cron",
+            "expr": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *",
+            "display": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *"
+          },
+          "no_agent": false,
+          "script": "/home/wang/.hermes/scripts/five-roles/tester-poll.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": [
+            {
+              "id": "4415f7d4de914afd846ba06bd7e9fbdf",
+              "status": "running",
+              "pid": 3439654,
+              "claimed_at": "2026-10-14T10:24:53.087287+08:00",
+              "started_at": "2026-10-14T10:24:53.310968+08:00",
+              "finished_at": null,
+              "error": null
+            },
+            {
+              "id": "262596f8528b49e7862737188cc41aba",
+              "status": "completed",
+              "pid": 3427318,
+              "claimed_at": "2026-10-14T10:14:53.087140+08:00",
+              "started_at": "2026-10-14T10:14:53.308221+08:00",
+              "finished_at": "2026-10-14T10:22:00.582246+08:00",
+              "error": null
+            }
+          ]
+        },
+        "report_job_id": {
+          "id": "b41450f1df3c",
+          "enabled": true,
+          "schedule": {
+            "kind": "cron",
+            "expr": "0 11,15,18 * * *",
+            "display": "0 11,15,18 * * *"
+          },
+          "no_agent": true,
+          "script": "/home/wang/.hermes/scripts/five-roles/tester-report.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": [
+            {
+              "id": "8a9b747b181b4d20975ea39c65eb688c",
+              "status": "completed",
+              "pid": 2272610,
+              "claimed_at": "2026-10-13T18:00:53.147281+08:00",
+              "started_at": "2026-10-13T18:00:53.439446+08:00",
+              "finished_at": "2026-10-13T18:00:56.908708+08:00",
+              "error": null
+            },
+            {
+              "id": "5bdc767d23df4c568e6ff185d21b99da",
+              "status": "completed",
+              "pid": 2021525,
+              "claimed_at": "2026-10-13T15:00:53.150337+08:00",
+              "started_at": "2026-10-13T15:00:53.489255+08:00",
+              "finished_at": "2026-10-13T15:00:58.062795+08:00",
+              "error": null
+            }
+          ]
+        },
+        "retired_idle_report_job_id": {
+          "id": "54096d889bf4",
+          "enabled": false,
+          "schedule": {
+            "kind": "cron",
+            "expr": "16 0-23/2 * * *",
+            "display": "16 0-23/2 * * *"
+          },
+          "no_agent": true,
+          "script": "/home/wang/.hermes/scripts/five-roles/tester-idle-report.sh",
+          "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+          "executions": []
+        }
+      },
+      "session_mtime": "2026-10-14T10:20:32.633618+08:00",
+      "session_tail": "追加 `test-receipts/TASK-11S-BATCH-1012/attempt-1.md`（06:4x 段）；事件 `tester-t11s-batch-1012-0647-infer-continue-quiet-20261014`。\n- **下一步：** 下轮 observer 唤醒核 4acf689f 模型段完成信号（checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE，跨夜继续）；A flat 三提交绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）。夜间静默：final [SILENT]，08:00 协调者汇总。\n## 2026-10-14 06:5x 巡检（poll，prerun checked_at 2026-10-14T06:54:53+08:00，指纹 795a1a22…）\n\n- **状态：TASK-11S-BATCH-1012 在途，本轮只读实测无实质变化（4acf689f ~475min 模型段持续在算），无新派单/新 decision。** 唤醒源=上轮 06:50 自写事件 `tester-t11s-batch-1012-0650-infer-continue-quiet-20261014` canonical/inbox 双副本（hash `db68a355…`）+ sessions 回声，均已核读。\n- 关键实测（06:55:31）：`scene-4acf689f`(16_02_03 合法链) SCENE_RUNNING attempt1，heartbeat 06:55:29 30s 节奏刷新、八步仍全 QUEUED started_at=NULL（~475min）；**升级条件逐项未命中**——VLM 06:55:07–06:55:37 Running 2-3 reqs/Waiting 0、prefix 92.2%、KV 2.5-3.5%、MM 88.6%、POST 200 连发、proxy 3495931 volcsw 92293→92319（12s +26 持续递增）、nvolcsw 298 不变、RSS 18213948kB S——**INFER 远端推理持续活跃，不 kill/cancel/retry**。flat 三提交 `a65a25a7`(14_42_48)/`87dfebaa`(16_37_47)/`518089ed`(16_58_28) 仍 PENDING_INPUT source_id=NULL（ingest_submission 8 行不变）等 A D4 第三步，**14_42_48 正式全链维持 NOT_RUN**；`scan_job` 4053/4052（06:45:49）仍最新 incoming SUCCESS {dirs:3 bags:1 failed:2} 空包拒绝可追溯、self_built 8dirs 全绿；scene run 全集 7=6 SCENE_DONE+1 SCENE_RUNNING 无新 run；8767 health=ok active_runs=[4acf689f ACCEPTED pid:1]；PASS 基线不变。本轮全部动作只读（探针 `tester_065x_check.py` 复用 exit 0），未提交/retry/调模型/写生产。\n- 回执追加 `test-receipts/TASK-11S-BATCH-1012/attempt-1.md`（06:5x 段）；事件 `tester-t11s-batch-1012-0655-infer-continue-quiet-20261014`。\n- **下一步：** 下轮 observer 唤醒核 4acf689f 模型段完成信号（checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE，跨夜继续）；A flat 三提交绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）。夜间静默：final [SILENT]，08:00 协调者汇总。"
+    }
+  }
+}

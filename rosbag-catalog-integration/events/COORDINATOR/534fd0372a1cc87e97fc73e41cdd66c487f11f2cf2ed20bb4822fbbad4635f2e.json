@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-204553-task09-ack-running",
+  "occurred_at": "2026-10-11T20:49:37+08:00",
+  "recorded_at": "2026-10-11T20:49:37+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "20:45巡检：2号20:44 ACK已开工TASK-09（wt-04a-t09 分支 scene/task-09-slope-real-verify base 0a8ca8a fetch双核一致），编码中无回执；main未动无OCR在途，TASK-10维持WAITING",
+  "evidence": "inbox/2号/TASK-09/attempt-1-ack.md",
+  "next": "等2号交付回执后机械核验+串行OCR+合入"
+}

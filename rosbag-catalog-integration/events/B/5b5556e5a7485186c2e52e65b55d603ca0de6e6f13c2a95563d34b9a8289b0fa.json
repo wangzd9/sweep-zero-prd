@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-212253-nochange-t07b-ocr-b9-done-b10-inflight-idle",
+  "occurred_at": "2026-10-12T21:26:35+08:00",
+  "recorded_at": "2026-10-12T21:26:35+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "无新派单无返修，07B f4bfcf2 交付冻结等审；协调者 r95 OCR b9 收口 1 low、b10 21:21 起跑在途，本侧只读观察",
+  "evidence": "sessions/B.md 21:27 条目; reviews/TASK-07B/attempt-1/ocr-batches.md r100",
+  "next": "等协调者 b10+契约批收口→b5/b7 最后 resume→裁决/合入"
+}

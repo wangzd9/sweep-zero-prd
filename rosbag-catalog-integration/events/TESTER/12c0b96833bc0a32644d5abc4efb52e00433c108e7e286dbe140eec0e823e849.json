@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-032453-nochange",
+  "occurred_at": "2026-10-13T03:26:20+08:00",
+  "recorded_at": "2026-10-13T03:26:20+08:00",
+  "role": "TESTER",
+  "task": "POLL",
+  "attempt": "1",
+  "status": "NO_CHANGE",
+  "summary": "03:24:53 巡检零新增 TESTER 派单/回执，16A b11 OCR 在途属协调者面，origin/main 未变，空闲待命",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/sessions/TESTER.md",
+  "next": "保持 5 分钟巡检；收口后如派 TESTER 独立验证单再 ACK"
+}

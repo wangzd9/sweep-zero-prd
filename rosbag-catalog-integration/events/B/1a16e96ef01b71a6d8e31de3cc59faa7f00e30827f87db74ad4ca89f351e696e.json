@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-1ack-accepted-20261010-1638",
+  "occurred_at": "2026-10-10T16:39:09+08:00",
+  "recorded_at": "2026-10-10T16:39:09+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-3",
+  "status": "WAITING_REVIEW",
+  "summary": "巡检：1号 attempt-5-rework-2 已 ACK（16:27，wt-01），合入门禁收敛为 1号 medium 小修 commit + 增量 OCR；本侧无新派单无在途进程，86b2cc1 冻结交付不变",
+  "evidence": "sessions/B.md；inbox/1号/TASK-03B/attempt-5-rework-2-ack.md",
+  "next": "等 1号交付 → 协调者增量 OCR → 同批合入 + TESTER 派单"
+}

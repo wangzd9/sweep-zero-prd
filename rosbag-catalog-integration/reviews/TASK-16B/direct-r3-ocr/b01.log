@@ -1,0 +1,187 @@
+{
+  "status": "failed",
+  "llm": {
+    "provider": "vllm-local",
+    "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8"
+  },
+  "message": "Review failed (cancelled): 2 finding(s); 0 of 2 selected item(s) failed.",
+  "summary": {
+    "files_reviewed": 2,
+    "comments": 2,
+    "total_tokens": 4990262,
+    "input_tokens": 4750435,
+    "output_tokens": 239827,
+    "elapsed": "1h5m1s"
+  },
+  "tool_calls": {
+    "total": 128,
+    "by_tool": {
+      "code_comment": 1,
+      "code_search": 64,
+      "file_find": 4,
+      "file_read": 59
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [
+    {
+      "path": "scripts/scene_host_proxy.py",
+      "content": "BUG（可复现）：旧 attempt 的 FINALIZING_* 台账在 Backend attempt 前进后无任何清理路径，会把该 run 永久锁死在 SCENE_SLICE_QUEUE。触发步骤：① attempt-1 收尾失败后进程死亡（FINALIZING_SUCCESS complete 未确认 / FINALIZING_FAILURE 未确认），state 文件保留；② 自动重试激活或手动 retry（retry_run/activate_due_auto_retries 置 SCENE_SLICE_QUEUE、attempt+=1、换新租约）；③ 派发新 attempt 到 /run → 命中 `pending.get(\"attempt\") != attempt` 恒 409，文件不清；④ 重启 recover_pending_runs → 本分支 attempt 不匹配直接 return，文件保留为\"审计依据\"；⑤ orchestrator 每轮 claim→409→SCENE_FAILED→重新入队，死循环永不收敛（每轮 token 不同，幂等回放不能截断）。旧 attempt 已被 Backend attempt 校验剥夺全部写权，文件对旧身份也无意义。最小修复：attempt 前进即清台账。",
+      "suggestion_code": "        detail = backend.run_detail(run_id)\n        if int(detail.get(\"attempt\", 0)) \u003e attempt:\n            # 新attempt已拥有写权：旧身份无任何写入口（步骤/complete/状态均409），\n            # 台账若保留会恒挡新attempt的/run派发（409死循环）→ 留痕后清除。\n            print(f\"scene finalization stale (backend attempt advanced), clearing {run_id}\", flush=True)\n            clear_recovery_state(cfg, run_id)\n            return\n        if int(detail.get(\"attempt\", 0)) != attempt:\n            # 新attempt拥有写权，旧收尾只保留审计依据，绝不写入或重执行。\n            return",
+      "existing_code": "        detail = backend.run_detail(run_id)\n        if int(detail.get(\"attempt\", 0)) != attempt:\n            # 新attempt拥有写权，旧收尾只保留审计依据，绝不写入或重执行。\n            return",
+      "start_line": 1004,
+      "end_line": 1007,
+      "category": "bug",
+      "severity": "high"
+    },
+    {
+      "path": "scripts/scene_host_proxy.py",
+      "content": "BUG（低概率可复现）：`state.update` 重建顶层字段时丢弃了既有台账里的 `resource_lease_token`（及 `accepted_at`）。FINALIZING_FAILURE 总是在 `_release_resource` 之前落盘：若进程在两者之间死亡，重启后 `_resume_finalization` 取 `state.get(\"resource_lease_token\")` 为 None，SCENE_EXEC_HOST 资源租约无法主动释放，只能等 Backend TTL 过期回收。最小修复：写 finalization 时保留资源租约身份。",
+      "suggestion_code": "def _save_finalization(cfg, run_id, attempt, lease_token, *, stage, work_root=None, **facts):\n    state = _read_json(state_path(cfg, run_id)) or {}\n    state.update({\"version\": \"scene-proxy-recovery-v1\", \"pipeline_run_id\": run_id,\n                  \"attempt\": attempt, \"lease_token\": lease_token,\n                  \"resource_lease_token\": state.get(\"resource_lease_token\"),\n                  \"accepted_at\": state.get(\"accepted_at\"),\n                  \"stage\": stage, \"identity\": _process_identity(), \"updated_at\": time.time(),\n                  \"finalization\": {\"work_root\": str(work_root) if work_root else None, **facts}})",
+      "existing_code": "def _save_finalization(cfg, run_id, attempt, lease_token, *, stage, work_root=None, **facts):\n    state = _read_json(state_path(cfg, run_id)) or {}\n    state.update({\"version\": \"scene-proxy-recovery-v1\", \"pipeline_run_id\": run_id,\n                  \"attempt\": attempt, \"lease_token\": lease_token, \"stage\": stage,\n                  \"identity\": _process_identity(), \"updated_at\": time.time(),\n                  \"finalization\": {\"work_root\": str(work_root) if work_root else None, **facts}})",
+      "start_line": 372,
+      "end_line": 377,
+      "category": "bug",
+      "severity": "medium"
+    }
+  ],
+  "groups": [
+    {
+      "label": "small change set",
+      "files": [
+        "app/services/scene_result_report_service.py",
+        "scripts/scene_host_proxy.py"
+      ]
+    }
+  ],
+  "warnings": [
+    {
+      "file": "app/services/scene_result_report_service.py,scripts/scene_host_proxy.py",
+      "message": "round 2: LLM completion error: context canceled",
+      "type": "review_round_failed"
+    }
+  ],
+  "session_id": "3e65796b-a207-4131-8da4-d124531ccd52",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "3e65796b-a207-4131-8da4-d124531ccd52",
+    "operation": "review",
+    "terminal_state": "failed",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "e1524657bda1f66f03034cb72ef05cd65e0c1dfc",
+      "requested_head": "15e4ef9094c7b51ec6f38832533c670d2664b985",
+      "resolved_base": "e1524657bda1f66f03034cb72ef05cd65e0c1dfc",
+      "resolved_head": "15e4ef9094c7b51ec6f38832533c670d2664b985",
+      "exact_range": "e1524657bda1f66f03034cb72ef05cd65e0c1dfc..15e4ef9094c7b51ec6f38832533c670d2664b985",
+      "source_artifact_sha256": "2d10b9b24ad05378f1b174779fecd0b5453a068b1212f1ee01be7a44bf65ece6"
+    },
+    "execution": {
+      "ocr_version": "v1.12.13",
+      "provider": "vllm-local",
+      "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "df6c4c2ac07c51e5d56a2565de4a9db986d34faff5d26da3c2a00b4b3248416d",
+      "runtime_config_sha256": "8edc2e1d8571fdf287cc13c33745cd126301e450999b13d052de01b19b6d17d2"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "24da4ffea0635e1ba3c41a11353bf18d6b981e909361eef9708e3c6aa258d5e6",
+          "path": "scripts/scene_host_proxy.py",
+          "fingerprint": "baf35756557e4a8ec16578fe780109535b535e62f36ab16c7974ee9e37e3c505"
+        },
+        {
+          "item_id": "9720ecf21387b135b3243bdfc4c14f49544e9be2ba0e6e085aabee747df7395a",
+          "path": "app/services/scene_result_report_service.py",
+          "fingerprint": "e0aa59e8eeb1e21424521261ef3408c8d6a2b6b6f44c949258dc4ebde00a4286"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "24da4ffea0635e1ba3c41a11353bf18d6b981e909361eef9708e3c6aa258d5e6",
+          "path": "scripts/scene_host_proxy.py",
+          "fingerprint": "baf35756557e4a8ec16578fe780109535b535e62f36ab16c7974ee9e37e3c505"
+        },
+        {
+          "item_id": "9720ecf21387b135b3243bdfc4c14f49544e9be2ba0e6e085aabee747df7395a",
+          "path": "app/services/scene_result_report_service.py",
+          "fingerprint": "e0aa59e8eeb1e21424521261ef3408c8d6a2b6b6f44c949258dc4ebde00a4286"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "run_failure": {
+      "classification": "cancelled",
+      "reason": "review was cancelled"
+    },
+    "elapsed_ms": 3900751
+  },
+  "retry_report": {
+    "schema_version": "ocr.llm-retry-report/v1",
+    "total_requests": 94,
+    "retried_requests": 0,
+    "total_retries": 0,
+    "recovered_requests": 0,
+    "failed_requests": 0,
+    "cancelled_requests": 1,
+    "requests": [
+      {
+        "logical_request_id": "6dfbcc0b89336caabbe6961016fdccbd914395999e45bddcf5a66bf3200ad466",
+        "provider": "vllm-local",
+        "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8",
+        "file_path": "app/services/scene_result_report_service.py,scripts/scene_host_proxy.py",
+        "task_type": "main_task",
+        "request_no": 92,
+        "outcome": "cancelled",
+        "attempts": [
+          {
+            "attempt": 1,
+            "outcome": "error",
+            "error_class": "cancelled",
+            "failure_phase": "context",
+            "duration_to_headers_ms": 58977
+          }
+        ]
+      }
+    ]
+  }
+}
+{
+  "status": "failed",
+  "llm": {
+    "provider": "vllm-local",
+    "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8"
+  },
+  "summary": {
+    "files_reviewed": 2,
+    "comments": 0,
+    "total_tokens": 4990262,
+    "input_tokens": 4750435,
+    "output_tokens": 239827,
+    "elapsed": "1h5m1s"
+  },
+  "tool_calls": {
+    "total": 128,
+    "by_tool": {
+      "code_comment": 1,
+      "code_search": 64,
+      "file_find": 4,
+      "file_read": 59
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": null,
+  "session_id": "3e65796b-a207-4131-8da4-d124531ccd52"
+}
+[ocr] Session: 3e65796b-a207-4131-8da4-d124531ccd52 (retry with: --resume 3e65796b-a207-4131-8da4-d124531ccd52)
+Error: review failed: context canceled

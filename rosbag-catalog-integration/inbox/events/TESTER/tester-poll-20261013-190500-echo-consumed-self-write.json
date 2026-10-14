@@ -1,0 +1,9 @@
+{
+  "event_id": "tester-poll-20261013-190500-echo-consumed-self-write",
+  "occurred_at": "2026-10-13T19:05:30+08:00",
+  "role": "TESTER",
+  "task": "poll",
+  "status": "ECHO_CONSUMED",
+  "summary": "prerun 指纹 41716a80 唤醒=上轮自写回声（echo 事件+sessions 段）；零新业务输入；两份 TEST_REPORT_PENDING（16B-r2 R1-02/03 FAIL 阻塞 / S9b f76e2a9 PASS）维持待协调者裁决；无在途进程/容器/租约；未触 OCR/他人 worktree/生产",
+  "next": "等协调者裁决两份报告；12S-D/16C 复测/16D 新 dispatch 即 ACK 固定快照开工；若脚本已观测新指纹则 41716a80 ack 保留 pending 下轮接续"
+}

@@ -1,0 +1,20 @@
+{
+  "event_id": "C:t11s-obs78-session-line-20261014",
+  "kind": "business",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "occurrence": {
+    "kind": "now"
+  },
+  "summary": "C 78 轮只读观察会话行（obs78 细节见独立事件 c-t11s-batch-1012-obs78-scene-run-cancelled-after-oom-20261014）：消费协调者 17:20:04 BATCH-STATUS 刷新（16:30/17:15 通知 rev7/rev8 口径=4acf SCENE_CANCELLING 疑似 OOM 重启后租约断链，待 C 只读核实）。实测：16_02_03 大包 attempt 1 已 CANCELLED（容器日志 09:14:25Z=17:14:25 +08），INFER 阶段 decoder 收到取消信号；cancel confirm 两次 409 task lease expired 致 8180 滞留 SCENE_CANCELLING（lease_expires_at 停 16:23:55 stale）；checkpoint.json 17:14:25 更新 INFER FAILED/EXTRACT,SEGMENT RUNNING/余 PENDING；INFER 取消前 15:27 已产出 spray_model_results.json+render_log.json+slice-write=模型主体计算完成；slices/test/spray 6 目录无新发布；8767 active_runs 空。本批 8 包口径变化=大包 attempt 1 取消非 SCENE_DONE；处置归协调者，C 只读不 kill/retry/不重烧模型。",
+  "evidence": "处理机 17:28-17:36 只读：docker logs ddcc7df81635 --timestamps（08:22:22Z cancellation observed / 09:14:25Z CANCELLED INFER / 409 task lease expired x2）；8180 SCENE_CANCELLING lease_expires_at 16:23:55；checkpoint.json mtime 17:14:25；8767 active_runs=[]；NAS 71%；load 0.67/1.82/8.99",
+  "next": "下轮续核 status 收敛 SCENE_CANCELLED 或回 RUNNING；15:27 INFER 产出物归属供协调者/TESTER 处置评估；C 只读",
+  "schema_version": 1,
+  "role": "C",
+  "recorded_at": "2026-10-14T17:55:36+08:00",
+  "occurred_at": "2026-10-14T17:55:36+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

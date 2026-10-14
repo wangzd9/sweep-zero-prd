@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-0507-infer-continue-quiet-20261014050856",
+  "occurred_at": "2026-10-14T05:08:56+08:00",
+  "recorded_at": "2026-10-14T05:08:56+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "05:07 静默期增量只读巡检（唤醒源=上轮 04:59 自写事件 6f0ce73d…+inbox 副本+sessions 回声，无新派单/新 decision）：scene 4acf689f SCENE_RUNNING attempt1 heartbeat=05:06:52 八步全 QUEUED（~362min）；升级条件逐项未命中（VLM 05:06:56-05:07:16 Running 3-4/Waiting 0/prefix 91.9%/KV 4.8-5.7%/prompt 298-1030 tok/s/POST 200 连发/proxy 3495931 volcsw 79150→79174 +24/12s 持续递增）INFER 远端推理持续活跃不 kill/retry；flat 三提交 PENDING_INPUT source_id 空等 A D4③，14_42_48 正式全链 NOT_RUN；scan_job 4033（05:05:46）新周期 SUCCESS failed:2 空包拒绝可追溯；scene run 7=6DONE+1RUNNING 无新 run；PASS 基线不变。",
+  "evidence": "pipeline_run scene-4acf689f9a6a473da1fa2f2efc70 SCENE_RUNNING attempt1 heartbeat=2026-10-14 05:06:52; step_run 八步全 QUEUED started_at=NULL; ingest_submission 8 行不变（a65a25a7/87dfebaa/518089ed PENDING_INPUT source_id=NULL）; scan_job 4033 05:05:46 SUCCESS {dirs:3 bags:1 failed:2}; 8767 health=ok active_runs=[4acf689f ACCEPTED]; proxy 3495931 volcsw 79150→79174（12s 直接/proc采样）nvolcsw 268 不变 RSS 18213940kB S; VLM 05:06:56-05:07:16 Running 3-4 Waiting 0 prefix 91.9% KV 4.8-5.7% MM 87.2% prompt 298-1030 tok/s POST 200 连发",
+  "next": "继续等 4acf689f 模型段完成信号（checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE，跨夜继续）；A flat 三提交绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）"
+}

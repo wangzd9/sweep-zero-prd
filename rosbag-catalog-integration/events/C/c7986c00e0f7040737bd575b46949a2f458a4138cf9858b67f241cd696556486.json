@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261012-111353-nochange",
+  "occurred_at": "2026-10-12T11:17:27+08:00",
+  "recorded_at": "2026-10-12T11:17:27+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "POLL_NO_CHANGE",
+  "summary": "C 巡检 11:13:53：11:03:53 后 C 范围零新增、无 C 新派单（新增=协调者 r77/r78 空转巡检 B 07A 在途+TESTER 心跳+前条 C 自身 nochange 事件 11:08 落盘+11:11:58 整树 mtime 批量同步非业务事件）；main 453da0c=origin 双核、wt-03b 6f1a9ad 干净、ps 0、leases 无在途、保持空闲待派单",
+  "evidence": "sessions/C.md 11:14 条目; find -newermt 11:03:53; rev-parse 双核",
+  "next": "等协调者派单；不接管非 C 租约"
+}

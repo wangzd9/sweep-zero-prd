@@ -1,0 +1,11 @@
+{
+  "event_id": "b-poll-20261012-221753-nochange-t07b-ocr-b5-resume-inflight-idle",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "attempt-1",
+  "status": "IDLE_WAITING",
+  "checked_at": "2026-10-12T22:17:53+08:00",
+  "summary": "无新派单/返修；07B f4bfcf2 交付冻结 REVIEW_PENDING（base 502bf8e 未合入）；协调者 b5 最后一次 --resume（pid 607379，21:59 起跑）实测在途，返修单（b9-1 HIGH+b3 MEDIUM+LOW3）待 b5/b7 收口后由协调者出；本侧遵裁决不移动 HEAD，sessions 追加 22:20 巡检条目（165 行，签名核验通过）",
+  "evidence": "sessions/B.md#165; inbox/coordinator/TASK-07B/ocr-r101-findings-ruling.md",
+  "next": "等 b5/b7 resume 收口 → 收返修问题 ID 单后按 attempt 续 scene/task-07b-manual-revision-withdraw 最小返修"
+}

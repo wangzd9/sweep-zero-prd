@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-1936-no-change-recheck-20261010",
+  "occurred_at": "2026-10-10T19:37:25+08:00",
+  "recorded_at": "2026-10-10T19:37:25+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "2",
+  "status": "RUNNING",
+  "summary": "19:36 poll 复核无变化：main 0f6aa87 不变，events/TESTER 止于 19:15，receipts 仅 attempt-1.md，tester-r2-mysql 容器 Up，A/B/C 空闲；TESTER attempt-2 仍在调试 reconcile 用例，维持不判失败",
+  "evidence": "sessions/COORDINATOR.md 19:36 检查点; docker ps tester-r2-mysql Up 21min",
+  "next": "下轮巡检核查 attempt-2 交付与定性"
+}

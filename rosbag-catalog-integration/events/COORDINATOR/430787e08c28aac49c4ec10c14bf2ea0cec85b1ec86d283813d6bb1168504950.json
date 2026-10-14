@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-005053-r107-t07b-r2-ocr-b2-inflight-nochange",
+  "occurred_at": "2026-10-13T00:57:28+08:00",
+  "recorded_at": "2026-10-13T00:57:28+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07B",
+  "attempt": "attempt-2-r2",
+  "status": "OCR_INFLIGHT",
+  "summary": "r107 巡检无业务变化：07B R2 增量 OCR b2（service +51/-12）00:32:04 起 detached pid 811234 存活在途 ~23min（fuser 核 flock ocr.lock，18002 running=4/waiting=0 不 reap 不重启），b1-b5 排队；A 16A（f7bf5c5）/C 16B（9437308）开发在途零新交付；B 交付冻结；TESTER 空闲；main c2018dd/502bf8e 零 app 面漂移；强审查 AUTHORIZED 0/5 期限 2026-10-13 11:33:12 未起跑",
+  "evidence": "inbox/sessions/COORDINATOR.md#r107",
+  "next": "r108+ 核 b2 DONE 行 → 续 b3-b5+b1 → 强审查 pack → 合入 → TESTER"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-230553-t10-1b-400-inflight",
+  "occurred_at": "2026-10-11T23:09:00+08:00",
+  "recorded_at": "2026-10-11T23:09:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "端到端驱动首跑 23:05 推进：1a submission 201 冻结 OK；1b register source dir 400 NAS_LOCAL_ROOT（B 自设挂载软链口径），判 RUNNING 排查期不催单不接管",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/t10-e2e.json",
+  "next": "每轮核 1b 处置口径/回执，交付即核验链"
+}

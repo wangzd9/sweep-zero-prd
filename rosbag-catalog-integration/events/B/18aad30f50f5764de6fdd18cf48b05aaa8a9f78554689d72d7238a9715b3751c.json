@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-054200-sessions-b-restore-repaired",
+  "occurred_at": "2026-10-12T05:38:26+08:00",
+  "recorded_at": "2026-10-12T05:38:26+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "sessions/B.md 恢复修补：3条同行拆分段补回'- '前缀、2处快照空行还原；终态69行/67条条目，wc/grep核验通过",
+  "evidence": "sessions/B.md",
+  "next": "维持IDLE_WAITING；恢复完整性=快照口径待协调者抽查"
+}

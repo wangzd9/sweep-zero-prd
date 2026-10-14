@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-151553-strongmodel-pass-closeout",
+  "occurred_at": "2026-10-11T15:15:53+08:00",
+  "recorded_at": "2026-10-11T15:27:11+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "strong-review-R2I-20261010-06",
+  "status": "ACCEPT_PASS",
+  "summary": "强复审 R2I-20261010-06 结果 PASS（target 62a85bf，CORRECTION 0/VERIFICATION_GAP 1 I-1 LOW 不阻断/OUT_OF_SCOPE 0，V-1/V-2/V-3 全裁决，真 MySQL 8.4.11 隔离证据 0 残留）→ 03/05/06 聚合 DONE（03 行历史状态冲突解除）→ TASK-08 已派 2号 attempt-1（base 62a85bf）+ I-1 夹具最小修复已派 1号 i1-1（零 app 变更，真 MySQL 文件级全绿为停止条件，不阻断 TASK-08）",
+  "evidence": "reviews/strongmodel/R2I-20261010-06-result.md；inbox/coordinator/TASK-06/strong-review-R2I-20261010-06-acceptance-decision.md；inbox/2号/TASK-08/attempt-1-dispatch.md；inbox/1号/TASK-05/i1-fixture-uid-dispatch.md",
+  "next": "核 1号/2号 ACK 开工；I-1 交付→核验→OCR→合入；TASK-08 联调报告验收"
+}

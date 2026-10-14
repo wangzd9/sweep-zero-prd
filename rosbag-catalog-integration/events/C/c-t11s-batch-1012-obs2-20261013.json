@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs2-20261013",
+  "occurred_at": "2026-10-13T21:12:50+08:00",
+  "recorded_at": "2026-10-13T21:12:50+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "11S-BATCH-1012 C 第2轮只读观察（夜间静默，不群报）：restore-observation-2109 增量事实全部消费核实（TESTER 21:05 ACK 在案、A 原生 execution e6d1bfddebe9425385d46e2c051752ac pid2491657 在途、正确租约目录 leases/ 实测 A.json 21:10/B.json 21:06/C.json 本轮 21:12、处理机 staging 21:08 出现）；实测 staging .upload-staging/spray-production-1012-20261013/ 已创建但 0 文件（A 开始准备暂存、尚无 1012 包落位），incoming/spray/ 仍 0 包 → 本批 run 仍未启动；ps 实测无 C 自发起业务进程；C 不阻塞模型承载传输，待 A 落包/正式提交后按 run 只读接续观察处理机装配/资源/租约/进度",
+  "evidence": "sessions/C.md 21:08 基线条目+本条; leases/A.json 21:10 在途; restore-observation-2109.md; BATCH-STATUS.md C 行 ACKED 21:07",
+  "next": "等 A 落包（runtime_tools 冻结 spec 跨回合），staging/incoming 出现本批包后 C 按 run 只读接续；发现生产问题取证报协调者"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-174553-t08c1-encoding-continues-nochange",
+  "occurred_at": "2026-10-11T17:48:42+08:00",
+  "recorded_at": "2026-10-11T17:48:42+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "RUNNING",
+  "summary": "17:44 后零业务变化：main 98f6c88=origin；2号 t08c-1 编码继续（3 文件 +67/-12，catalog_ingest 17:43:56/clone 17:45:49 mtime），未 commit 无回执；停滞维持解除不催单不接管；无新派单/合入/OCR",
+  "evidence": "wt-04a-t08c git diff --stat 3 files +67/-12; stat mtime 17:38:10/17:43:56/17:45:49",
+  "next": "等 2号 commit+真 MySQL A/B 交付回执→机械核验→串行 OCR 增量→合入→9 红文件全绿复核→08 收口 2/2→TASK-10 候选重算"
+}

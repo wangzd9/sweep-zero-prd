@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-2350-nochange-20261010",
+  "occurred_at": "2026-10-10T23:46:34+08:00",
+  "recorded_at": "2026-10-10T23:46:34+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "4",
+  "status": "WAITING",
+  "summary": "23:45巡检零业务变化：main 6d30a68=origin，强复审结果文件仍不存在，06聚合门禁保持关闭",
+  "evidence": "sessions/COORDINATOR.md",
+  "next": "等用户手动触发强复审R2I-20261010-06"
+}

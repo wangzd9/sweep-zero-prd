@@ -1,0 +1,10 @@
+{
+  "event_id": "b-poll-20261012-222753-t07b-ocr-b5-rc0-core-timeout-b7-resume-inflight",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": 1,
+  "status": "IDLE_WAITING",
+  "summary": "22:27:53 preflight 巡检：b5 最后一次 resume 收口 RC=0/1800s 但 core review 30m 超时（待协调者裁决口径），progress 落 1 bug medium（scalar 缺 order_by/limit）+1 style low（尾换行）；b7 resume 22:19 起实测在途（pid 643555/643563）。inbox/2号 无新派单/返修/裁决单，wt-04a-t07b HEAD=f4bfcf2 冻结洁净遵裁决不移动，origin/main 502bf8e 不变。",
+  "evidence": "scratch/t07b/ocr/r101_resume_progress.txt; sessions/B.md 22:32 条目（167 行核验）",
+  "next": "等协调者核 b5 收口态 + b7 resume 收口 → 出 CONFIRMED CORRECTION 合并返修问题 ID 单后按 attempt 续 scene/task-07b-manual-revision-withdraw 最小返修"
+}

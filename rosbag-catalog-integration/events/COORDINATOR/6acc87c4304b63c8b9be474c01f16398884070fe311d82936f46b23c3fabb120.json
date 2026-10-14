@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-173053-t08c-stall-round4-tick-resumed",
+  "occurred_at": "2026-10-11T17:35:53+08:00",
+  "recorded_at": "2026-10-11T17:35:53+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "STALL_ROUND4_TICK_RESUMED",
+  "summary": "t08c-1 业务活动停滞第4轮(wt-04a-t08c 17:07:36后零变更无commit/回执)，B tick 17:28:53恢复跳=会话存活；main 98f6c88=origin 不变；无新派单/合入/OCR",
+  "evidence": "ticks/B.json 17:28:53; receipts/TASK-08/ 无 t08c 回执; rev-parse HEAD=origin/main",
+  "next": "下轮再停滞(第5轮)则提示用户核 B 群会话，不自动接管；交付即机械核验→OCR 增量→合入→08 DONE"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-023053-r111-ocr-v2-6of14-nochange",
+  "occurred_at": "2026-10-13T02:36:27+08:00",
+  "recorded_at": "2026-10-13T02:37:34+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16A/16B, TASK-07B",
+  "attempt": "ocr-v2 / r3-inflight",
+  "status": "POLL_NO_CHANGE",
+  "summary": "16A OCR v2 6/14 COMPLETED（b6 paths 25208f92 rc=0 378s 0 findings），b7 runner.py 02:23:38 起 INFLIGHT，16B 3 批排队；B 07B R3 开发在途（wt-04a-t07b HEAD 68b5188 未动、api 文件 02:25 后活跃写入、无新回执）；强审授权 1/5 在期至 11:33:12，无在途；无新派单/合入/强审查调用",
+  "evidence": "reviews/TASK-16/16A-16B-ocr-batches.md r111 回写、/home/wang/.hermes/cache/scratch/t16_ocr/t16_ocr_v2_progress.txt、sessions/COORDINATOR.md r111",
+  "next": "核 16A b7+b8~b14→16B 3 批收口→clients medium 正式裁决；B R3 交付后机械核验→R3 增量 OCR→强审增量复审→TESTER 07B-post-r3→07B 合入"
+}

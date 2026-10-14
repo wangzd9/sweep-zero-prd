@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-192753-tester-postmerge-ack-inprogress",
+  "occurred_at": "2026-10-11T19:28:50+08:00",
+  "recorded_at": "2026-10-11T19:28:50+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "MERGED",
+  "summary": "无新派单/返修；TESTER 19:23:47 ACK 合入后 9 红文件真 MySQL 复核在途；wt-04a-t08c bf48a45 冻结干净",
+  "evidence": "sessions/B.md",
+  "next": "等 TESTER 复核报告/协调者 08 DONE 记账"
+}

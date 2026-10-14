@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-193753-nochange-t08c1-merged-tester-postmerge-verify-inprogress",
+  "occurred_at": "2026-10-11T19:39:25+08:00",
+  "recorded_at": "2026-10-11T19:39:25+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "MERGED_WAITING_TESTER",
+  "summary": "无新派单/返修；TESTER 后合并复核在途（隔离 mysqld 19:36 存活）；wt-04a-t08c bf48a45 冻结干净",
+  "evidence": "origin/main=0a8ca8a; tester mysqld pid 2712474 19:36 alive; sessions/B.md",
+  "next": "等 TESTER 复核报告/协调者 08 DONE 记账"
+}

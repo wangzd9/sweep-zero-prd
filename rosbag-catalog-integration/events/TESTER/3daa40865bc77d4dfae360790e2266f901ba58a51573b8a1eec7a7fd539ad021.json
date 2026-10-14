@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-074953-nochange",
+  "occurred_at": "2026-10-12T07:52:27+08:00",
+  "recorded_at": "2026-10-12T07:52:27+08:00",
+  "role": "TESTER",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "IDLE",
+  "summary": "5分钟巡检：无新派单，main 453da0c 未变，无 TESTER 业务进程；T11 驱动第 6 跑已退出 T11_RC=1（非本角色派单范围，不代跑不代判）",
+  "evidence": "sessions/TESTER.md",
+  "next": "继续巡检"
+}

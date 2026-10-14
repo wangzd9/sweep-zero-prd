@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t11s-batch-1012-batchstatus-0024sync-obs14-d4-unlock-3of3-b-noaction-idle-quiet-20261014-0027",
+  "occurred_at": "2026-10-14T00:27:30+08:00",
+  "recorded_at": "2026-10-14T00:27:30+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Consumed BATCH-STATUS.md 00:24:00 sync (9794B; ack of pre-run fp 1a0b41ae rejected STALE_OBSERVATION because observer 00:25:10 captured newer fp 99d14fdd - read new content first, then ack new fp, no retry loop on old fp). New facts (coordinator single-write, C obs14 scope): scene-24ab78bb (16_58_28 dup) 00:07:46 SCENE_DONE NOT_APPLICABLE zero-model, no 24ab78bb fake slice in slices/.staging, lease released - all three zero-iv routing classifications from B DONE 21:12 (16_31_25/16_37_47/16_58_28) now confirmed in production on the dup face, D4 unlock 3/3; scene-4acf689f (16_02_03 formal chain) SCENE_RUNNING since 00:16:27 with active lease renewal (largest cross-DB3 bag, overnight-continue, no kill/retry); NAS top-level dup second slice copy (FFDEE943 x4) preserved as evidence; NAS 71%/load 2.44 expected during large-bag run. B side zero action: inbox/2号 no new dispatch/rework; zero commit/model/copy/prod-write; no B-side process; wt-04a-t12sb frozen. 00:22 session entry appended (sessions/B.md 361->362 lines) + prior event on record. Maintains IDLE_WAITING; quiet hours 21:00-08:00, no proactive group message; 08:00 digest includes C actor-identity escalation.",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md (00:24:00 mtime, 9794B); inbox/control/runtime/observer/B.json (observed fp 99d14fdd at 00:25:10; pending changed_sources=[BATCH-STATUS.md] first_seen 00:22:53); receipts/TASK-11S-BATCH-1012/b-attempt-1.md (B DONE 21:12 classification); sessions/B.md (00:22 entry, 362 lines)",
+  "next": "IDLE_WAITING: await next coordinator dispatch; quiet hours until 08:00, 08:00 digest."
+}

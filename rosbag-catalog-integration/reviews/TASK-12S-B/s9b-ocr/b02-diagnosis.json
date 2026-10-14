@@ -1,0 +1,53 @@
+{
+  "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sb/dfe990b0-8183-4c2b-a8d4-a4bc46eb4eac.jsonl",
+  "session_ids": [
+    "dfe990b0-8183-4c2b-a8d4-a4bc46eb4eac"
+  ],
+  "last_event": {
+    "type": "session_end",
+    "timestamp": "2026-10-13T10:27:52Z"
+  },
+  "terminal_state": "complete",
+  "manifest_schema": "ocr.run-manifest/v1",
+  "input": {
+    "mode": "range",
+    "requested_from": "f62a29c211ac846342dd79b2937962f8cb3c172c",
+    "requested_head": "f76e2a9b403577b791ca3688e0da5e574c4c272a",
+    "resolved_base": "f62a29c211ac846342dd79b2937962f8cb3c172c",
+    "resolved_head": "f76e2a9b403577b791ca3688e0da5e574c4c272a",
+    "exact_range": "f62a29c211ac846342dd79b2937962f8cb3c172c..f76e2a9b403577b791ca3688e0da5e574c4c272a",
+    "source_artifact_sha256": "e1665e79ed3905e9f2a933330c8c4906e69c339c28cec0c6072309e50ec0c9af"
+  },
+  "ocr_version": "v1.12.13",
+  "coverage_counts": {
+    "selected": 3,
+    "completed": 3,
+    "reused": 0,
+    "failed": 0,
+    "waived": 0
+  },
+  "coverage_complete": true,
+  "remaining_paths": [],
+  "gate_decision": "NOT_EVALUATED",
+  "parse_errors": [],
+  "manifest_failures": [],
+  "item_error_messages": {},
+  "llm_errors": [],
+  "repeated_tools": [],
+  "request_characters": {
+    "count": 9,
+    "max": 78630,
+    "max_frozen_first_two": 26123,
+    "note": "字符统计只用于观察增长，不是OCR本地token估计或模型上下文长度。"
+  },
+  "model_usage": {
+    "responses": 9,
+    "total_prompt_tokens": 175250,
+    "total_completion_tokens": 28431,
+    "max_prompt_tokens": 29837
+  },
+  "next_steps": [
+    "本session文件覆盖完整；仍须核对批次base/head、排除/跨文件覆盖、发现裁决及测试，不能自动PASS。"
+  ],
+  "batch_identity_matches": true
+}

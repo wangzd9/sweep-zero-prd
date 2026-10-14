@@ -1,0 +1,18 @@
+{
+  "event_id": "tester-t11s-batch-1012-b-baseline-intake-202610132116300800",
+  "occurred_at": "2026-10-13T21:16:30+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "WAITING_INPUT",
+  "summary": "静默期巡检（指纹15f07d7c…）：消费restore-observation-2109与BATCH-STATUS更新；B回执DONE(21:12:47)独立只读取证已并入TESTER验收基线——16_31_25/16_37_47/16_58_28输入层NOT_APPLICABLE(验无伪切片)、14_42_48/16_00_13需runtime全链、16_02_03全链+跨DB3真实时间戳边界、空包验拒绝；incoming/spray仍空、staging目录21:08建后为空、无上传进程在途→无可验收对象，维持等待A落位",
+  "next": "observer唤醒核A短包/空包落位→按重估口径逐包增量验收；全批收口交付TEST_REPORT_PENDING",
+  "evidence": {
+    "fingerprint": "15f07d7c722eb950fefba8bcbb00c954a2d3ea4e13d89527116d2051175b46f",
+    "b_receipt": "receipts/TASK-11S-BATCH-1012/b-attempt-1.md DONE 21:12:47",
+    "a_lease_owner": "A-batch-1012 (claimed 21:10:42, file pid exited; not preempted)",
+    "upload_staging": "/mnt/nas_backup/.../.upload-staging/spray-production-1012-20261013 空目录(21:14实测)",
+    "incoming_spray_empty": true,
+    "upload_procs": "none (cp/rsync/sha256sum 无匹配, 21:14)"
+  }
+}

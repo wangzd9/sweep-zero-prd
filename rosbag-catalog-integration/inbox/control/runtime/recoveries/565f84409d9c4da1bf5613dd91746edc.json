@@ -1,0 +1,13 @@
+{
+  "recovered_at": "2026-10-13T23:50:21+08:00",
+  "role": "COORDINATOR",
+  "old_owner": "coord-cron-2331",
+  "verification_evidence": "/home/wang/.hermes/cache/scratch/coord-2331-recovery-evidence.txt",
+  "lease": {
+    "owner": "coord-cron-2331",
+    "claimed_at": "2026-10-13T23:37:17+08:00",
+    "expires_at": 1791906437.59159,
+    "pid": null,
+    "process_start": null
+  }
+}

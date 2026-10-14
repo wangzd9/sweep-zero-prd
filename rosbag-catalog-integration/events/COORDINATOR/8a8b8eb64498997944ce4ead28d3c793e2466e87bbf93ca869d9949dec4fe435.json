@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-074553-t11-r5r6-new-failures",
+  "occurred_at": "2026-10-12T07:49:33+08:00",
+  "recorded_at": "2026-10-12T07:49:33+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11",
+  "attempt": "0",
+  "status": "OBSERVATION",
+  "summary": "T11 未归属驱动第 5 跑 FAIL（complete-scene 409 INCOMPLETE 容器路径绑定缺口）+ 第 6 跑 FAIL（1b_register derived-slice 409 跨轮残留）；只观察不接管，记 TASK-11 前置观察事实",
+  "evidence": "scratch/t11/t11-run.log; scratch/t11/t11-e2e.json; scratch/t11_run.out; ~/.hermes/cache/scratch/t11-publish/unassigned/slope",
+  "next": "下轮核第 7 跑/owner 申报；TASK-11 门禁维持未放行"
+}

@@ -1,0 +1,12 @@
+{
+  "role": "COORDINATOR",
+  "event_id": "coord-poll-20261011-1946-task08-done",
+  "type": "task_closure",
+  "checked_at": "2026-10-11T19:45:53+08:00",
+  "recorded_at": "2026-10-11T19:47+08:00",
+  "task": "TASK-08",
+  "summary": "TESTER post-merge-0a8ca8a 复核 19:44 交付 PASS（14/14 真 MySQL RC=0）；协调者独立机械核验（rev-parse 双核/results.json/日志 spot-check/docker+worktree 0 残留）→ 收口条件 2/2 满足 → TASK-08 DONE。候选重算：TASK-10 待 TASK-09（用户授权真实坡道样本/VLM）解除后派单，本轮无新派单。生产门禁维持未放行。",
+  "decision": "inbox/coordinator/TASK-08/post-merge-0a8ca8a-acceptance-decision.md",
+  "main_head": "0a8ca8a",
+  "status_change": "TASK-08 RUNNING→DONE"
+}

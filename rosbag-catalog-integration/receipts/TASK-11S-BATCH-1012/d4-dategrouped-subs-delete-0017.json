@@ -1,0 +1,19 @@
+{
+ "deleted_at": "2026-10-14T00:17:59+0800",
+ "pre": "03281a5159344364b227b1b524521106\tSCHEDULED\tNULL\n5e08e73da0b84cf1a69ba5fb580d652b\tSCHEDULED\tNULL\n7f4e7b757f7043f8a546080e8d51488a\tSCHEDULED\tNULL",
+ "runs_pre": "scene-24ab78bbc4254cf3820daa8c67fa\tSCENE_DONE\nscene-eb4397c3fe8c411a9aab0da8acbf\tSCENE_DONE\nscene-a4824f1c3ea64a5dba9e67bfc353\tSCENE_DONE",
+ "del_03281a51": {
+  "rc": 0,
+  "stderr": "mysql: [Warning] Using a password on the command line interface can be insecure."
+ },
+ "del_5e08e73d": {
+  "rc": 0,
+  "stderr": "mysql: [Warning] Using a password on the command line interface can be insecure."
+ },
+ "del_7f4e7b75": {
+  "rc": 0,
+  "stderr": "mysql: [Warning] Using a password on the command line interface can be insecure."
+ },
+ "post": "",
+ "post_subs_1012": "24d60fee44554e74b15df3fcdf5d93d5\tSCHEDULED\trosbag2_2026_10_12-16_02_03\n518089ed6f554f1895797eb568fc2932\tPENDING_INPUT\trosbag2_2026_10_12-16_58_28\na65a25a70bd74934bdde31eadce69ba7\tPENDING_INPUT\trosbag2_2026_10_08-14_42_48\n87dfebaa5b614f37acda5e25cd834295\tPENDING_INPUT\trosbag2_2026_10_12-16_37_47"
+}

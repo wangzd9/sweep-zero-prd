@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t11s-batch-1012-ruling-consumed-idle-20261013-2125",
+  "occurred_at": "2026-10-13T21:25:30+08:00",
+  "recorded_at": "2026-10-13T21:25:30+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Coordinator ruling b-input-ruling-2117.md consumed: B attempt-1 DONE evidence accepted (per-bag counts match manifest), manifest 3-bag NOT_APPLICABLE correction executed by coordinator, no rework assigned (item 6). B task TASK-11S-BATCH-1012 closed on B side; no dev action, no code change in this batch (OCR/strong-review not triggered per item 7). A remains sole upload/submit owner (execution e6d1bfddebe9425385d46e2c051752ac in flight) - B does not chase or take over. BATCH-STATUS role table confirms B=DONE 21:12.",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/b-input-ruling-2117.md;inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md",
+  "next": "IDLE_WAITING: await next dispatch from coordinator; quiet hours 21:00-08:00 - no proactive group messages."
+}

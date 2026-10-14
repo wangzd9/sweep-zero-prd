@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261012-093953-nochange",
+  "occurred_at": "2026-10-12T09:42:32+08:00",
+  "recorded_at": "2026-10-12T09:42:32+08:00",
+  "role": "TESTER",
+  "task": "TASK-10",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "5分钟巡检无变化：无新派单/无在途owner/维持IDLE",
+  "evidence": "git rev-parse HEAD origin/main = 453da0c",
+  "next": "继续5分钟巡检"
+}

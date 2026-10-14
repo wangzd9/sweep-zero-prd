@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-112053-t07a-attempt1-ocr-rework-r79",
+  "occurred_at": "2026-10-12T13:20:41+08:00",
+  "recorded_at": "2026-10-12T13:20:41+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07A",
+  "attempt": "2-r1",
+  "status": "REWORK_DISPATCHED",
+  "summary": "07A attempt-1 f94d006 机械核验全绿+OCR 8/8 app 覆盖，bags.html 2 medium findings 回派 attempt-2-r1 最小返修，bag_role 下拉裁决接受现状",
+  "evidence": "inbox/coordinator/TASK-07A/attempt-1-ocr-ruling-20261012.md; reviews/TASK-07A/attempt-1/ocr-batches.md",
+  "next": "等 B ACK/交付 attempt-2-r1，交付后增量 OCR→合入→TESTER 验证"
+}

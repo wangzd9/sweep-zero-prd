@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-135253-nochange",
+  "role": "B",
+  "owner": "hermes-cron-poll-6f7471d8747c-20261011-135253",
+  "checked_at": "2026-10-11T13:52:53+08:00",
+  "task": "TASK-06B",
+  "attempt": "1-r2",
+  "status": "IDLE_WAITING",
+  "summary": "无新派单无返修；main 65ca0be=origin 无变化；rework-8 已收口；强复审 R2I-20261010-06 仍 READY_FOR_USER_TRIGGER（pack 12:31 target 65ca0be）",
+  "evidence": "sessions/B.md",
+  "next": "继续 5 分钟巡检；空闲不扩需求"
+}

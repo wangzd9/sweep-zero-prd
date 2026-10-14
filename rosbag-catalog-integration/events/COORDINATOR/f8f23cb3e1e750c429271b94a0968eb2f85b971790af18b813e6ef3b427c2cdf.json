@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-dispatch-0940-tester-attempt5-20261011",
+  "occurred_at": "2026-10-11T09:50:55+08:00",
+  "recorded_at": "2026-10-11T09:50:55+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "5",
+  "status": "PENDING",
+  "summary": "TESTER attempt-5 派单：R-01 秒末边界+R-03 零 UPDATE+attempt-4 抽查+越界核对，base 4697be0",
+  "evidence": "inbox/TESTER/TASK-06/r2-final-mysql-e2e-attempt-5.md",
+  "next": "TESTER ACK 后开工，回执 test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-5.md"
+}

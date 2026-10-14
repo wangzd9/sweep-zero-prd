@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-195053-nochange-t08-done-confirmed",
+  "occurred_at": "2026-10-11T19:53:20+08:00",
+  "recorded_at": "2026-10-11T19:53:20+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-08",
+  "attempt": "post-merge",
+  "status": "DONE",
+  "summary": "19:47后零业务变化 TASK-08 DONE独立复核一致 无新派单",
+  "evidence": "inbox/coordinator/TASK-08/post-merge-0a8ca8a-acceptance-decision.md",
+  "next": "维持巡检 TASK-10待09授权"
+}

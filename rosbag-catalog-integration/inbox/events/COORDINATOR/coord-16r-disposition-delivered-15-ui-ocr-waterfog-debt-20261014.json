@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-16r-disposition-delivered-15-ui-ocr-waterfog-debt-20261014",
+  "occurred_at": "2026-10-14T11:42:05+08:00",
+  "recorded_at": "2026-10-14T11:42:05+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16R",
+  "attempt": "attempt-1",
+  "status": "REVIEW_PENDING",
+  "summary": "用户11:25恢复v0.4最小界面+OCR遗留入任务后，协调者核实本角色空闲（leases仅0字节陈旧锁/ocr.lock无持有/无在途process）并claim。完成TASK-16R盘点+裁决回执（不开发代码）：①15条UI OCR逐条处置=CONFIRMED CORRECTION 4(C5/C8+C3家族)回A/C叶、待核实5(C7/c03-02/03/04/C9)交付前先复现核代码依据、C4维持REJECTED(冲突DESIGN§7.3.3不派错误修复)、C3/c05-03同一修复SHA关两条来源，全经唯一ocr_runtime串行增量+TESTER逐面复验关闭；②水雾债5类分列(git first-parent 4b9f30a..3c9c496实测)=direct-r3(15e4ef9非生产祖先)/final-r4/r5/r6均后续替代(强审R4 29af08a→ad60e41 17红绿+89PASS)、release-8e538bb+3c9c496 CIFS修复=真实e2e覆盖+保留生产接受、fe17e8a..3c9c496=唯一真实未覆盖(orchestrator+70/proxy+24/catalog-scene+5约108行代码)登记低优先补审候选(待UI叶OCR后ocr.lock空窗经唯一入口,不阻塞父16收口/不撤销3c9c496接受/不伪称OCR PASS)。",
+  "evidence": "reviews/TASK-16R/attempt-1-disposition.md;git rev-parse/merge-base first-parent 4b9f30a..3c9c496(15e4ef9非3c9c496祖先,29af08a/6ddcbcb/ad60e41/8e538bb逐级祖先);reviews/TASK-16B/{direct-r3-ocr,final-r6-ocr}/spec.json,r4-correction-verdict.md,release-8e538bb-acceptance.md;reviews/TASK-11S/production-first-bag-20261013.md;TODO.md §8 16R行更新",
+  "next": "5min observer接续核A/B/C/TESTER叶ACK+开工(inbox/1号|2号|3号 TASK-16C-*+TESTER/TASK-16D)→任一叶交付冻结=机械核验→唯一ocr_runtime串行增量OCR→TESTER逐面复验→接受叶;TESTER 16D环境/复现已知缺陷并行;三叶齐=生成含seed固定集成候选→16D联合验收→父16C聚合接受;fe17e8a..3c9c496弱OCR补审待UI叶OCR后空窗执行(低优先,不阻塞收口)。不代ACK/不强杀/不起全部prepared。"
+}

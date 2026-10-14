@@ -1,0 +1,117 @@
+{
+  "status": "complete",
+  "llm": {
+    "provider": "vllm-local",
+    "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8"
+  },
+  "message": "Review complete: 0 finding(s) across 4 selected item(s).",
+  "summary": {
+    "files_reviewed": 4,
+    "comments": 0,
+    "total_tokens": 349292,
+    "input_tokens": 315898,
+    "output_tokens": 33394,
+    "elapsed": "20m29s"
+  },
+  "tool_calls": {
+    "total": 12,
+    "by_tool": {
+      "code_comment": 1,
+      "code_search": 1,
+      "file_read": 9,
+      "file_read_diff": 1
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [],
+  "groups": [
+    {
+      "label": "Spray scene module changes",
+      "files": [
+        "app/scene/spray/adapter.py",
+        "app/scene/spray/decode.py",
+        "app/scene/spray/render.py",
+        "app/scene/spray/time_map.py"
+      ]
+    }
+  ],
+  "session_id": "f951f13f-9824-4a08-bd9b-e6cd2bb3bd1d",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "f951f13f-9824-4a08-bd9b-e6cd2bb3bd1d",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "f62a29c211ac846342dd79b2937962f8cb3c172c",
+      "requested_head": "f76e2a9b403577b791ca3688e0da5e574c4c272a",
+      "resolved_base": "f62a29c211ac846342dd79b2937962f8cb3c172c",
+      "resolved_head": "f76e2a9b403577b791ca3688e0da5e574c4c272a",
+      "exact_range": "f62a29c211ac846342dd79b2937962f8cb3c172c..f76e2a9b403577b791ca3688e0da5e574c4c272a",
+      "source_artifact_sha256": "7e1e2bd91f7c35f0571fdd270629617dd2c6fa5cd51fd2cb0a684feebb7c2612"
+    },
+    "execution": {
+      "ocr_version": "v1.12.13",
+      "provider": "vllm-local",
+      "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "2aa8703543b534fa8286eb6aa7a13d123696540e716989eacdb2966683de7c40",
+      "runtime_config_sha256": "8edc2e1d8571fdf287cc13c33745cd126301e450999b13d052de01b19b6d17d2"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "00fd52718e183dda4cce5e84ab6abbba5034e347e5f001739981c91bae3c2185",
+          "path": "app/scene/spray/adapter.py",
+          "fingerprint": "18c1e36c034cc4d574b57be91d4722adb83f33da8997f271631677dadafad875"
+        },
+        {
+          "item_id": "6f35f88ee1ba63654d65a0b27b847c4bf96e04477fc33dbaa6c6ed6436523449",
+          "path": "app/scene/spray/decode.py",
+          "fingerprint": "564a229a379c4aa46f4c2bde0e51034506726ede23cda70a7d3a2539202ba9d0"
+        },
+        {
+          "item_id": "a8179b6edda41da0514dd61874dabf6834043abd9bf25b1be9512cadbb7fd9ea",
+          "path": "app/scene/spray/time_map.py",
+          "fingerprint": "8a085460d73a8551a09c086f2bf9b74b3c6e12a614731b93e59b91f4e6a1fc18"
+        },
+        {
+          "item_id": "c020914786b5f2d5f46ec09abfd00f56ad6a9a36d0632011e43e7fa55b0fbdd5",
+          "path": "app/scene/spray/render.py",
+          "fingerprint": "aa350e43acb798fd68ba74e05c9d43415eea0d51233172c8250b050aea99eb86"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "00fd52718e183dda4cce5e84ab6abbba5034e347e5f001739981c91bae3c2185",
+          "path": "app/scene/spray/adapter.py",
+          "fingerprint": "18c1e36c034cc4d574b57be91d4722adb83f33da8997f271631677dadafad875"
+        },
+        {
+          "item_id": "6f35f88ee1ba63654d65a0b27b847c4bf96e04477fc33dbaa6c6ed6436523449",
+          "path": "app/scene/spray/decode.py",
+          "fingerprint": "564a229a379c4aa46f4c2bde0e51034506726ede23cda70a7d3a2539202ba9d0"
+        },
+        {
+          "item_id": "a8179b6edda41da0514dd61874dabf6834043abd9bf25b1be9512cadbb7fd9ea",
+          "path": "app/scene/spray/time_map.py",
+          "fingerprint": "8a085460d73a8551a09c086f2bf9b74b3c6e12a614731b93e59b91f4e6a1fc18"
+        },
+        {
+          "item_id": "c020914786b5f2d5f46ec09abfd00f56ad6a9a36d0632011e43e7fa55b0fbdd5",
+          "path": "app/scene/spray/render.py",
+          "fingerprint": "aa350e43acb798fd68ba74e05c9d43415eea0d51233172c8250b050aea99eb86"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 1229259
+  }
+}

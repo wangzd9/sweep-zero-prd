@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-131253-nochange-t07a-ocr-bagsvc-r3",
+  "occurred_at": "2026-10-12T13:15:19+08:00",
+  "recorded_at": "2026-10-12T13:15:19+08:00",
+  "role": "B",
+  "task": "TASK-07A",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "无新派单/返修；T07A交付冻结f94d006等审；协调者OCR T07A-r1f-bagsvc-r3 13:10:40续审在途(pid 4147299)",
+  "evidence": "sessions/B.md 13:13条目; inbox/ocr.lock",
+  "next": "等OCR收口/机械核验/裁决→合入→TESTER验证"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coordinator-poll-20261011210553-task09-runner-done-no-receipt",
+  "occurred_at": "2026-10-11T21:07:43+08:00",
+  "recorded_at": "2026-10-11T21:07:43+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "巡检：2号 TASK-09 真实样本 runner 21:04:53 EXIT=0 落 t09-real-verify.json（五键齐全，阳性/阴性NO_MATCH/边界MODEL_UNAVAILABLE 断言均在），wt-04a-t09 三文件 20:51 后未再改、未 commit 无交付回执；main 0a8ca8a=origin 未动，无 OCR 在途，TASK-10 维持 WAITING；等 2号 commit+回执后机械核验",
+  "evidence": "/home/wang/.hermes/cache/scratch/t09-real/t09-real-verify.json; inbox/2号/TASK-09/attempt-1-ack.md",
+  "next": "等 2号交付回执 → 机械核验(含图像 content 非空) → 串行 OCR → 合入 → 09 DONE → 派 TASK-10"
+}

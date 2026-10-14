@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-040553-r118-t16b1-failed",
+  "occurred_at": "2026-10-13T04:14:32+08:00",
+  "recorded_at": "2026-10-13T04:14:32+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "16B-b1 orchestrator 首跑 FAILED rc=1（LLM 队列超时，manifest 在案可 resume）；b2 proxy 04:05:50 起跑在途；重试政策落账",
+  "evidence": "scratch/t16_ocr/v2_16B_scripts_scene_host_orchestrator.py.log",
+  "next": "等 v2 锁释放后独立 resume 补跑 b1"
+}

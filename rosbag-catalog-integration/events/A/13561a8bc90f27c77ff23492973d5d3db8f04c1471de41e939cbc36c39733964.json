@@ -1,0 +1,12 @@
+{
+  "event_id": "a-t11-observe-20261012-073653-run5-1d-fail",
+  "occurred_at": "2026-10-12T07:39:23+08:00",
+  "recorded_at": "2026-10-12T07:39:23+08:00",
+  "role": "A",
+  "task": "TASK-11",
+  "attempt": "observe",
+  "status": "POLL_NO_CHANGE",
+  "summary": "t11驱动07:35第5跑:1c PASS升位生效,1d FAIL consume后未建SCENE_SLICE run,T11_RC=1,进程已退出;断点下移,归属待协调者核;本角色无新派单开发槽空闲",
+  "evidence": "scratch/t11/t11-run.log, scratch/t11_run.out",
+  "next": "等协调者核t11驱动归属与处置;TASK-11生产门禁维持未放行"
+}

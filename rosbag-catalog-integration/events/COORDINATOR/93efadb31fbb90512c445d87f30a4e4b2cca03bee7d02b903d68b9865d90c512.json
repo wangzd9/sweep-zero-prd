@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-111553-rework7-delivered",
+  "occurred_at": "2026-10-11T11:16:49+08:00",
+  "recorded_at": "2026-10-11T11:16:49+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "2号rework-7已交付commit-9e5455f-回执在案-待协调者验收+串行OCR",
+  "evidence": "receipts/TASK-06B/attempt-1-r2-rework-7.md",
+  "next": "下轮验收+OCR增量"
+}

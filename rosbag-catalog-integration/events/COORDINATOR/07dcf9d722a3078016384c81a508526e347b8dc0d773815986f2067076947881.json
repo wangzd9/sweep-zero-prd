@@ -1,0 +1,10 @@
+{
+  "event_id": "coord-poll-20261011-204053-nochange",
+  "role": "COORDINATOR",
+  "task": "none",
+  "attempt": null,
+  "status": "POLL_NOCHANGE",
+  "summary": "20:30 后零业务变化：main 0a8ca8a=origin 双核一致，业务目录零新增，A/B/C/TESTER 全空闲（B 20:37/C 20:38 例行 nochange 心跳），TASK-08 DONE 维持收口，TASK-09 真实样本门禁待用户授权，无新派单。",
+  "checked_at": "2026-10-11T20:40:53+08:00",
+  "next": "维持 5 分钟巡检；等用户授权 TASK-09 后重算 TASK-10"
+}

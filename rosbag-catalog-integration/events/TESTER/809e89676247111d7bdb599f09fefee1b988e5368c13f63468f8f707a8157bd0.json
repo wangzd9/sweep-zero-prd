@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-4acf-stall-slow-activity-20261014020343",
+  "occurred_at": "2026-10-14T02:03:43+08:00",
+  "recorded_at": "2026-10-14T02:03:43+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "02:0x 跨夜增量只读实测（消费 01:52 静默段升级事件回声+sessions 回声，无新派单/新 decision）：4acf689f SCENE_RUNNING attempt1 heartbeat 02:00:10 持续刷新、八步仍全 QUEUED（入队 ~2h）；docker stats CPU 5.70% 回升经 /proc 甄别=短窗口噪声（10s 双采样 voluntary_ctxt_switches 增量仅 20、top 实测 %CPU=0.0），worker 未恢复实质在算；但 12min 跨度 voluntary_ctxt_switches 55223→56536（+1313，~110/min）=存在低速活动，01:4x『零推进』口径修正为『零实质推进+低频事件循环』，维持升级报协调者定性（cancel/retry 生产写，TESTER 不执行）；ingest_submission 8 行不变 flat 三提交仍 PENDING_INPUT 等 A 绑定、14_42_48 正式全链 NOT_RUN；scan_job 3995（01:55:40）incoming SUCCESS failed:2=空包 16_33_10 拒绝 10min 周期持续；scene run 7=6DONE+1RUNNING 无新 run；PASS 基线不变。",
+  "evidence": "pipeline_run heartbeat=2026-10-14 02:00:10; step_run 8/8 QUEUED started_at=NULL; /proc/3495931 voluntary_ctxt_switches 55223(01:49)→56536(02:01) +1313; docker stats 0.48-5.70% MEM 20.44-20.62GiB; ingest_submission 8 rows flat PENDING_INPUT; scan_job 3995 01:55:40 SUCCESS failed:2; scene_runs 7=6DONE+1RUNNING",
+  "next": "等协调者定性 4acf689f 静默段处置（cancel/retry 由协调者/A 执行）；SCENE_DONE 后跨 DB3 边界/产物/两次 reconcile（16_02_03 正式全链）；A flat 三提交绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-193253-nochange-t08c1-merged-tester-postmerge-verify-inprogress",
+  "occurred_at": "2026-10-11T19:34:18+08:00",
+  "recorded_at": "2026-10-11T19:34:18+08:00",
+  "role": "B",
+  "task": "TASK-08",
+  "attempt": "1",
+  "status": "MERGED_WAITING_TESTER",
+  "summary": "t08c-1 已合入 0a8ca8a，TESTER 后合并复核在途，无新派单无返修",
+  "evidence": "origin/main=0a8ca8a; wt-04a-t08c HEAD=bf48a45 冻结; TESTER tester-pm08-mysql 容器进程存活",
+  "next": "等 TESTER 复核报告/协调者 08 DONE 记账"
+}

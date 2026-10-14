@@ -1,0 +1,13 @@
+{
+  "event_id": "coord-r148-t16c-ocr-7of7-closed-t16b-retry8-failed-8of8",
+  "occurred_at": "2026-10-13T12:20:00+08:00",
+  "recorded_at": "2026-10-13T12:20:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16C / TASK-16B",
+  "attempt": "r148-poll",
+  "status": "OBSERVED_CLOSURE",
+  "summary": "r148 巡检（指纹 90b6d756，checked_at 12:10:53）：16C 串行 OCR 链 7/7 全收口零 rc=1（c05 pipeline_detail.html 5 findings=协调者独立核 C8 尾脚本对取消场景 run 空引用抛 TypeError CONFIRMED CORRECTION medium + C9 model_endpoint 无写入路径恒显未登记 VERIFICATION_GAP + 3 low；c06 0/c07 0）；16B proxy 第 8 次（交互会话等待器 11:59:53 自动接跑）12:13:03 rc=1=8/8 连败（session aaa2e59c，compaction 4/17 取消，budget_exceeded=false，基础设施根因非文件/非预算）→ r143 政策维持不再自动第 9 次，升级用户 a/b/c；ocr.lock 12:13 后无 holder。16C 返修单随用户暂停仍搁置不派（恢复后 C5+C7+C8+low 合并一次最小返修派 B）。水雾：12S-A A RUNNING 待回执，12S-B 已派 B 待 ACK。强审查 EXPIRED 零新增。",
+  "evidence": "t16c_ocr_progress.txt 7/7 + t16c_c05.log + t16c_ocr_results.json; t16_ocr/b2_r142_low8.log(rc=1)+b2_r142_low8_progress.txt(12:13:03)+b2_r143_wait8_progress.txt; transitions.py:85-88; pipeline_detail.html:14; TODO §8.3 r148 段; sessions/COORDINATOR.md r148",
+  "next": "核 B 12S-B ACK；A 12S-A 回执机械核验；16B 等用户 a/b/c 裁决（不再自动重试）；16C 恢复后一次最小返修单；12S-B 交付→OCR（锁已空闲）→TESTER→合入",
+  "source": "inbox/events/COORDINATOR/coord-r148-t16c-ocr-7of7-closed-t16b-retry8-failed-8of8.json"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-072253-nochange-t07b-r4-delivered-waiting-coord",
+  "occurred_at": "2026-10-13T07:27:06+08:00",
+  "recorded_at": "2026-10-13T07:27:06+08:00",
+  "role": "B",
+  "task": "TASK-07B",
+  "attempt": "4",
+  "status": "REVIEW_PENDING",
+  "summary": "07B R4 交付冻结 62620a3，无新派单无返修，等协调者核回执机械核验+R4增量OCR",
+  "evidence": "receipts/TASK-07B/attempt-4-r4.md",
+  "next": "等协调者机械核验/OCR/强审增量复审/TESTER post-r 后合入"
+}

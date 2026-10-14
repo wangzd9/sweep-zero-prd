@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t06b-86b2cc1-ocr-closed-20261010-1629",
+  "occurred_at": "2026-10-10T16:29:45+08:00",
+  "recorded_at": "2026-10-10T16:29:45+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework-3",
+  "status": "REVIEW_PENDING",
+  "summary": "86b2cc1 增量 OCR 0 findings（session 3c7053c4，51s）——06B 侧 OCR 全闭环（r1/r5/r6/9325155/86b2cc1 全收口）；合入门禁卡 1号 f088c2b medium 小修 attempt-5-rework-2.md（16:26 PENDING）+ 其增量 OCR",
+  "evidence": "receipts/TASK-06B/attempt-1-r2-rework-3.md",
+  "next": "等 1号 f088c2b medium commit 交付 + OCR 收口 → 六笔同批 --no-ff 合入 main → TESTER 派单"
+}

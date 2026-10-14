@@ -1,0 +1,12 @@
+{
+  "event_id": "a-task12sa-attempt1-delivered-20261013",
+  "occurred_at": "2026-10-13T13:27:00+08:00",
+  "recorded_at": "2026-10-13T13:27:00+08:00",
+  "role": "A",
+  "task": "TASK-12S-A",
+  "attempt": "1",
+  "status": "DELIVERED_REVIEW_PENDING",
+  "summary": "执行者 A 交付 TASK-12S-A attempt-1（v0.5 水雾原始信息绑定 scene-input/v1 source_metadata，AC-18.1/18.2/18.3 开发侧口径）：commit 77c395b9（base 6fb42c4），5 文件 +1272/-32=DTO SourceMetadataSchema+POST/PATCH 可选块+接受时不猜车校验+独立 hash+冻结车辆绑定/恢复+seed scene-spray 幂等不崩。自测新增 25 passed（独立+全量顺序均绿）、既有 ingest/scene 78 无回归、ruff 全过、全量 908 passed；开发中自纠两处越界（_disabled_prefix_claims_path 破坏既有 disabled 回退口径已回退、spray 必填判定改 incoming_prefix 语义）",
+  "evidence": "inbox/1号/TASK-12S-A/attempt-1-receipt.md",
+  "next": "REVIEW_PENDING 非通过，未合入；等协调者机械核验→增量 OCR→TESTER 独立验证（真实 sensor 名单/A100 生产留 TESTER 域）→合入 12S-A DONE；本角色开发槽等待审查结果，协调者释放槽并给无冲突新单可接续"
+}

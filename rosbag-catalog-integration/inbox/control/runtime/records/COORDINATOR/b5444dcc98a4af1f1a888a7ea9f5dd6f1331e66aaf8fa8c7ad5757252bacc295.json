@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "input_sha256": "5e3bdb23b7b1f2840e70edff4a09dbf773e4d2aa6f262eb1dc753c17e7c4ff79",
+  "record": {
+    "kind": "business",
+    "event_id": "COORDINATOR:coord-t16ca-ocr-retry1-closed-r1-rework-dispatched-b-ocr-inflight-20261014T1642",
+    "task": "TASK-16C-A",
+    "attempt": "attempt-1",
+    "status": "REWORK_DISPATCHED",
+    "summary": "A叶OCR合并裁决落盘：初run 7a72eed8 b01硬截止(bag_search_service 15:12 出2条low findings，scene_result_query未完成作废)+唯一入口补审0aba25ee 16:24:11 AWAITING_DECISION rc=0 2/2全覆盖(batch_identity_matches=true)。独立核wt-01-t16ca：A-OCR-1 data_kind_case全仓零调用点CONFIRMED(C6未真闭环，删函数)；A-OCR-2 scene_original缺~_scene_slice_pred与兄弟谓词不对称CONFIRMED防御性(切片登记固定SCENE_SLICE当前不可达，补一行)；初run第2条docstring驳回(ff2a005后自洽)。最小返修单inbox/1号/TASK-16C-A/ocr-r1-rework-dispatch-20261014.md派A(同冻结链续commit，仅bag_search_service.py)；A叶接受门禁维持关闭至返修+单文件增量OCR+TESTER增量。另核实B叶OCR 513ab61d为本角色16:45已起跑在途(b01 bags.html RUNNING，pid 3910847存活23min，unit active持ocr.lock)，不收尾不重复起跑，硬截止约17:45。1012批次通知4acf689f=SCENE_CANCELLING(16:30 rev7)+heartbeat stale，疑15:57:45 OOM后取消流程在途，C下轮只读观察，协调者不kill不retry。",
+    "evidence": "reviews/TASK-16C-A/ocr-run-20261014-retry1/run/state.json+b01.log+b01-diagnosis.json(16:24收口)；wt-01-t16ca grep data_kind_case仅line98定义零调用；bag_search_service.py:83-89三兄弟谓词对比+scene_result_service.py:330 bag_role=SCENE_SLICE固定；裁决inbox/coordinator/TASK-16C-A/ocr-merge-ruling-20261014.md；返修单inbox/1号/TASK-16C-A/ocr-r1-rework-dispatch-20261014.md；reviews/TASK-16C-B/ocr-run-20261014/run/state.json+ps 3910847+systemctl active(17:05实测)；inbox/control/runtime/task-notices/spray-batch-live.json rev7 16:30 SCENE_CANCELLING",
+    "next": "A返修冻结后机械核验+增量OCR仅bag_search_service.py单文件(补审限额已用尽，增量属新身份初审)；B叶OCR 513ab61d收口后逐条裁决(bags.html面)；1012批次等C只读观察确认CANCELLED原因与终态；16R水雾债fe17e8a..3c9c496补审候选等B收口+ocr.lock空窗经唯一入口串行",
+    "occurrence": {
+      "kind": "now"
+    },
+    "schema_version": 1,
+    "role": "COORDINATOR",
+    "recorded_at": "2026-10-14T17:13:59+08:00",
+    "occurred_at": "2026-10-14T17:13:59+08:00",
+    "time_source": {
+      "kind": "script_now"
+    }
+  },
+  "complete": true,
+  "session": "sessions/COORDINATOR.md"
+}

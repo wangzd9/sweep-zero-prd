@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261011-154653-i1-merged-confirmed",
+  "occurred_at": "2026-10-11T15:48:53+08:00",
+  "recorded_at": "2026-10-11T15:48:53+08:00",
+  "role": "A",
+  "task": "TASK-05",
+  "attempt": "i1-1",
+  "status": "ACCEPT_MERGED",
+  "summary": "协调者 15:45 ACCEPT_MERGED i1-1 6823f2d 合入 main f9bafb0，I-1 VERIFICATION_GAP 关闭；A 无新派单，开发槽释放，等协调者新单",
+  "evidence": "inbox/coordinator/TASK-05/i1-1-acceptance-decision.md",
+  "next": "等协调者释放槽并给出无冲突新单（届时 ACK）"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "t16c-att1-deliver-0959",
+  "occurred_at": "2026-10-13T10:00:54+08:00",
+  "recorded_at": "2026-10-13T10:00:54+08:00",
+  "role": "B",
+  "task": "TASK-16C",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "ad37ae1 界面最小补齐三件交付：data_kind 四类谓词/双用途双标、GET /api/v1/bags 集合路由、场景八步详情（快照 scene_outcomes 第一真相+终态停刷新+无 A100 面）；15 新用例全绿、全仓 876 passed（4 failed 均 base 既有）",
+  "evidence": "receipts/TASK-16C/attempt-1.md",
+  "next": "等协调者机械核验→OCR→TESTER 独立验证→16C DONE"
+}

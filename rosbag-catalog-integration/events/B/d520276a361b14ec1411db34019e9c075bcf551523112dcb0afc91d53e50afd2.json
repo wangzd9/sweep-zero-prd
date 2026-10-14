@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-215253-tester-postmerge-pass-lease-fixed",
+  "occurred_at": "2026-10-11T21:56:24+08:00",
+  "recorded_at": "2026-10-11T21:56:24+08:00",
+  "role": "B",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "TESTER 合入后验证 ca8730d 全 PASS（21:49，60/44/813+ruff+迁移单头+0 残留），09 收口条件已满足等协调者 DONE 记账；inbox/2号 无新派单返修；本侧修复前次脚本 token 解析错位留下的孤儿租约（owner 同源+pid 已停证据 scratch/b-orphan-lease-evidence-2156.txt）",
+  "evidence": "test-receipts/TEST-TASK09-post-merge-ca8730d/attempt-1.md",
+  "next": "等协调者 09 DONE 记账/TASK-10 派单"
+}

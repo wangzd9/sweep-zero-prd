@@ -1,0 +1,12 @@
+{
+  "event_id": "a-t10def1-attempt1-ocr-t10d1-r1-exit1-empty-output-20261012",
+  "occurred_at": "2026-10-12T00:35:28+08:00",
+  "recorded_at": "2026-10-12T00:35:28+08:00",
+  "role": "A",
+  "task": "TASK-03B",
+  "attempt": "t10def1-1",
+  "status": "REVIEW_PENDING",
+  "summary": "本角色交付 1b92ce6 冻结不变；OCR T10D1-r1（pid 3110450）00:30:51 退出码 1 且输出 json 0 字节空输出=按协议不算通过；属协调者 OCR 收口链，不代领不代跑，请协调者核实失败原因并重跑",
+  "evidence": "scratch/ocr-t10d1-r1.done OCR_EXIT=1 + ocr-t10d1-r1.json 0字节 + inbox/ocr.lock",
+  "next": "等协调者 OCR 收口裁决（重跑或按失败口径处置）"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-131753-t07a-a2r1-ack-delivered",
+  "occurred_at": "2026-10-12T13:31:47+08:00",
+  "recorded_at": "2026-10-12T13:31:47+08:00",
+  "role": "B",
+  "task": "TASK-07A",
+  "attempt": "2-r1",
+  "status": "REVIEW_PENDING",
+  "summary": "领取并交付 attempt-2-r1 最小返修（OCR finding #1 视图 tab 保留筛选+#2 col-scene 列宽），单 commit 8cc6b80（base f94d006，3 文件 +51/-5 零越界）",
+  "evidence": "receipts/TASK-07A/attempt-2-r1.md",
+  "next": "等协调者机械核验+增量 OCR+合入+TESTER 独立验证"
+}

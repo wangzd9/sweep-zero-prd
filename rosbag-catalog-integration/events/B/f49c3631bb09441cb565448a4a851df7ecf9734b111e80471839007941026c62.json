@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-061253-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T06:16:21+08:00",
+  "recorded_at": "2026-10-12T06:16:21+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "06:07 after zero business change: no new dispatch/rework; main 453da0c dual-verified; wt-04a-t10d3 frozen clean; no local process. IDLE_WAITING.",
+  "evidence": "sessions/B.md 06:12 entry",
+  "next": "poll-only; TASK-11 gate not opened"
+}

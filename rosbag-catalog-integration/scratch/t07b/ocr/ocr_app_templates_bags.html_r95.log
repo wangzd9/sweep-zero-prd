@@ -1,0 +1,12 @@
+[ocr] Summary: 1 file(s) reviewed, 1 comment(s), ~323664 token(s) used (input: ~308094, output: ~15570), 13m44s elapsed
+[ocr] Session: 71c2370c-c0ab-4eaa-90b3-e218ac546207
+Review complete: 1 finding(s) across 1 selected item(s).
+
+─── app/templates/bags.html:226-226 ───
+[maintainability · low] 两个小问题：1) 分支 `'failed' if bag.availability == 'WITHDRAWN' else 'failed'`
+两个结果相同，是冗余的，会让人误以为 WITHDRAWN 有独立的样式分支，建议简化为 `else 'failed'`；2) 非 WITHDRAWN 的切片行会渲染出空的 `title=""`
+属性。功能正确性没有问题（WITHDRAWN 显示“已下架”红标并带 tooltip，测试已覆盖 all 视图断言）。
+
+- <td data-label="状态">{% if sc.get('_role') == 'slice' and bag.availability %}<span class="status {{ 'done' if bag.availability == 'AVAILABLE' else 'queued' if bag.availability == 'PENDING' else 'failed' if bag.availability == 'WITHDRAWN' else 'failed' }}" title="{{ '人工下架：模型原结果保留，退出默认可用检索（all 视图可见）' if bag.availability == 'WITHDRAWN' else '' }}">{{ '已下架' if bag.availability == 'WITHDRAWN' else bag.availability }}</span>{% else %}<span class="status {{ ('done' if nv and nv.pipeline_status in ['NVIDIA_DONE','PUBLISHED'] else 'queued' if nv and nv.pipeline_status == 'NVIDIA_QUEUE' else 'running' if nv and nv.pipeline_status == 'RUNNING' else 'failed' if nv else (bag.status|lower)) }}">{{ nv.pipeline_status_zh if nv else bag.status }}</span>{% endif %}</td>
++ <td data-label="状态">{% if sc.get('_role') == 'slice' and bag.availability %}{% set wd = bag.availability == 'WITHDRAWN' %}<span class="status {{ 'done' if bag.availability == 'AVAILABLE' else 'queued' if bag.availability == 'PENDING' else 'failed' }}" {% if wd %}title="人工下架：模型原结果保留，退出默认可用检索（all 视图可见）"{% endif %}>{{ '已下架' if wd else bag.availability }}</span>{% else %}
+

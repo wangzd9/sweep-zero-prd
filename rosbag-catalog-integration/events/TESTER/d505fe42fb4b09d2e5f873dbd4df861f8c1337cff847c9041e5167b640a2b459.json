@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-poll-20261013-053453",
+  "occurred_at": "2026-10-13T05:34:53+08:00",
+  "recorded_at": "2026-10-13T05:38:03+08:00",
+  "role": "TESTER",
+  "task": "idle-poll",
+  "attempt": "none",
+  "status": "IDLE",
+  "summary": "5min poll: no new TESTER dispatches since 05:19:53 preflight (find -newermt zero files in inbox/TESTER, test-receipts, receipts); coordinator 16B resume chain alive (pid 1198826 etime ~47min, ocr review --resume e2b8a607 pid 1229080 etime ~23min); main c2018dd / origin/main 502bf8e unchanged, merge gate closed; no TESTER in-flight processes; idle standby.",
+  "evidence": "find inbox/TESTER test-receipts receipts -newermt '2026-10-13 05:19:53' -> empty; ps -o pid,etime -p 1198826,1229080; git -C wt-01 fetch+rev-parse main/origin/main",
+  "next": "stay idle; ACK immediately on SR-05 (07B-post-r3 real-MySQL) or 16D dispatch"
+}

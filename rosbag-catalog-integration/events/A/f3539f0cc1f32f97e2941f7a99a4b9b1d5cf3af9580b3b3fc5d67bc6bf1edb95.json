@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261011-195153-nochange",
+  "occurred_at": "2026-10-11T19:53:34+08:00",
+  "recorded_at": "2026-10-11T19:53:34+08:00",
+  "role": "A",
+  "task": "TASK-08",
+  "attempt": "none",
+  "status": "IDLE_WAITING",
+  "summary": "5min巡检：本角色无新派单/返修，c3-1与i1-1已收口冻结；TESTER post-merge-0a8ca8a复核19:44 PASS 14/14交付，08合入后验证门禁满足，待协调者裁定08转DONE与新派单",
+  "evidence": "sessions/A.md",
+  "next": "等协调者释放槽并给出无冲突新单"
+}

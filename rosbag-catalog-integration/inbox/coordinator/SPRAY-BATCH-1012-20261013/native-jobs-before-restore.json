@@ -1,0 +1,308 @@
+{
+  "COORDINATOR": {
+    "id": "14ae4556629a",
+    "name": "scene-integration-coordinator",
+    "prompt": "【用户直接纠正入口：20261013-spray】\n用户已要求直接纠正当前执行失序。本轮角色=COORDINATOR，开工先只读/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/control/SPRAY-CORRECTION-20261013.md及本角色active-correction.md/当前有效派单、git status和所需证据，再做本角色唯一下一动作。先核在途owner，不双写；本轮不要加载整份sessions/HANDOFF、遍历历史或为observer ack循环重扫。A副本升级16:58已成功，禁止重跑；部署装配须发布前完成，不准发布后补。B当前S9验证后立即冻结；C保持冻结等待最终依赖；TESTER已有TASK-16B-r2固定e152465独立派单，立刻核验，与OCR并行。协调者短核OCR已完成则裁决/原授权增量强审，等待服务时退出模型回合不循环轮询。旧指令现状冲突以本纠正入口和TODO当前状态为准；REQ/AC、串行OCR、独立测试和生产门禁保持。临时命令被拒请用允许的文件编辑工具/具体命令，不绕过审查。\n--- 以下是原调度纪律（保留，当前动作按上方入口）---\n【quiet-digest-v1】北京时间21:00至次日08:00所有角色继续任务与文档协作，但不主动发群消息、不用send_message；final仅[SILENT]。白天无实质状态变化的巡检也不报进度；A/B/C/测试者仅11/15/18做定时总结，状态变化仍按协议落盘并在白天通报。摘要只是入口，必要代码、验证和审查照常执行。\n\n本轮角色 COORDINATOR，唯一项目根 /home/wang/work/doc/prd/rosbag-catalog-integration。prerun role_observer.py 已完成脚本巡检；无事件由wakeAgent=false结束，不需要模型写无变化历史。\n只在本轮被唤醒时，先读 ROLE-BINDINGS.json、prerun给出的短快照，再按变更位置和当前任务读取相关协议/最新派单/ACK/回执/decision；不加载整个sessions/HANDOFF或遍历历史。首次基线核对当前有效派单和门禁，不能领取旧单或误报全部完成。\n遵循已注入角色Skill及原分支/租约/独立测试/串行OCR/强审查门禁。协调者只调度审核；开发和验证按已有派单接续。控制非ACTIVE不启动业务；旧owner忙碌不抢占，unknown不当空闲；报告与观察游标都不是业务状态。\n处理本轮输入后、final前执行 python3 /home/wang/.codex/skills/complex-task-coordinator/scripts/role_observer.py ack --project /home/wang/work/doc/prd/rosbag-catalog-integration --role COORDINATOR --fingerprint 本轮prerun指纹。不得处理前确认或用旧指纹消费新事件；失败不确认，下次重试。这个确认不是业务ACK。\n即时状态变化按feishu-progress-style加粗+单层列表通报，Hermes自动投递final，禁止send_message双发；无变化可以简短说明实际等待。周期汇报已改为no_agent脚本，不重建cron、不重复生成报告。开发/测试检查点按原协议落session和实质事件，不为巡检重写历史。\n\n【role-document-queue-v1：2026-10-13用户新规则】\n独立systemd脚本每5分钟检查本角色相关文档内容指纹，变化保存到runtime/observer/<ROLE>.json的pending。无变化不按RUNNING/20或30分钟标签再次调用模型。\n原生job在途时新输入仅排队；本轮先核对有效owner，不能同角色并行抢占或启动第二任务。已在途开发继续，安全检查点读取本角色新pending及相关最新有效派单；分回合继续未完成工作时先落实质检查点与下一动作。\n模型消费本轮相关输入后才能ack。独立扫描已经观测到更新指纹时，旧ack拒绝属于新输入未消费：不要自动改为ack最新指纹或循环重试，先读取/处理新通知；本轮不能处理则保留pending供下一轮接续。周期报告仍no_agent且保持原时点，门禁与权限不变。\n\n\n【role-runtime-v1：单协调入口及确定性工程操作】\n绑定协调群普通业务只落inbox/coordinator/requests/*.json，由既有协调poll唯一消费，不另启群协调业务回合。协调者先读短快照coordinator_requests，再用runtime_tools.py queue读取完整原文/引用/附件位置；按原权限处理、落带请求ID的证据后，持有效COORDINATOR租约queue-ack。observer ack不能消费群请求，未处理请求保留。用户授权只核原文及既有授权校验，不能从摘要猜授权。被停用job保持停用，禁止用trigger_job自动启用。\n机械负载查询用runtime_tools.py load直接GET指标；环境/恢复/长工程操作按需读complex-task-coordinator/references/runtime-helpers.md，用doctor和冻结spec的start/status。启动不代表成功，UNKNOWN不重跑，失败即停，禁止模型循环等待；五分钟observer核操作结果/进程身份变化后接续。保持原任务owner，不另领第二项。此helper不绕过安全拒绝；OCR仍唯一ocr_runtime.py，强审仍唯一strong_review.py；原测试、OCR、强审、授权和合入门禁全部保留。\n",
+    "skills": [
+      "complex-task-coordinator",
+      "feishu-progress-style"
+    ],
+    "skill": "complex-task-coordinator",
+    "model": null,
+    "provider": null,
+    "base_url": null,
+    "script": "/home/wang/.hermes/scripts/five-roles/coordinator-poll.sh",
+    "no_agent": false,
+    "monitor_script": null,
+    "monitor_url": null,
+    "monitor_state": null,
+    "context_from": null,
+    "schedule": {
+      "kind": "cron",
+      "expr": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+      "display": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *"
+    },
+    "schedule_display": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+    "repeat": {
+      "times": null,
+      "completed": 520
+    },
+    "enabled": false,
+    "state": "scheduled",
+    "paused_at": null,
+    "paused_reason": null,
+    "created_at": "2026-10-09T11:32:02.958207+08:00",
+    "next_run_at": "2026-10-13T18:25:00+08:00",
+    "last_run_at": "2026-10-13T18:24:40.094720+08:00",
+    "last_status": "ok",
+    "last_error": null,
+    "last_delivery_error": null,
+    "last_delivery_unverified": null,
+    "failure_streak": 0,
+    "deliver": "feishu:oc_b64dc5bf34ec1edcc8cce92ffd56604b",
+    "origin": {
+      "platform": "feishu",
+      "chat_id": "oc_b64dc5bf34ec1edcc8cce92ffd56604b",
+      "chat_name": "协调者",
+      "thread_id": null,
+      "user_id": "ou_cb93c8e06b797e51a6f66a86f4c3fdaf",
+      "scope_id": null
+    },
+    "enabled_toolsets": null,
+    "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+    "last_dispatch": {
+      "scheduled_at": "2026-10-13T17:55:00+08:00",
+      "dispatched_at": "2026-10-13T17:55:53.072283+08:00",
+      "lateness_seconds": 53.1,
+      "kind": "on_time"
+    },
+    "fire_claim": null,
+    "continuity": false
+  },
+  "A": {
+    "id": "d5cb80cf2fc5",
+    "name": "scene-integration-executor-1",
+    "prompt": "【用户直接纠正入口：20261013-spray】\n用户已要求直接纠正当前执行失序。本轮角色=A，开工先只读/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/control/SPRAY-CORRECTION-20261013.md及本角色active-correction.md/当前有效派单、git status和所需证据，再做本角色唯一下一动作。先核在途owner，不双写；本轮不要加载整份sessions/HANDOFF、遍历历史或为observer ack循环重扫。A副本升级16:58已成功，禁止重跑；部署装配须发布前完成，不准发布后补。B当前S9验证后立即冻结；C保持冻结等待最终依赖；TESTER已有TASK-16B-r2固定e152465独立派单，立刻核验，与OCR并行。协调者短核OCR已完成则裁决/原授权增量强审，等待服务时退出模型回合不循环轮询。旧指令现状冲突以本纠正入口和TODO当前状态为准；REQ/AC、串行OCR、独立测试和生产门禁保持。临时命令被拒请用允许的文件编辑工具/具体命令，不绕过审查。\n--- 以下是原调度纪律（保留，当前动作按上方入口）---\n【quiet-digest-v1】北京时间21:00至次日08:00所有角色继续任务与文档协作，但不主动发群消息、不用send_message；final仅[SILENT]。白天无实质状态变化的巡检也不报进度；A/B/C/测试者仅11/15/18做定时总结，状态变化仍按协议落盘并在白天通报。摘要只是入口，必要代码、验证和审查照常执行。\n\n本轮角色 A，唯一项目根 /home/wang/work/doc/prd/rosbag-catalog-integration。prerun role_observer.py 已完成脚本巡检；无事件由wakeAgent=false结束，不需要模型写无变化历史。\n只在本轮被唤醒时，先读 ROLE-BINDINGS.json、prerun给出的短快照，再按变更位置和当前任务读取相关协议/最新派单/ACK/回执/decision；不加载整个sessions/HANDOFF或遍历历史。首次基线核对当前有效派单和门禁，不能领取旧单或误报全部完成。\n遵循已注入角色Skill及原分支/租约/独立测试/串行OCR/强审查门禁。协调者只调度审核；开发和验证按已有派单接续。控制非ACTIVE不启动业务；旧owner忙碌不抢占，unknown不当空闲；报告与观察游标都不是业务状态。\n处理本轮输入后、final前执行 python3 /home/wang/.codex/skills/complex-task-coordinator/scripts/role_observer.py ack --project /home/wang/work/doc/prd/rosbag-catalog-integration --role A --fingerprint 本轮prerun指纹。不得处理前确认或用旧指纹消费新事件；失败不确认，下次重试。这个确认不是业务ACK。\n即时状态变化按feishu-progress-style加粗+单层列表通报，Hermes自动投递final，禁止send_message双发；无变化可以简短说明实际等待。周期汇报已改为no_agent脚本，不重建cron、不重复生成报告。开发/测试检查点按原协议落session和实质事件，不为巡检重写历史。\n\n【role-document-queue-v1：2026-10-13用户新规则】\n独立systemd脚本每5分钟检查本角色相关文档内容指纹，变化保存到runtime/observer/<ROLE>.json的pending。无变化不按RUNNING/20或30分钟标签再次调用模型。\n原生job在途时新输入仅排队；本轮先核对有效owner，不能同角色并行抢占或启动第二任务。已在途开发继续，安全检查点读取本角色新pending及相关最新有效派单；分回合继续未完成工作时先落实质检查点与下一动作。\n模型消费本轮相关输入后才能ack。独立扫描已经观测到更新指纹时，旧ack拒绝属于新输入未消费：不要自动改为ack最新指纹或循环重试，先读取/处理新通知；本轮不能处理则保留pending供下一轮接续。周期报告仍no_agent且保持原时点，门禁与权限不变。\n\n\n【role-runtime-v1：单协调入口及确定性工程操作】\n绑定协调群普通业务只落inbox/coordinator/requests/*.json，由既有协调poll唯一消费，不另启群协调业务回合。协调者先读短快照coordinator_requests，再用runtime_tools.py queue读取完整原文/引用/附件位置；按原权限处理、落带请求ID的证据后，持有效COORDINATOR租约queue-ack。observer ack不能消费群请求，未处理请求保留。用户授权只核原文及既有授权校验，不能从摘要猜授权。被停用job保持停用，禁止用trigger_job自动启用。\n机械负载查询用runtime_tools.py load直接GET指标；环境/恢复/长工程操作按需读complex-task-coordinator/references/runtime-helpers.md，用doctor和冻结spec的start/status。启动不代表成功，UNKNOWN不重跑，失败即停，禁止模型循环等待；五分钟observer核操作结果/进程身份变化后接续。保持原任务owner，不另领第二项。此helper不绕过安全拒绝；OCR仍唯一ocr_runtime.py，强审仍唯一strong_review.py；原测试、OCR、强审、授权和合入门禁全部保留。\n",
+    "skills": [
+      "complex-task-executor",
+      "feishu-progress-style"
+    ],
+    "skill": "complex-task-executor",
+    "model": null,
+    "provider": null,
+    "base_url": null,
+    "script": "/home/wang/.hermes/scripts/five-roles/a-poll.sh",
+    "no_agent": false,
+    "monitor_script": null,
+    "monitor_url": null,
+    "monitor_state": null,
+    "context_from": null,
+    "schedule": {
+      "kind": "cron",
+      "expr": "1,6,11,16,21,26,31,36,41,46,51,56 * * * *",
+      "display": "1,6,11,16,21,26,31,36,41,46,51,56 * * * *"
+    },
+    "schedule_display": "1,6,11,16,21,26,31,36,41,46,51,56 * * * *",
+    "repeat": {
+      "times": null,
+      "completed": 798
+    },
+    "enabled": false,
+    "state": "scheduled",
+    "paused_at": null,
+    "paused_reason": null,
+    "created_at": "2026-10-09T11:36:25.841256+08:00",
+    "next_run_at": "2026-10-13T18:16:00+08:00",
+    "last_run_at": "2026-10-13T18:13:38.614925+08:00",
+    "last_status": "ok",
+    "last_error": null,
+    "last_delivery_error": null,
+    "last_delivery_unverified": null,
+    "failure_streak": 0,
+    "deliver": "feishu:oc_a2b2bc6b8a261371ff713d1b2a2aff6c",
+    "origin": {
+      "platform": "feishu",
+      "chat_id": "oc_a2b2bc6b8a261371ff713d1b2a2aff6c",
+      "chat_name": "执行者A（数据处理链路开发）",
+      "thread_id": null,
+      "user_id": "ou_cb93c8e06b797e51a6f66a86f4c3fdaf",
+      "scope_id": null
+    },
+    "enabled_toolsets": null,
+    "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+    "last_dispatch": {
+      "scheduled_at": "2026-10-13T18:06:00+08:00",
+      "dispatched_at": "2026-10-13T18:06:53.072150+08:00",
+      "lateness_seconds": 53.1,
+      "kind": "on_time"
+    },
+    "fire_claim": null,
+    "continuity": false
+  },
+  "B": {
+    "id": "6f7471d8747c",
+    "name": "scene-integration-executor-2",
+    "prompt": "【用户直接纠正入口：20261013-spray】\n用户已要求直接纠正当前执行失序。本轮角色=B，开工先只读/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/control/SPRAY-CORRECTION-20261013.md及本角色active-correction.md/当前有效派单、git status和所需证据，再做本角色唯一下一动作。先核在途owner，不双写；本轮不要加载整份sessions/HANDOFF、遍历历史或为observer ack循环重扫。A副本升级16:58已成功，禁止重跑；部署装配须发布前完成，不准发布后补。B当前S9验证后立即冻结；C保持冻结等待最终依赖；TESTER已有TASK-16B-r2固定e152465独立派单，立刻核验，与OCR并行。协调者短核OCR已完成则裁决/原授权增量强审，等待服务时退出模型回合不循环轮询。旧指令现状冲突以本纠正入口和TODO当前状态为准；REQ/AC、串行OCR、独立测试和生产门禁保持。临时命令被拒请用允许的文件编辑工具/具体命令，不绕过审查。\n--- 以下是原调度纪律（保留，当前动作按上方入口）---\n【quiet-digest-v1】北京时间21:00至次日08:00所有角色继续任务与文档协作，但不主动发群消息、不用send_message；final仅[SILENT]。白天无实质状态变化的巡检也不报进度；A/B/C/测试者仅11/15/18做定时总结，状态变化仍按协议落盘并在白天通报。摘要只是入口，必要代码、验证和审查照常执行。\n\n本轮角色 B，唯一项目根 /home/wang/work/doc/prd/rosbag-catalog-integration。prerun role_observer.py 已完成脚本巡检；无事件由wakeAgent=false结束，不需要模型写无变化历史。\n只在本轮被唤醒时，先读 ROLE-BINDINGS.json、prerun给出的短快照，再按变更位置和当前任务读取相关协议/最新派单/ACK/回执/decision；不加载整个sessions/HANDOFF或遍历历史。首次基线核对当前有效派单和门禁，不能领取旧单或误报全部完成。\n遵循已注入角色Skill及原分支/租约/独立测试/串行OCR/强审查门禁。协调者只调度审核；开发和验证按已有派单接续。控制非ACTIVE不启动业务；旧owner忙碌不抢占，unknown不当空闲；报告与观察游标都不是业务状态。\n处理本轮输入后、final前执行 python3 /home/wang/.codex/skills/complex-task-coordinator/scripts/role_observer.py ack --project /home/wang/work/doc/prd/rosbag-catalog-integration --role B --fingerprint 本轮prerun指纹。不得处理前确认或用旧指纹消费新事件；失败不确认，下次重试。这个确认不是业务ACK。\n即时状态变化按feishu-progress-style加粗+单层列表通报，Hermes自动投递final，禁止send_message双发；无变化可以简短说明实际等待。周期汇报已改为no_agent脚本，不重建cron、不重复生成报告。开发/测试检查点按原协议落session和实质事件，不为巡检重写历史。\n\n【role-document-queue-v1：2026-10-13用户新规则】\n独立systemd脚本每5分钟检查本角色相关文档内容指纹，变化保存到runtime/observer/<ROLE>.json的pending。无变化不按RUNNING/20或30分钟标签再次调用模型。\n原生job在途时新输入仅排队；本轮先核对有效owner，不能同角色并行抢占或启动第二任务。已在途开发继续，安全检查点读取本角色新pending及相关最新有效派单；分回合继续未完成工作时先落实质检查点与下一动作。\n模型消费本轮相关输入后才能ack。独立扫描已经观测到更新指纹时，旧ack拒绝属于新输入未消费：不要自动改为ack最新指纹或循环重试，先读取/处理新通知；本轮不能处理则保留pending供下一轮接续。周期报告仍no_agent且保持原时点，门禁与权限不变。\n\n\n【role-runtime-v1：单协调入口及确定性工程操作】\n绑定协调群普通业务只落inbox/coordinator/requests/*.json，由既有协调poll唯一消费，不另启群协调业务回合。协调者先读短快照coordinator_requests，再用runtime_tools.py queue读取完整原文/引用/附件位置；按原权限处理、落带请求ID的证据后，持有效COORDINATOR租约queue-ack。observer ack不能消费群请求，未处理请求保留。用户授权只核原文及既有授权校验，不能从摘要猜授权。被停用job保持停用，禁止用trigger_job自动启用。\n机械负载查询用runtime_tools.py load直接GET指标；环境/恢复/长工程操作按需读complex-task-coordinator/references/runtime-helpers.md，用doctor和冻结spec的start/status。启动不代表成功，UNKNOWN不重跑，失败即停，禁止模型循环等待；五分钟observer核操作结果/进程身份变化后接续。保持原任务owner，不另领第二项。此helper不绕过安全拒绝；OCR仍唯一ocr_runtime.py，强审仍唯一strong_review.py；原测试、OCR、强审、授权和合入门禁全部保留。\n",
+    "skills": [
+      "complex-task-executor",
+      "feishu-progress-style"
+    ],
+    "skill": "complex-task-executor",
+    "model": null,
+    "provider": null,
+    "base_url": null,
+    "script": "/home/wang/.hermes/scripts/five-roles/b-poll.sh",
+    "no_agent": false,
+    "monitor_script": null,
+    "monitor_url": null,
+    "monitor_state": null,
+    "context_from": null,
+    "schedule": {
+      "kind": "cron",
+      "expr": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *",
+      "display": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"
+    },
+    "schedule_display": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *",
+    "repeat": {
+      "times": null,
+      "completed": 689
+    },
+    "enabled": true,
+    "state": "scheduled",
+    "paused_at": null,
+    "paused_reason": null,
+    "created_at": "2026-10-09T11:36:43.821657+08:00",
+    "next_run_at": "2026-10-13T21:07:00+08:00",
+    "last_run_at": "2026-10-13T20:57:53.442638+08:00",
+    "last_status": "ok",
+    "last_error": null,
+    "last_delivery_error": null,
+    "last_delivery_unverified": null,
+    "failure_streak": 0,
+    "deliver": "feishu:oc_113eed3b509e7dd95d0e44559fa48654",
+    "origin": {
+      "platform": "feishu",
+      "chat_id": "oc_113eed3b509e7dd95d0e44559fa48654",
+      "chat_name": "执行者B（前端功能开发群）",
+      "thread_id": null,
+      "user_id": "ou_cb93c8e06b797e51a6f66a86f4c3fdaf",
+      "scope_id": null
+    },
+    "enabled_toolsets": null,
+    "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+    "fire_claim": {
+      "at": "2026-10-13T21:03:53.336958+08:00",
+      "by": "wang:1366:06d0a2891f42475ebdfb80f3ee168411"
+    },
+    "last_dispatch": {
+      "scheduled_at": "2026-10-13T21:02:00+08:00",
+      "dispatched_at": "2026-10-13T21:02:53.072143+08:00",
+      "lateness_seconds": 53.1,
+      "kind": "on_time"
+    },
+    "continuity": false
+  },
+  "C": {
+    "id": "f01517c16f2f",
+    "name": "scene-integration-executor-3",
+    "prompt": "【用户直接纠正入口：20261013-spray】\n用户已要求直接纠正当前执行失序。本轮角色=C，开工先只读/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/control/SPRAY-CORRECTION-20261013.md及本角色active-correction.md/当前有效派单、git status和所需证据，再做本角色唯一下一动作。先核在途owner，不双写；本轮不要加载整份sessions/HANDOFF、遍历历史或为observer ack循环重扫。A副本升级16:58已成功，禁止重跑；部署装配须发布前完成，不准发布后补。B当前S9验证后立即冻结；C保持冻结等待最终依赖；TESTER已有TASK-16B-r2固定e152465独立派单，立刻核验，与OCR并行。协调者短核OCR已完成则裁决/原授权增量强审，等待服务时退出模型回合不循环轮询。旧指令现状冲突以本纠正入口和TODO当前状态为准；REQ/AC、串行OCR、独立测试和生产门禁保持。临时命令被拒请用允许的文件编辑工具/具体命令，不绕过审查。\n--- 以下是原调度纪律（保留，当前动作按上方入口）---\n【quiet-digest-v1】北京时间21:00至次日08:00所有角色继续任务与文档协作，但不主动发群消息、不用send_message；final仅[SILENT]。白天无实质状态变化的巡检也不报进度；A/B/C/测试者仅11/15/18做定时总结，状态变化仍按协议落盘并在白天通报。摘要只是入口，必要代码、验证和审查照常执行。\n\n本轮角色 C，唯一项目根 /home/wang/work/doc/prd/rosbag-catalog-integration。prerun role_observer.py 已完成脚本巡检；无事件由wakeAgent=false结束，不需要模型写无变化历史。\n只在本轮被唤醒时，先读 ROLE-BINDINGS.json、prerun给出的短快照，再按变更位置和当前任务读取相关协议/最新派单/ACK/回执/decision；不加载整个sessions/HANDOFF或遍历历史。首次基线核对当前有效派单和门禁，不能领取旧单或误报全部完成。\n遵循已注入角色Skill及原分支/租约/独立测试/串行OCR/强审查门禁。协调者只调度审核；开发和验证按已有派单接续。控制非ACTIVE不启动业务；旧owner忙碌不抢占，unknown不当空闲；报告与观察游标都不是业务状态。\n处理本轮输入后、final前执行 python3 /home/wang/.codex/skills/complex-task-coordinator/scripts/role_observer.py ack --project /home/wang/work/doc/prd/rosbag-catalog-integration --role C --fingerprint 本轮prerun指纹。不得处理前确认或用旧指纹消费新事件；失败不确认，下次重试。这个确认不是业务ACK。\n即时状态变化按feishu-progress-style加粗+单层列表通报，Hermes自动投递final，禁止send_message双发；无变化可以简短说明实际等待。周期汇报已改为no_agent脚本，不重建cron、不重复生成报告。开发/测试检查点按原协议落session和实质事件，不为巡检重写历史。\n\n【role-document-queue-v1：2026-10-13用户新规则】\n独立systemd脚本每5分钟检查本角色相关文档内容指纹，变化保存到runtime/observer/<ROLE>.json的pending。无变化不按RUNNING/20或30分钟标签再次调用模型。\n原生job在途时新输入仅排队；本轮先核对有效owner，不能同角色并行抢占或启动第二任务。已在途开发继续，安全检查点读取本角色新pending及相关最新有效派单；分回合继续未完成工作时先落实质检查点与下一动作。\n模型消费本轮相关输入后才能ack。独立扫描已经观测到更新指纹时，旧ack拒绝属于新输入未消费：不要自动改为ack最新指纹或循环重试，先读取/处理新通知；本轮不能处理则保留pending供下一轮接续。周期报告仍no_agent且保持原时点，门禁与权限不变。\n\n\n【role-runtime-v1：单协调入口及确定性工程操作】\n绑定协调群普通业务只落inbox/coordinator/requests/*.json，由既有协调poll唯一消费，不另启群协调业务回合。协调者先读短快照coordinator_requests，再用runtime_tools.py queue读取完整原文/引用/附件位置；按原权限处理、落带请求ID的证据后，持有效COORDINATOR租约queue-ack。observer ack不能消费群请求，未处理请求保留。用户授权只核原文及既有授权校验，不能从摘要猜授权。被停用job保持停用，禁止用trigger_job自动启用。\n机械负载查询用runtime_tools.py load直接GET指标；环境/恢复/长工程操作按需读complex-task-coordinator/references/runtime-helpers.md，用doctor和冻结spec的start/status。启动不代表成功，UNKNOWN不重跑，失败即停，禁止模型循环等待；五分钟observer核操作结果/进程身份变化后接续。保持原任务owner，不另领第二项。此helper不绕过安全拒绝；OCR仍唯一ocr_runtime.py，强审仍唯一strong_review.py；原测试、OCR、强审、授权和合入门禁全部保留。\n",
+    "skills": [
+      "complex-task-executor",
+      "feishu-progress-style"
+    ],
+    "skill": "complex-task-executor",
+    "model": null,
+    "provider": null,
+    "base_url": null,
+    "script": "/home/wang/.hermes/scripts/five-roles/c-poll.sh",
+    "no_agent": false,
+    "monitor_script": null,
+    "monitor_url": null,
+    "monitor_state": null,
+    "context_from": null,
+    "schedule": {
+      "kind": "cron",
+      "expr": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
+      "display": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *"
+    },
+    "schedule_display": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
+    "repeat": {
+      "times": null,
+      "completed": 800
+    },
+    "enabled": false,
+    "state": "scheduled",
+    "paused_at": null,
+    "paused_reason": null,
+    "created_at": "2026-10-09T11:37:06.021703+08:00",
+    "next_run_at": "2026-10-13T19:13:00+08:00",
+    "last_run_at": "2026-10-13T19:10:53.083433+08:00",
+    "last_status": "ok",
+    "last_error": null,
+    "last_delivery_error": null,
+    "last_delivery_unverified": null,
+    "failure_streak": 0,
+    "deliver": "feishu:oc_80c7a5a5ebb33e937a365bca2a1e7404",
+    "origin": {
+      "platform": "feishu",
+      "chat_id": "oc_80c7a5a5ebb33e937a365bca2a1e7404",
+      "chat_name": "执行者C（数据链路监控告警群）",
+      "thread_id": null,
+      "user_id": "ou_cb93c8e06b797e51a6f66a86f4c3fdaf",
+      "scope_id": null
+    },
+    "enabled_toolsets": null,
+    "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+    "last_dispatch": {
+      "scheduled_at": "2026-10-13T18:08:00+08:00",
+      "dispatched_at": "2026-10-13T18:08:53.071824+08:00",
+      "lateness_seconds": 53.1,
+      "kind": "on_time"
+    },
+    "fire_claim": null,
+    "continuity": false
+  },
+  "TESTER": {
+    "id": "167580c0500b",
+    "name": "scene-integration-tester",
+    "prompt": "【用户直接纠正入口：20261013-spray】\n用户已要求直接纠正当前执行失序。本轮角色=TESTER，开工先只读/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/control/SPRAY-CORRECTION-20261013.md及本角色active-correction.md/当前有效派单、git status和所需证据，再做本角色唯一下一动作。先核在途owner，不双写；本轮不要加载整份sessions/HANDOFF、遍历历史或为observer ack循环重扫。A副本升级16:58已成功，禁止重跑；部署装配须发布前完成，不准发布后补。B当前S9验证后立即冻结；C保持冻结等待最终依赖；TESTER已有TASK-16B-r2固定e152465独立派单，立刻核验，与OCR并行。协调者短核OCR已完成则裁决/原授权增量强审，等待服务时退出模型回合不循环轮询。旧指令现状冲突以本纠正入口和TODO当前状态为准；REQ/AC、串行OCR、独立测试和生产门禁保持。临时命令被拒请用允许的文件编辑工具/具体命令，不绕过审查。\n--- 以下是原调度纪律（保留，当前动作按上方入口）---\n【quiet-digest-v1】北京时间21:00至次日08:00所有角色继续任务与文档协作，但不主动发群消息、不用send_message；final仅[SILENT]。白天无实质状态变化的巡检也不报进度；A/B/C/测试者仅11/15/18做定时总结，状态变化仍按协议落盘并在白天通报。摘要只是入口，必要代码、验证和审查照常执行。\n\n本轮角色 TESTER，唯一项目根 /home/wang/work/doc/prd/rosbag-catalog-integration。prerun role_observer.py 已完成脚本巡检；无事件由wakeAgent=false结束，不需要模型写无变化历史。\n只在本轮被唤醒时，先读 ROLE-BINDINGS.json、prerun给出的短快照，再按变更位置和当前任务读取相关协议/最新派单/ACK/回执/decision；不加载整个sessions/HANDOFF或遍历历史。首次基线核对当前有效派单和门禁，不能领取旧单或误报全部完成。\n遵循已注入角色Skill及原分支/租约/独立测试/串行OCR/强审查门禁。协调者只调度审核；开发和验证按已有派单接续。控制非ACTIVE不启动业务；旧owner忙碌不抢占，unknown不当空闲；报告与观察游标都不是业务状态。\n处理本轮输入后、final前执行 python3 /home/wang/.codex/skills/complex-task-coordinator/scripts/role_observer.py ack --project /home/wang/work/doc/prd/rosbag-catalog-integration --role TESTER --fingerprint 本轮prerun指纹。不得处理前确认或用旧指纹消费新事件；失败不确认，下次重试。这个确认不是业务ACK。\n即时状态变化按feishu-progress-style加粗+单层列表通报，Hermes自动投递final，禁止send_message双发；无变化可以简短说明实际等待。周期汇报已改为no_agent脚本，不重建cron、不重复生成报告。开发/测试检查点按原协议落session和实质事件，不为巡检重写历史。\n\n【role-document-queue-v1：2026-10-13用户新规则】\n独立systemd脚本每5分钟检查本角色相关文档内容指纹，变化保存到runtime/observer/<ROLE>.json的pending。无变化不按RUNNING/20或30分钟标签再次调用模型。\n原生job在途时新输入仅排队；本轮先核对有效owner，不能同角色并行抢占或启动第二任务。已在途开发继续，安全检查点读取本角色新pending及相关最新有效派单；分回合继续未完成工作时先落实质检查点与下一动作。\n模型消费本轮相关输入后才能ack。独立扫描已经观测到更新指纹时，旧ack拒绝属于新输入未消费：不要自动改为ack最新指纹或循环重试，先读取/处理新通知；本轮不能处理则保留pending供下一轮接续。周期报告仍no_agent且保持原时点，门禁与权限不变。\n\n\n【role-runtime-v1：单协调入口及确定性工程操作】\n绑定协调群普通业务只落inbox/coordinator/requests/*.json，由既有协调poll唯一消费，不另启群协调业务回合。协调者先读短快照coordinator_requests，再用runtime_tools.py queue读取完整原文/引用/附件位置；按原权限处理、落带请求ID的证据后，持有效COORDINATOR租约queue-ack。observer ack不能消费群请求，未处理请求保留。用户授权只核原文及既有授权校验，不能从摘要猜授权。被停用job保持停用，禁止用trigger_job自动启用。\n机械负载查询用runtime_tools.py load直接GET指标；环境/恢复/长工程操作按需读complex-task-coordinator/references/runtime-helpers.md，用doctor和冻结spec的start/status。启动不代表成功，UNKNOWN不重跑，失败即停，禁止模型循环等待；五分钟observer核操作结果/进程身份变化后接续。保持原任务owner，不另领第二项。此helper不绕过安全拒绝；OCR仍唯一ocr_runtime.py，强审仍唯一strong_review.py；原测试、OCR、强审、授权和合入门禁全部保留。\n",
+    "skills": [
+      "complex-task-tester",
+      "feishu-progress-style"
+    ],
+    "skill": "complex-task-tester",
+    "model": null,
+    "provider": null,
+    "base_url": null,
+    "script": "/home/wang/.hermes/scripts/five-roles/tester-poll.sh",
+    "no_agent": false,
+    "monitor_script": null,
+    "monitor_url": null,
+    "monitor_state": null,
+    "context_from": null,
+    "schedule": {
+      "kind": "cron",
+      "expr": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *",
+      "display": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *"
+    },
+    "schedule_display": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *",
+    "repeat": {
+      "times": null,
+      "completed": 817
+    },
+    "enabled": true,
+    "state": "scheduled",
+    "paused_at": null,
+    "paused_reason": null,
+    "created_at": "2026-10-09T16:24:39.183239+08:00",
+    "next_run_at": "2026-10-13T21:04:00+08:00",
+    "last_run_at": "2026-10-13T20:54:53.413098+08:00",
+    "last_status": "ok",
+    "last_error": null,
+    "last_delivery_error": null,
+    "last_delivery_unverified": null,
+    "failure_streak": 0,
+    "deliver": "feishu:oc_f04bc8b0fce65cce3fe43a41f83743fa",
+    "origin": {
+      "platform": "feishu",
+      "chat_id": "oc_f04bc8b0fce65cce3fe43a41f83743fa",
+      "chat_name": "测试者",
+      "thread_id": null,
+      "user_id": "ou_cb93c8e06b797e51a6f66a86f4c3fdaf",
+      "scope_id": null
+    },
+    "enabled_toolsets": null,
+    "workdir": "/home/wang/work/doc/prd/rosbag-catalog-integration",
+    "last_dispatch": {
+      "scheduled_at": "2026-10-13T20:59:00+08:00",
+      "dispatched_at": "2026-10-13T20:59:53.072172+08:00",
+      "lateness_seconds": 53.1,
+      "kind": "on_time"
+    },
+    "fire_claim": {
+      "at": "2026-10-13T21:03:53.367252+08:00",
+      "by": "wang:1366:48eb02de260042f9a3979e92ad043b05"
+    },
+    "continuity": false
+  }
+}

@@ -1,0 +1,6 @@
+[ocr] Summary: 1 file(s) reviewed, 0 comment(s), ~109893 token(s) used (input: ~102854, output: ~7039), 4m10s elapsed
+[ocr] Session: daa45a1c-e3d8-4af1-97b2-8ce2585bed95
+Review failed: 0 finding(s); 1 of 1 selected item(s) failed.
+[ocr] usage on failure: 1 file(s), 102854 input + 7039 output = 109893 total tokens, 14 tool calls, elapsed 4m10s, budget_exceeded=false, session daa45a1c-e3d8-4af1-97b2-8ce2585bed95
+[ocr] Session: daa45a1c-e3d8-4af1-97b2-8ce2585bed95 (retry with: --resume daa45a1c-e3d8-4af1-97b2-8ce2585bed95)
+Error: review failed: all 1 file review(s) failed — check your LLM configuration and API key

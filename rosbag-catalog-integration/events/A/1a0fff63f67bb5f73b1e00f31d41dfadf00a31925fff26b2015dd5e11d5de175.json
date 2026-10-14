@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261012-051153-nochange",
+  "occurred_at": "2026-10-12T05:13:37+08:00",
+  "recorded_at": "2026-10-12T05:13:37+08:00",
+  "role": "A",
+  "task": "P0-CLOSED-IDLE",
+  "attempt": "0",
+  "status": "POLL_NO_CHANGE",
+  "summary": "05:07后零业务变化：main=origin/main 453da0c 零前移；inbox/1号零新增无新派单/返修；开发槽空闲",
+  "evidence": "find -newermt 05:07:00 业务目录零本角色新增；rev-parse双核453da0c；leases仅B.json(2号自身)",
+  "next": "维持5分钟常规空转巡检，等协调者新派单"
+}

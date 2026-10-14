@@ -1,0 +1,12 @@
+{
+  "event_id": "tester-t11s-batch-1012-040x-infer-continue-quiet-20261014",
+  "occurred_at": "2026-10-14T04:03:48+08:00",
+  "recorded_at": "2026-10-14T04:03:48+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "04:02 静默期增量只读巡检：4acf689f INFER 持续活跃（VLM Running 4/POST 200 连发/ctxsw +24/12s），八步全 QUEUED ~297min 完成信号未到，无升级条件命中，维持不 kill/retry；flat 三提交 PENDING_INPUT 等 A D4③；PASS 基线不变",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/events/TESTER/tester-t11s-batch-1012-040x-infer-continue-quiet-20261014.json",
+  "next": "继续等 4acf689f 模型段完成信号跨夜继续；SCENE_DONE 后核 16_02_03 正式全链；全批齐后 TEST_REPORT_PENDING"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261011-151253-nochange-strongmodel-inreview",
+  "occurred_at": "2026-10-11T15:17:06+08:00",
+  "recorded_at": "2026-10-11T15:17:06+08:00",
+  "role": "B",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "IDLE_WAITING",
+  "summary": "无新派单无返修 强复审R2I-20261010-06 IN_REVIEW在途 task-0.log 15:14:20活跃 result仍缺 main 62a85bf",
+  "evidence": "sessions/B.md",
+  "next": "等强复审收口后03-05-06聚合DONE及TASK-08联调"
+}

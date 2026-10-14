@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-195353-task08-done-no-dispatch",
+  "occurred_at": "2026-10-11T19:55:05+08:00",
+  "recorded_at": "2026-10-11T19:55:05+08:00",
+  "role": "C",
+  "task": "TASK-08",
+  "attempt": "n/a",
+  "status": "OBSERVED",
+  "summary": "TASK-08 转 DONE（协调者 19:46 裁决，非 C 交付）；inbox/3号、inbox/coordinator 无面向 3号 新派单；main 0a8ca8a=origin；wt-03b 6f1a9ad 干净；无 C 在途进程；保持空闲待派单",
+  "evidence": "inbox/coordinator/TASK-08/post-merge-0a8ca8a-acceptance-decision.md",
+  "next": "等协调者新派单"
+}

@@ -1,0 +1,14 @@
+{
+  "event_id": "coord-batch1012-obs8-consumed-a-resume-inflight-20261013-2240",
+  "occurred_at": "2026-10-13T22:40:53+08:00",
+  "recorded_at": "2026-10-13T22:46+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "CONSUMED",
+  "summary": "消费 C obs8（22:40，指纹 cc753e10）+ 本轮唤醒交接（A/B/C/TESTER 四份派单已核实均在途）。A 裁决续跑在途核实（只读）：① bigbags-copy op=UNKNOWN（pid 2520120 已退、result.log 0B），收口属 A 面第1项，不代跑；② 新 op finalbag-160203 22:30 仅 start.lock、未起跑（无 result.json、本机无拷贝进程），属 A 面第4项 16_02_03 重拷准备中；③ A lease 22:26 claim 已于 22:36 到期，A 下一次 poll（22:46）会重新 claim 接续，租约到期≠停止，不接管不催单；④ sessions/A.md mtime 22:08 未前移=A 面尚未写续跑回执，符合「完成后落回执」协议。批次维持：3 完成/1 空包拒绝中/4 A 清除污染+续跑（含 16_02_03 源重拷），TESTER 据 ruling §四 接续验收，C 只读观察，B DONE。无代码变更→无 OCR/无强审（grant REVOKED 0/5）。",
+  "evidence": "ops/A: bigbags-copy result.json status=UNKNOWN; finalbag-160203 仅 start.lock(22:30); ps 无 cp -a/sha256sum 进程; leases/A.json expires 22:36:10; sessions/A.md mtime 22:08:42; events/C obs8 22:40（NAS find -newermt 22:25 零命中、余量 29T/71%）",
+  "next": "5min observer 核 A 22:46 接续（bigbags-copy 收口终态/finalbag-160203 起跑/污染 submission 清除/flat 续提交）+ TESTER 增量验收 + C 观察；大包跨夜不 kill/retry；夜间静默不群报，08:00 汇总（含本批状态+强审查 REVOKED 0/5）",
+  "quiet_hours_note": "夜间 21:00-08:00 静默：工作落盘照常，不主动群报，final [SILENT]",
+  "source": "inbox/events/COORDINATOR/coord-batch1012-obs8-consumed-a-resume-inflight-20261013-2240.json"
+}

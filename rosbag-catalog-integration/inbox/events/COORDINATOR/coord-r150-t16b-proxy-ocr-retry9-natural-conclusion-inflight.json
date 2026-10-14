@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r150-t16b-proxy-ocr-retry9-natural-conclusion-inflight",
+  "occurred_at": "2026-10-13T12:55:00+08:00",
+  "recorded_at": "2026-10-13T12:55:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16B / TASK-12S-A / TASK-12S-B",
+  "attempt": "r150-poll",
+  "status": "OBSERVED",
+  "summary": "r150 巡检（指纹 93a68b5b，checked_at 12:50:53）：核 16B proxy OCR 第 9 次收口=硬截止 12:50 已过但进程 pid 1810468/1810491 仍存活健康（etime ~28min，session 40e90fea 持续写 12:54）。关键新事实=第 9 次与前 8 次根因不同：--max-tokens 0 修正后未再 compaction cancelled，真实推进在审（90 tool_call、仅审 scene_host_proxy.py 单文件），末条 llm_response='I have completed my verification... #1 (TOCTOU) Confirmed'=已进入收尾产出 findings 阶段。决策：不强行 kill，延长观察至自然收口；rc=0→16B findings 全合并（b1 H1/M1/M2+b3 2+proxy）一次最小返修单派 C→16B 解冻走门禁链；rc=1→9/9 连败，NEEDS_REVIEW 维持冻结、不再自动第 10 次、升级用户 a/b/c。12S-A（A wt-01-t12sa 4 文件 M+新测试 +390/-32 开发中，待回执）/12S-B（B wt-04a-t12sb app/scene/spray/ 9 模块在写）双线 RUNNING 执行者面不接管。强审查 EXPIRED（11:33:12 已过）零新增。",
+  "evidence": "ps 1810468/1810491 etime 25:35 存活; ~/.opencodereview/sessions/...wt-03b-t16b/40e90fea….jsonl last ts 04:54:13Z=12:54:13+08 持续写, 90 tool_calls, 末 llm_response content='I've completed my verification... #1 (TOCTOU) Confirmed'; wt-01-t12sa git status 4 文件 M+新测试; sessions/B.md 12S-B app/scene/spray/ 9 模块",
+  "next": "下轮(12:5x-13:0x)再核第 9 次是否 rc 收口：progress b2_r144_maxtok9_progress.txt 出现 'DONE rc=' 行即收口，按 rc 分派（0→最小返修单派C解冻16B / 1→升级用户 a/b/c）；12S-A 回执落盘后机械核验；12S-B 交付后 OCR 排队（ocr.lock 第9次占用中）→TESTER→合入"
+}

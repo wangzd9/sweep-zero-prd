@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261013-224253-ruling-doublewrite-consumed-b-idle",
+  "occurred_at": "2026-10-13T22:46:00+08:00",
+  "recorded_at": "2026-10-13T22:47:18+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Consumed ruling-doublewrite-2210 + BATCH-STATUS sync: B row remains DONE 21:12 no rework; ruling cites B 21:12 independent NOT_APPLICABLE finding for 16_31_25 as evidence; all authorized scope is A (upload/submit owner) + TESTER/C - B zero action, no takeover. ps: no B-side business processes. Zero commit/model/prod-write.",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/ruling-doublewrite-2210.md;inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md;sessions/B.md",
+  "next": "IDLE_WAITING: await next dispatch; quiet hours - no group messages, 08:00 summary"
+}

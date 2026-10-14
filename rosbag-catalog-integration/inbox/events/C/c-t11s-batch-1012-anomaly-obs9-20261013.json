@@ -1,0 +1,13 @@
+{
+  "event_id": "c-t11s-batch-1012-anomaly-obs9-20261013",
+  "occurred_at": "2026-10-13T22:56:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "第9轮只读观察（obs8 22:40 后 ~16 分钟窗），接续 c-t11s-batch-1012-anomaly-obs8-20261013；prerun 22:48:53 指纹 9f4926ae（changed=sessions/C.md 自产 obs8/22:46 核账行，非新派单）",
+  "summary": "裁决（22:10/22:38）后 C 观察到本批首个实质移动：**A 面 16_02_03 flat 重拷已起跑**——NAS `incoming/spray/.rosbag2_2026_10_12-16_02_03.tmp` 出现，du -sb 22:53→22:55 三次实测 5724664038→6276026598→8887607526（源 10105921766，末测约 88%）；进程身份=zsh -lic pid 2617420（START 22:50:49，PPID 1366=hermes gateway）+ cp -a 子进程 pid 2617451（D 态）。时间线吻合 A 裁决续跑面（A lease claim 22:49:38 先于拷贝起跑 ~71s）；**申报一项差异供 A/协调者核**：执行路径为 zsh -lic 直拷，非 runtime_tools 冻结 operation——`ops/A/...-finalbag-160203/` 仍仅 start.lock（22:30:22）无 spec/result.json，冻结 op 记录与实际进程身份不一致，C 只申报不处置。生产端点复核：18000/health/ready=production ready、8767 active_runs=[]（无在途 run，16_02_03 尚未被 scanner 消费）。A sessions mtime 22:08:42 未记该起跑（A 在途回合中，其 22:08 口径维持 BLOCKED=裁决前口径，以裁决单为准）。C 全程只读（ssh ls/du/stat/find、ps -o lstart、curl），未 kill/未删/未重启/未改任何生产路径。",
+  "evidence": "ssh processing-machine: ls/du -sb/st… pid 2622094 claimed 22:54:24（token 整体 JSON 解析 len=32）",
+  "next": "接续只读观察：16_02_03 tmp 消失+incoming/spray flat 目录出现（mv 完成）→A 正式提交（upload-ledger 16_02_03 条目）→scanner 消费+run 起跑；finalbag op 记录差异待 A/协调者归因；其余 4 包裁决处置面（14_42_48 清 claim+提交/16_37_47 提交/16_58_28 绑定确认/空包拒绝）推进时 C 按 run 只读核账；大包跨夜继续不 kill/retry；夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

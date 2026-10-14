@@ -1,0 +1,41 @@
+[ocr] Summary: 1 file(s) reviewed, 4 comment(s), ~804688 token(s) used (input: ~749305, output: ~55383), 19m6s elapsed
+[ocr] Session: 46b7e357-2ec9-4b77-9d0d-db4c98073b03
+Review complete: 4 finding(s) across 1 selected item(s).
+
+─── app/web/pipelines.py:111-112 ───
+[maintainability · low] Unreachable branch: this `elif` can never execute. When `step is None`
+(guaranteed here, since the first `if step:` failed) and `no_match` is True, the preceding branch
+`step is None and no_match and SCENE_STEP_ORDER.get(key, 0) >= SCENE_STEP_ORDER["SEGMENT"]` already
+matches WRITE/VALIDATE/PUBLISH/REGISTER (orders 4–7 ≥ SEGMENT's 3). So this line is dead; it looks
+like a leftover from an earlier draft. Remove it to avoid misleading readers.
+
+
+
+─── app/web/pipelines.py:163-163 ───
+[maintainability · low] The `run` parameter is never read in the body (only `copies` and `artifacts`
+are iterated). Drop it to avoid implying the function depends on the run object.
+
+- def _scene_environment_paths(run: PipelineRun, copies: list, artifacts: list) -> dict:
++ def _scene_environment_paths(copies: list, artifacts: list) -> dict:
+
+
+─── app/web/pipelines.py:628-635 ───
+[other · low] Dead context variable: `scene_terminal` is passed to `pipeline_detail.html` but never
+referenced by any template. The auto-refresh-stop logic actually lives in the template's hardcoded
+list (line 81: `run.status not in [...
+'SCENE_DONE','SCENE_FAILED','SCENE_PARTIAL_FAILED','CANCELLED','QUARANTINED']`), which omits
+`INPUT_INVALID` even though `INPUT_INVALID` is a terminal scene status. So the intended behavior of
+stopping refresh on `INPUT_INVALID` is silently inert. Either update the template to consume
+`scene_terminal` (and/or add `INPUT_INVALID` to its list) or remove this unused argument.
+
+
+
+─── app/web/pipelines.py:113-115 ───
+[maintainability · low] Redundant branch: when `step` is None (guaranteed here, since we're in the
+`elif` chain after `if step:` failed), both this branch and the final `else` assign the identical
+value `"未开始"`. The `run_failed` computation at line 94 therefore has no observable effect on the
+output. Either drop the branch and the variable, or make the branch meaningful (e.g. `"已终止"` to
+match the non-scene phase summary's treatment of failed runs) if the intent is to distinguish
+terminated-but-not-started steps.
+
+

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-defect3-tester-retest-pass-2152",
+  "occurred_at": "2026-10-10T21:54:24+08:00",
+  "recorded_at": "2026-10-10T21:54:24+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "WAITING_REVIEW",
+  "summary": "TESTER attempt-3 复测 PASS（真 MySQL 8.4.11，main 5f0124b）：AC1 幂等二次/AC2 定向31/AC3 等价40-40；06 复测门禁收口，剩余强模型增量复审+协调者验收",
+  "evidence": "test-receipts/TEST-TASK06-r2-final-mysql-e2e/attempt-3.md",
+  "next": "等协调者验收 attempt-3 回执；本侧无待办不扩需求"
+}

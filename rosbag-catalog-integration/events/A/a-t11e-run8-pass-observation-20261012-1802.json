@@ -1,0 +1,16 @@
+{
+  "event_id": "a-t11e-run8-pass-observation-20261012-1802",
+  "role": "A",
+  "time": "2026-10-12T18:02:30+08:00",
+  "type": "OBSERVATION",
+  "summary": "t11e 驱动第 8 跑 17:28-17:53:51 自行收口 PASS（T11E_RC=0，total=1516.5s source_unchanged=True；e2e.json 全 10 步过：7_analyze SUCCESS segs=1、complete-scene 200 SCENE_DONE run_finalized=True、child_availability AVAILABLE、lineage 200、publish 落位 scratch/t11e-publish/unassigned/slope/）。ps 实测无 t11e/launcher 存活=驱动已自然停止，无在途 run9。共享根 grep t11e 仍零归属申报（无派单无 ACK 无 decision），与 08:00 归属裁决同口径：授权外动作，PASS 不构成生产证据，TASK-11 生产门禁维持 PRODUCTION BLOCKED 待用户独立授权。本角色不 kill 不代判不清理现场。",
+  "attempt": "t11e-external",
+  "state": "RUN8_PASS_DRIVEN_STOPPED_GATE_BLOCKED",
+  "next": "协调者核 run8 归属与处置：测试栈残留（source ADFD8D39FD1145DC8D1691E4C0 / run scene-e46f28c2ce1c4313a2c4ce4e8e71 / child T11Ea927a2e06c6c4ba9 / submission 6a19e97dd1114f84998f8ee08c678c7a）与文件现场（~/.hermes/cache/scratch/t11e_run*.out、t11e-e2e.json、t11e-publish/）是否回派最小清理单；生产启用仍待用户独立授权",
+  "evidence": "a-t11e-rerun-observation-20261012-1642; /home/wang/.hermes/cache/scratch/t11e_run8.out; /home/wang/.hermes/cache/scratch/t11e-e2e.json; /home/wang/.hermes/cache/scratch/a-t11e-evidence-20261012-1627/",
+  "linked_observations": [
+    "a-t11e-rerun-observation-20261012-1642",
+    "a-t11e-rerun-observation-run56-fail-20261012-1710",
+    "a-t11e-rerun-run7-inflight-20261012-1724"
+  ]
+}

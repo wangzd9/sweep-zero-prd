@@ -1,0 +1,12 @@
+{
+  "event_id": "c-poll-20261012-180853-nochange",
+  "occurred_at": "2026-10-12T18:11:10+08:00",
+  "recorded_at": "2026-10-12T18:11:10+08:00",
+  "role": "C",
+  "task": "IDLE",
+  "attempt": "0",
+  "status": "NO_CHANGE",
+  "summary": "C 范围零新增无新派单；main 30e55a3 本地/origin 502bf8e 滞后非 C；wt-03b 6f1a9ad 干净；无 C 进程；COORDINATOR 租约过期约 43min 仅观察不接管；A.json 在途不接管",
+  "evidence": "sessions/C.md",
+  "next": "保持空闲待派单"
+}

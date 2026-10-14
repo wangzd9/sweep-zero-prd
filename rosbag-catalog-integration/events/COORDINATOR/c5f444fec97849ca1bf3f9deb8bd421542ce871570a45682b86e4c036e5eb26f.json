@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-145553-strongmodel-inreview",
+  "occurred_at": "2026-10-11T14:58:06+08:00",
+  "recorded_at": "2026-10-11T14:58:06+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06",
+  "attempt": "1",
+  "status": "IN_REVIEW",
+  "summary": "强复审R2I-20261010-06已由用户14:49手动触发IN_REVIEW，子agent deleg_2f539bbb 14:48:52起跑且14:56 log活跃，result文件尚不存在，预计1~2h；main 62a85bf不变，03/05/06聚合门禁冻结在途，各角色空闲待命",
+  "evidence": "reviews/strongmodel/R2I-20261010-06-pack.md; /home/wang/.hermes/cache/delegation/live/deleg_2f539bbb/task-0.log",
+  "next": "每轮核result文件是否出现，PASS收口即03/05/06聚合DONE→TASK-08联调派单"
+}

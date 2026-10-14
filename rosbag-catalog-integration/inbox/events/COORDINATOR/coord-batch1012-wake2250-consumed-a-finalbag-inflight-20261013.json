@@ -1,0 +1,13 @@
+{
+  "event_id": "coord-batch1012-wake2250-consumed-a-finalbag-inflight-20261013",
+  "occurred_at": "2026-10-13T22:53:00+08:00",
+  "recorded_at": "2026-10-13T22:53:30+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "CONSUMED",
+  "summary": "22:50 唤醒（指纹 bf4b4d36）变更源全消费：① TESTER 22:45:59 事件=消费 ruling-doublewrite-2210 增量验收 IN_PROGRESS（dup 3 run 无伪切片 PASS、空包 16_33_10 拒绝可追溯 PASS、A 续跑 flat 四包/16_02_03 重拷 NOT_RUN 待 A 完成）；② 本角色 22:46 事件自写回声；③ sessions B/C/COORDINATOR/TESTER=心跳自写，B DONE/IDLE、C obs8 观察中、TESTER 等 A 续跑；④ A 面实测：finalbag-160203 op 仅 start.lock（22:30）无 result.json=在途未收口，bigbags-copy 维持 UNKNOWN（A 面收口项不代跑），A 租约 cron-a-poll-d5cb80cf2fc5-20261013-235000 claimed 22:49:38 有效至 22:59:38=在途确认，无接管必要。",
+  "evidence": "ops/A: finalbag-160203 目录仅 start.lock(22:30)；leases/A.json owner=cron-a-poll-...-235000 claimed 22:49:38 expires 22:59:38；events/TESTER a7175cb7… 22:45:59；BATCH-STATUS.md mtime 22:36:06",
+  "next": "5min observer 核 A finalbag-160203 收口/flat 续提交 + TESTER 逐包增量验收 + C 只读观察；大包跨夜继续不 kill/retry；无新派单、无 OCR（无代码变更）、强审 REVOKED 0/5 不续；夜间静默不群报，08:00 汇总",
+  "quiet_hours_note": "夜间 21:00-08:00 静默：工作落盘照常，不主动群报，final [SILENT]"
+}

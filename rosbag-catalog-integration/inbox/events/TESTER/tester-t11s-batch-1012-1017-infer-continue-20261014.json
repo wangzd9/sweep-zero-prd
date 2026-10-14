@@ -1,0 +1,13 @@
+{
+ "event_id": "tester-t11s-batch-1012-1017-infer-continue-20261014",
+ "occurred_at": "2026-10-14T10:18:19+08:00",
+ "recorded_at": "2026-10-14T10:20:32+08:00",
+ "role": "TESTER",
+ "task": "TASK-11S-BATCH-1012",
+ "attempt": "1",
+ "status": "IN_PROGRESS",
+ "summary": "10:1x 巡检轮（prerun 指纹 ed030147，变更源 inbox/PROTOCOL.md=20:58:48 恢复决定历史行 mtime 刷新，已核读，非新 TESTER 派单/新 decision）：按本角色范围增量只读巡检，scene-4acf689f SCENE_RUNNING heartbeat 10:18:12、八步 QUEUED 8/8 started_at=NULL（入队 ~673min）；VLM 10:18:09-10:18:39 Running 4 reqs / Waiting 3→1 瞬态回落、prefix 95.4、KV 7.4-17.3、MM 88.6、POST 200 连发；proxy 3495931 volcsw 116912->116936（12s +24 持续递增）、nvolcsw 376 不变、RSS 18084292kB S——INFER 远端推理持续活跃，升级条件逐项未命中，不 kill/cancel/retry。flat 三提交 3/3 PENDING_INPUT source_id=NULL（ingest_submission 8 行不变）等 A D4 第三步，14_42_48 正式全链维持 NOT_RUN；scan 4095 incoming SUCCESS {directories:3 bags:1 failed:2} 10:16:00 周期持续空包拒绝可追溯、self_built 4094 8dirs 全绿；scene run 全集 7=6DONE+1RUNNING 无新 run；health ok active_runs=[4acf689f ACCEPTED pid:1]；PASS 基线不变。单脚本 claim→巡检→renew→release 闭环 exit 0，lease 已释放。全部只读。",
+ "evidence": "scene_runs top='scene-4acf689f9a6a473da1fa2f2efc70\\tSCENE_RUNNING\\t1\\t2026-10-14 10:18:12'; steps QUEUED=8/8 started_at=NULL; volcsw 116912->116936 nvol 376 RSS 18084292kB S; flat PENDING_INPUT=3/3 source_id=NULL (ingest_submission 8 rows); scan top='4095\\t/public/rosbag_scene_processing/incoming\\tSUCCESS\\t{directories:3 bags:1 created:0 updated:0 failed:2 root_id:scene}\\t2026-10-14 10:16:00' (self_built 4094 8dirs 0failed); health='{status: ok, active_runs: [4acf689f ACCEPTED pid:1]}'; vlm Running 4 Waiting 3->1 prefix 95.4 KV 7.4-17.3 MM 88.6 POST 200 连发 @10:18:09-10:18:39",
+ "next": "白天按原节奏巡检；等 4acf689f 模型段完成信号（checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE）；flat 绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING；11:00 时段总结照常",
+ "source": "inbox/events/TESTER/tester-t11s-batch-1012-1017-infer-continue-20261014.json"
+}

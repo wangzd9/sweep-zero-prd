@@ -1,0 +1,14 @@
+{
+  "event_id": "c-t11s-batch-1012-obs49-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T06:40:00+08:00",
+  "recorded_at": "2026-10-14T06:42:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "supersedes_context": "obs48（06:3x）后新一轮：prerun 06:38:53 指纹 bb09cb26 触发源=sessions/C.md（obs48 自产记账），ACK 21:07:41 在案不重复领取",
+  "summary": "C 第49轮只读观察（处理机 06:40-06:41 实测）：与 obs48 零状态变化，scene-4acf689f（16_02_03 正式链）仍 SCENE_RUNNING attempt=1 无升级条件命中，INFER 模型段持续活跃（大包跨夜不 kill/retry）。C 全程只读（ssh curl 8180/8767、docker exec 只读、llm-server 读 vllm log、host ls/df/uptime），未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "evidence": "处理机 06:40-06:41 只读实测：8180 scene-4acf689f9a6a473da1fa2f2efc70 status=SCENE_RUNNING attempt=1 error 空 lease_expires_at 06:41:58 续租 lease_owner=platform-local frozen_at 23:05:30 八步 API 全 QUEUED；8767/health ok active_runs=[4acf689f ACCEPTED pid1]；proxy pid 3495931 docker top CPU 12% TIME 01:19:12（obs48 01:18:5x 持续非零）STIME 10月13 未重启；work 树（容器 /var/lib/scene-proxy/work/…/attempt-1）checkpoint.json mtime 2026-10-13 16:23:10.474817688 UTC 未翻、jpg 1781/pcd 5373 与 obs34-48 同、find -newermt 15min=0 零新写；llm-server vllm log 06:39:57-06:40:27 采样 Running 3-4 reqs Waiting 单点 1（06:39:57 一次后回 0=非持续>0，与 obs24-48 单点口径同）prefix 92.1% MM 88.6% gen 70-190 tok/s POST /v1/chat/completions 200 连发累计 183005（obs48 182675 口径后继续增长）=推理活跃续证；NAS 98T/70T/29T 71% 不变、load 0.36/0.38/0.43 低位、up 5 天 20:59；incoming/spray 仍仅 16_33_10 空包目录（D6 A 面不变）、.upload-staging 仅 d4-dategrouped-delete-20261014 与 spray-production-1012-20261013 证据目录无在传",
+  "next": "接续只读观察：① 模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；② 升级条件按 ruling-4acf：heartbeat 4 连败/FAILED/VLM Waiting 持续积压且 proxy 无 ESTAB；③ 16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核。夜间静默不主动群报，08:00 随协调者汇总",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

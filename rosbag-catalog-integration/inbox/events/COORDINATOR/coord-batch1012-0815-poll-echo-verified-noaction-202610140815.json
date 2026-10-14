@@ -1,0 +1,13 @@
+{
+  "event_id": "coord-batch1012-0815-poll-echo-verified-noaction-202610140815",
+  "occurred_at": "2026-10-14T08:13:24.613893+08:00",
+  "recorded_at": "2026-10-14T08:13:24.613893+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "NO_ACTION",
+  "supersedes_context": "prerun 指纹 d3ff8efc（8 变更源）；first_seen 08:05:10 起 pending",
+  "summary": "08:15 巡检：变更源全自产回声（coord 08:00 汇总+TESTER 08:05/08:07+sessions/receipts 回声），零外部新输入。恢复交接四项核完：四份派单+四份 ACK 在案无需重派；在途仅 C obs61 租约，无双会话；生产 8767 ok、大包 4acf689f ACCEPTED 活跃不 kill/retry（08:07 八步 QUEUED ~555min、VLM 活跃，升级条件未命中）；flat 三提交 PENDING_INPUT，14_42_48 维持 NOT_RUN 等 A D4③。强审 REVOKED 0/5 在途0。",
+  "evidence": "ssh processing-machine 08:15 只读：8767 health ok active_runs=4acf689f stage ACCEPTED；8180 服务在（run 详情路径 404 页面但服务可达，run 状态以 C/TESTER 08:0x DB 实测为准）；四份 dispatch mtime 2026-10-13 20:58:48 与 ack 21:05–21:18 find 核验；leases 目录 find 仅 C.json 有效；sessions/COORDINATOR.md 追加条目",
+  "next": "A 核 4acf689f 终态→D4③ 回执；C 续 obs；TESTER 11:00 时段总结；协调者 20min 报告+5min observer 接续"
+}

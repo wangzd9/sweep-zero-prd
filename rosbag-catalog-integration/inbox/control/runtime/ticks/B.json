@@ -1,0 +1,14 @@
+{
+  "checked_at": "2026-10-14T18:10:36+08:00",
+  "role": "B",
+  "mode": "script_poll",
+  "control": "ACTIVE",
+  "wakeAgent": true,
+  "reason": "new_or_unacknowledged_change",
+  "fingerprint": "56cc417ffd8f936a143967db249b7e1dc9f10be94bbf1ec9b08e031e39169f67",
+  "changed_sources": [
+    "event:B:B:b-poll-20261014-175253-fp-4dbf39e7-batch-cancellation-confirmed-idle",
+    "inbox/coordinator/TASK-16C-B/leaf-acceptance-decision-20261014.md",
+    "sessions/B.md"
+  ]
+}

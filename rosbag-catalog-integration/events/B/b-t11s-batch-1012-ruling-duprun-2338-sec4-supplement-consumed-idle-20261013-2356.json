@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t11s-batch-1012-ruling-duprun-2338-sec4-supplement-consumed-idle-20261013-2356",
+  "occurred_at": "2026-10-13T23:56:00+08:00",
+  "recorded_at": "2026-10-13T23:57:00+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Cron wake on observer pending fp=1dfa4ea6 (changed_sources: ruling-duprun-2338.md 23:53 mtime = section-4 23:5x supplement later than the 23:50 consumed version; own 23:50 event; sessions/B.md own checkpoint). Read supplement: C obs11 reclassifies scene-a4824f1c (14_42_48 dup) attempt-2 as EXTRACT fully on disk (171 jpg/534 pcd, 2.4GB tree) + INFER active, D2 timing addendum = A checks formal cancel endpoint read-only and cancels ASAP if present; queued runs expected to pass RESOLVING (C checks next round); resource side no risk. All new content is in A/C/TESTER scope. B side zero action: no rework, no new B dispatch, no B process; B independent evidence DONE 21:12 stands, D3 three-bag zero-iv NOT_APPLICABLE classification remains valid (TESTER verifies convergence terminals, no B involvement). Zero commit/model/copy/prod-write. sessions/B.md checkpoint appended 357->358 lines (append-only verified).",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/ruling-duprun-2338.md;inbox/control/runtime/observer/B.json;sessions/B.md",
+  "next": "IDLE_WAITING: await next dispatch from coordinator; quiet hours 21:00-08:00 - no proactive group messages, 08:00 digest."
+}

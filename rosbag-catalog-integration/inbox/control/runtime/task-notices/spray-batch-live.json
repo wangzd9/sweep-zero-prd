@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "observation_id": "spray-batch-live",
+  "notify_roles": [
+    "COORDINATOR"
+  ],
+  "observed_at": "2026-10-14T09:15:10+00:00",
+  "revision": 8,
+  "semantic": {
+    "identity": {
+      "observation_id": "spray-batch-live",
+      "task": "TASK-11S-BATCH-1012",
+      "run_id": "scene-4acf689f9a6a473da1fa2f2efc70",
+      "notify_roles": [
+        "COORDINATOR"
+      ]
+    },
+    "attempt": 1,
+    "status": "SCENE_CANCELLING",
+    "steps": [
+      {
+        "step_name": "EXTRACT",
+        "attempt": 1,
+        "status": "DONE",
+        "error_message": ""
+      },
+      {
+        "step_name": "INFER",
+        "attempt": 1,
+        "status": "RUNNING",
+        "error_message": ""
+      },
+      {
+        "step_name": "PRECHECK",
+        "attempt": 1,
+        "status": "DONE",
+        "error_message": ""
+      },
+      {
+        "step_name": "PUBLISH",
+        "attempt": 1,
+        "status": "QUEUED",
+        "error_message": ""
+      },
+      {
+        "step_name": "REGISTER",
+        "attempt": 1,
+        "status": "QUEUED",
+        "error_message": ""
+      },
+      {
+        "step_name": "SEGMENT",
+        "attempt": 1,
+        "status": "QUEUED",
+        "error_message": ""
+      },
+      {
+        "step_name": "VALIDATE",
+        "attempt": 1,
+        "status": "QUEUED",
+        "error_message": ""
+      },
+      {
+        "step_name": "WRITE",
+        "attempt": 1,
+        "status": "QUEUED",
+        "error_message": ""
+      }
+    ],
+    "source_id": "91FFEEC14C6243C49A81C75AB5",
+    "config_hash": "8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5",
+    "error": "",
+    "health": {
+      "heartbeat": "stale",
+      "proxy": "ok",
+      "proxy_run": "absent",
+      "container": "running",
+      "disk": "healthy"
+    },
+    "process_identity": {
+      "pid": 1,
+      "start_ticks": "54100678",
+      "boot_id": "eae82bd2-5ea6-4853-8abb-ca654b9121c6"
+    },
+    "container_id": "ddcc7df816356761663f81497d8db59291e0e43d047013e7683d1abfd2c56cf5",
+    "checkpoint_steps": {
+      "EXTRACT": {
+        "status": "RUNNING",
+        "detail": ""
+      },
+      "INFER": {
+        "status": "FAILED",
+        "detail": "CANCELLED: decoder 阶段收到取消信号"
+      },
+      "PRECHECK": {
+        "status": "DONE",
+        "detail": ""
+      },
+      "PUBLISH": {
+        "status": "PENDING",
+        "detail": ""
+      },
+      "REGISTER": {
+        "status": "PENDING",
+        "detail": ""
+      },
+      "SEGMENT": {
+        "status": "RUNNING",
+        "detail": ""
+      },
+      "VALIDATE": {
+        "status": "PENDING",
+        "detail": ""
+      },
+      "WRITE": {
+        "status": "PENDING",
+        "detail": ""
+      }
+    },
+    "unknown": {}
+  },
+  "semantic_fingerprint": "f1a18a6b8a9e97b86fc973a11444881ff087532ac364a09d8f7924bf60955f1b"
+}

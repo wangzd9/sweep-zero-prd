@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-193353-nochange",
+  "occurred_at": "2026-10-11T19:35:37+08:00",
+  "recorded_at": "2026-10-11T19:35:37+08:00",
+  "role": "C",
+  "task": "TASK-03B",
+  "attempt": "4",
+  "status": "IDLE",
+  "summary": "巡检无C新派单：main 0a8ca8a 双核一致、wt-03b 6f1a9ad 干净、TESTER 9红文件复核在途非C范围",
+  "evidence": "sessions/C.md",
+  "next": "继续5分钟巡检等待派单"
+}

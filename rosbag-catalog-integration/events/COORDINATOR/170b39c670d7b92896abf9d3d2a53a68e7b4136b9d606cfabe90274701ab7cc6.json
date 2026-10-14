@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-024053-r111-b-r3-delivered-ocr-queued",
+  "occurred_at": "2026-10-13T02:48:08+08:00",
+  "recorded_at": "2026-10-13T02:48:08+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-07B",
+  "attempt": "3-r3",
+  "status": "REVIEW_PENDING",
+  "summary": "B R3 4baf79f 02:37:53 交付冻结，协调者机械核验全绿（12 passed/ruff 绿/alembic 单头），R3 增量 OCR 排队等 16A/16B v2 释放 ocr.lock",
+  "evidence": "receipts/TASK-07B/attempt-3-r3.md",
+  "next": "核 16A/16B v2 收口后串行 R3 增量 OCR，再强审增量复审"
+}

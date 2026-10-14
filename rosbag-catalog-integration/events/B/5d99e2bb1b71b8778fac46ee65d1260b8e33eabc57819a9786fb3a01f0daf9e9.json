@@ -1,0 +1,20 @@
+{
+  "event_id": "B:b-poll-20261014-175253-fp-4dbf39e7-batch-cancellation-confirmed-idle",
+  "kind": "business",
+  "task": "TASK-16C-B",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "巡检 2026-10-14 17:53 +08:00（cron poll 6f7471d8747c，脚本指纹 4dbf39e7，17:50:12 首见/17:52:53 复检）：消费 pending——变更源2件均核完。①B叶 OCR 门禁事件（17:35 轮次 17:40 已处理）；②协调者 17:50 更新 BATCH-STATUS（17:48:50 落行）：大包 scene-4acf689f 取消已确认（C obs78 17:35 实测/17:41 落盘——容器日志 17:14:25 attempt1 CANCELLED 于 INFER 阶段、两次 HTTP 409 task lease expired；8180 滞留 SCENE_CANCELLING 未收敛、lease 16:23:55 stale，收敛面待 C/A 下轮核实；按取消终态登记、TESTER 大包验收面改取消链证据+产物完整性）。批次/大包面非本角色职责，对 B 叶零新派单/零返修/零问题 ID 单。B 交付 e399daf 冻结（wt-04a-t16cb 18:05 复核 HEAD 不变、仅 .venv 未跟踪）；inbox/2号 17:40 后零新增；ps 无 B 侧业务进程（A 叶 17:56 起在跑 test_task16ca_query_api/test_task16c_ui_minimal/test_web，属 A 侧清理自测面不介入）。维持 IDLE_WAITING 不占开发槽：等协调者机械核验+三叶齐后集成候选 → TESTER 16D 本叶独立增量验证 → 叶接受；收 A 叶清理（view_label 统一+data_kind_case 删除）后集成版本再核对应面。",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md（17:48:50 mtime，协调者17:50行）；git -C /home/wang/.local/state/rosbag-scene/wt-04a-t16cb log -1 = e399daf；find inbox/2号 -newermt 2026-10-14 17:40 零命中；ps：B 侧零业务进程、A 叶 pytest 在途",
+  "next": "IDLE_WAITING：等协调者机械核验/集成候选 → TESTER 16D 本叶独立增量验证 → B 叶接受；收 A 叶清理后集成版本再核 view_label 对应面；空闲只读巡检不扩需求、不碰生产",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "B",
+  "recorded_at": "2026-10-14T18:10:20+08:00",
+  "occurred_at": "2026-10-14T18:10:20+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

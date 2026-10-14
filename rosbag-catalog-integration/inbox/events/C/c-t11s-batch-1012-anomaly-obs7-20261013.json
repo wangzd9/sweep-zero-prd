@@ -1,0 +1,13 @@
+{
+  "event_id": "c-t11s-batch-1012-anomaly-obs7-20261013",
+  "occurred_at": "2026-10-13T22:16:00+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "ANOMALY_UPDATING",
+  "supersedes_context": "第7轮只读观察（obs6 22:12 后 ~4 分钟窗），接续 c-t11s-batch-1012-anomaly-obs6-20261013 异常链；prerun 22:13:53 指纹 b1e5cf07（changed=sessions/C.md 自产 obs6 行 + obs6 event 自身）",
+  "summary": "11S-BATCH-1012 C 第7轮只读观察：批次仍**零移动**，但**新确认 A bigbags-copy op 为滞留 RUNNING 僵尸记录**——① NAS 全树 find -newermt 22:12 零命中，无 bag 移动/新 run/checkpoint 推进；② 新：A op TASK-11S-BATCH-1012-attempt-1-bigbags-copy result.json 仍 status=RUNNING、pid=2520120，但 ps -p 2520120 NOT ALIVE、result.log 0 字节、current_step 停 1、staging 目录空——op 记录从未收口为终态（obs6 只判'无存活进程'，本轮首核 pid 存活+记录状态，发现滞留 RUNNING）；③ 16_02_03（10GB）find 全域仍零命中、源 du -sb=10105921766 完整在位（未变）；④ 16_37_47 仍 ready/spray/ 与 ready/spray/20261012/ 双份、ledger 仍无条目（账实不符未变）；⑤ upload-ledger.json（receipts/TASK-11S-BATCH-1012）mtime 仍 21:43:56、6 条目 state 摘要未变；⑥ incoming/spray 仍仅 16_33_10 空包目录。obs5/obs6 五项裁决请求原样保留并新增第⑥项：A bigbags-copy op 滞留 RUNNING 记录收口（A 面动作）。C 继续按 run 只读观察，不接管 A 槽、不代跑、不 kill/retry。",
+  "evidence": "find /mnt/nas_backup/rosbag_scene_processing -newermt 22:12 零命中；ps -o pid,etime,stat,cmd -p 2520120=NOT ALIVE；cat result.json status=RUNNING pid=2520120 current_step=1；wc -c result.log=0、start.lock=0、result.json.worker.lock=0；ls staging 空；pgrep -af batch1012|q1012|bigbags 仅命中本轮自身；find *16_02_03* 零命中、du -sb 源=10105921766；find *16_37_47* 仍 ready 双份；stat upload-ledger.json mtime=2026-10-13 21:43:56；ls incoming/spray 仅 16_33_10",
+  "next": "维持 obs5/obs6 五项裁决请求等协调者并新增第⑥项（A bigbags-copy op 滞留 RUNNING 收口）：① A 链是否续起（op 收口+16_33_10 空包拒绝+14_42_48 补 submission）；② 16_02_03 10GB 失踪处置（源完整可重拷）；③ 16_37_47 账实不符补账或回退；④ ready 双份去重与 relative_path 血缘（TESTER 面）；⑤ 生产 backend 18000 归属核实；⑥ A bigbags-copy op 滞留 RUNNING 记录收口。夜间静默继续，C 每轮 run 只读观察至有实质变化。",
+  "quiet_hours_note": "夜间静默 21:00-08:00：工作落盘照常，不主动群报；final [SILENT]"
+}

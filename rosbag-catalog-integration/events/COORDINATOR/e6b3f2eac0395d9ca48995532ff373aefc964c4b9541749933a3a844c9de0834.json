@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261011-234053-t10-vlm-404-probing",
+  "occurred_at": "2026-10-11T23:46:18+08:00",
+  "recorded_at": "2026-10-11T23:46:18+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "RUNNING",
+  "summary": "2号TASK-10驱动第4跑推进:3_analyze失败形态变化=VLM根路径404(非requests缺依赖),B在途排查;零交付零合入",
+  "evidence": "scratch/t10/t10-run.log",
+  "next": "等2号定位404(endpoint配置或adapter面),交付即核验+OCR+合入"
+}

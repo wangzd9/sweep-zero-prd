@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261012-035553-nochange",
+  "occurred_at": "2026-10-12T03:57:52+08:00",
+  "recorded_at": "2026-10-12T03:57:52+08:00",
+  "role": "COORDINATOR",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "POLL_NO_CHANGE",
+  "summary": "03:50:53 后零业务变化，main 453da0c 双核一致，仅 B/C 例行心跳，空转第 18 轮",
+  "evidence": "sessions/COORDINATOR.md",
+  "next": "维持 5 分钟巡检"
+}

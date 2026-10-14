@@ -1,0 +1,15 @@
+{
+  "event_id": "coord-batch1012-1052-post-spray-closeout-accept-recovery-classify-defects-20261014",
+  "occurred_at": "2026-10-14T10:52:00+08:00",
+  "recorded_at": "2026-10-14T10:53:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "CLOSEOUT_RECOVERY_ACCEPTED_DEFECTS_CLASSIFIED",
+  "supersedes_context": "prerun bd4c3f35（含 POST-SPRAY-CLOSEOUT-20261014 10:49:02 用户收尾卡 + 四角色 post-release-closeout-20261014.md 增补 + A/C/TESTER 10:2x-10:3x 事件 + receipts/a-attempt-1.md 10:29 + before-docs 快照）；接续 10:25/10:49 协调者事件",
+  "summary": "消费 POST-SPRAY-CLOSEOUT-20261014.md（10:49:02，用户原文『水雾已经上了生产，继续原来的收尾工作』，当前调度入口）：① 接受三提交恢复事实（10:23 正式 API 恢复 a65a25a7→a4824f1c SUCCESS / 87dfebaa→eb4397c3·518089ed→24ab78bb NOT_APPLICABLE，均 SCHEDULED/gen1/事件 CONSUMED/created_runs=0/reused_runs=3/errors=[]/总 run=7/attempt 不变，10:37 只读审计再确认）；② 停止 A 重登记旧单（resume-ruling-binding-1017 已 STOP，A 10:29 只读核实身份待核回执）；③ 刷新 BATCH-STATUS 过时等待语句（A/TESTER/四 flat/大包/缺陷修复节均 10:23 回执口径）；④ TESTER 独立核派单并入 closeout 增补卡（ruling-104x 顶部标注以 post-release-closeout 为准，不重复领取/不双份记账）；⑤ 两项需新代码接收缺陷按原 AC 分类固定 owner/base/最小范围，本轮不实施不派单（父子共享快指纹 409 误拒绝 + 空包提交长期 PENDING_INPUT 无终态）。范围维持：UI/DEFERRED 仍暂停，大包优化 ros2_slice 先行平台不开发，强审 REVOKED 不续，全批 DONE 需 7 有效输入终态/独立验收+1 无效拒绝追溯齐全。",
+  "evidence": "inbox/control/POST-SPRAY-CLOSEOUT-20261014.md（10:49:02）；inbox/coordinator/POST-SPRAY-CLOSEOUT-20261014/{role-audit.json,refresh-result.json,verification.json,before-docs/}；codex-repair-receipt-20261014.md（10:23）；BATCH-STATUS.md 10:23 回执更新；sessions/COORDINATOR.md 10:52 条目（2717 行）；ruling-104x 顶部并入标注；role-audit/verification 确认本 cron pid 3406135 为在途 COORDINATOR owner、四角色 ack=PENDING_ROLE_CONSUMPTION、auto-wake 失败（multiple repeat，靠 5min 原生 poll 消费）",
+  "next": "等 TESTER 按 closeout 增补卡独立核三复用结果（SCHEDULED/gen1/CONSUMED/总 run=7/attempt 不变 + SUCCESS 切片 AVAILABLE/血缘/原 SHA/两次 reconcile 幂等 + NOT_APPLICABLE 无伪切片 + 大包补报未改 checkpoint 未重启）→ 协调者裁决放行；同步核 scene-4acf689f 模型段完成信号→终态后补真实跨 DB3+全批收口；两项接收缺陷等用户/后续批次授权定 owner/base/范围再派（本轮不实施）；白天 20min 报告 no_agent 投递，状态变化即时通报",
+  "quiet_hours_note": "白天口径，状态变化即时通报",
+  "source": "inbox/events/COORDINATOR/coord-batch1012-1052-post-spray-closeout-accept-recovery-classify-defects-20261014.json"
+}

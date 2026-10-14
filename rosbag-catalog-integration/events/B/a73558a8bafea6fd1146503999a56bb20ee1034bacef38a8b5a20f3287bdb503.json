@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-032253-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T03:23:48+08:00",
+  "recorded_at": "2026-10-12T03:23:48+08:00",
+  "role": "B",
+  "task": "TASK-10",
+  "attempt": "1",
+  "status": "IDLE_WAITING",
+  "summary": "P0 停止派发后夜间巡检：03:18 后零业务变化，无新派单无返修，worktree 冻结干净，origin/main 453da0c 不变",
+  "evidence": "sessions/B.md",
+  "next": "继续5分钟巡检；TASK-11 生产门禁未放行不启动"
+}

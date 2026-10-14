@@ -1,0 +1,13 @@
+{
+  "recovered_at": "2026-10-14T17:55:08+08:00",
+  "role": "C",
+  "old_owner": "C-cron-poll-20261014-172353-t11s-obs78",
+  "verification_evidence": "/home/wang/.hermes/cache/scratch/obs78-lease-verification.json",
+  "lease": {
+    "owner": "C-cron-poll-20261014-172353-t11s-obs78",
+    "claimed_at": "2026-10-14T17:31:56+08:00",
+    "expires_at": 1791970916.490136,
+    "pid": null,
+    "process_start": null
+  }
+}

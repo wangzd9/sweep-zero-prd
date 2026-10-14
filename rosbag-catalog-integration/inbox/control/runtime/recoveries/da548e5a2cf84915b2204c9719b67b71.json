@@ -1,0 +1,13 @@
+{
+  "recovered_at": "2026-10-10T23:52:56+08:00",
+  "role": "A",
+  "old_owner": "cron-poll-d5cb80cf2fc5-234653",
+  "verification_evidence": "/tmp/claimA.json",
+  "lease": {
+    "owner": "cron-poll-d5cb80cf2fc5-234653",
+    "claimed_at": "2026-10-10T23:47:27+08:00",
+    "expires_at": 1791647547.346248,
+    "pid": null,
+    "process_start": null
+  }
+}

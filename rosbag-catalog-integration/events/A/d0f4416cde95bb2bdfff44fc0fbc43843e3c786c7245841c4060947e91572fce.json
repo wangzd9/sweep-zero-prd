@@ -1,0 +1,12 @@
+{
+  "event_id": "a-s1-attempt6-rework-delivered-20261010",
+  "occurred_at": "2026-10-10T18:58:18+08:00",
+  "recorded_at": "2026-10-10T18:58:18+08:00",
+  "role": "A",
+  "task": "TASK-03B",
+  "attempt": "6-rework",
+  "status": "REVIEW_PENDING",
+  "summary": "S1 迁移链 1406 返修交付：revision 20261009_02_ingest_frozen_columns(33) 改短为 20261009_02_ingest_frozen(25)，down_revision 不动；新增链宽度+一致性+SQLite upgrade head 定向回归",
+  "evidence": "receipts/TASK-03B/attempt-6-rework.md; commit ceeac16 (base main 74ba3bf); 真实 MySQL 8.4.11 双路径 RC=0 证据 reviews/TASK-03B/attempt-5/s1-attempt6-mysql-evidence-1hao.log; SQLite 全量 800 passed",
+  "next": "等协调者 OCR 增量复审与 TESTER S1 新 attempt 复测"
+}

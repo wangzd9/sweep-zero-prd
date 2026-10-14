@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-r116-t16a-ocr-v2-14of14-closure-and-r1-dispatch",
+  "occurred_at": "2026-10-13T03:52:00+08:00",
+  "recorded_at": "2026-10-13T03:52:00+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16A",
+  "attempt": "attempt-2-r1",
+  "status": "REWORK_DISPATCHED",
+  "summary": "16A OCR v2 14/14 全收口（零 high/critical；b13 迁移 1 low 尾换行+b14 compose 0）；b10 list_profiles 正式裁决 CORRECTION(low)（DESIGN.md:157 字段承诺）；最小返修单 attempt-2-r1 已派 A（6 项限 runner/ingest_service/scene_intake/迁移尾换行，clients.py 不碰）；16B b1 orchestrator INFLIGHT；07B R3 增量 OCR 仍排 16B 收口后串行",
+  "evidence": "reviews/TASK-16/16A-16B-ocr-batches.md r116b; inbox/1号/TASK-16A/attempt-2-r1-dispatch.md; t16_ocr_v2_progress.txt",
+  "next": "等 A ACK+开工；核 16B b1-b3 收口→07B R3 增量 OCR→强审增量复审→07B 合入→16A rebase 双头合入"
+}

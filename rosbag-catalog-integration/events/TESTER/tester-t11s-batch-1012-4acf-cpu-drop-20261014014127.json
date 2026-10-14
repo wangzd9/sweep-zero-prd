@@ -1,0 +1,22 @@
+{
+  "event_id": "tester-t11s-batch-1012-4acf-cpu-drop-20261014014127",
+  "occurred_at": "2026-10-14T01:41:27+08:00",
+  "recorded_at": "2026-10-14T01:41:27+08:00",
+  "role": "TESTER",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IN_PROGRESS",
+  "summary": "01:01:3x 跨夜增量只读实测（消费 prerun 指纹 4b818d96…，唤醒源=上轮 01:28 事件回声，无新派单）：4acf689f SCENE_RUNNING attempt1 01:35:38 心跳持续、八步全 QUEUED ~88min 前置段；**proxy CPU 骤降 341.87%(01:27)→0.45/0.57/0.58%(01:36-38 三连测)、RAM 20.43GiB 高位维持**=前置解析段已过或静默子段，日志 FEngine/EGL 渲染引擎反复重建，暂不判卡死下轮核八步开跑或升级证据链；ingest_submission 8 行不变 flat 三提交仍 PENDING_INPUT 等 A 绑定，14_42_48 正式全链 NOT_RUN；scan_job 3991 01:35:39 SUCCESS failed:2=空包 16_33_10 拒绝持续；scene run 7=6DONE+1RUNNING 无新 run；NAS slices 6/ready 7flat/incoming 仅空包与上轮一致；PASS 基线不变。",
+  "evidence": {
+    "fingerprint": "4b818d96e4f37be269c7ea46a21b4246b5cd8f06efc7f1dc4c2cdc40685d780a",
+    "proxy_stats": "01:36-01:38 x3: cpu 0.45/0.57/0.58% mem 20.43GiB/30.78GiB (prev 341.87%@01:27, 386.59%@01:19)",
+    "heartbeat": "pipeline_run 4acf689f heartbeat_at=updated_at=2026-10-14 01:35:38",
+    "steps_queued": "8/8 attempt1 QUEUED started_at=NULL",
+    "ingest_submission": "8 rows unchanged, flat a65a25a7/87dfebaa/518089ed PENDING_INPUT source_id=null",
+    "scan_job": "id3991 01:35:39 incoming SUCCESS failed:2 (empty bag 16_33_10 persistent)",
+    "scene_runs": "7 = 6 SCENE_DONE + 4acf689f SCENE_RUNNING",
+    "nas": "slices/test/spray 6 dirs (FFDEE943x4+2 baseline); ready/spray 7 flat; incoming/spray only empty bag",
+    "receipt": "test-receipts/TASK-11S-BATCH-1012/attempt-1.md (01:3x 段)"
+  },
+  "next": "下轮核 4acf689f 八步 started_at 落值（PRECHECK/EXTRACT 开跑）或 CPU 持续低位则升级静默段证据链报协调者定性 + SCENE_DONE 后跨DB3 边界/产物/两次 reconcile；A flat 绑定行出现后核 14_42_48 正式全链（0038 口径）；全批 8 包齐后 TEST_REPORT_PENDING（含双写事件产物一节）"
+}

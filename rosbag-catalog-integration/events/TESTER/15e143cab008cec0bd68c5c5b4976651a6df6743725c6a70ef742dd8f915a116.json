@@ -1,0 +1,12 @@
+{
+  "event_id": "20261011-1820-t08c1-delivery-detected",
+  "occurred_at": "2026-10-11T18:22:54+08:00",
+  "recorded_at": "2026-10-11T18:22:54+08:00",
+  "role": "TESTER",
+  "task": "TASK-08",
+  "attempt": "t08c-1",
+  "status": "DELIVERY_DETECTED",
+  "summary": "巡检独立核实 2号 t08c-1 已交付 REVIEW_PENDING（receipts+reports 18:18，base f9bafb0 至 head bf48a45，7 文件 +91/-18，app 行为面 6 文件）；inbox/TESTER 无 PENDING 复测派单，不预跑，等协调者验收/OCR/合入后按新派单开工",
+  "evidence": "receipts/TASK-08/c1c2-t08c-1.md",
+  "next": "等协调者验收口径与 TESTER 复测派单"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t12sb-s9b-dual-evidence-idle-20261013-1927",
+  "occurred_at": "2026-10-13T19:31:45+08:00",
+  "recorded_at": "2026-10-13T19:31:45+08:00",
+  "role": "B",
+  "task": "TASK-12S-B",
+  "attempt": "1-rework-s9b",
+  "status": "IDLE_WAITING",
+  "summary": "19:2x 只读巡检：S9b 双证据齐（OCR run 01407cec 两批 4/4+3/3 rc0 零 findings 18:51 裁接受；TESTER 独立复验 PASS 报告 TEST_REPORT_PENDING 18:49），本侧无返修单，wt-04a-t12sb HEAD f76e2a9 冻结干净；PROTOCOL.md runtime-v1 变更已消费",
+  "evidence": "reviews/TASK-12S-B/s9b-ocr-verdict.md; test-receipts/TEST-TASK12S-B-s9b/attempt-1.md; wt-04a-t12sb HEAD=f76e2a9b403577b791ca3688e0da5e574c4c272a",
+  "next": "等协调者合入裁决；收返修按问题 ID 续 b/task-12s-b-spray-adapter 最小修复"
+}

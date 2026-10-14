@@ -1,0 +1,12 @@
+{
+  "event_id": "rework5-delivered-5c854ea",
+  "occurred_at": "2026-10-10T22:39:07+08:00",
+  "recorded_at": "2026-10-10T22:39:07+08:00",
+  "role": "B",
+  "task": "TASK-06B",
+  "attempt": "rework5",
+  "status": "REVIEW_PENDING",
+  "summary": "codex 3 项返修交付 commit 5c854ea（M-1 started_at 截断到秒+回归/M-2 迁移边界 docstring/M-3 注释纠偏）",
+  "evidence": "receipts/TASK-06B/attempt-1-r2-rework-5.md",
+  "next": "等协调者增量 OCR+TESTER 生产连接语义复跑+合入"
+}

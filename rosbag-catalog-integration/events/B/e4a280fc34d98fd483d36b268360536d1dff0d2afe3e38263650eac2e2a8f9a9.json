@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-032753-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T03:29:13+08:00",
+  "recorded_at": "2026-10-12T03:29:13+08:00",
+  "role": "B",
+  "task": "none",
+  "attempt": "none",
+  "status": "IDLE",
+  "summary": "P0收口后常规空转：inbox/2号零新增，main 453da0c双核不变，无本侧在途进程，维持IDLE_WAITING",
+  "evidence": "none",
+  "next": "等协调者派单或返修，空闲不扩需求"
+}

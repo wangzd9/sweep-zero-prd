@@ -1,0 +1,204 @@
+{
+ "schema_version": 1,
+ "batch_id": "spray-production-1012-20261013",
+ "bags": {
+  "rosbag2_2026_10_12-15_58_23": {
+   "bag": "rosbag2_2026_10_12-15_58_23",
+   "state": "REUSE_READY_SHA_MATCH",
+   "dest": "/mnt/nas_backup/rosbag_scene_processing/ready/spray/rosbag2_2026_10_12-15_58_23",
+   "sha": {
+    "metadata.yaml": "5a3cb2966cffa7485f95cc0d6cb20a85a3eb20d046c6397338d52c95d86b0064",
+    "rosbag2_2026_10_12-15_58_23_0.db3": "73acd0d5875d321005ed03f341c5f7f12145539ec24f489b8ba3184ddc614f24"
+   },
+   "updated_at": "2026-10-13T21:20:52+0800"
+  },
+  "rosbag2_2026_10_12-16_31_25": {
+   "bag": "rosbag2_2026_10_12-16_31_25",
+   "state": "PLACED_INCOMING",
+   "copy_s": 0.9,
+   "sha": {
+    "metadata.yaml": "fcc5ff252dff517f980570ff2c2084730c21f389774d53a6789cefe8fbe75dda",
+    "rosbag2_2026_10_12-16_31_25_0.db3": "8e9eee4421a6b8a25c58dc66cba5259ebc4c673babf529eafcd5e2d1bc1c0e3c"
+   },
+   "src_sha": {
+    "metadata.yaml": "fcc5ff252dff517f980570ff2c2084730c21f389774d53a6789cefe8fbe75dda",
+    "rosbag2_2026_10_12-16_31_25_0.db3": "8e9eee4421a6b8a25c58dc66cba5259ebc4c673babf529eafcd5e2d1bc1c0e3c"
+   },
+   "dest": "/mnt/nas_backup/rosbag_scene_processing/incoming/spray/rosbag2_2026_10_12-16_31_25",
+   "updated_at": "2026-10-13T21:21:04+0800",
+   "idempotency_key": "spray1012:rosbag2_2026_10_12-16_31_25:4c4e5c8b42281dbf11ff1b0743aa2def06aeaaf9685adf16e0efd213c77aac3d",
+   "submission_http": "{\"submission_id\":\"e5649055b93242f3ae095e87d84e5a8f\",\"profile_id\":\"scene-spray\",\"profile_version\":1,\"relative_path\":\"rosbag2_2026_10_12-16_31_25\",\"status\":\"PENDING_INPUT\",\"row_version\":1,\"config_required\":false,\"effective_config\":{\"schema_version\":\"scene-config-v1\",\"profile_id\":\"scene-spray\",\"profile_version\":1,\"purposes\":[\"scene_slice\"],\"scenes\":[{\"scene_code\":\"spray\",\"capability_version\":\"spray-v1\",\"parameters\":{\"route\":\"auto\",\"window_size\":15,\"min_abnormal_ratio\":0.15,\"enter\":3,\"exit_\":5,\"lead_seconds\":3,\"overlap_merge_seconds\":7.0}}],\"config_hash\":\"8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5\"},\"effective_config_hash\":\"8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5\",\"bound_source_id\":null,\"bound_source_generation\":null}\n[HTTP 201]"
+  },
+  "rosbag2_2026_10_12-16_00_13": {
+   "bag": "rosbag2_2026_10_12-16_00_13",
+   "state": "PLACED_INCOMING",
+   "copy_s": 1.2,
+   "sha": {
+    "metadata.yaml": "68032a411b9d64fcdb567a47ba3957c95de5f3917e21268a87803245713a4c79",
+    "rosbag2_2026_10_12-16_00_13_0.db3": "3f44defb738e4275c132585aaece988a61148289518af38b8111d2d33bc6c32c"
+   },
+   "src_sha": {
+    "metadata.yaml": "68032a411b9d64fcdb567a47ba3957c95de5f3917e21268a87803245713a4c79",
+    "rosbag2_2026_10_12-16_00_13_0.db3": "3f44defb738e4275c132585aaece988a61148289518af38b8111d2d33bc6c32c"
+   },
+   "dest": "/mnt/nas_backup/rosbag_scene_processing/incoming/spray/rosbag2_2026_10_12-16_00_13",
+   "updated_at": "2026-10-13T21:21:11+0800",
+   "idempotency_key": "spray1012:rosbag2_2026_10_12-16_00_13:7ba0e32cd6356adf459b605bc1934204eac7e26f830689a5ed0f6c165643b86c",
+   "submission_http": "{\"submission_id\":\"99615748164a48268889045c7e3113e4\",\"profile_id\":\"scene-spray\",\"profile_version\":1,\"relative_path\":\"rosbag2_2026_10_12-16_00_13\",\"status\":\"PENDING_INPUT\",\"row_version\":1,\"config_required\":false,\"effective_config\":{\"schema_version\":\"scene-config-v1\",\"profile_id\":\"scene-spray\",\"profile_version\":1,\"purposes\":[\"scene_slice\"],\"scenes\":[{\"scene_code\":\"spray\",\"capability_version\":\"spray-v1\",\"parameters\":{\"route\":\"auto\",\"window_size\":15,\"min_abnormal_ratio\":0.15,\"enter\":3,\"exit_\":5,\"lead_seconds\":3,\"overlap_merge_seconds\":7.0}}],\"config_hash\":\"8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5\"},\"effective_config_hash\":\"8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5\",\"bound_source_id\":null,\"bound_source_generation\":null}\n[HTTP 201]"
+  },
+  "rosbag2_2026_10_12-16_33_10": {
+   "bag": "rosbag2_2026_10_12-16_33_10",
+   "state": "PLACED_INCOMING",
+   "copy_s": 0.2,
+   "sha": {
+    "metadata.yaml": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rosbag2_2026_10_12-16_33_10_0.db3": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "src_sha": {
+    "metadata.yaml": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rosbag2_2026_10_12-16_33_10_0.db3": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "dest": "/mnt/nas_backup/rosbag_scene_processing/incoming/spray/rosbag2_2026_10_12-16_33_10",
+   "updated_at": "2026-10-13T23:59:00+08:00",
+   "idempotency_key": "spray1012:rosbag2_2026_10_12-16_33_10:86a22681c05ae4fddcb108603f2abc1edadb1265b3cc80c92b3e5b528a03c0fc",
+   "submission_http": "{\"submission_id\":\"7a71e404e17b4cf393ffe8e487f8f39e\",\"profile_id\":\"scene-spray\",\"profile_version\":1,\"relative_path\":\"rosbag2_2026_10_12-16_33_10\",\"status\":\"PENDING_INPUT\",\"row_version\":1,\"config_required\":false,\"effective_config\":{\"schema_version\":\"scene-config-v1\",\"profile_id\":\"scene-spray\",\"profile_version\":1,\"purposes\":[\"scene_slice\"],\"scenes\":[{\"scene_code\":\"spray\",\"capability_version\":\"spray-v1\",\"parameters\":{\"route\":\"auto\",\"window_size\":15,\"min_abnormal_ratio\":0.15,\"enter\":3,\"exit_\":5,\"lead_seconds\":3,\"overlap_merge_seconds\":7.0}}],\"config_hash\":\"8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5\"},\"effective_config_hash\":\"8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5\",\"bound_source_id\":null,\"bound_source_generation\":null}\n[HTTP 201]",
+   "rejection": {
+    "recorded_at": "2026-10-13T23:59:00+08:00",
+    "rule": "D6 ruling-duprun-2338：正式拒绝痕迹补进台账",
+    "submission": "7a71e404e17b4cf393ffe8e487f8f39e",
+    "submission_status": "PENDING_INPUT",
+    "source_id_bound": null,
+    "run_created": null,
+    "scanner_trace": "rosbag-catalog-scanner-1 日志反复 'FAILED [scene] /public/rosbag_scene_processing/incoming/spray/rosbag2_2026_10_12-16_33_10: missing rosbag2_bagfile_information'（23:5x 取证 6h 窗口 17+ 行，持续未消失）",
+    "scan_job_trace": "scan_job 每 10min 轮询 SUCCESS 计数含 failed:2（16_33_10 为其中持续失败项；scan_job id=3961~3971 实测）",
+    "input_state": "incoming/spray 下 metadata.yaml 0B + db3 0B（SHA e3b0c442…=空文件指纹，与 manifest INVALID_EMPTY_INPUT 一致）",
+    "conclusion": "真实输入校验拒绝闭环：零 source 绑定、零 run 创建，拒绝可追溯（scanner 日志+scan_job 计数）",
+    "evidence_file": "d6-163310-rejection-trace-2338.json"
+   }
+  },
+  "rosbag2_2026_10_08-14_42_48": {
+   "bag": "rosbag2_2026_10_08-14_42_48",
+   "state": "PLACED_INCOMING",
+   "copy_s": 17.5,
+   "sha": {
+    "metadata.yaml": "a5bd2d903b72cde3ca3f7b9773d1a79ffe7ca707355b0c90c6c4b3122a4c46dc",
+    "rosbag2_2026_10_08-14_42_48_0.db3": "ca879384be65d91a7835006f7a91d2474469b59b59f7bbaad1a890bc7d57b775"
+   },
+   "src_sha": {
+    "metadata.yaml": "a5bd2d903b72cde3ca3f7b9773d1a79ffe7ca707355b0c90c6c4b3122a4c46dc",
+    "rosbag2_2026_10_08-14_42_48_0.db3": "ca879384be65d91a7835006f7a91d2474469b59b59f7bbaad1a890bc7d57b775"
+   },
+   "dest": "/mnt/nas_backup/rosbag_scene_processing/incoming/spray/rosbag2_2026_10_08-14_42_48",
+   "updated_at": "2026-10-13T21:27:36+0800",
+   "idempotency_key": "spray1012:rosbag2_2026_10_08-14_42_48:0195a14f52000fde0eb244a97f3fcfe7148fb7da51921e63ab7a4ff738cddd66",
+   "submission_http": "{\"submission_id\":\"a65a25a70bd74934bdde31eadce69ba7\",\"profile_id\":\"scene-spray\",\"profile_version\":1,\"relative_path\":\"rosbag2_2026_10_08-14_42_48\",\"status\":\"PENDING_INPUT\",\"row_version\":1,\"config_required\":false,\"effective_config\":{\"schema_version\":\"scene-config-v1\",\"profile_id\":\"scene-spray\",\"profile_version\":1,\"purposes\":[\"scene_slice\"],\"scenes\":[{\"scene_code\":\"spray\",\"capability_version\":\"spray-v1\",\"parameters\":{\"route\":\"auto\",\"window_size\":15,\"min_abnormal_ratio\":0.15,\"enter\":3,\"exit_\":5,\"lead_seconds\":3,\"overlap_merge_seconds\":7.0}}],\"config_hash\":\"8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5\"},\"effective_config_hash\":\"8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5\",\"bound_source_id\":null,\"bound_source_generation\":null}\n[HTTP 201]",
+   "binding_closeout": {
+    "recorded_at": "2026-10-14T10:55:47+08:00",
+    "rule": "post-release-closeout-20261014.md（10:49 收尾增补）：核 source/generation/flat ready 路径、outbox CONSUMED、复用 run/attempt；1017 对 A STOP，重登记 owner 转 Codex（fix/spray-progress-20261014 单写经正式 Backend API）；A 只读核实不重登记/不重试/不写库",
+    "binding_actor": "Codex 10:23:08-09 经 POST /api/v1/sources/register（backend 日志 02:23:08 UTC x3 200，首载快指纹 409 被切片保护拒绝后改按精确原包 ready 路径恢复）",
+    "binding_state": "SCHEDULED",
+    "source_generation": 1,
+    "outbox_event": "purpose_schedule_event CONSUMED（id8/id9/id10，10:23:08-09，error_reason NULL）",
+    "run_reused": true,
+    "created_runs": 0,
+    "reused_runs_total": 3,
+    "evidence": "processing-machine MySQL NOW 10:55:47 ingest_submission(pending->SCHEDULED gen1 source_id 实测) + purpose_schedule_event id8-10 CONSUMED + pipeline_run 复用 run 全 SCENE_DONE attempt2(既有终态非新建) + binding-repair.jsonl",
+    "source_id": "FFDEE9435C454721BE7EBA30F1",
+    "flat_ready_path": "/public/rosbag_scene_processing/ready/spray/rosbag2_2026_10_08-14_42_48",
+    "reused_run": "scene-a4824f1c3ea64a5dba9e67bfc353",
+    "reused_run_status": "SCENE_DONE",
+    "reused_run_attempt": 2,
+    "reused_run_updated": "2026-10-13T23:54:41+08:00"
+   }
+  },
+  "rosbag2_2026_10_12-16_58_28": {
+   "bag": "rosbag2_2026_10_12-16_58_28",
+   "state": "PLACED_INCOMING",
+   "copy_s": 236.7,
+   "sha": {
+    "metadata.yaml": "935220dcca4f467b7b021050c5c03ec0e2fc91cbf28e3f87fa618768064219ae",
+    "rosbag2_2026_10_12-16_58_28_0.db3": "269719387fc40a8ad5f5c1663572fdc5d7e891a8a426ab3d69caa4909c4b2b97",
+    "rosbag2_2026_10_12-16_58_28_1.db3": "55ff5e559dd96e8cd201a5ee75fd822f02386e6cd519c706fa8ca30e41a4ca36"
+   },
+   "src_sha": {
+    "metadata.yaml": "935220dcca4f467b7b021050c5c03ec0e2fc91cbf28e3f87fa618768064219ae",
+    "rosbag2_2026_10_12-16_58_28_0.db3": "269719387fc40a8ad5f5c1663572fdc5d7e891a8a426ab3d69caa4909c4b2b97",
+    "rosbag2_2026_10_12-16_58_28_1.db3": "55ff5e559dd96e8cd201a5ee75fd822f02386e6cd519c706fa8ca30e41a4ca36"
+   },
+   "dest": "/mnt/nas_backup/rosbag_scene_processing/incoming/spray/rosbag2_2026_10_12-16_58_28",
+   "updated_at": "2026-10-13T21:41:32+0800",
+   "idempotency_key": "spray1012:rosbag2_2026_10_12-16_58_28:a2ea550e2529576062a356bc9dd0651009133e62213ed19b80444555dac564e4",
+   "submission_http": "{\"submission_id\":\"518089ed6f554f1895797eb568fc2932\",\"profile_id\":\"scene-spray\",\"profile_version\":1,\"relative_path\":\"rosbag2_2026_10_12-16_58_28\",\"status\":\"PENDING_INPUT\",\"row_version\":1,\"config_required\":false,\"effective_config\":{\"schema_version\":\"scene-config-v1\",\"profile_id\":\"scene-spray\",\"profile_version\":1,\"purposes\":[\"scene_slice\"],\"scenes\":[{\"scene_code\":\"spray\",\"capability_version\":\"spray-v1\",\"parameters\":{\"route\":\"auto\",\"window_size\":15,\"min_abnormal_ratio\":0.15,\"enter\":3,\"exit_\":5,\"lead_seconds\":3,\"overlap_merge_seconds\":7.0}}],\"config_hash\":\"8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5\"},\"effective_config_hash\":\"8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5\",\"bound_source_id\":null,\"bound_source_generation\":null}\n[HTTP 201]",
+   "binding_closeout": {
+    "recorded_at": "2026-10-14T10:55:47+08:00",
+    "rule": "post-release-closeout-20261014.md（10:49 收尾增补）：核 source/generation/flat ready 路径、outbox CONSUMED、复用 run/attempt；1017 对 A STOP，重登记 owner 转 Codex（fix/spray-progress-20261014 单写经正式 Backend API）；A 只读核实不重登记/不重试/不写库",
+    "binding_actor": "Codex 10:23:08-09 经 POST /api/v1/sources/register（backend 日志 02:23:08 UTC x3 200，首载快指纹 409 被切片保护拒绝后改按精确原包 ready 路径恢复）",
+    "binding_state": "SCHEDULED",
+    "source_generation": 1,
+    "outbox_event": "purpose_schedule_event CONSUMED（id8/id9/id10，10:23:08-09，error_reason NULL）",
+    "run_reused": true,
+    "created_runs": 0,
+    "reused_runs_total": 3,
+    "evidence": "processing-machine MySQL NOW 10:55:47 ingest_submission(pending->SCHEDULED gen1 source_id 实测) + purpose_schedule_event id8-10 CONSUMED + pipeline_run 复用 run 全 SCENE_DONE attempt2(既有终态非新建) + binding-repair.jsonl",
+    "source_id": "205E5054125648A4B837D2BDF3",
+    "flat_ready_path": "/public/rosbag_scene_processing/ready/spray/rosbag2_2026_10_12-16_58_28",
+    "reused_run": "scene-24ab78bbc4254cf3820daa8c67fa",
+    "reused_run_status": "SCENE_DONE",
+    "reused_run_attempt": 2,
+    "reused_run_updated": "2026-10-14T00:07:46+08:00"
+   }
+  },
+  "rosbag2_2026_10_12-16_37_47": {
+   "bag": "rosbag2_2026_10_12-16_37_47",
+   "state": "REUSE_READY_SHA_MATCH",
+   "dest": "/mnt/nas_backup/rosbag_scene_processing/ready/spray/rosbag2_2026_10_12-16_37_47",
+   "sha": {
+    "metadata.yaml": "fdbec0075c733449aea5e5ea2beaa88e876d3874270a9c8ea30381a57ed3c88b",
+    "rosbag2_2026_10_12-16_37_47_0.db3": "8532ce810aa7f476028e80a9e1610946fff703c227866f8c7d7a0535e1e45b09",
+    "rosbag2_2026_10_12-16_37_47_1.db3": "bc7ad38c6b7f6b0b4b0838a51c31d5633f734b9ac2105ae4d103207cda887ba4"
+   },
+   "updated_at": "2026-10-13T22:56:04+0800",
+   "idempotency_key": "spray1012:rosbag2_2026_10_12-16_37_47:ef68da1f1d0a58fa5cd08dd1b4ae88bc758d83ef7e65802ea09bc3c98c37e362",
+   "submission_http": "{\"submission_id\":\"87dfebaa5b614f37acda5e25cd834295\",\"profile_id\":\"scene-spray\",\"profile_version\":1,\"relative_path\":\"rosbag2_2026_10_12-16_37_47\",\"status\":\"PENDING_INPUT\",\"row_version\":1,\"config_required\":false,\"effective_config\":{\"schema_version\":\"scene-config-v1\",\"profile_id\":\"scene-spray\",\"profile_version\":1,\"purposes\":[\"scene_slice\"],\"scenes\":[{\"scene_code\":\"spray\",\"capability_version\":\"spray-v1\",\"parameters\":{\"route\":\"auto\",\"window_size\":15,\"min_abnormal_ratio\":0.15,\"enter\":3,\"exit_\":5,\"lead_seconds\":3,\"overlap_merge_seconds\":7.0}}],\"config_hash\":\"8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5\"},\"effective_config_hash\":\"8dc34357c4cb5b08488de6778be96612d413eaa5a2279787338a6ae4ac5f1cb5\",\"bound_source_id\":null,\"bound_source_generation\":null}\n[HTTP 201]",
+   "binding_closeout": {
+    "recorded_at": "2026-10-14T10:55:47+08:00",
+    "rule": "post-release-closeout-20261014.md（10:49 收尾增补）：核 source/generation/flat ready 路径、outbox CONSUMED、复用 run/attempt；1017 对 A STOP，重登记 owner 转 Codex（fix/spray-progress-20261014 单写经正式 Backend API）；A 只读核实不重登记/不重试/不写库",
+    "binding_actor": "Codex 10:23:08-09 经 POST /api/v1/sources/register（backend 日志 02:23:08 UTC x3 200，首载快指纹 409 被切片保护拒绝后改按精确原包 ready 路径恢复）",
+    "binding_state": "SCHEDULED",
+    "source_generation": 1,
+    "outbox_event": "purpose_schedule_event CONSUMED（id8/id9/id10，10:23:08-09，error_reason NULL）",
+    "run_reused": true,
+    "created_runs": 0,
+    "reused_runs_total": 3,
+    "evidence": "processing-machine MySQL NOW 10:55:47 ingest_submission(pending->SCHEDULED gen1 source_id 实测) + purpose_schedule_event id8-10 CONSUMED + pipeline_run 复用 run 全 SCENE_DONE attempt2(既有终态非新建) + binding-repair.jsonl",
+    "source_id": "9C9456B6EFEA4FCBB122D506F2",
+    "flat_ready_path": "/public/rosbag_scene_processing/ready/spray/rosbag2_2026_10_12-16_37_47",
+    "reused_run": "scene-eb4397c3fe8c411a9aab0da8acbf",
+    "reused_run_status": "SCENE_DONE",
+    "reused_run_attempt": 2,
+    "reused_run_updated": "2026-10-14T00:01:30+08:00"
+   }
+  },
+  "rosbag2_2026_10_12-16_02_03": {
+   "bag": "rosbag2_2026_10_12-16_02_03",
+   "state": "REUSE_INCOMING_SHA_MATCH",
+   "dest": "/mnt/nas_backup/rosbag_scene_processing/incoming/spray/rosbag2_2026_10_12-16_02_03",
+   "sha": {
+    "metadata.yaml": "e40a8d8652cb98a1226a02c51f26926df272ab3ab0b39947aef882dfd8cf67ce",
+    "rosbag2_2026_10_12-16_02_03_0.db3": "b352cde3f004a6e33370e1ffd63b8acc5381e338fe3d4ff1a2daf54fc25c1810",
+    "rosbag2_2026_10_12-16_02_03_1.db3": "bceda7fee825e336481cad305d14865741197d13fd5c62360eb1068dece8b871"
+   },
+   "updated_at": "2026-10-13T22:59:21+0800",
+   "idempotency_key": "1012-spray-20261012-16_02_03",
+   "submission_note": {
+    "recorded_at": "2026-10-14T10:55:47+08:00",
+    "submission_id": "24d60fee44（实测 10 字符前缀，完整行见 ingest_submission idempotency_key=1012-spray-20261012-16_02_03）",
+    "status": "SCHEDULED",
+    "source_id": "91FFEEC1（实测 8 字符前缀，gen1，source_copy id122 ready/spray/rosbag2_2026_10_12-16_02_03）",
+    "run": "scene-4acf689f9a6a473da1fa2f2efc70",
+    "run_state_at_record": "SCENE_RUNNING attempt1（PRECHECK/EXTRACT DONE、INFER RUNNING，余 QUEUED；跨夜继续不 kill/cancel/retry；完成帧数/ETA 未知）",
+    "note": "D1 保留链（2210 清除指令作废）；source_metadata 完整 vehicle_code=test；10:23 Codex 经正式步骤 API 补报真实阶段不改 checkpoint/不重启"
+   }
+  }
+ }
+}

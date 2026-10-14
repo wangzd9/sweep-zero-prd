@@ -1,0 +1,12 @@
+{
+  "event_id": "b-t11s-batch-1012-batchstatus-2354-consumed-idle-20261013-2359",
+  "occurred_at": "2026-10-13T23:59:00+08:00",
+  "recorded_at": "2026-10-13T23:59:30+08:00",
+  "role": "B",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "Mid-round observer fingerprint rotated to bf4e02d7 (BATCH-STATUS.md 23:54:37 sync after own 23:56 checkpoint write; ack of prerun fp 1dfa4ea6 correctly rejected STALE_OBSERVATION per role-document-queue-v1, no auto-retry). Consumed BATCH-STATUS 23:54 full: B row still DONE 21:12 no rework; all new facts in A (D2 cancel endpoint check in flight for 14_42_48 dup), C (D5 retry attribution), TESTER (incremental verify) scope. No new B dispatch, no B-side process. Zero commit/model/copy/prod-write. Maintains IDLE_WAITING; quiet hours 21:00-08:00, no proactive group messages, 08:00 digest.",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/BATCH-STATUS.md;inbox/control/runtime/observer/B.json;events/B/b-t11s-batch-1012-ruling-duprun-2338-sec4-supplement-consumed-idle-20261013-2356.json",
+  "next": "IDLE_WAITING: await next dispatch from coordinator; consume pending fp bf4e02d7 on next wake or this ack if fingerprint stable."
+}

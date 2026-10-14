@@ -1,0 +1,12 @@
+{
+  "event_id": "20261011-1922-post-merge-0a8ca8a-ack",
+  "occurred_at": "2026-10-11T19:23:47+08:00",
+  "recorded_at": "2026-10-11T19:23:47+08:00",
+  "role": "TESTER",
+  "task": "TASK-08",
+  "attempt": "post-merge-0a8ca8a",
+  "status": "ACK",
+  "summary": "ACK 合入后 9 红文件全绿复核：main 0a8ca8a 独立复核=origin/main；真 MySQL 8.4.11 隔离容器+TESTER 专属 worktree；14 文件文件级 RC=0 口径",
+  "evidence": "inbox/TESTER/TASK-08/post-merge-0a8ca8a-red-files-ack.md",
+  "next": "环境起好后长测试留检查点，交付 TEST_REPORT_PENDING"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs34-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T04:14:00+08:00",
+  "recorded_at": "2026-10-14T04:13:23+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第34轮只读观察（处理机 04:10-04:15 实测）：与 obs33 零状态变化=模型段完成信号未到，INFER 持续活跃。scene-4acf689f（16_02_03 正式链）SCENE_RUNNING attempt=1 error 空 lease 续租 04:12:18 活跃；proxy active_runs=[4acf689f ACCEPTED pid1]；work 树 10min 零新写、checkpoint 00:23:10 未翻、jpg 1781/pcd 5373/树 24915281800B；VLM ESTAB→192.168.2.45:8002 在案；llm-server 04:09:56-04:10:46 五点 Running 4/4/4/4/2/3 Waiting 0 prefix 93.1%=推理活跃续证；容器全 Up、load 0.19 低位。无升级条件命中（heartbeat 无连败/run 未 FAILED/Waiting=0）。大包跨夜继续不 kill/retry。",
+  "evidence": "处理机 04:10-04:15 只读实测：curl 8180 scene-4acf689f status=SCENE_RUNNING lease_expires_at=04:12:18、8767/health active_runs=[4acf689f ACCEPTED pid1]、find attempt-1 -newermt 10min=0、stat checkpoint=00:23:10.47、jpg 1781/pcd 5373/du=24915281800、容器 net/tcp ESTAB 2D02A8C0:1F42、llm-server /tmp/vllm_qwen38.log 04:10:46 Running=3 Waiting=0 prefix 93.1%、uptime load 0.19/0.31/0.27、docker ps 全 Up；未 kill/未删/未重启/未 retry/未改生产路径",
+  "next": "接续只读观察：模型段完成信号=checkpoint 翻 EXTRACT/DONE 或八步 DB 推进或 SCENE_DONE 即取证申报协调者（C 不处置）；升级条件按 ruling-4acf-infer-active-0218（heartbeat 4 连败/FAILED/VLM Waiting 持续>0）；16_33_10 D6 拒绝痕迹落 upload-ledger 后同步核；flat 三提交 a65a25a7/87dfebaa/518089ed 串行释放后核绑定 run。夜间静默不主动群报，08:00 随协调者汇总"
+}

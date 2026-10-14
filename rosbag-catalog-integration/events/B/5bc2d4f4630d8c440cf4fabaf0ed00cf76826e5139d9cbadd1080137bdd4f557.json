@@ -1,0 +1,12 @@
+{
+  "event_id": "b-deliver-20261011-2130-t09-attempt1",
+  "occurred_at": "2026-10-11T21:26:55+08:00",
+  "recorded_at": "2026-10-11T21:26:55+08:00",
+  "role": "B",
+  "task": "TASK-09",
+  "attempt": "1",
+  "status": "REVIEW_PENDING",
+  "summary": "交付冻结 a60bb81：接线3文件+187/-3；row19 SUCCESS+阴性2 NO_MATCH+边界 MODEL_UNAVAILABLE；row20/21 外部500帧阻塞（非app缺陷）；自测 SQLite813+MySQL60+ruff 全绿",
+  "evidence": "receipts/TASK-09/attempt-1.md",
+  "next": "等协调者机械核验+串行OCR(app 2文件)+§G阳性覆盖裁决"
+}

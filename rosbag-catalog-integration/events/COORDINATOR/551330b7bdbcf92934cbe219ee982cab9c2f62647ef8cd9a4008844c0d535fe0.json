@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-20261013-041553-r119-t16a-r1-delivery-verified",
+  "occurred_at": "2026-10-13T04:20:33+08:00",
+  "recorded_at": "2026-10-13T04:20:33+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16A",
+  "attempt": "2",
+  "status": "REVIEW_PENDING",
+  "summary": "A attempt-2-r1 交付 3aee4d1 机械核验全绿，增量 OCR 排队；16B-b2 proxy 在途",
+  "evidence": "receipts/TASK-16A/attempt-2-r1.md;reviews/TASK-16/16A-16B-ocr-batches.md",
+  "next": "r120+ 核 16B-b2 收口→b1 resume 补跑→16A 增量 OCR 3 批"
+}

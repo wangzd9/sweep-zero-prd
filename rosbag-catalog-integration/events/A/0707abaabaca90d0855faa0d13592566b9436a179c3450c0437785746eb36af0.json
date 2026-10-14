@@ -1,0 +1,12 @@
+{
+  "event_id": "a-poll-20261013-071653-nochange-16a-review-pending",
+  "occurred_at": "2026-10-13T07:19:57+08:00",
+  "recorded_at": "2026-10-13T07:19:57+08:00",
+  "role": "A",
+  "task": "TASK-16A",
+  "attempt": "attempt-2-r1",
+  "status": "POLL_NO_CHANGE",
+  "summary": "07:16 巡检：本角色零新派单/返修；16A attempt-2-r1 冻结 REVIEW_PENDING 不变（HEAD 3aee4d1，16A OCR 面全闭环零 CORRECTION，合入门禁剩余=TESTER 独立验证+07B 先合入 rebase 双头）；窗口新增仅 B 07B-R4 回执 62620a3（2号域不代跑）",
+  "evidence": "sessions/A.md#307",
+  "next": "等待 07B R4 收口→强审增量→TESTER 07B-post-r3→07B 先合入 rebase 双头→TESTER 16D 前独立验证→16A 收口合入；本角色无新单不开工"
+}

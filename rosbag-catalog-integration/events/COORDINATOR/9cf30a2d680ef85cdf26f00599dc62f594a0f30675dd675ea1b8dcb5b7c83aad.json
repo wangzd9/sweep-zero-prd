@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-t03b-rework2-c285e2e-ocr-b9-20261010-1649",
+  "occurred_at": "2026-10-10T16:49:41+08:00",
+  "recorded_at": "2026-10-10T16:49:41+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-03B",
+  "attempt": "5-rework-2",
+  "status": "OCR_RUNNING",
+  "summary": "1号交付 c285e2e 机械核实全绿（2文件+145/-24零越界），B9 增量 OCR 16:48:18 起跑（session cdba7e7f，硬截止17:15）",
+  "evidence": "receipts/TASK-03B/attempt-5-rework-2.md;reviews/TASK-03B/attempt-5/ocr-batches.md",
+  "next": "B9 收口无 high/critical 即六笔同批 --no-ff 合入 main(eff0479)+TESTER 派单"
+}

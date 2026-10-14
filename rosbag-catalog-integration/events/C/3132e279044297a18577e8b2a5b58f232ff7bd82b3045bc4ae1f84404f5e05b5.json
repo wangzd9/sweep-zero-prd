@@ -1,0 +1,12 @@
+{
+  "event_id": "c-t11s-batch-1012-obs76-infer-continue-nochange-20261014",
+  "occurred_at": "2026-10-14T11:23:00+08:00",
+  "recorded_at": "2026-10-14T11:24:36+08:00",
+  "role": "C",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C 第76轮只读观察（处理机 11:21-11:23 实测）：与 obs75 零状态变化=模型段完成信号仍未到，INFER 持续活跃（大包跨夜续跑不 kill/retry）。① scene-4acf689f（16_02_03 正式链 source 91FFEEC1…/submission 24d60fee…/av1）实测 SCENE_RUNNING attempt=1 error 空、lease_expires_at 11:25:15（11:23 查点 heartbeat 续租活跃，无 4 连败升级条件）、八步 PRECHECK/EXTRACT=DONE、INFER=RUNNING、PUBLISH/REGISTER/SEGMENT/VALIDATE/WRITE=QUEUED（与 10:23 步骤补报后口径一致）；② 8767/health ok active_runs=[4acf689f ACCEPTED pid1] 唯一在途、18000 ready=production；③ proxy 宿主 pid 3495931 LSTART Tue Oct 13 20:22:38 连续未重启、ELAPSED 15:00:39、TIME 01:22:14（obs75 01:22:05，+9s 持续非零）、RSS 18082680 同量级；④ work 树 checkpoint.json mtime 2026-10-14 00:23:10.474817688 +0800 未翻、find -newermt 25min=0 零新写（完成帧/ETA 仍未知）；⑤ VLM 通道容器 3376cd90f44e /proc/net/tcp 实测 1 条 ESTAB 8602A8C0:EDDA→2D02A8C0:1F42（192.168.2.45:8002，临时端口循环重建 BB60→EDDA 非通道消失）+1 TIME_WAIT 残迹；⑥ VLM 远端直证 llm-server /tmp/vllm_qwen38.log 11:21:10-11:22:20 八点十秒采样 Running 2-4 reqs、Waiting 仅 11:21:10 单点 1 即回 0（非持续>0）、prefix cache 95.9%、MM 88.5%、gen 35.9-191.3 tok/s=推理活跃续证；⑦ 资源/入口面 NAS 98T/70T/29T 71% 不变、load 6.09/5.58/5.11（较 obs75 4.46 继续抬升，C 未起任何进程，如实归因 INFER+VLM 活跃段）、up 6 天 1:40、incoming/spray 仍仅 16_33_10 空包目录（D6 台账 A 面不变）。本批 8 包无新终态，无升级条件命中。11:00 时段总结照常。",
+  "evidence": "处理机 ssh curl 8180 api/v1/scene-analysis-runs/scene-4acf689f（JSON 全字段）、8767/health、18000/health/ready、ps 3495931、docker exec 3376cd90f44e cat /proc/net/tcp state01=1到1F42、stat checkpoint.json mtime 1791908590/742B、find -newermt 25min=0、df 71%、uptime load 6.09、ls incoming/spray=16_33_10 仅；llm-server tail vllm log 八点采样 11:21:10-11:22:20。C 全程只读，未 kill/未删/未重启/未 retry/未改任何生产路径。",
+  "next": "① 4acf 模型段完成信号（checkpoint 翻面/INFER→DONE/后续步骤推进/SCENE_DONE）取证申报，升级条件=heartbeat 4 连败/run FAILED/VLM Waiting 持续>0 且无 ESTAB；② 16_33_10 提交层终态=隔离树修复待部署面跟踪；③ load 持续抬升如实记录不升级；④ 11:00 时段总结已覆盖，下一状态变化即时通报。"
+}

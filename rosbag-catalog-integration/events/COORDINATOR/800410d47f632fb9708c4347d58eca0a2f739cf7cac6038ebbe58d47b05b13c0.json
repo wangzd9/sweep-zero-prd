@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-t10d2-merged-a77aa45-20261012-0058",
+  "occurred_at": "2026-10-12T01:03:20+08:00",
+  "recorded_at": "2026-10-12T01:03:20+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1",
+  "status": "ACCEPT_MERGED",
+  "summary": "2号 t10-defect2 d4719f6 机械核验全绿+OCR T10D2-r1 0 findings→合入 main a77aa45(推origin 277e40f..a77aa45, sanity 42 passed)；两笔返修齐，E2E复跑派TESTER",
+  "evidence": "receipts/TASK-06B/t10-defect2-storage-offset.md; reviews/TASK-06B/t10-defect2-storage-offset/ocr-batches.md; inbox/coordinator/TASK-06B/t10-defect2-acceptance-decision.md",
+  "next": "TESTER E2E复跑 main a77aa45 PASS→TASK-10 DONE→P0收口"
+}

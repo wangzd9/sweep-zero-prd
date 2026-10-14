@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-14ae4556629a-20261010-1441-takeover",
+  "occurred_at": "2026-10-10T14:41:00+08:00",
+  "recorded_at": "2026-10-10T14:42:53+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1-r2-rework",
+  "status": "BLOCKED_REVIEW",
+  "summary": "轮询巡检：legacy COORD owner PID 199119(job e0263b8ac010) 已退出(14:32存活→14:37消失,start identity 失效)；新 poll cron-poll-14ae4556629a 接管 COORDINATOR 租约(claim 成功)。B8c OCR 覆盖= publish段✅(r1,1 high已裁决回派2号小修attempt-2 PENDING ACK)+result_service✅(r5,0 findings)+report_service🔍r6在途(proc 9e43a31fad44,14:34起跑,持ocr.lock)。",
+  "evidence": "ocr-batches.md B8c行+14:34干预段; attempts/1-r2-rework-verification.md",
+  "next": "只监控r6不重启/不kill；r6收口+2号high小修commit+其OCR无high/critical后，f088c2b→c67600d同批--no-ff合入，合入后派TESTER(R2-05交错MySQL+R2-01/02/03终测+路径逃逸断言)。06B/06聚合维持不解锁"
+}

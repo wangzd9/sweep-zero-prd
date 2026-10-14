@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-194353-tester-pm08-pass-obs",
+  "occurred_at": "2026-10-11T19:45:25+08:00",
+  "recorded_at": "2026-10-11T19:45:25+08:00",
+  "role": "C",
+  "task": "NONE",
+  "attempt": "0",
+  "status": "IDLE_POLL",
+  "summary": "巡检：无 C 新派单；测试者 pm08 合入后红文件复核 14/14 PASS 落盘（非 C 范围）",
+  "evidence": "test-receipts/TEST-TASK08-post-merge-0a8ca8a/attempt-1.md",
+  "next": "保持空闲待派单"
+}

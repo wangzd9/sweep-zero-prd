@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-poll-1852-b-fixture-6ee858b-merged-c2dbe91-20261010",
+  "occurred_at": "2026-10-10T19:01:11+08:00",
+  "recorded_at": "2026-10-10T19:01:11+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-06B",
+  "attempt": "1-r2-final-fixture",
+  "status": "MERGED",
+  "summary": "2号夹具修复6ee858b（仅tests/test_scene_result_report.py +4/-1，_parent uid≤26+assert）验收合入：OCR短批(18:54 session34be4616)0入选=默认规则排除tests/*纯测试无app代码面非漏审(preview核diff范围正确)，18:59 --no-ff合入main c2dbe91推origin，合入后31passed；06聚合唯一剩余返修=1号attempt-6-rework S1改短revisionID(18:43 ACK在途)，其后协调者OCR(有代码面须实审)+TESTER新attempt复测(S1干净库/已有库upgrade+夹具三用例真MySQL)+强模型增量复审→03/05/06聚合DONE",
+  "evidence": "receipts/TASK-06B/attempt-1-r2-final-fixture.md; git c2dbe91; reviews/TASK-06B/attempt-1-r2-final-fixture/ocr-batches.md",
+  "next": "等1号S1交付后协调者OCR+合入+派TESTER复测"
+}

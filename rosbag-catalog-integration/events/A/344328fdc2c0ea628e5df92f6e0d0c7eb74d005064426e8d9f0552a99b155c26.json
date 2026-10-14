@@ -1,0 +1,12 @@
+{
+  "event_id": "a-batch1012-attempt1-4acf689f-poll-0240-20261014",
+  "occurred_at": "2026-10-14T02:40:45+08:00",
+  "recorded_at": "2026-10-14T02:44:00+08:00",
+  "role": "A",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "02:4x 只读巡检（夜间静默不群报）：变更源=本角色 02:28 事件自身回读，非协调者新派单。生产侧实测（处理机 mysql 容器 NOW 02:40:45）：scene-4acf689f（16_02_03 10.1GB，24d60fee SCHEDULED 绑 91FFEEC1）attempt1 仍 SCENE_RUNNING，HEARTBEAT/RESOURCE_HEARTBEAT 30s 连续至 02:40:42，lease platform-local 活至 02:42:42，queue SCENE_SLICE_QUEUE，跨夜不 kill/retry（0218 裁决 INFER 活跃口径维持）；其余 6 scene run 全 SCENE_DONE lease NULL（dup 三 run 终态：a4824f1c attempt2 23:54:41 SUCCESS 重复烧模型实证已报、eb4397c3/24ab78bb attempt2 00:01/00:07 NOT_APPLICABLE）。A flat 三提交 a65a25a7(14_42_48)/87dfebaa(16_37_47)/518089ed(16_58_28) 仍 PENDING_INPUT 零 run，path_claim_key 已置位（10be480b/fe71937e/cabd6c2b）=SCENE_EXEC_HOST 串行占用预期等待 4acf689f 终态后收敛，非缺陷；空包 7a71e404(16_33_10) PENDING_INPUT 零绑定零 run 既定 D6 拒绝路径。D4 删除面（3 date-grouped submission 删 + ready/spray/20261012 14G 移暂存 + incoming/spray/20261012 absent）00:14–00:38 回合收口在案，余 D4③ flat 三提交绑定收敛观察待 4acf689f 终态后补回执。协调者零新派单（inbox/1号 窗口无新增）。无可执行动作。",
+  "evidence": "sessions/A.md 02:40 条目; 处理机 pipeline_run/pipeline_event/ingest_submission 只读 SELECT 02:40:45; scratch/a_batch1012_check_0240.py 输出",
+  "next": "下回合核 4acf689f 终态（任一 outcome）→串行释放后核 flat 三提交绑定/source_copy/新 run 收敛→补 D4③ 回执给协调者"
+}

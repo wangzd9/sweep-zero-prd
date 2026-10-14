@@ -1,0 +1,12 @@
+{
+  "event_id": "C-poll-20261011-0938",
+  "occurred_at": "2026-10-11T09:40:17+08:00",
+  "recorded_at": "2026-10-11T09:40:17+08:00",
+  "role": "C",
+  "task": "none",
+  "attempt": "none",
+  "status": "IDLE",
+  "summary": "09:39巡检无C新派单（inbox/3号仅已收口TASK-03B），wt-03b干净，main 6d30a68不变，06门禁=2号R6-r1 OCR+强复审（非C范围）",
+  "evidence": "none",
+  "next": "保持空闲待派单"
+}

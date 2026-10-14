@@ -1,0 +1,36 @@
+# TASK-07B attempt-1 串行 OCR 批次账
+
+- task/attempt：TASK-07B / attempt-1
+- owner：协调者（cron poll 14ae4556629a r92，claim `cron-coord-poll-14ae4556629a-20261012-172553-r92`）
+- base / head：`502bf8ec`..`f4bfcf2a`（commit `5fa0942` + `f4bfcf2`，2 commit 均属本任务；merge-base 祖先核通过）
+- 工具：ocr v1.12.9（`~/.npm-global/bin/ocr`，接 127.0.0.1:18002 本机 Qwen）
+- 尺寸预检（§3.6）：10 入选 app 文件全 <500 行 diff（最大 `scene_manual_revision_service.py` +383 新文件），无 >500 行独立大文件；`--preview` 核入选 10 / 排除 1（tests default_path 先例，独立验证挂 TESTER）
+- 策略：cron 化身短路径=逐文件单审（`--from BASE --to HEAD --audience agent --max-tokens 60000 --exclude 其余`），flock 持 `inbox/ocr.lock`，前台串行，防 420s reap；runner `scratch/t07b/ocr/run_ocr_file.py`
+- 预计收口窗：单文件 150-320s × 10 ≈ 25-55min（跨巡检轮次，逐轮核账）
+
+| batch | 文件 | +行 | run/session | 起止 | status | findings |
+|---|---|---|---|---|---|---|
+| T07B-b1 | alembic/versions/20261012_01_scene_manual.py | +77 | `fc11be06-ec40-46fd-a639-eda519ca2520`（17:3x 收口 329s；前 2 次 420s reap 无 manifest 不可 resume 作废 `fe1d6fee`/`9ae3219f`） | 17:2x-17:3x | COMPLETED | **0** |
+| T07B-b2 | app/api/__init__.py | +2 | `ad7c44c4-db0a-4d0f-9608-4954ff8bbee9`（25s） | 17:3x | COMPLETED | **0** |
+| T07B-b3 | app/api/scene_manual_revision.py | +38 | 18:0x 收口 415s | 17:5x-18:0x | COMPLETED | **1 medium**：`request.json()` 后非 dict JSON（list/scalar）→ `body.get` AttributeError → 500，与文档化 422 面不一致（建议 pydantic DTO 或 `isinstance(data, dict)` 守卫；兄弟 API `ingest_submissions._parse_model` 先例）=**CORRECTION 待协调者裁决**（独立核代码属实） |
+| T07B-b4 | app/models.py | +25 | `8b4086bd-a9dc-491f-b223-149b5bddf20a`（87s） | 18:0x | COMPLETED | **0** |
+| T07B-b5 | app/services/scene_manual_revision_service.py | +383 | r95 detached 第 6 次 session `81a66282` RC=1 FAILED（core request timed out）；**r101 `--resume 81a66282` 最后一次 COMPLETED RC=0 1800s**（21:59→22:29，session `7d703528` usage 995025 tokens；round2 又报 review_round_failed 但 core review complete=3 findings 有效） | 22:29 | COMPLETED（resume 最后一次） | **3 findings**：① **[bug·MEDIUM]** service:204-221（revise 守卫 204-206/写回 255；withdraw 同模式）`if bag.row_version != expected: 409` 后 ORM `bag.row_version += 1` flush=非守卫写入，真并发输方可 500/StaleDataError 或 lost-update，与文档化 409 面不一致（`ingest_service.update_submission` F2 注释=单条守卫 UPDATE 既有先例，独立核实属实）=**CONFIRMED CORRECTION**；② **[bug·MEDIUM]** service:215-221 `db.scalar(select(BagSceneLabelEvidence)…MANUAL)` 无 `.order_by().limit(1)`，该表无 (bag_uid,scene_id,label_source) 唯一约束（独立核实 models.py+迁移）→ 双 MANUAL 行时 MultipleResultsFound 500=**CONFIRMED CORRECTION**；③ [style·LOW] 文件尾缺换行。
+| T07B-b6 | app/static/bag-detail.css | +13 | r95 detached session `c010afa4-105c-4b4e-83c5-f71ae8c21c08` **RC=0 79s**（20:32:3x→20:33:1x） | 20:33 | COMPLETED | **0** |
+| T07B-b7 | app/static/bag-search.css | +12/-1 | r95 detached session `daa45a1c` RC=1 FAILED（250s 瞬态）；**r101 `--resume daa45a1c` 最后一次 COMPLETED RC=0 839s**（22:29→22:43:38，session `997d0ddd` usage 155479 tokens） | 22:43 | COMPLETED（resume 最后一次） | **3 findings**：① **[maintainability·MEDIUM]** bag-search.css:1376-1385 `.bag-scene-withdrawn` 无 `align-self: flex-start`（兄弟 `.bag-scene-badge`/:1336 与 `.bag-scene-history`/:1345 都有），在 `.bag-scene-cell` column-flex（:1328）内撑满宽度+`margin-left: 6px` 错位、`display: inline-block` 对 flex item 无效（独立核实属实）=**CONFIRMED CORRECTION**；② [style·LOW] :1384 `color: #d64545` 建议 `var(--red)`（app.css:10 定义，一致性）；③ [style·LOW] :1378 `margin-left: 6px` inline-flow 偏移对 flex 子项错位。
+| T07B-b8 | app/templates/bags.html | +2/-2 | r95 detached session `71c2370c-c0ab-4eaa-90b3-e218ac546207` **RC=0 823s**（20:39→20:51，usage 323664 tokens） | 20:39-20:51 | COMPLETED | **1 low（maintainability）**：bags.html:226 状态三元 `'failed' if WITHDRAWN else 'failed'` 冗余分支 + 非 WITHDRAWN 切片行空 `title=""` 属性；OCR 注明功能正确性无问题（WITHDRAWN 红标+tooltip 测试已覆盖）=**LOW 非 CORRECTION，不阻塞，建议并入 07B 收口或 TESTER 验证口径，不单独返修** |
+| T07B-b9 | app/templates/detail.html | +36/-1 | r95 detached session `0c62a8cc` **RC=0 1800s**（20:51→21:21，usage 792803 tokens） | 21:21 | COMPLETED | **3 findings**：① **[bug·HIGH]** detail.html:52 `corrected_label` 下拉提供 construction/congestion/night/rain/other 5 个模型不产出的标签，服务 `_VALID_LABELS`={slope,flat,unknown} 会 422，且合法 `unknown` 缺选项（**独立核实代码属实**=f4bfcf2 只改 service+tests 未改模板，模板仍列 7 项）=**CORRECTION**；② **[maintainability·LOW]** detail.html:72 审计时间列渲染 `created_at.isoformat()` 字符串（含 T/微秒/+08:00）非全站 `datetime_local` 口径；③ **[bug·LOW]** detail.html:52 select 缺 `required`，空串提交触发 422 往返。round2 LLM deadline 报 review_round_failed，但 core review 已 complete=3 findings 有效 |
+| T07B-b10 | app/web/bags.py | +77 | r95 detached session `0dd6c985` **RC=0 304s**（21:21→21:26，usage 97161 tokens） | 21:26 | COMPLETED | **0** |
+| 契约批次 | 跨文件（API↔service↔迁移↔页面接线） | - | - | | **CLOSED（r102：不单跑）** | 跨文件契约面已由逐文件审查+协调者独立代码核覆盖——b9-1 HIGH（模板选项域 vs service `_VALID_LABELS`）与 b5-1 MEDIUM（API 409 语义 vs service 守卫写入）本身即跨文件契约 finding，无剩余未覆盖接线面 |
+
+**收口进度 r102（23:0x）=10/10 全收口**（b1 0 / b2 0 / b3 **1 medium=CONFIRMED** / b4 0 / **b5 3 findings=2 medium CONFIRMED + 1 low** / b6 0 / **b7 3 findings=1 medium CONFIRMED + 2 low** / b8 1 low / **b9 3 findings=1 high CONFIRMED + 2 low** / b10 0）；`== r101 resume done 2026-10-12 22:43:38 ==` 落盘（detached pid 607379 已退出，ps 核无残留，ocr.lock 无持有者）；契约批次 CLOSED 不单跑（跨文件面已由逐文件+独立代码核覆盖）。**合计 5 处 CONFIRMED CORRECTION（b9-1 high / b3 / b5-1 / b5-2 / b7-1）+ 6 处 LOW 非阻塞**，已并入一次最小返修 R2 派 B（`inbox/2号/TASK-07B/attempt-2-r2-dispatch.md` 23:0x）。
+
+**收口进度 r101（21:5x）**：r95 detached 已收口 8/10（b1 0 / b2 0 / b3 **1 medium=CONFIRMED CORRECTION 待返修** / b4 0 / b6 0 / b8 1 low 非阻塞 / **b9 3 findings=1 HIGH CORRECTION + 2 LOW** / b10 0）；**b5（核心服务 +383）/b7（css）r101 低负载期 `--resume` 最后一次 INFLIGHT**（detached pid 607379，21:59 起，progress `scratch/t07b/ocr/r101_resume_progress.txt`）；契约批次=b5/b7 收口后按结果定。
+
+**收口进度 r101（21:5x）**：r95 detached 已收口 8/10（b1 0 / b2 0 / b3 **1 medium=CONFIRMED CORRECTION 待返修** / b4 0 / b6 0 / b8 1 low 非阻塞 / **b9 3 findings=1 HIGH CORRECTION + 2 LOW** / b10 0）；**b5（核心服务 +383）/b7（css）r101 低负载期 `--resume` 最后一次 INFLIGHT**（detached pid 607379，21:59 起，progress `scratch/t07b/ocr/r101_resume_progress.txt`）；契约批次=b5/b7 收口后按结果定。
+
+**收口进度 r100（21:0x）**：7/10（b1 0 / b2 0 / b3 1 medium 待裁决 / b4 0 / b6 0 / b8 1 low 非阻塞）+ b5、b7 双双 FAILED 未审 + b9 在途 + b10 排队；契约批次 b10 后按结果定。
+
+**r101 裁决（21:5x，协调者独立核代码后落）**：b9 HIGH + b3 MEDIUM = **CONFIRMED CORRECTION**（详见 `inbox/coordinator/TASK-07B/ocr-r101-findings-ruling.md`）；b9 LOW×2 + b8 LOW = 非阻塞 maintainability，随同一返修合并。返修**暂缓派单**：b5/b7 resume 仍在途（review 范围锚定 `502bf8e..f4bfcf2`），此时移动 HEAD 会使在途 resume 失效并可能触发二次返修；等 b5/b7 收口后把全部 OCR findings 并入**一次最小返修**派 B，避免多轮。
+
+**r101 裁决（21:5x，协调者独立核代码后落）**：b9 HIGH + b3 MEDIUM = **CONFIRMED CORRECTION**（详见 `inbox/coordinator/TASK-07B/ocr-r101-findings-ruling.md`）；b9 LOW×2 + b8 LOW = 非阻塞 maintainability，随同一返修合并。返修**暂缓派单**：b5/b7 resume 仍在途（review 范围锚定 `502bf8e..f4bfcf2`），此时移动 HEAD 会使在途 resume 失效并可能触发二次返修；等 b5/b7 收口后把全部 OCR findings 并入**一次最小返修**派 B，避免多轮。
+**恢复入口（r101+）**：detached pid 464164 跑完 b9-b10 后（progress 文件 `== r95 detached done ==` 标记）核 b9-b10 收口态；**b5/b7 剩余动作=低负载期（vllm waiting 趋 0）分别 `--resume 81a66282-6ab7-4a78-a3d5-f309033d8dde`（b5，核心服务面）与 `--resume daa45a1c-e3d8-4af1-97b2-8ce2585bed95`（b7）最后一次尝试**，再失败=挂 NEEDS_REVIEW 冻结 07B 合入门禁（未覆盖文件不得宣称收口）；不无限重试。b3 medium 裁决前置=OCR 收口（避免返修后旧批作废）；b3 预判=回派 B 最小返修（`app/api/scene_manual_revision.py` 单文件 isinstance/pydantic 守卫）与 07B 返修链合并；b8 low 不单独返修，收口时并入口径。

@@ -1,0 +1,76 @@
+23:31:32 [0] env set; DB=/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/t10-e2e.db; local_nas_root=/home/wang/.hermes/cache/scratch/t10-nasroot
+23:31:32 [0] SLOPE_VLM_ENDPOINT=http://192.168.2.45:8002
+23:31:33 [0] copying real bag .db3+metadata into local NAS root: files=['1165414093_slope_20260818_105105_105120_0.db3']
+23:31:36 [0] copied 1 data files (byte-identical) into /home/wang/.hermes/cache/scratch/t10-nasroot/incoming/1165414093_slope_20260818_105105_105120
+23:31:37 [1a] create ingest submission (default profile, scene_slice + slope); fast_fingerprint=8f622686afb11d166130d792...
+23:31:37 [1a] submission frozen config_hash=0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0
+23:31:37 [1b] register source dir via /sources/register (incoming_path for 03B bind)
+23:31:37 [1b] source_id=5D4CA9F85A4D4356B62DA47E67 ingest={'matched': True, 'scheduled_purposes': ['scene_slice'], 'self_built': False, 'config_required': False}
+23:31:37 [1c2] applying documented harness precondition source_status=READY (app has no setter -> finding #1)
+23:31:37 [1d] consume purpose events -> create SCENE_SLICE run (frozen identity, no NULL-hash)
+23:31:37 [1d] no scene run from consume; falling back to explicit POST /scene-analysis-runs
+23:31:37 [1d] run_id=scene-a837d694ceb3470194c76e5f21f8 (frozen via 03B chain, config_hash from submission=0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0)
+23:31:37 [3] claim SCENE_SLICE_QUEUE run
+23:31:37 [3] claimed run=scene-a837d694ceb3470194c76e5f21f8 lease=676b054409e349c7... attempt=1 gen=1 frozen_hash=a8ba9678eb3fcbb6338e403a63c29522beb0d729635b2adc7c4ecad3dc0e9a40
+23:31:37 [3] parent fp=8f622686afb11d166130d792c2045d8bd50f1552663301a25d27d6dea7515617 gen=1; running real VLM analyze on /mnt/nas_backup/data_slice/1165414093/slope/1165414093_slope_20260818_105105_105120 (work=/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/work)
+23:31:40 [FAIL] 3_analyze: adapter.analyze raised SceneAdapterError: MODEL_UNAVAILABLE: 第 0 帧模型服务异常：帧 1787021465142223739 模型请求失败：HTTPError: 404 Client Error: Not Found for url: http://192.168.2.45:8002/
+23:50:50 [0] env set; DB=/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/t10-e2e.db; local_nas_root=/home/wang/.hermes/cache/scratch/t10-nasroot
+23:50:50 [0] SLOPE_VLM_ENDPOINT=http://192.168.2.45:8002/v1/chat/completions
+23:50:51 [0] copying real bag .db3+metadata into local NAS root: files=['1165414093_slope_20260818_105105_105120_0.db3']
+23:50:53 [0] copied 1 data files (byte-identical) into /home/wang/.hermes/cache/scratch/t10-nasroot/incoming/1165414093_slope_20260818_105105_105120
+23:50:55 [1a] create ingest submission (default profile, scene_slice + slope); fast_fingerprint=8f622686afb11d166130d792...
+23:50:55 [1a] submission frozen config_hash=0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0
+23:50:55 [1b] register source dir via /sources/register (incoming_path for 03B bind)
+23:50:55 [1b] source_id=84ACFA57E53149878DF7FCCC24 ingest={'matched': True, 'scheduled_purposes': ['scene_slice'], 'self_built': False, 'config_required': False}
+23:50:55 [1c2] applying documented harness precondition source_status=READY (app has no setter -> finding #1)
+23:50:55 [1d] consume purpose events -> create SCENE_SLICE run (frozen identity, no NULL-hash)
+23:50:55 [1d] no scene run from consume; falling back to explicit POST /scene-analysis-runs
+23:50:55 [1d] run_id=scene-e3d62c298c5242c9b41db32f9c4b (frozen via 03B chain, config_hash from submission=0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0)
+23:50:55 [3] claim SCENE_SLICE_QUEUE run
+23:50:55 [3] claimed run=scene-e3d62c298c5242c9b41db32f9c4b lease=241f81fcdabf49cb... attempt=1 gen=1 frozen_hash=a8ba9678eb3fcbb6338e403a63c29522beb0d729635b2adc7c4ecad3dc0e9a40
+23:50:55 [3] parent fp=8f622686afb11d166130d792c2045d8bd50f1552663301a25d27d6dea7515617 gen=1; running real VLM analyze on /mnt/nas_backup/data_slice/1165414093/slope/1165414093_slope_20260818_105105_105120 (work=/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/work)
+23:50:55 [FAIL] 3_analyze: adapter.analyze raised ModuleNotFoundError: No module named 'requests'
+23:53:26 [0] env set; DB=/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/t10-e2e.db; local_nas_root=/home/wang/.hermes/cache/scratch/t10-nasroot
+23:53:26 [0] SLOPE_VLM_ENDPOINT=http://192.168.2.45:8002/v1/chat/completions
+23:53:27 [0] copying real bag .db3+metadata into local NAS root: files=['1165414093_slope_20260818_105105_105120_0.db3']
+23:53:30 [0] copied 1 data files (byte-identical) into /home/wang/.hermes/cache/scratch/t10-nasroot/incoming/1165414093_slope_20260818_105105_105120
+23:53:31 [1a] create ingest submission (default profile, scene_slice + slope); fast_fingerprint=8f622686afb11d166130d792...
+23:53:31 [1a] submission frozen config_hash=0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0
+23:53:31 [1b] register source dir via /sources/register (incoming_path for 03B bind)
+23:53:31 [1b] source_id=AC1A03217ED14837BF80ABEBF0 ingest={'matched': True, 'scheduled_purposes': ['scene_slice'], 'self_built': False, 'config_required': False}
+23:53:31 [1c2] applying documented harness precondition source_status=READY (app has no setter -> finding #1)
+23:53:31 [1d] consume purpose events -> create SCENE_SLICE run (frozen identity, no NULL-hash)
+23:53:31 [1d] no scene run from consume; falling back to explicit POST /scene-analysis-runs
+23:53:31 [1d] run_id=scene-a42c729a11ae4fd8b1dfb47d2e3d (frozen via 03B chain, config_hash from submission=0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0)
+23:53:31 [3] claim SCENE_SLICE_QUEUE run
+23:53:31 [3] claimed run=scene-a42c729a11ae4fd8b1dfb47d2e3d lease=66c9da1dd0df4f1d... attempt=1 gen=1 frozen_hash=a8ba9678eb3fcbb6338e403a63c29522beb0d729635b2adc7c4ecad3dc0e9a40
+23:53:31 [3] parent fp=8f622686afb11d166130d792c2045d8bd50f1552663301a25d27d6dea7515617 gen=1; running real VLM analyze on /mnt/nas_backup/data_slice/1165414093/slope/1165414093_slope_20260818_105105_105120 (work=/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/work)
+23:55:50 [3] analyze outcome=SUCCESS segments=1 err=None
+23:55:50 [4] publishable segments=1
+23:55:50 [4] derive_storage_offset = None
+23:55:50 [4] publish BLOCKED (offset None) or NO_MATCH (no publishable) -> complete-scene will reflect outcome
+23:55:50 [4] publish blocked -> claim released (run stays in queue for reconcile)
+23:55:50 [5] no child (publish blocked); parent bags/AC1A03217ED14837BF80ABEBF0=200
+23:55:50 [5] source unchanged=False
+23:55:50 [DONE] evidence written to /home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/t10-e2e.json
+01:03:08 [0] env set; DB=/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/t10-e2e.db; local_nas_root=/home/wang/.hermes/cache/scratch/t10-nasroot
+01:03:08 [0] SLOPE_VLM_ENDPOINT=http://192.168.2.45:8002/v1/chat/completions
+01:03:09 [0] copying real bag .db3+metadata into local NAS root: files=['1165414093_slope_20260818_105105_105120_0.db3']
+01:03:12 [0] copied 1 data files (byte-identical) into /home/wang/.hermes/cache/scratch/t10-nasroot/incoming/1165414093_slope_20260818_105105_105120
+01:03:13 [1a] create ingest submission (default profile, scene_slice + slope); fast_fingerprint=8f622686afb11d166130d792...
+01:03:13 [1a] submission frozen config_hash=0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0
+01:03:13 [1b] register source dir via /sources/register (incoming_path for 03B bind)
+01:03:13 [1b] source_id=13551AA0FD504BF28BC282DD7E ingest={'matched': True, 'scheduled_purposes': ['scene_slice'], 'self_built': False, 'config_required': False}
+01:03:13 [1c2] applying documented harness precondition source_status=READY (app has no setter -> finding #1)
+01:03:13 [1d] consume purpose events -> create SCENE_SLICE run (frozen identity, no NULL-hash)
+01:03:13 [1d] no scene run from consume; falling back to explicit POST /scene-analysis-runs
+01:03:13 [1d] run_id=scene-7a441d21a2ef42579e48c5e65ecd (frozen via 03B chain, config_hash from submission=0845b4021fdd7e2857cbfa480ea65a78570880fed42d0a80d8457eb80f7a98e0)
+01:03:13 [3] claim SCENE_SLICE_QUEUE run
+01:03:13 [3] claimed run=scene-7a441d21a2ef42579e48c5e65ecd lease=83269a4918164699... attempt=1 gen=1 frozen_hash=a8ba9678eb3fcbb6338e403a63c29522beb0d729635b2adc7c4ecad3dc0e9a40
+01:03:13 [3] parent fp=8f622686afb11d166130d792c2045d8bd50f1552663301a25d27d6dea7515617 gen=1; running real VLM analyze on /mnt/nas_backup/data_slice/1165414093/slope/1165414093_slope_20260818_105105_105120 (work=/home/wang/work/doc/prd/rosbag-catalog-integration/scratch/t10/work)
+01:05:37 [3] analyze outcome=SUCCESS segments=1 err=None
+01:05:37 [4] publishable segments=1
+01:05:37 [4] derive_storage_offset = 100381744
+01:05:37 [4] published 1 slices
+01:05:37 [4] /results status=200
+01:05:38 [4] /complete-scene status=409 body={'detail': 'INCOMPLETE: 切片 slope:1787021465142223739:1787021479550464104 消息超出区间上界 1787021479647655120 > 1787021479550464104'}

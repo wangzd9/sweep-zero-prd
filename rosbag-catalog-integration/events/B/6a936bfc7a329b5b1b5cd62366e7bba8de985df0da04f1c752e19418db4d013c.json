@@ -1,0 +1,12 @@
+{
+  "event_id": "b-poll-20261012-035253-nochange-task10-done-p0-idle",
+  "occurred_at": "2026-10-12T03:53:45+08:00",
+  "recorded_at": "2026-10-12T03:53:45+08:00",
+  "role": "B",
+  "task": "none",
+  "attempt": "0",
+  "status": "POLL_NO_CHANGE",
+  "summary": "03:47 后零业务变化，P0 收口后维持 IDLE_WAITING",
+  "evidence": "main 453da0c=origin/main 双核；wt-04a-t10d3 冻结 0943885；inbox/2号 01:20 后零新增；无本侧业务进程",
+  "next": "仅按需巡检与事件接续"
+}
