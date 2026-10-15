@@ -1,0 +1,73 @@
+{
+  "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/6b2bbaf1-2658-490e-9926-ed54eeac4a90.jsonl",
+  "session_ids": [
+    "6b2bbaf1-2658-490e-9926-ed54eeac4a90"
+  ],
+  "last_event": {
+    "type": "session_end",
+    "timestamp": "2026-10-15T09:45:01Z"
+  },
+  "terminal_state": "complete",
+  "manifest_schema": "ocr.run-manifest/v1",
+  "input": {
+    "mode": "range",
+    "requested_from": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+    "requested_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+    "resolved_base": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+    "resolved_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+    "exact_range": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3..96afc43206bfcf9276203a89e75c97d28c6204bf",
+    "source_artifact_sha256": "c5d3b908fd039f933a2e57fc2edad01304eb4692f935acd6cae26e5fe430b933"
+  },
+  "ocr_version": "v1.13.0",
+  "coverage_counts": {
+    "selected": 1,
+    "completed": 1,
+    "reused": 0,
+    "failed": 0,
+    "waived": 0
+  },
+  "coverage_complete": true,
+  "remaining_paths": [],
+  "gate_decision": "NOT_EVALUATED",
+  "parse_errors": [],
+  "manifest_failures": [],
+  "item_error_messages": {},
+  "llm_errors": [
+    {
+      "task": "main_task",
+      "error": "error reading response body: read tcp [2408:820c:d09:57a0:e22e:522b:126e:a9f1]:43960->[2606:4700:3034::6815:ca7]:443: read: connection reset by peer",
+      "count": 1
+    }
+  ],
+  "repeated_tools": [
+    {
+      "file": "app/services/ingest_service.py",
+      "tool": "code_search",
+      "arguments_sha256_prefix": "bac89e819cf15dcf",
+      "count": 2
+    },
+    {
+      "file": "app/services/ingest_service.py",
+      "tool": "file_read",
+      "arguments_sha256_prefix": "47f1df1b873ed452",
+      "count": 2
+    }
+  ],
+  "request_characters": {
+    "count": 19,
+    "max": 118836,
+    "max_frozen_first_two": 24680,
+    "note": "字符统计只用于观察增长，不是OCR本地token估计或模型上下文长度。"
+  },
+  "model_usage": {
+    "responses": 18,
+    "total_prompt_tokens": 354693,
+    "total_completion_tokens": 5895,
+    "max_prompt_tokens": 39645
+  },
+  "next_steps": [
+    "存在相同参数的重复工具调用；核对是否必要，不直接判模型无能力。",
+    "本session文件覆盖完整；仍须核对批次base/head、排除/跨文件覆盖、发现裁决及测试，不能自动PASS。"
+  ],
+  "batch_identity_matches": true
+}

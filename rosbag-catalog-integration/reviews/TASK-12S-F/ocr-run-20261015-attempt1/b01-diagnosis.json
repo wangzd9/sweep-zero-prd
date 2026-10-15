@@ -1,0 +1,66 @@
+{
+  "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/948dea59-8ec1-4e4b-802c-7006bf6ab481.jsonl",
+  "session_ids": [
+    "948dea59-8ec1-4e4b-802c-7006bf6ab481"
+  ],
+  "last_event": {
+    "type": "review_item_done",
+    "timestamp": "2026-10-15T05:03:31Z"
+  },
+  "terminal_state": null,
+  "manifest_schema": null,
+  "input": {},
+  "ocr_version": null,
+  "coverage_counts": {
+    "selected": 0,
+    "completed": 0,
+    "reused": 0,
+    "failed": 0,
+    "waived": 0
+  },
+  "coverage_complete": false,
+  "remaining_paths": [],
+  "gate_decision": "NOT_EVALUATED",
+  "parse_errors": [],
+  "manifest_failures": [],
+  "item_error_messages": {},
+  "llm_errors": [
+    {
+      "task": "main_task",
+      "error": "context canceled",
+      "count": 1
+    }
+  ],
+  "repeated_tools": [
+    {
+      "file": "alembic/versions/20261014_01_ingest_rejected.py,app/api/ingest_submissions.py,app/models.py,app/services/ingest_service.py",
+      "tool": "file_read",
+      "arguments_sha256_prefix": "47f1df1b873ed452",
+      "count": 2
+    },
+    {
+      "file": "alembic/versions/20261014_01_ingest_rejected.py,app/api/ingest_submissions.py,app/models.py,app/services/ingest_service.py",
+      "tool": "file_read",
+      "arguments_sha256_prefix": "acfe5949437e892b",
+      "count": 2
+    }
+  ],
+  "request_characters": {
+    "count": 37,
+    "max": 135875,
+    "max_frozen_first_two": 34867,
+    "note": "字符统计只用于观察增长，不是OCR本地token估计或模型上下文长度。"
+  },
+  "model_usage": {
+    "responses": 36,
+    "total_prompt_tokens": 1034325,
+    "total_completion_tokens": 78293,
+    "max_prompt_tokens": 51064
+  },
+  "next_steps": [
+    "没有完整session_end/manifest；先核对实际PID及start identity，不能判停止或通过。",
+    "context canceled可能由客户端压缩/退出触发；需额外进程或服务端证据才能归因。",
+    "存在相同参数的重复工具调用；核对是否必要，不直接判模型无能力。"
+  ],
+  "batch_identity_matches": false
+}

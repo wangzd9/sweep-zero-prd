@@ -1,0 +1,57 @@
+{
+  "state": "AWAITING_DECISION",
+  "updated_at": "2026-10-14T17:59:35.364462+00:00",
+  "pid": 282411,
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/coordinator-ocr-3480a1612da141eabd66ff50fd6efa32.service",
+  "run_id": "3480a1612da141eabd66ff50fd6efa32",
+  "unit": "coordinator-ocr-3480a1612da141eabd66ff50fd6efa32.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "app/services/pending_binding.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-14T17:04:09.037934+00:00",
+      "pid": 282484,
+      "process_start_ticks": "39771099",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-01-t12se/ed51dc45-2198-47da-8b80-15e75d000ab8.jsonl",
+      "session_mtime": 1791998987.7162333,
+      "returncode": 0,
+      "ended_at": "2026-10-14T17:30:56.510096+00:00",
+      "duration_seconds": 1607.47
+    },
+    {
+      "id": "b02",
+      "files": [
+        "app/services/scene_schedule_consumer.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-14T17:30:56.701671+00:00",
+      "pid": 308925,
+      "process_start_ticks": "39931865",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-01-t12se/376c357f-efde-4540-b294-f9b11c182c55.jsonl",
+      "session_mtime": 1791999600.6783655,
+      "returncode": 0,
+      "ended_at": "2026-10-14T17:40:54.344028+00:00",
+      "duration_seconds": 597.64
+    },
+    {
+      "id": "b03",
+      "files": [
+        "app/services/source_service.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-14T17:40:54.501274+00:00",
+      "pid": 318618,
+      "process_start_ticks": "39991645",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-01-t12se/75069dbd-df12-4413-965f-edad99e457c6.jsonl",
+      "session_mtime": 1792000735.893251,
+      "returncode": 0,
+      "ended_at": "2026-10-14T17:59:35.308240+00:00",
+      "duration_seconds": 1120.81
+    }
+  ],
+  "gate_decision": "NOT_EVALUATED",
+  "ended_at": "2026-10-14T17:59:35.364467+00:00"
+}

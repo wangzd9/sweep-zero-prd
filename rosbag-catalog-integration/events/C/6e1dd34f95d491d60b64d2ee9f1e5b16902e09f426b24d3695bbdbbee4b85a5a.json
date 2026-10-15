@@ -1,0 +1,20 @@
+{
+  "event_id": "C:t12sd1-coord-mech-verify-consumed-20261014-2101",
+  "kind": "business",
+  "task": "TASK-12S-D1",
+  "attempt": "attempt-1",
+  "status": "REVIEW_PENDING",
+  "summary": "消费协调者 20:55 TODO §11 D1 行更新：部分交付获机械核验通过（8包 bytes/DB3/topic/duration/SHA 与冻结 input-manifest 逐项一致、4acf 取消终态三方一致、批次 25,119,612,157 B 一致）；五项 BLOCKED_MATERIAL 维持（真值区间/真实正常阴性/实车映射/质量阈值/跨DB3命中），D2 真实验收维持阻塞；TESTER 可测试性复核待派。本轮只读取证，无代码/生产动作。",
+  "evidence": "TODO.md §11 TASK-12S-D1 行（2026-10-14 20:55:34 mtime）; receipts/TASK-12S-D1/attempt-1.md; receipts/TASK-12S-D1/attempt-1-samples.md",
+  "next": "C 开发槽空闲：等 TESTER 可测试性复核单或任一 BLOCKED_MATERIAL 补齐后重算对应用例；上游材料不在 C 职责内不代补；新派单/返修按协调者优先级接续",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "C",
+  "recorded_at": "2026-10-14T21:01:54+08:00",
+  "occurred_at": "2026-10-14T21:01:54+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

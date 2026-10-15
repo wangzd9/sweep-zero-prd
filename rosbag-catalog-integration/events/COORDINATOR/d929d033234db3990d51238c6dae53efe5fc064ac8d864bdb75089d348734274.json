@@ -1,0 +1,20 @@
+{
+  "event_id": "COORDINATOR:coord-t12se-attempt2-ocr-closed-reverify-dispatched-20261015-1015",
+  "kind": "business",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-2",
+  "status": "REVIEW_PENDING",
+  "summary": "run a9bf637e 09:46:17 三批 REVIEW_COMPLETE rc=0，逐批实读 b0*.log comments 数组=0 findings（16/5/6 LLM 往返、identity 一致、coverage_complete 3/3）；协调者独立核 app 面 E-R1~R8 逐点位在位+E-R6 统计 key 兼容+零越界 → OCR 门禁满足（ocr-verdict.md 落盘）。TESTER attempt-2 增量复验单 10:12 已派（E-R7 真实口径/E-R1~R3 字段断言/E-R8 两路/E-R4 防御/E-R6 回归，真 MySQL 隔离库）。强审口径=MERGE_INTO 12S-E+F 批次包（TESTER PASS 后生成，grant 9827cf8f 10-15 22:24 内 0/5）。12S-F 冻结 base 候选 1e9c7de 待 E 接受后通知 B。E 仍 REWORK 未接受未合入。",
+  "evidence": "reviews/TASK-12S-E/ocr-run-20261015-attempt2/{state.json,b01.log,b02.log,b03.log,b01-diagnosis.json,b02-diagnosis.json,b03-diagnosis.json,ocr-verdict.md}; inbox/TESTER/TASK-12S-E/attempt-2-reverify-dispatch.md; wt-01-t12se git 1e9c7de; TODO section-11 E 行; DEVELOPMENT-LOG 10:15 段; HANDOFF coord-checkpoint-t12se-attempt2-ocr-closed-20261015-1015",
+  "next": "下轮 observer 核 TESTER E attempt-2 复验回执（1-2h）+ D1 可测试性复核回执（10:00 ACK 已开工）；E 复验 PASS → 落盘 E 接受决策 → 通知 B 12S-F rebase 1e9c7de → 强审 12S-E+F 批次 pack（授权内经 strong_review.py）；1012 大包维持收敛观察不 kill/retry",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "COORDINATOR",
+  "recorded_at": "2026-10-15T10:26:54+08:00",
+  "occurred_at": "2026-10-15T10:26:54+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

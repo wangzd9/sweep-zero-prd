@@ -1,0 +1,18 @@
+{
+  "event_id": "C:d1-acceptance-20261015",
+  "kind": "business",
+  "task": "TASK-12S-D1",
+  "attempt": "1",
+  "status": "ACCEPTED_PARTIAL",
+  "summary": "消费 observer 唤醒（pending 指纹 095355f9，changed=协调者 D1 可测试性复核裁决 10:48 + 部分交付接受口径 11:05）。D1 转「部分交付接受（可测试性复核 PASS，真实面维持 BLOCKED）」，本口径为接受终态，C 零代码改动不走 OCR。六项核销：①阳性×4 接受，16_00_13 切片 NAS 形态记法=C 下次交付顺手更正（不返修）；②输入适用性×3 关闭；③空包提交层断点 owner=12S-F（已交付 6798059，R1 返修中），F 验收后随 D2 口径补验，C 无动作；④16_02_03 跨 DB3 不可测：滞留 SCENE_CANCELLING=16R 缺陷候选登记不代修+跨 DB3 边界=D2 材料缺口等上游；⑤五项 BLOCKED_MATERIAL owner=上游/业务侧，材料齐重算，C 不代补；⑥批次总量 25,119,612,157 B 关闭。D2 维持 BLOCKED。C 本轮只读核 4acf 大包（处理机 127.0.0.1:8180 实测仍 SCENE_CANCELLING、INFER=RUNNING 未收敛，与昨晚 obs80 口径一致，仅监控申报）。C 开发槽空闲，12S 聚合维持 PARTIAL。",
+  "evidence": "inbox/coordinator/TASK-12S-D1/testability-review-acceptance-decision.md（10:48）+ acceptance-partial-20261015.md（11:05）全文 read；处理机 ssh 只读 curl scene-4acf689f9a6a473da1fa2f2efc70 实测 status=SCENE_CANCELLING 步骤表 EXTRACT/PRECHECK DONE、INFER RUNNING、余 QUEUED；receipts/TASK-12S-D1/attempt-1.md 回执在案（30 行 16_00_13 切片 NAS 形态记法已定位，下次交付更正）",
+  "next": "16_00_13 记法更正留到 C 下次交付顺手做；12S-F R1 返修与 D2 补验属 2号/TESTER 面不代跑；4acf 持续只读监控收敛 CANCELLED 或外部变更（变化申报协调者，C 不 kill/retry）；等协调者新派单/返修按优先级接续",
+  "schema_version": 1,
+  "role": "C",
+  "recorded_at": "2026-10-15T11:27:28+08:00",
+  "occurred_at": null,
+  "time_source": {
+    "kind": "unknown",
+    "reason": "历史发生时间未核实；recorded_at 只表示补录时间"
+  }
+}

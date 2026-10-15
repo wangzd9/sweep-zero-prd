@@ -1,0 +1,20 @@
+{
+  "event_id": "TESTER:t16c-merge-hold-consumed-f1-rework-pending-20261014-1858",
+  "kind": "business",
+  "task": "TASK-16D",
+  "attempt": "attempt-1",
+  "status": "PENDING_RERUN",
+  "summary": "消费协调者 18:55 合入 HOLD（覆盖 16C「PASS 后可直接合入」的立即执行）：TESTER 16D 对固定集成 29bd1f4 联合验收 PASS 在案有效，但 OCR run 66ca40d3 b01 裁决 F1（medium/bug CONFIRMED：scene_original/self_built_original 谓词缺 NVIDIA 排除）在集成范围内未修不得合入。HOLD 解除五条件①-⑤齐前不执行合入/推送/测试环境更新。TESTER 侧待办=条件④ A 增量面（F1 组合夹具：nvidia+scene 用途原包筛 scene_original/self_built_original 不返回、筛 nvidia_original 命中、标签仅 nvidia_original 一致性）+条件⑤ 重建三叶固定集成候选后重新联合验收。本轮实测：A worktree wt-01-t16ca HEAD 仍 1489bc6、status 仅 .venv untracked、回执无 R1-3 段=A 最小返修尚未交付（REWORK_DISPATCHED 在途），TESTER 验证面前置未齐，不开工不实跑。11S 大包 4acf689f 线不受本 HOLD 影响，维持 18:40 裁决口径等待。",
+  "evidence": "inbox/coordinator/TASK-16C/merge-authorization-20261014.md 18:55 HOLD 段; inbox/1号/TASK-16C-A/ocr-r1-rework-3-dispatch-20261014.md; git -C wt-01-t16ca log/status 实测 HEAD=1489bc6 无 R1-3 commit; receipts/TASK-16C-A/attempt-1.md grep R1-3=0",
+  "next": "等 A 按 R1-3 冻结新 head（仅 bag_search_service.py：两谓词补 dataset_type != nvidia_physicalai + docstring/注释同步）→ 协调者机械核验+增量 OCR 单文件零 CORRECTION 级 → TESTER 执行 A 增量面 F1 组合夹具（隔离 MySQL+自造夹具，16D 环境可复用）→ 三叶集成候选重建后 TESTER 重新联合验收 → HOLD 解除。期间 5min 巡检只读核 A 交付状态，不重复启动。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "TESTER",
+  "recorded_at": "2026-10-14T18:56:56+08:00",
+  "occurred_at": "2026-10-14T18:56:56+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

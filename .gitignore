@@ -8,3 +8,8 @@ __pycache__/
 *.key
 *.lock
 node_modules/
+
+# Transient execution state and test workspaces are not cloud backup inputs.
+**/inbox/control/runtime/
+**/scratch/
+**/.claim*

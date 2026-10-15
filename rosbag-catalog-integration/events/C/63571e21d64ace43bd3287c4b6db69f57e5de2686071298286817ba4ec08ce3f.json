@@ -1,0 +1,20 @@
+{
+  "event_id": "C:t11s-obs80-scene-cancelling-stale-20261014",
+  "kind": "business",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "OBSERVING",
+  "summary": "C obs80 只读核实（消费 observer 唤醒：pending 指纹 2e950fc3 分类原因=12S-D1/11S 两派单 unresolved，均已有 ACK+交付+协调者记账，无新 C 业务输入）。11S 大包 scene-4acf689f 实测仍 SCENE_CANCELLING，与 obs79（18:28-18:33）同一在途状态无翻转：8180 status=SCENE_CANCELLING、attempt=1、lease_expires_at=2026-10-14T16:23:55 持续 stale、error_message 空、steps PRECHECK/EXTRACT DONE + INFER RUNNING + 余 QUEUED（DB 行自 17:14:25 编排退出后未再推进，容器日志 CANCELLED 与 DB INFER RUNNING 的口径差按 17:50 裁决登记为收口缺口，处置归协调者）；8767 health ok、active_runs=[]、无在途写者；C 不 kill/retry/不重烧模型。12S-D1 部分交付维持 REVIEW_PENDING：五项 BLOCKED_MATERIAL 上游材料不在 C 职责内不代补，D2 维持阻塞；等 TESTER 可测试性复核单或材料补齐后重算对应用例。",
+  "evidence": "处理机 21:06-21:08 只读 ssh：curl 8180 /api/v1/scene-analysis-runs/scene-4acf689f9a6a473da1fa2f2efc70（SCENE_CANCELLING/lease 16:23:55/steps 与 obs79 逐字段一致）；curl 8767 /health（status ok, active_runs=[]）；snapshot C.json（21:03:52）与 observer/C.json pending 分类原因核实；TODO §11 D1 行 20:55:34 在案口径",
+  "next": "下轮续核 SCENE_CANCELLING 收敛 SCENE_CANCELLED 或外部变更（仅监控，申报协调者处置）；12S-D1 等 TESTER 复核单/上游材料；C 开发槽空闲，新派单/返修按协调者优先级接续",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "C",
+  "recorded_at": "2026-10-14T21:08:39+08:00",
+  "occurred_at": "2026-10-14T21:08:39+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

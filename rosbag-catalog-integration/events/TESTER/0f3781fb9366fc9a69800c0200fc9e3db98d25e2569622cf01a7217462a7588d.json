@@ -1,0 +1,12 @@
+{
+  "event_id": "TESTER:t12se-attempt2-reverify-pass-20261015",
+  "occurred_at": "2026-10-15T12:20:48+08:00",
+  "recorded_at": "2026-10-15T12:20:48+08:00",
+  "role": "TESTER",
+  "task": "TASK-12S-E",
+  "attempt": "2",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "attempt-2 增量复验 PASS：11:20 BLOCKED 根因=mysql:8.4 镜像仅授 user@localhost，bridge 源 IP 1045；补授 user@% 后 raw+engine 双通。真 MySQL 8.4.11 隔离库 5 面全过：E-R7 真实口径 17 用例 -v PASSED/E-R1~R3 字段断言/E-R8 两路(812 豁免+871 非409)/E-R4 ROOT_MISMATCH/回归 159 passed(154 口径扩展)。固定 head 1e9c7de 只读，VLM=0，隔离资源归零留证。",
+  "evidence": "test-receipts/TASK-12S-E/attempt-2-reverify.md",
+  "next": "交协调者裁决：E 接受(1e9c7de)→通知 B 12S-F 冻结 base rebase"
+}

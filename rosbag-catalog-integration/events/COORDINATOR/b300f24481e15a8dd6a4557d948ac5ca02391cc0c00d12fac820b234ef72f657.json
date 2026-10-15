@@ -1,0 +1,20 @@
+{
+  "kind": "business",
+  "event_id": "COORDINATOR:t16ca-r13-f1-mech-verify-green-20261014T1908",
+  "task": "TASK-16C-A",
+  "attempt": "ocr-r1-rework-3 (R1-3) head 8958291",
+  "status": "MECH_VERIFY_GREEN",
+  "summary": "A R1-3 F1 返修交付 head 8958291（续 1489bc6，19:03:26 落盘，仅 bag_search_service.py 18+/10-）协调者机械核验全绿：①祖先链 1489bc6→8958291 OK、树干净（仅 .venv 软链 untracked）；②diff 逐行核=F1 两谓词 scene_original/self_built_original 各补 dataset_type!=nvidia_physicalai（镜像 data_kind_context 的 elif nvidia 先命中优先级）+ F1 文档同步（data_kind_pred docstring 3/4 条+顶部分类优先级注释）+ F3 _parse_time docstring 秒精度进位口径 + F2 view 注释 all=全部，零越界不动 scene_result_query.py/模板/tests；③独立复跑 .venv pytest test_web+test_task16ca_query_api+test_task16c_ui_minimal = 74 passed + 1 failed（唯一失败 test_bag_search_page_has_bounded_query_count_and_response_time = seed 固有 bounded-query N+1 11>8，与 A 已 stash 复现 base 1489bc6 同口径，本 R1-3 零新增失败）；④协调者独立 F1 不变量探针（内存 SQLite，非采信 A 探针）：N1(nvidia+ORIGINAL+scene_slice 用途+非子包)/N2(nvidia+ORIGINAL+无用途)/SB(self_built+双用途) → scene_original=[SB]、self_built_original=[SB]、nvidia_original=[N1,N2]，8 断言全 PASS，NVIDIA 原包不再误命中 scene/self_built 筛选、双用途行为不变。A 叶接受门禁仍待单文件增量 OCR 零 CORRECTION + TESTER F1 增量面。",
+  "evidence": "wt-01-t16ca git diff 1489bc6..8958291 -- app/services/bag_search_service.py（F1 两谓词 +dataset_type!=nvidia_physicalai 逐行核）；.venv/bin/python3 -m pytest test_web.py test_task16ca_query_api.py test_task16c_ui_minimal.py = 74 passed 1 failed(seed 固有)；协调者独立探针 /home/wang/.hermes/cache/scratch/f1_invariant_probe.py = F1_INVARIANT_ALL_OK 8 断言（scene=[SB]/selfb=[SB]/nvid=[N1,N2]）；A 回执 receipts/TASK-16C-A/attempt-1.md R1-3 段（8958291，19:03）",
+  "next": "单文件增量 OCR 仅 bag_search_service.py（head 8958291 变化，旧 66ca40d3 覆盖不续用；base 1489bc6..8958291 单批）经 ocr_runtime 唯一入口起跑 → 零 CORRECTION 级裁决 → TESTER F1 增量面（真 MySQL 8.4.11 严格 nvidia+scene 用途原包筛 scene_original 不返回 + 标签仅 nvidia_original 一致性）→ A 叶接受 → 重建固定集成候选（含 B e399daf + C ce5921d）重新 16D 联合验收 → 解除合入 HOLD 后合入 main。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "COORDINATOR",
+  "recorded_at": "2026-10-14T19:08:41+08:00",
+  "occurred_at": "2026-10-14T19:08:41+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

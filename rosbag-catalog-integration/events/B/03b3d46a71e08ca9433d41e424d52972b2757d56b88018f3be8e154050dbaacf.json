@@ -1,0 +1,20 @@
+{
+  "event_id": "B:b-poll-20261014-1828-merge-auth-consumed-idle",
+  "kind": "business",
+  "task": "TASK-16C-B",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "巡检 2026-10-14 18:22 +08:00（cron poll 6f7471d8747c，脚本指纹 d7ece7b9，18:22:52 首见/18:25:12 复检）：消费 pending——唯一变更源为协调者 18:22 前落盘（观察首见 18:22:52）合入持续授权 inbox/coordinator/TASK-16C/merge-authorization-20261014.md：用户群内指令“PASS 后可直接合入并更新测试环境”，授权口径=TESTER 16D 联合验收对固定集成 SHA 29bd1f4 回执 PASS 后协调者可直接 merge --no-ff 入 main 并推 github、同步本地 Compose 测试环境收敛（不含生产处理机部署），非 PASS 则不自动合入回叶 owner 最小返修。对 B：本叶 18:10 已接受（leaf-acceptance-decision，冻结 e399daf），授权执行者为协调者而非 B，B 无新派单/返修/问题 ID 单，开发面维持收口；等待链=父 16C 聚合（A 叶接受后含 seed 固定集成候选）→ TESTER 16D 联合验收 → 协调者按本授权合入+测试环境更新。",
+  "evidence": "inbox/coordinator/TASK-16C/merge-authorization-20261014.md（观察首见 2026-10-14T18:22:52+08:00，chat oc_b64dc5bf34ec1edcc8cce92ffd56604b / msg om_x100b63c13aa398a8dd204907be97f78）；inbox/coordinator/TASK-16C-B/leaf-acceptance-decision-20261014.md（18:10 落盘，B 叶已接受 e399daf）；find inbox/2号 -newermt 2026-10-14 18:12 零命中（无 B 侧新派单/返修）",
+  "next": "IDLE_WAITING：B 叶已接受、开发面收口；合入与测试环境更新由协调者在 TESTER 16D PASS 后执行，B 无动作；等父 16C 聚合含 seed 固定集成候选 → TESTER 16D 联合验收（view_label 新名页面断言届时覆盖）；无新派单不占开发槽，空闲只读巡检不扩需求、不碰生产",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "B",
+  "recorded_at": "2026-10-14T18:29:57+08:00",
+  "occurred_at": "2026-10-14T18:29:57+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

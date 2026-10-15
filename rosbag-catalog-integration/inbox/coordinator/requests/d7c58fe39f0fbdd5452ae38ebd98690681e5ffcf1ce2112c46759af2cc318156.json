@@ -1,0 +1,11 @@
+{
+  "schema": "coordinator-request/v1",
+  "request_id": "d7c58fe39f0fbdd5452ae38ebd98690681e5ffcf1ce2112c46759af2cc318156",
+  "received_at": "2026-10-15T17:38:09+08:00",
+  "status": "PENDING",
+  "message_id": "om_x100b623df418c4a0de1c0a9bd8f67e2",
+  "chat_id": "oc_b64dc5bf34ec1edcc8cce92ffd56604b",
+  "user_id": "ou_cb93c8e06b797e51a6f66a86f4c3fdaf",
+  "text": "甲",
+  "context": "回复协调者 2026-10-15 17:2x 现状梳理中给出的三选一：甲=把未经门禁的脚本线 cad585a 合回 main 基线 16a154f（或反向 rebase），跑全仓测试、补 OCR 与独立测试门禁后再谈部署；乙=只做隔离与止血；丙=只落盘对账记录。用户单字选择即为该方案的执行授权，不含生产部署授权（方案甲明确「再谈部署」）。"
+}

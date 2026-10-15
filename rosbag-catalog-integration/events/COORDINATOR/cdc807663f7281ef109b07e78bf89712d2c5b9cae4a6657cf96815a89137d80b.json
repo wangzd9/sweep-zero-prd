@@ -1,0 +1,12 @@
+{
+  "event_id": "COORDINATOR:t16c-aggregate-accepted-merged-main-16a154f-20261014-2005",
+  "occurred_at": "2026-10-14T20:06:49+08:00",
+  "recorded_at": "2026-10-14T20:06:49+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16C",
+  "attempt": "aggregate-merge",
+  "status": "MERGED_MAIN_16A154F",
+  "summary": "消费 TESTER 44b6c07 最终联合验收 PASS（19:56 事件/19:5x 回执：集成面确认、cursor 矩阵两入口 20/20、严格 MySQL 8.4.11 21/21、真实 Chrome Console 零异常、header 版本核 44b6c076、夹具自清归零），合入 HOLD 五条件全齐。按 18:22 用户授权（om_x100b63c13aa398a8dd204907be97f78，不含生产）执行：合入前核 main 仍 63bfcf8、diff 7M+4A 全在 16C 冻结范围、与主仓用户脏文件零重叠、merge-tree 冲突 0；--no-ff 合入 main 16a154f（seed bd0db1d2 + 三叶 A 8958291 / B e399daf / C ce5921d）；推 github 63bfcf8..16a154f、ls-remote 回读一致；本地 Compose 测试环境收敛 local_stack.sh up rc=0（mock 18 容器 Healthy）+ test rc=0（mock 全链路 a09870b7 到 PUBLISHED、revision 对账 changed=[] stale=false、platform=16a154f）；真实 Chrome 页面实测 /bags?view=originals：header 平台 16a154ff、三 tab + chip 视图：原始数据在位、36 行。16C 聚合 ACCEPTED、16D 任务面收口、父 TASK-16 聚合 DONE（12S-D 质量矩阵缺证、16R 水雾债 fe17e8a..3c9c496 低优先补审候选为独立后续，不属父16）。生产处理机部署未执行。强审 grant 32e3edfd 有效 0/5 未调用（三叶接受 NOT_REQUIRED 口径在案）。",
+  "evidence": "inbox/coordinator/TASK-16C/merge-decision-20261014.md; test-receipts/TEST-TASK16D/attempt-1.md 44b6c07 段; git ls-remote github refs/heads/main = 16a154fff6f23e20b15498d1285a783713859647",
+  "next": "11S 批次 4acf689f 取消链收敛面观察（TEST_REPORT_PENDING 独立线）；A/B/C/TESTER 开发槽空闲待命不扩需求；16R 补审候选待 ocr.lock 空窗经唯一入口补；水雾 E/F/12S-D 补验按 TODO 第11节等 v0.4 收口后核条件派发（父16本回合已收口，是否启动第11节专项待用户指示）"
+}

@@ -1,0 +1,20 @@
+{
+  "event_id": "A:a-task12se-attempt2-r1-delivered-20261015",
+  "kind": "business",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-2",
+  "status": "REVIEW_PENDING",
+  "occurrence": {
+    "kind": "now"
+  },
+  "summary": "attempt-2 R1 最小返修交付冻结：commit 1e9c7de（base b39a3ec，分支 a/task-12s-e-auto-bind，wt-01-t12se），5文件+363/-31；E-R1~E-R8 逐条修复（bound_ready_path 真实物理口径/bound_incoming_path 拼回 prefix/bound_purposes_json 持久化/防御分支 fail-closed ROOT_MISMATCH/PENDING_INPUT FIFO/scene_schedule_consumer docstring+全零stats合并/incoming 根归一 storage 相对/409 栅栏后移移动恢复豁免两路）+ test_pipeline_api:177 夹具改真实口径；新增 6 用例。自测：目标文件 42 passed（真 MySQL 8.4.11 独立探针库）、全量回归基线 b39a3ec 38 既有失败两核完全一致零新增（head 多 5 passed=新增用例）、ruff clean、git diff --check rc=0。探针 MySQL 容器+基线 worktree 自毁归零。",
+  "evidence": "wt-01-t12se git log 1e9c7de; receipts/attempt-2.md; /tmp/base_clean.log vs /tmp/head_clean.log diff NEW=0/GONE=0 (38 既有失败两核一致); docker rm -f 自毁后 docker ps -a 计数=0",
+  "next": "等协调者机械核验 -> OCR 唯一入口对 attempt-2 增量审查(新交付身份) -> TESTER 对 E-R7 真实口径夹具/E-R1~R3 字段断言/E-R8 两路增量复验 -> 接受；无新单只读核查",
+  "schema_version": 1,
+  "role": "A",
+  "recorded_at": "2026-10-15T09:30:35+08:00",
+  "occurred_at": "2026-10-15T09:30:35+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

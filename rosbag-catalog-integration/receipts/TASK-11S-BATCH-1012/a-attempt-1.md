@@ -105,3 +105,9 @@ owner=A（A-batch-1012），唯一上传/正式提交 owner。生产业务 `3c9c
 **台账补录**：`upload-ledger.json` 三条 flat 包追加 `binding_closeout`（source_id/flat_ready_path/outbox CONSUMED/复用 run+attempt+终态时刻/evidence），`16_02_03` 补 `submission_note`（24d60fee SCHEDULED 绑 91FFEEC1 run 4acf689f SCENE_RUNNING）。
 
 **A 侧收口**：1017/D4③ 绑定恢复面对 A 已 STOP（owner 转 Codex，已完成）；A 本回合只读核实 + 台账补录，未做任何重登记/重试/上传/写库。剩余 A 面=只读观察 `scene-4acf689f` 终态（任一 outcome）配合 TESTER 全链增量验收；不 kill/retry 大包、不重烧 dup、不自行扩大修复。交付本回执后释放槽。
+
+## 18:40 裁决消费段（2026-10-14 18:45，A）
+
+**消费** `ruling-4acf-stuck-cancelling-1840.md`（协调者 2026-10-14T18:40+08:00 落盘）：大包 `scene-4acf689f` 取消已实际发生（17:14:25 编排退出 INFER CANCELLED，C obs77/obs78+TESTER 18:13 三方独立一致），DB run 行滞留 SCENE_CANCELLING=确认写被过期租约守卫（`app/domain/security.py:39` 409 task lease expired）挡回的受控对账缺口，缺陷候选入 16R 盘点（不新开任务、不代修、不直写生产 DB）。批次 8 包独立验收面全部闭合（7 包终态 PASS + 大包取消链 PASS），等 TESTER TEST_REPORT_PENDING 收口。
+
+**A 处置**：按裁决 A 本批上传提交面全闭环转 IDLE，滞留行面 A 不处置；上段「剩余 A 面=只读观察 4acf689f 终态」作废，不再逐轮申报（run 行外部变更监控归 C）。本轮 A 未做任何生产写。事件已记账（event `a-batch1012-upload-face-closed-by-ruling-1840-20261014`）。16C-A 叶维持冻结 head=`1489bc6`，18:43 实测协调者增量 OCR `66ca40d3` 仍在途（b01 bag_search_service.py REVIEW_COMPLETE rc=0、b02 scene_result_query.py RUNNING、gate NOT_EVALUATED），A 叶接受门禁维持关闭，等收口后协调者裁决+TESTER 增量面。

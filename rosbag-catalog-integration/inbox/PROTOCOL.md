@@ -81,7 +81,7 @@ preflight 在每个巡检回合更新真实检查时间并报告 ACTIVE/PAUSED�
 
 事件落盘由既有五分钟检查接续；仅在确认不会启用暂停job的原生入口可提前唤醒。当前trigger_job会启用job，禁止以它绕过暂停。已运行目标只排pending，不重启。定时回合不创建或更改定时任务；巡检回合只有用户有效授权且明确需要时才通过统一限额脚本调用Codex，二十分钟报告仍只读不起跑。
 
-统一显示由 `feishu-progress-style`（/home/wang/.codex/skills/feishu-progress-style/SKILL.md）维护，普通群回复、READY、事件和周期报告均加载。协调者整体进度使用整体目标与进度、执行者进度、测试者进度、OCR情况与后续、强审查情况、风险与阻塞、下一步七个加粗分区，各区下拆单层短bullet。普通单题直接答题；默认不展示diff数量、完整commit、grant/token字典等取证明细，需要时给详情链接，不用“叶/聚合/冻结head/机械全绿”等内部话。所有角色的即时事件也用具体功能名，原始记录只作证据，不直接复制成群报。当前 A=查询/API，B=Bag 三视图（切片、原始数据、全部），C=流水线详情；其他任务按有效派单确定功能名。模型执行绑定的`runtime_tools.py progress-facts --project ROOT --json`并读取返回正文；只拿到文件索引不算已读。长操作结束、最终汇报前再读一次相关最新事实。各角色session按ROLE-BINDINGS中的session_file相对项目根解析，不按镜像mtime选权威。TASK事实和门禁仍以原权威文档为准，样式不改变职责。
+报告共用 `runtime_tools.py report-input --project ROOT --role ROLE`，默认JSON包含本角色`sections`、同源`markdown`和`evidence_reference`。协调者所有进度入口（人工、定时、事件、夜间）完整使用整体目标与进度、执行者进度、测试者进度、OCR情况和后续计划、强审查情况、风险、下一步计划七区；A/B/C各一组，分开当前工作、后台关联责任和已接受成果。执行者/测试者只报告自身当前工作、本次完成、阻塞与依赖、下一步计划四区，不复述其他角色或全局审查账本。各区短条目、重点加粗，显示细则仅由`feishu-progress-style`维护，事实及通知边界仅由当前reporting-policy维护。完整证据按需取证，长操作结束、最终报告前刷新本角色材料。session按绑定session_file相对项目根解析。开发、自测、独立验证、OCR运行/裁决、接受、合入和生产分别核实，不因报告改变门禁。
 
 普通poll只有正常心跳、持续在途、纯等待、自写观察或重复进展时final仅[SILENT]；白天有意义的新完成/交付/失败/阻塞变化/返修/实质问题及需用户决策事项，先落稳定event_id与证据，允许一条即时通报。固定时段总结与人工问答正常输出。周期报告不是重复事件，不伪造时间线业务进展。实际排队延迟如实记录，5 分钟是调度周期而非模型运行时限。
 
@@ -118,7 +118,7 @@ Hermes现有report_job_id沿用，旧idle_report_job_id停用；协调者独立m
 
 ## 人工会话、后台执行与进度答复（2026-10-14）
 
-自然语言问进展、解释或讨论方向保留Hermes原生群模型会话，不自动入业务队列，不等待五分钟巡检；夜间用户主动问话可答复。绑定协调群的新会话通过原生auto_skill加载协调者与显示Skill；旧会话在人工回合提示先读取最新版Skill，不强制清空历史。只有显式/progress为可选脚本简报。模型与脚本统一读取当次`runtime_tools.py progress-facts --project ROOT`，当前事实存于`inbox/control/runtime/progress/facts.json`，不是第二份任务状态。每字段保留来源及有依据的发生/观测/记录时间；缺失或冲突说明具体来源差异、影响与核对动作，不用刷新时间冒充进展。协调者整体进度先给加粗结论，再按整体目标与进度、执行者进度、测试者进度、OCR情况与后续、强审查情况、风险与阻塞、下一步七个加粗分区组织，区内用单层短bullet，工程取证明细按需给详情链接。
+自然语言问进展、解释或讨论方向保留Hermes原生群模型会话，不自动入业务队列、不等待五分钟巡检；夜间主动问话正常答复。绑定协调群的新会话自动加载协调者和显示Skill，旧人工回合读取最新版Skill。只有显式/progress使用可选脚本简报。模型和脚本按上文同一角色报告契约工作；完整progress-facts --json保留按需取证，不默认注入全局旧摘要。读取时间不冒充业务发生时间。
 
 明确要执行的业务动作才用runtime_tools.py request保留原文、原生消息身份与引用/附件。群与cron共用COORDINATOR租约，取得后重读TODO/派单/ACK/decision、实际任务/attempt及已有处理证据；已处理不重做。空闲时群可直接接续；已有owner忙时保存待办并解释，不抢占、不恢复暂停。问答不刷业务事件或制造派单。原测试/OCR/强审/合入/生产授权全部保留；HANDLED不等于业务完成或回复送达。详见[流程指南§0](/home/wang/work/doc/SKILL-DEVELOPMENT-WORKFLOW.md#0-先看这里我该怎么使用飞书协调者)。
 
@@ -127,3 +127,18 @@ Hermes现有report_job_id沿用，旧idle_report_job_id停用；协调者独立m
 所有面向用户的实际时间统一为`YYYY-MM-DD HH:MM +08:00`，精确到分钟即可；禁止`10:2x`、`10:1x`、十点多等占位或模糊钟点。标题用实际系统生成时间；动作发生时间取可信记录，明确区分发生、观测、补录。只有分钟的可靠记录可直接显示；发生时刻没有记录就写“发生时间未记录”，可另列精确观测时间，不拿文件mtime、消息发送、cron结束或租约时间代替，不编造秒。内部结构化时间保留原始精度与时区。
 
 日常角色记账用`runtime_tools.py role-record`，正常观察独立写runtime/observations，不反复追加session/event制造唤醒；真实业务变化保持事件和自身session。固定只读长任务采样供各角色共享，正常心跳/CPU/mtime只更新事实；状态/attempt/身份、异常、未知与恢复更新稳定notice。独立测试取证复用原runner的`evidence-record`/`evidence-check`，机械匹配不替代关键断言、独立验收或审批。详情以当前Skill参考文件为准，不另造任务状态源。
+
+
+<!-- NIGHT-CONTINUATION-20261015 -->
+## 夜间接续与完整审查结果核验（2026-10-15）
+
+本节是本次用户授权的协作机制修复，覆盖旧描述中相冲突的观察/恢复步骤；不改变需求、任务编号、既有派单或任何验收门禁。协调者Skill为1.12.0，旧runner和历史证据保持原样。
+
+- 五分钟脚本除Markdown外，观察OCR冻结spec/state的语义终态、失败与真实进程身份异常，进入原协调者pending。心跳、正常日志增长不重复唤醒；忙碌只排队，夜间继续消费和返修，只静默主动通知。
+- 协调者裁决前执行当前唯一入口 `python3 /home/wang/.codex/skills/complex-task-coordinator/scripts/ocr_runtime.py results --run RUN_DIR`，核逐批真实问题、覆盖、固定身份及独立验证。READY_FOR_ADJUDICATION只是材料齐备，不能等同PASS；INSUFFICIENT_EVIDENCE总数未知并保留已知问题，接受门禁继续关闭。当前提取器核验v1.13.0；不因旧格式未支持重开已有有效历史裁决。
+- 首次部署会合并历史OCR运行通知。先核已有裁决及其代码快照；已处理不重复审查/返修，不批量ACK未读输入。原在途OCR自然收口，不杀后重跑。
+- 同一存活owner原token可以直接renew，不持锁sleep等待TTL。已核实长期worker PID/start可绑定；存活或未知owner不抢占，不继承死owner token；旧未绑定租约保持兼容，仍需原证据恢复。角色租约不代表业务完成。
+- 每次稳定交付或结果事件后，先做能解除等待的控制动作，再检查原范围内可独立开发/验证/准备的工作；测试者空闲可接既有资料可测试性复核。共享文件/硬依赖/真实材料门禁保持，不能为填并发新增功能、激活DEFERRED或伪造样本。协调者核证据，常规行为复跑派测试者。
+- 时间分类修正ACKED_RUNNING与已关闭派单的mtime误判；历史时间不倒填、等待不算空闲。客户端响应耗时不能当纯服务端排队。
+
+实施与验证：`/home/wang/work/doc/analysis/night-continuation-fix-20261015/REPORT.md`；全流程指南：`/home/wang/work/doc/SKILL-DEVELOPMENT-WORKFLOW.md`。本次只做维护部署，不批准或合入任何业务交付，不更改强审授权。

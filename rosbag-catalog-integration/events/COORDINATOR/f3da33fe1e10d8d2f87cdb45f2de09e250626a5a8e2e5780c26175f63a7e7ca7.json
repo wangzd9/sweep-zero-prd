@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-t12sf-rebased-ocr-harddeadline-adjudicated-20261015-1505",
+  "occurred_at": "2026-10-15T15:05:00+08:00",
+  "recorded_at": "2026-10-15T15:12:39+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-F",
+  "attempt": "attempt-1",
+  "status": "OCR_HARD_DEADLINE_NOT_PASS",
+  "summary": "消费14:40脚本唤醒（pending指纹740f9d44，changed=reviews/TASK-12S-F/ocr-run-20261015-attempt1-rebased/state.json）。裁决：run 1fe96fde（1e9c7de→96afc43逐文件7批）b01 ingest_service.py 05:14:07Z起、06:19:08Z终 duration3901.49s rc=1 撞3900s单批硬截止，diagnosis coverage_complete=false 0/1完成 terminal_state=null batch_identity_matches=false，b02-b07停链未跑 gate=NOT_EVALUATED；unit coordinator-ocr-1fe96fde已不存在、双锁fuser无持有。根因=远端vllm 192.168.2.45:8002 capacity排队（本轮实测running=4/waiting=10）。裁决不判通过不写零findings、F OCR门禁维持关闭、本轮不补审（端点不空闲）；补审留端点空窗（running=0/waiting=0）经唯一入口--reuse-run同身份retry_depth0→1唯一额度，再失败RETRY_LIMIT升级。E已接受不受影响；E+F强审批次包仍待F收口。",
+  "evidence": "reviews/TASK-12S-F/ocr-run-20261015-attempt1-rebased/ocr-verdict.md + state.json(HARD_DEADLINE) + b01-diagnosis.json(coverage_complete=false) + results INSUFFICIENT_EVIDENCE；端点实测running=4/waiting=10",
+  "next": "TESTER F面真MySQL/并发/迁移探针待OCR裁决后再派；observer续核vllm端点空窗；E+F合入授权口径待用户"
+}

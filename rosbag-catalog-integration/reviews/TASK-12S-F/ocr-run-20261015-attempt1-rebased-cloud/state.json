@@ -1,0 +1,36 @@
+{
+  "state": "REVIEW_INCOMPLETE",
+  "updated_at": "2026-10-15T08:21:07.350162+00:00",
+  "pid": 1226638,
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/coordinator-ocr-77db648b45454c55b2e3577bd5dc251f.service",
+  "process_start_ticks": "45270271",
+  "run_id": "77db648b45454c55b2e3577bd5dc251f",
+  "unit": "coordinator-ocr-77db648b45454c55b2e3577bd5dc251f.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "alembic/versions/20261014_01_ingest_rejected.py"
+      ],
+      "state": "REVIEW_INCOMPLETE",
+      "started_at": "2026-10-15T08:20:40.949831+00:00",
+      "execution_route": {
+        "provider": "hermes-sub2api",
+        "model": "deepseek-v4.1-flash",
+        "endpoint": "https://sub.vankit.top/v1",
+        "hermes_provider": "custom:sub2api-deepseek",
+        "reason": "当前不在21:00—次日08:00本地允许窗口",
+        "effort": "medium"
+      },
+      "pid": 1226738,
+      "process_start_ticks": "45270313",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/96cd425c-df4a-4da1-ac80-ce59b9f35dd7.jsonl",
+      "session_mtime": 1792052455.9367523,
+      "returncode": 1,
+      "ended_at": "2026-10-15T08:21:07.325579+00:00",
+      "duration_seconds": 26.14
+    }
+  ],
+  "gate_decision": "NOT_EVALUATED",
+  "ended_at": "2026-10-15T08:21:07.350169+00:00"
+}

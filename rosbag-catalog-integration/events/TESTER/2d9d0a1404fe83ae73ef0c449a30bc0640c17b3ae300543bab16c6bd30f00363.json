@@ -1,0 +1,18 @@
+{
+  "event_id": "TESTER:t12se-accepted-12sf-idle-20261015",
+  "kind": "business",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-1",
+  "status": "ACCEPTED_BY_COORDINATOR",
+  "summary": "消费 TODO 08:36 刷新（协调者 ACCEPTED 登记 12S-E）：我 attempt-1 独立验证 PASS（00:43 回执，冻结 b39a3ec 真 MySQL 8.4.11 五面全过/12+154/8 探针/零越界/隔离资源自毁归零）+ 协调者 OCR retry1 补审 3 批 REVIEW_COMPLETE 零 findings 双证齐 → E 接受成立。E 接受释放 12S-F 公共文件前置（F 转 READY_TO_DISPATCH，建议 B，未派单，非本角色范围）。TESTER 当前无在途任务、无新派单（12S-F 建议 B 未派、D1 测试者可测试性复核待派、D2 缺真实资料/许可维持 DEFERRED），转空闲待命。已清理 16D 遗留自毁隔离容器 rosbag-t16d-mysql（Up 20h，16D 已 DONE 合入 16a154f 后残留，属本角色自建资源）。",
+  "evidence": "TODO.md 12S-E 行（08:36 ACCEPTED，协调者接受登记）；test-receipts/TASK-12S-E/attempt-1.md（PASS 00:45，TESTER:t12se-attempt1-test-report-pass-20261015 事件在案）；reviews/TASK-12S-E/ocr-run-20261014-retry1/ocr-verdict.md（3 批零 findings）；docker ps -a 清理前 rosbag-t16d-mysql Up 20h（本角色 16D 自建）→ docker rm -f 后零 rosbag-t16d* 命中。",
+  "next": "空闲待命：等 12S-F 派单（建议 B，本角色非 owner）或 D1 测试者可测试性复核派单或 D2 真实资料补齐后固定候选联合验收；无派单时 11:00 时段总结照常（no_agent 快照投递）。",
+  "schema_version": 1,
+  "role": "TESTER",
+  "recorded_at": "2026-10-15T08:41:58+08:00",
+  "occurred_at": null,
+  "time_source": {
+    "kind": "unknown",
+    "reason": "历史发生时间未核实；recorded_at 只表示补录时间"
+  }
+}

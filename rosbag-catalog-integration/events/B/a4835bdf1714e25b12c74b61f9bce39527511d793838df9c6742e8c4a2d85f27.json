@@ -1,0 +1,20 @@
+{
+  "event_id": "B:b-ack-20261015-084400-task12sf",
+  "kind": "business",
+  "task": "TASK-12S-F",
+  "attempt": "1",
+  "status": "ACKED",
+  "summary": "TASK-12S-F attempt-1 ACK（08:44 落盘，30min 时限内）：协调者 08:38 派单（REQ-21/AC-21，base=b39a3ec=E 已接受冻结 head）。核实 base 可达（cat-file=commit、log 一致、main 16a154f 祖先链在案）；新建专属 worktree wt-04a-t12sf@b/task-12s-f-input-reject（洁净仅 .venv 软链，不复用 16C-B 旧树）；边界确认=只写 app/scanner 五文件+ingest_service+ingest_submissions API+必要 sources 上报端点，增量 schema 若需先交协调者核兼容，不碰 16C 合入面/E 行为语义/1012 大包取消链/生产，VLM=0（纯控制面），真 MySQL 8.4.11 隔离库用完即毁。ps 无 B 侧业务进程，无既有 12S-F ACK。",
+  "evidence": "inbox/2号/TASK-12S-F/attempt-1-ack.md",
+  "next": "开工实现：INPUT_REJECTED 持久登记+逻辑隔离+受控 resume API+幂等；先核 E pending_binding 扫描点与 source_service 拒绝态接线",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "B",
+  "recorded_at": "2026-10-15T08:41:18+08:00",
+  "occurred_at": "2026-10-15T08:41:18+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

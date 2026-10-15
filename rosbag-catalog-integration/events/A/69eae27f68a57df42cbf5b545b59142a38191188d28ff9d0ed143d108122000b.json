@@ -1,0 +1,20 @@
+{
+  "event_id": "A:a-batch1012-upload-face-closed-by-ruling-1840-20261014",
+  "kind": "business",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "IDLE",
+  "summary": "消费协调者 18:40 裁决 ruling-4acf-stuck-cancelling-1840.md：大包 16_02_03(scene-4acf689f)取消已实际发生、DB run 行滞留 SCENE_CANCELLING 定性为过期租约守卫挡回确认写的受控对账缺口（缺陷候选入 16R 盘点，不新开任务不代修不直写生产 DB）。A 本批上传提交面已全闭环（10:23 三 flat 绑定恢复完成），按裁决转 IDLE，滞留行面 A 不处置、不做任何生产写。本轮 A 无新派单/返修；16C-A 叶维持冻结 head=1489bc6 等协调者增量 OCR 66ca40d3 收口（实测 18:43 b02 scene_result_query.py 仍 RUNNING、gate NOT_EVALUATED）。",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/ruling-4acf-stuck-cancelling-1840.md (裁决落盘 2026-10-14T18:40+08:00，协调者 18:34 只读实测+三方一致证据链); BATCH-STATUS.md 18:40 更新段(TEST_REPORT_PENDING 收口口径); reviews/TASK-16C-A/ocr-run-20261014-r12/state.json (18:43 实测 state=RUNNING/b02 RUNNING/gate NOT_EVALUATED, ps 4040042 存活); 本轮 A 全程只读",
+  "next": "A 开发槽空闲不占第二任务；16C-A 下轮只读核 66ca40d3 收口（零 CORRECTION 级）后等协调者接受裁决+TESTER 增量面；滞留行 reap 若用户授权走隔离树+正式门禁，届时以新派单为准。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "A",
+  "recorded_at": "2026-10-14T18:45:23+08:00",
+  "occurred_at": "2026-10-14T18:45:23+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

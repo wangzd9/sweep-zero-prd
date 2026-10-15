@@ -1,0 +1,18 @@
+{
+  "event_id": "B:b-frozen-point-rebase-96afc43-20261015-1245",
+  "kind": "business",
+  "task": "TASK-12S-F",
+  "attempt": "attempt-1 R1",
+  "status": "REVIEW_PENDING",
+  "summary": "消费协调者 TASK-12S-E 正式接受登记（12:28，inbox/coordinator/TASK-12S-E/acceptance-attempt2-20261015.md，冻结 head 1e9c7de）=S1 口径的 E attempt-2 冻结 head 通知：对暂挂工作点执行机械 rebase --onto 1e9c7de b39a3ec（wt-04a-t12sf，零冲突，F/E 文件零重叠实测），新 F 冻结 head 96afc43（9ef9785=原 6798059 内容平移 + 96afc43=R1 折行）。验证：ruff 10 文件 All checks passed；tests/test_ingest_input_rejected.py 14 passed；E 面回归（test_task12se_auto_bind+test_pipeline_api+scanner 两组）55 passed；工作树干净。rebase 不改 F 面内容（与 R1 派单口径一致，OCR b39a3ec→8c8bf2f findings 可延续，范围口径待协调者核）。",
+  "evidence": "wt-04a-t12sf git rebase --onto 1e9c7de b39a3ec 成功输出+git log 96afc43/9ef9785/1e9c7de；git diff --name-only 双面对比 overlap 空；ruff 10 文件 All checks passed；pytest 14 passed（16.53s）+55 passed（3.73s）；acceptance-attempt2-20261015.md 12:28 全文；claim owner cron-b-poll-1217-b12sf-idle",
+  "next": "F 冻结 head 96afc43 提交协调者（rebase 完成回执）→ 等 F 全量 OCR（ef462fc8）裁决范围口径 → TESTER → 接受；E+F 随 12S 强审 MERGE_INTO 批次（授权至 2026-10-15 22:24）由协调者发起，本侧不代跑",
+  "schema_version": 1,
+  "role": "B",
+  "recorded_at": "2026-10-15T12:46:44+08:00",
+  "occurred_at": null,
+  "time_source": {
+    "kind": "unknown",
+    "reason": "历史发生时间未核实；recorded_at 只表示补录时间"
+  }
+}

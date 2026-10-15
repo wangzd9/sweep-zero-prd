@@ -1,0 +1,20 @@
+{
+  "event_id": "TESTER:t16d-final-integration-44b6c07-pass-delivered-20261014-1958",
+  "kind": "business",
+  "task": "TASK-16D",
+  "attempt": "attempt-1",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "消费协调者 19:41 最终联合验收派单（fixed SHA 44b6c07，并入 attempt-1 同一验证链），四清单在含 seed+三叶（A 8958291 R1-3 / B e399daf / C ce5921d）的固定集成候选上独立执行，TESTER 最终联合面 PASS：① 集成面确认——wt-coord-intcheck-16c HEAD=44b6c076 detached 干净（仅 .venv untracked）、grep -c def data_kind_case=0、F1 两谓词 dataset_type != nvidia_physicalai 在位（line 89/96）、view_label line 672={originals:原始数据, all:全部}、git diff --stat 29bd1f4..44b6c07=仅 app/services/bag_search_service.py +18/-10 零意外文件；② cursor 矩阵（严格 MySQL 8.4.11 隔离库 rosbag-t16d-mysql，探针容器内跑两查询入口，镜像内代码已核=44b6c07 同构）——search_scene_bags 翻页无漏无重、换 data_kind/view→422、同筛选续页 200 无重复、旧锚点 cursor 兼容 200、scene_code None/空串归一、lineage 父包翻页无漏无重(3 子包)、子包视角 parent 正确、非法 cursor→422 不 500，矩阵 20/20 PASS rc=0；③ 严格 MySQL 8.4.11 方言 21/21 PASS rc=0（C7 非法日期 422 源头+date end=23:59:59.999999 边界+收紧窗口排除+C5 双用途 UID 唯一+纯 scene/self_built 不串面+C6 分类真相 NOT_APPLICABLE 空标签/NVIDIA 行 nvidia_original+幂等）；④ 真实 headless Chrome CDP Console 零异常——/bags?view=originals 三 tab+chip「视图：原始数据」(has_chip_view_label=true/has_old_view_label=false) 重载 hookAlive=true errors=[]、/bags 重载 hookAlive=true errors=[]、/pipelines/scene-e46f28c2 血缘 ol.lineage 在位+SCENE_DONE+无 refresh meta/无 retry form/终态停刷新 重载 hookAlive=true errors=[]；页面 header 版本核「运行版本 平台 44b6c076」实证。相对旧候选 29bd1f4 唯一 diff=bag_search_service.py F1 修复，F1 增量面已由 19:26 回执 34/34 PASS 覆盖不重复；本单四清单联合确认全 PASS。全程只读+自造夹具 T16DCURS(11行)/T16DMYSQL(9行)自清归零实证，不改 seed/各叶树/业务实现、未运行 OCR、不批准合入。",
+  "evidence": "test-receipts/TEST-TASK16D/attempt-1.md（最终联合验收固定 SHA 44b6c07 段，本轮追加）；wt-coord-intcheck-16c@44b6c07 git rev-parse/diff --stat 29bd1f4..44b6c07 实测；scratch/t16d_44b6c07_cursor.log（cursor 20/20 rc=0）、t16d_44b6c07_mysql.log（21/21 rc=0）、t16d_44b6c07_browser1.json（Console errors=[] 三页 hookAlive=true）、t16d_44b6c07_browser2.json（header 44b6c076/SCENE_DONE/lineage_ol）、t16d_44b6c07_stack.log（Compose 栈 44b6c07 重建 rc=0）；purge verify left bags=0/deriv=0。",
+  "next": "交协调者裁决：TESTER 最终联合验收面 PASS 已就绪（16D 最终联合验收完成），合入 HOLD 五条件 TESTER 面（条件⑤）解除，合入 main+推 github+本地 Compose 测试环境更新执行归协调者（按 18:22 用户授权，不含生产）；任一失败项回原叶 owner（本轮无失败项）。11S 批次 4acf689f 取消链收敛面独立线 TEST_REPORT_PENDING 不变。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "TESTER",
+  "recorded_at": "2026-10-14T19:56:52+08:00",
+  "occurred_at": "2026-10-14T19:56:52+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

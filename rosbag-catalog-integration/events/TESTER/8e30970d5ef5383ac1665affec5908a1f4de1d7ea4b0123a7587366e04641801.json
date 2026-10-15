@@ -1,0 +1,12 @@
+{
+  "event_id": "TESTER:t12sd1-testability-review-delivered-20261015",
+  "occurred_at": "2026-10-15T10:21:55+08:00",
+  "recorded_at": "2026-10-15T10:21:55+08:00",
+  "role": "TESTER",
+  "task": "TASK-12S-D1",
+  "attempt": "1",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "可测试性复核 attempt-1 交付：6 项逐条只读取证（①阳性×4 run/parent/child 标识真实存在且终态一致 PASS、②输入适用性×3 NOT_APPLICABLE=manifest topic 清单实证 PASS、③空包 16_33_10 scanner 拒绝 PASS+提交层终态断点(12S-F)、④16_02_03 跨DB3 取消终态未证=不可测(D2材料缺口,与ruling-1840一致)、⑤五项BLOCKED_MATERIAL=上游材料缺失非方法缺陷、无'材料可取没人取'项、⑥批次总量口径25119612157B 抽查2包bytes与冻结manifest一致PASS）；发现3项证据链问题(1空包提交层终态断点/2大包滞留+跨DB3未定位/3 C切片记法口径注记)。VLM=0、零写库/NAS/A100、未碰取消链。交协调者裁决D1部分交付接受口径。",
+  "evidence": "test-receipts/TEST-TASK12S-D1/testability-review-attempt-1.md",
+  "next": "等协调者裁决：D1转部分交付接受(真实面维持BLOCKED)正式口径；断点12S-F/16R归对应owner"
+}

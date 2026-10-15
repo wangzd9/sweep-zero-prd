@@ -90,3 +90,115 @@ owner：TESTER（cron-tester-poll-167580c0500b-20261014-102453）。独立测试
 
 - **c03-02（cursor 上下文漏实际筛选字段）/c03-03（旧 cursor scene_code None 与空串）/c03-04（Python 分类与 SQL 子包条件分叉）**：实现面在 A 树 `563a91a` 的 `app/services/scene_result_query.py`（base64(JSON) cursor=排序锚点+全部实际筛选字段上下文；换筛选 422 不复用错误上下文；历史 cursor 无新键按旧口径兼容；scene_code None/空串归一）与 `tests/test_task16ca_query_api.py` 19 用例（`test_cursor_chain_no_gap_no_dup`/`test_cursor_with_changed_filter_422`/`test_legacy_cursor_without_new_keys_accepted`/`test_legacy_cursor_scene_code_none_equivalent_empty` 等）——**已由本回执 A 叶段独立 pytest 复跑（74 passed 同口径，非采信 A 自报）覆盖**，准备阶段无新增探针需求；c03-04 的 SCENE_SLICE 角色/有效 derivation 分类一致性另由 21/21 MySQL 探针 C6 面（`data_kind_context` 与谓词同真相）交叉覆盖。
 - **保留到联合验收固定 SHA 段**：cursor 矩阵在两查询入口的真实行为（换条件 422/连续翻页无漏无重/旧 cursor 兼容）+严格 MySQL 日期/分类方言，按派单联合矩阵在含 seed+三叶的固定集成 SHA 上执行，不提前。
+
+## 联合验收固定 SHA `29bd1f4`（2026-10-14 18:3x-18:5x +08:00，TESTER attempt-1）
+
+**被测树**：`/home/wang/.local/state/rosbag-scene/wt-coord-intcheck-16c` @ `29bd1f4`（detached 干净，仅 `.venv` 未跟踪；git log = seed `bd0db1d2` + C `ce5921d` + B `e399daf` + A cleanup `1489bc6`）。运行版本 header 实证 `29bd1f49`（浏览器 `pipeline_detail.header_text`）。
+
+**范围**（派单 `inbox/TESTER/TASK-16D/attempt-1-integration-29bd1f4-dispatch.md` 17:5x）：只做联合面 + A 清理增量，不重复各叶已 PASS 的增量面。
+
+### 1. A 清理面增量确认
+
+- `grep -c "def data_kind_case" app/services/bag_search_service.py` = **0**（A-OCR-1 死函数已删，实证）。
+- 源码 line 664：`view_label = {"originals": "原始数据", "all": "全部"}.get(state.view, state.view)`（A-OCR-2 + R1-2 同口径；`slices` 视图不渲染该 chip = 设计一致，`test_web.py` 断言绿）。
+- `scene_result_query.py` diff `ff2a005..29bd1f4` = **空**（A 清理未动第二查询入口谓词面，R1-2 chip 修复点仅在 A 独占文件）。
+- 定向 pytest `tests/test_web.py tests/test_task16ca_query_api.py tests/test_task16c_ui_minimal.py` = **74 passed + 1 failed**（唯一失败 `test_bag_search_page_has_bounded_query_count_and_response_time` = 派单注明 seed 固有 bounded-query N+1，11 SQL > 8 阈值，不计本账）。
+- 浏览器 `/bags?view=originals`（真实 headless Chrome CDP，`29bd1f4` Compose 栈重建）：已选筛选 chip 区 DOM 内 **`has_chip_view_label=true`（「视图：原始数据」在位）+ `has_old_view_label=false`（「视图：原始包」已消失）**；同 target `location.reload()` 后 `hookAlive=true`（`Page.addScriptToEvaluateOnNewDocument` 注入的 onerror/unhandledrejection 钩子存活）+ **`errors=[]`**（Console 零异常，证据有效）+ `chip_now=true/old_chip_gone=true`（重载后一致）。表 36 行渲染正常。
+
+### 2. cursor 矩阵（严格 MySQL 8.4.11 方言，隔离 `rosbag-t16d-mysql`，非 SQLite 外推）
+
+自造 11 行夹具（7 self_built originals staggered + 1 scene parent + 3 AVAILABLE slices 带 derivation，UID 前缀 `T16DCURS`）；探针 `t16d_joint_cursor_probe.py` 容器内跑 `search_scene_bags`（入口一 `/api/v1/bags`）与 `lineage`（入口二 `/api/v1/bags/{uid}/lineage`）：
+
+- 入口一 `view=all` 连续翻页 limit=3：`pages=4`，`len=11 uniq=11` **无漏无重**（含 3 切片 + 7 originals + 1 parent）。
+- 换 `data_kind`（self_built_original→scene_original）→ **422**「cursor 筛选上下文不一致：data_kind」；换 `view`（originals→all）→ **422**「...不一致：view」；同筛选续页 → **200** 且链合并 **无重复 UID**（`006/005/004/003/002/001`）。
+- 旧 cursor（仅 `ts/uid` 锚点无筛选新键）→ **200 兼容**（`items=3`），锚点生效（`UID(99)` 本身不在续页结果）。
+- `scene_code` 省略 vs 显式 `None` 同义；空串与 `None` 归一同义；`scene_code=spray` 命中 3 子包 = 夹具 `child_ids`。
+- 入口二 `lineage` 父包：第 1 页 2 子包 → 同包续页 200 → 合并 **无漏无重（3 子包）**；子包视角返回 `parent=T16DCURS000050`；换 `bag_uid`=新查询（**设计口径**：lineage cursor 仅 `{ts,uid}` 排序锚点、无 bag 身份字段，换 bag 返回新 bag 自身视角、不串 UID(50) 子包列表，断言按此核）；**非法 cursor（base64 非 JSON）→ 422**（两入口均，不 500）。
+
+**矩阵 20/20 PASS**（`purge verify left bags=0 deriv=0`，夹具自清归零）。
+
+### 3. 严格 MySQL 8.4.11 方言（复用 `rosbag-t16d-mysql` 隔离库，探针 `t16d_joint_mysql_probe.py`）
+
+C7/C5/C6 谓词面在 `29bd1f4` 树（非 A 单叶树）上复跑：**21/21 PASS**（`C7 非法值 not-a-date/2026-13-45/2026-02-01 raise`、`date end=23:59:59.999999`、`aware+10 换算 naive`、`C5 双用途两筛选 UID 唯一`、`C6 分类真相 NOT_APPLICABLE 空标签/NVIDIA 行`、幂等复查）；`purge rc0 rows=9`，`END pass=21/21 fail=0`，rc=0。确认 A 清理未改变谓词语义。
+
+### 4. 浏览器 Console 零异常（同 target 重载，钩子存活）
+
+真实 headless Chrome（`google-chrome --headless=new --remote-debugging-port=9333`，专属 user-data-dir，非 HTTP200 替代）：
+
+- `/bags?view=originals`（三 tab + chip）：`hookAlive=true` + **`errors=[]`**。
+- `/bags`（默认 slices 视图）：`hookAlive=true` + **`errors=[]`**。
+- `/pipelines/scene-e46f28c2ce1c4313a2c4ce4e8e71`（血缘兜底 + 终态停刷新）：`hookAlive=true` + **`errors=[]`**；`ol.lineage` 在位（1 子包 slope 切片带 `场景 slope · 切片键 slope:... · AVAILABLE` 血缘）；`has_refresh_meta=false` + `has_retry_form=false` + `setinterval_calls=0`（终态停刷新保持）；`status_badge=[SCENE_DONE, SCENE_DONE]`、`header_text` 平台版本 `29bd1f49`。
+
+### 结论
+
+- 联合验收清单 4 项（A 清理增量 / cursor 矩阵两入口 / 严格 MySQL 21/21 / 浏览器 Console 零异常）在固定集成 SHA `29bd1f4` 上**全部 PASS**；seed 固有 bounded-query N+1 一项按派单口径不计本账。
+- 三叶（A `1489bc6` cleanup / B `e399daf` / C `ce5921d`）在含 seed 的固定集成候选上联合行为一致，无跨模块回归；**TESTER 联合验收面 PASS**，允许合入的前置测试门禁满足（合入批准/OCR 门禁仍归协调者，TESTER 不代裁不批准）。
+- 夹具 `T16DCURS` 11 行 + `T16DMYSQL` 9 行均自清归零（purge 后 `left bags=0/deriv=0/rows=0` 实证）；全程只读 DB 探针 + 自造夹具自清，不改 seed/其他叶树/业务实现，未运行 OCR。
+- 浏览器 target 复用首启 about:blank page；Chrome 后台进程 pid 4040391（在途服务，非本角色独占，结束后不 kill 避免影响他角色）。
+
+**未测项（如实列，不外推）**：生产处理机/生产 MySQL/真实 NAS 根/受控 test 首包真产物 UID 血缘获取/大包跨 DB3/07C 预览/其他场景/统计/MN——均按派单与 12S-D 口径独立，不在本轮联合验收范围。
+
+## A 叶 R1-3 F1 增量独立验证（冻结 head `8958291`，2026-10-14 19:1x +08:00，TESTER attempt-1 续 F1 单）
+
+派单 `inbox/TESTER/TASK-16D/f1-incremental-8958291-dispatch.md`（协调者 19:12，A 叶 R1-3 F1 返修的 TESTER 独立行为面门禁，**不采信协调者探针**，TESTER 独立复现）；被测冻结 head `8958291`（`wt-01-t16ca` / `a/task-16c-a-query-api`，base `1489bc6`，仅 `app/services/bag_search_service.py` +18/−10）。专属验证树 `wt-tester-16d-A` 从 `563a91a` 前移到 `8958291`（同树续用，detached 干净，仅 `.venv` untracked）。
+
+- **环境（严格 MySQL 8.4.11 方言，非 SQLite 外推）**：复用 16D 隔离库 `rosbag-t16d-mysql`（`@@version=8.4.11`、32 表、head=`20261013_01_scene_intake`）。**接续修复**：该隔离库容器内 DBUSER 口令漂移（host 直连 caching_sha2 认证 1045 Access denied），经 root `ALTER USER` 重置回凭据文件值后同网容器探针可连（mysql CLI 内连 rc=0 实证）；隔离库为 TESTER 自建资源，reset 属维护自有环境、非生产写。探针以同 docker 网容器跑（`rosbag-catalog/backend:local` 镜像内 python，worktree 挂 wt 同路径、`import app` 解析到 `8958291` 代码，`BAG_CLEANUP_MYSQL_TEST_URL` 走网内 hostname），与 16D 既有 21/21 联合探针同配方。
+- **夹具（dispatch 口径 F1N1/F1N2/F1SB + 回归守卫 CTRL，UID 前缀 T16DF1）**：
+  - `F1N1`：`dataset_type=nvidia_physicalai, ORIGINAL, 有 scene_slice 用途, 非子包`（F1 前会误命中 scene_original 的可达组合，本单核心）；
+  - `F1N2`：`dataset_type=nvidia_physicalai, ORIGINAL, 无 scene 用途, 非子包`；
+  - `F1SB`：`dataset_type=self_built, ORIGINAL, 双用途(scene_slice+self_built), 非子包`（双用途行为回归基线）；
+  - `CTRL`：非 nvidia scene 根（`dataset_type=scene`+scene_slice 用途）/ nvidia 切片（`SCENE_SLICE` 角色）——F1 未误伤非 nvidia 与子包优先回归守卫。
+- **两查询入口共享谓词核实证**：入口一 `search_bags`（Web `bag_search_service.py:356`）、入口二 `search_scene_bags`（API `/api/v1/bags` `scene_result_query.py:184`）均 `where(data_kind_pred(kind))`——两入口同一 CASE，探针两入口各断言一次（非采信单入口外推）。
+- **F1 单源一致性 34/34 PASS，rc=0**（探针 `scratch/t16d_f1_probe.py`，`scratch/t16d_f1_green_full.log`）：
+  - `F1N1`/`F1N2`：筛 `scene_original` 两入口**均不返回**、筛 `self_built_original` **均不返回**、筛 `nvidia_original` **均返回**；行内标签 `data_kind_context` **仅 `nvidia_original`**（筛选命中集↔展示标签单源一致，C6 消除第二套真相实证）；
+  - `F1SB` 双用途回归：`scene_original` 与 `self_built_original` 两筛选**都命中**、`nvidia_original` 不命中、标签**双标** `scene_original`+`self_built_original`（R1-3 只加 NVIDIA 排除、不改双用途）；
+  - 各筛选命中集成员**逐一精确核**：`scene_original={F1SB,CTRL scene 根}`、`self_built_original={F1SB}`、`nvidia_original={F1N1,F1N2}`，且入口二集合与入口一一致；
+  - CTRL 回归守卫：非 nvidia scene 根命中 scene_original、不命中 nvidia_original（F1 未误伤）；nvidia 切片命中 scene_slice、不命中 nvidia_original（子包优先）、标签仅 scene_slice；
+  - 幂等：`scene_original`(入口一)/`nvidia_original`(入口二) 复查结果一致。
+- **零越界核（dispatch 项3）**：`git -C wt-01-t16ca diff --stat 1489bc6..8958291` = **仅 `app/services/bag_search_service.py` +18/−10**；`scene_result_query.py`/模板/tests 未动（独立复核，非采信）。
+- **F3 文档零行为核（dispatch 项2）**：`_parse_time` 改动为**纯 docstring 文本**（line 114-117 秒精度进位口径），diff 无 `def`/`return`/比较/谓词代码变化；行为面复用本回执 16D 联合段已有 `date end=23:59:59.999999`/`CAST('…59.999999' AS DATETIME)`=次日 00:00:00 探针口径，未重跑。
+- **RED 交叉证（非采信 A/协调者，证明夹具非空转）**：同一探针切 `RED_MODE=1` 于 pre-fix `1489bc6` 跑 1 断言——`F1N1` 型（nvidia+scene 用途原包）在 `1489bc6` 上**被 scene_original 筛出**（`scene_original=[N1,N2,SCENE,SB]`）=缺陷在位，R1-3(`8958291`) 为其修复点；夹具非空转实证。
+- **自清归零**：夹具 `T16DF1` purge 前 5 → 后 0（`left bags=0/deriv=0`），只读探针 + 自清，不改 A 树/seed/业务实现，未运行 OCR。
+- **结论（仅 A 叶 R1-3 F1 增量面，对应 dispatch PASS 条件）**：F1 单源一致性 6 类断言（scene_original/self_built_original 两筛选×F1N1/F1N2 不返回、nvidia_original 返回、标签单源一致）全过 + F1SB 双用途回归保持 + 零越界核通过 + F3 零行为核 + 自清核 → **PASS**。本单 PASS 为 A 叶接受门禁之 TESTER 独立行为面（另一 OCR 面已由协调者 r13 `f7899cfc` 0 findings/零 CORRECTION 满足）；A 叶接受判定归协调者。
+- **对 16D 合入 HOLD 的推进**：条件④（A 增量面 F1 组合夹具）本单交付 PASS；剩余⑤=协调者重建三叶固定集成候选（B `e399daf`+C `ce5921d`+新 A head `8958291`）后 TESTER 重新最终联合验收 → 解除 HOLD。`29bd1f4`（旧集成，A 仍 `1489bc6` 含 F1 未修）不可直接合入，本段不对其下联合结论。
+
+## 最终联合验收固定 SHA `44b6c07`（2026-10-14 19:4x +08:00，TESTER attempt-1 续最终联合单）
+
+派单 `inbox/TESTER/TASK-16D/final-integration-44b6c07-dispatch.md`（协调者 19:41，三叶全接受：B 18:10 / C 14:24 / A 19:40；旧集成 `29bd1f4` 含 F1 未修不可合入，本单测新候选 `44b6c07`）。**被测树**：`/home/wang/.local/state/rosbag-scene/wt-coord-intcheck-16c` @ `44b6c07`（detached 干净，仅 `.venv` 软链 untracked；`git rev-parse HEAD` = `44b6c0761cf92ae231b9d0f507db6bf8398d00de`；祖先链 496a3e4(A 8958291)→f24653c(B e399daf)→44b6c07(C ce5921d) 在案）。相对旧候选 `29bd1f4` 唯一 diff = `bag_search_service.py` F1 修复，F1 增量面已由本回执 19:26 段 34/34 PASS 覆盖，本单做联合确认、不重复 F1 已覆盖的增量断言。
+
+### 1. 集成面确认（wt-coord-intcheck-16c 实测）
+
+- `grep -c "def data_kind_case" app/services/bag_search_service.py` = **0**（A-OCR-1 死函数零残留）。
+- F1 谓词在位：`dataset_type != "nvidia_physicalai"` 命中 **line 89 / line 96** 两分支（scene_original / self_built_original）。
+- `view_label` line 672 = `{"originals": "原始数据", "all": "全部"}.get(state.view, state.view)`（B 叶 tab 新名同口径，「原始包/历史」旧名零残留）。
+- `git diff --stat 29bd1f4..44b6c07` = **仅 `app/services/bag_search_service.py` 1 file +18/−10**，零意外文件；`git status --short` 仅 `?? .venv`。
+
+### 2. cursor 矩阵（严格 MySQL 8.4.11 隔离库 `rosbag-t16d-mysql` 复用，两查询入口）
+
+探针 `t16d_joint_cursor_probe.py` 以 `rosbag-catalog/backend:local` 镜像容器内跑（镜像内 `bag_search_service.py` 独立核 = F1 两谓词 2 处、死函数 0 处，即 `44b6c07` 同构代码；DB 走 `rosbag-t16d-mysql` 网内 hostname，非 SQLite 外推）。自造 11 行夹具（`T16DCURS`，7 self_built originals staggered + 1 scene parent + 3 AVAILABLE slices 带 derivation）：
+
+- 入口一 `view=all` 连续翻页 limit=3：无漏无重；换 `data_kind`/`view` → **422**「cursor 筛选上下文不一致」；同筛选续页 → **200** 且链合并无重复 UID；旧锚点 cursor（无新键）→ **200 兼容**；`scene_code` 省略 vs `None` vs 空串归一同义；`scene_code=spray` 命中 3 子包 = 夹具 `child_ids`。
+- 入口二 `lineage` 父包：翻页无漏无重（3 子包）；子包视角 `parent=T16DCURS000050` 正确；换 `bag_uid` = 新查询自身视角（设计口径，不串子包列表）；**非法 cursor（base64 非 JSON）→ 422 不 500**（两入口均）。
+
+**矩阵 20/20 PASS，rc=0**（日志 `scratch/t16d_44b6c07_cursor.log`；`purge verify left bags=0 deriv=0` 自清归零）。
+
+### 3. 严格 MySQL 8.4.11 方言（复用 `rosbag-t16d-mysql`，探针 `t16d_joint_mysql_probe.py`）
+
+**21/21 PASS，rc=0**（日志 `scratch/t16d_44b6c07_mysql.log`）：C7 非法值（`not-a-date`/`2026-13-45`/`2026-02-01`）raise 源头（API 面 422）、`date end=23:59:59.999999` 全天边界、收紧窗口（到 23:59:58）排除 23:59:59 行、C5 双用途两筛选命中 UID 唯一、纯 scene/self_built 不串面、C6 分类真相（NOT_APPLICABLE 非 NVIDIA 空标签 / NVIDIA 行 `nvidia_original`）、幂等复查一致；`T16DMYSQL` 9 行夹具 `purge rc0 rows=9` 自清归零。确认 A R1-3 未改 C7/C5/C6 谓词语义（F1 增量已在本回执 19:26 段独立覆盖）。
+
+### 4. 浏览器 Console 零异常（真实 headless Chrome CDP，非 HTTP200 替代）
+
+Compose 栈以 `44b6c07` 重建（`wt-coord-intcheck-16c` 下 `./scripts/local_stack.sh up` rc=0，日志 `scratch/t16d_44b6c07_stack.log`；frontend 8181 http=200、API 18080 200）。`google-chrome --headless=new --remote-debugging-port=9333` 专属 user-data-dir，探针 `t16d_joint_browser.py` / `t16d_joint_browser2.py`（结果 `scratch/t16d_44b6c07_browser1.json` / `browser2.json`）：
+
+- `/bags?view=originals`（三 tab 切片/原始数据/全部 + chip「视图：原始数据」）：`has_chip_view_label=true`、`has_old_view_label=false`（「视图：原始包」旧名零残留）、表 36 行；同 target `location.reload()` 后 `hookAlive=true` + **`errors=[]`**（`Page.addScriptToEvaluateOnNewDocument` 钩子存活，Console 零异常）。
+- `/bags`（默认切片视图）：重载 `hookAlive=true` + **`errors=[]`**。
+- `/pipelines/scene-e46f28c2ce1c4313a2c4ce4e8e71`（血缘兜底 + 终态停刷新）：`ol.lineage` 在位（1 子包 slope 切片血缘原文取证）、`status_badge=[SCENE_DONE, SCENE_DONE]`、`has_refresh_meta=false` + `has_retry_form=false` + `setinterval_calls=0`（终态停刷新保持）；同 target 重载 `hookAlive=true` + **`errors=[]`**。
+- 页面 header 版本核：`运行版本 平台 44b6c076 · 自建 81b1e83a · NVIDIA 95f4ff65 · mock`——被测版本实证 `44b6c07`。
+
+### 结论
+
+- 最终联合验收清单 4 项（集成面确认 / cursor 矩阵两入口 20/20 / 严格 MySQL 8.4.11 21/21 / 浏览器 Console 零异常 + header 版本核 `44b6c07`）在固定集成 SHA `44b6c07` 上**全部 PASS**；**TESTER 最终联合验收面 PASS = 16D 最终联合验收完成**，合入 HOLD 五条件中 TESTER 面（条件⑤）解除（合入 main + 推 github + 本地 Compose 测试环境更新执行归协调者，按 18:22 用户授权，不含生产；TESTER 不批准合入、未运行 OCR）。
+- 夹具 `T16DCURS` 11 行 + `T16DMYSQL` 9 行均自清归零（purge 后 `left bags=0/deriv=0` 实证）；相对旧候选唯一 diff（F1）已由 19:26 段独立增量面覆盖（34/34 PASS + RED 交叉证），本段零意外、不重复其断言。
+- 浏览器 target 首启 page 复用；headless Chrome 为本轮自建 user-data-dir，验证结束不 kill 进程避免影响他角色（与 29bd1f4 段同口径）。
+
+**未测项（如实列，同 29bd1f4 段口径，不外推）**：生产处理机/生产 MySQL/真实 NAS 根/大包跨 DB3/07C 预览/其他场景/统计/MN——均不在本轮联合验收范围；11S 批次 4acf689f 取消链收敛面独立线 TEST_REPORT_PENDING 不变。

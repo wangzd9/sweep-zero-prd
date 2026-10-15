@@ -1,0 +1,20 @@
+{
+  "event_id": "C:t16c-merge-hold-consumed-20261014-1903",
+  "kind": "business",
+  "task": "TASK-16C",
+  "attempt": "integration-merge-chain",
+  "status": "MONITOR_ONLY",
+  "occurrence": {
+    "kind": "now"
+  },
+  "summary": "C 消费 merge-authorization-20261014.md 的 18:55 HOLD 段（本指纹 0cddc603 唯一新输入，文件前半 AUTHORIZED 段已于 18:34:56 消费在案）：TESTER 16D 对固定集成 29bd1f4 联合验收 PASS 成立，但协调者 OCR run 66ca40d3 b01（bag_search_service.py）收口裁决发现 F1（medium/bug CONFIRMED 防御性，scene_original/self_built_original 谓词缺 NVIDIA 排除），F1 属 A 叶文件且在 29bd1f4 集成范围内，未修不得合入。HOLD 只挂起立即合入不撤销授权；解除条件五项全部指向 A 叶 F1 返修链（① A 按 inbox/1号/TASK-16C-A/ocr-r1-rework-3-dispatch-20261014.md 最小返修冻结 ② 协调者机械核验 ③ 增量 OCR 单文件收口零 CORRECTION 级（含 b02 scene_result_query.py 先收口）④ TESTER A 增量面组合夹具 PASS ⑤ 重建三叶固定集成候选+TESTER 重新联合验收 PASS）。C 核实：C 叶 ce5921d 已 14:24 叶接受（LEAF_ACCEPTED 在案），返修范围仅 bag_search_service.py 属 A 独占文件，零 C 面影响；C 开发槽空闲不接第二任务、不代 A 处置、不提前合入/推送/动测试环境。11S 大包 4acf689f 按 18:40 裁决维持监控口径（仅外部变更时记录）。",
+  "evidence": "merge-authorization-20261014.md 19 行通读（HOLD 段 15-19 行，18:55 +08:00）；sessions/C.md 18:34:56 行（AUTHORIZED 段消费在案）与 14:29:19 行（C 叶 LEAF_ACCEPTED ce5921d 在案）；wt-c-16cc HEAD=ce5921d 干净（rev-parse 实测）；leases 本轮 claim 19:03:54 token a009c819 短占，他角色 B.json/COORDINATOR.json 在途不接管。",
+  "next": "等待 A 叶 F1 返修链收口（A/协调者/TESTER 范围，不催单）；C 仅在返修/新单时按协调者优先级回 c/task-16cc-pipeline-detail 分支；合入后本地测试环境更新由协调者按授权执行非 C；11S 4acf689f run 行外部变更时记录。",
+  "schema_version": 1,
+  "role": "C",
+  "recorded_at": "2026-10-14T19:04:32+08:00",
+  "occurred_at": "2026-10-14T19:04:32+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

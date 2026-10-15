@@ -822,3 +822,12 @@ owner=TESTER（cron-tester-poll）；只读正式 API/物理文件/源完整 SHA
 - **flat 三提交**：`a65a25a7`/`87dfebaa`/`518089ed` 维持 SCHEDULED + source 绑定（10:23:08/09 后零变化）；今晨已独立 PASS 的 14_42_48 复用产物、两次 reconcile 幂等、NOT_APPLICABLE 双包 409 无伪切片结论**不受影响**。
 - **TESTER 面**：按协调者口径切换为二选一等待——收敛 SCENE_CANCELLED → 转取消终态登记（核账点：中断步 INFER/零 PUBLISH 产物/无第 8 run/无重烧模型）；回 SCENE_RUNNING → 恢复原跨夜观察口径。期间不 kill/不 retry/不重烧模型；TEST_REPORT_PENDING 维持。本轮全部动作只读（探针 `tester_172x_check.py`/`tester_173x_cancel_check*.py`，处理机 MySQL 只读 + NAS + docker + VLM 日志），未提交/未 retry/未调模型/未写生产。
 - **下一步**：下轮核实 4acf689f 收敛方向与 VLM 调用方归属；16D 线不变（A 叶返修+单文件增量 OCR、B 叶 OCR 16:45 起跑在途、固定集成 SHA 联合验收待三叶接受）。
+
+## 18:13 16_02_03 大包取消链独立核实（消费 C obs78 + 协调者 17:55 取消确认）
+
+- **取消终态独立证实（容器日志原文复得）**：处理机容器 `ddcc7df81635`（rosbag-scene-proxy 新代次，Up 2h）`docker logs --timestamps` 三行——`08:22:22Z（16:22:22 +08）cancellation observed (status=SCENE_CANCELLING)`；`09:14:25Z（17:14:25 +08）attempt 1 CANCELLED：停写信号(cancel)后编排退出：[INFER] CANCELLED: decoder 阶段收到取消信号`；同刻 `cancel confirm failed … HTTP 409: {"detail":"task lease expired"}` ×2。与 C obs78（17:35 实测、17:41 落盘）一致，TESTER 独立复得非转述。
+- **DB 面（18:00:32 只读实测）**：run 行仍 `SCENE_CANCELLING` attempt1，heartbeat 停 16:21:55、lease_expires 16:23:55（stale）、error 空；八步 INFER 仍 RUNNING、余 QUEUED（DB 未翻 FAILED、未收敛 SCENE_CANCELLED=协调者登记的滞留面，非 TESTER 处置面）；scene 全集 7 run、无第 8；8767 health `active_runs=[]`。
+- **NAS 产物面**：`.staging/scene-4acf689f…/attempt-1` 目录 15:27 创建且内容空；`slices/test/spray` 顶层 6 目录（FFDEE943×4 双写现场 + 051768B1/615A4A7B），**无新 4acf689f 切片发布**（17:35 与 18:00 两次实测一致）。
+- **结论**：取消链 = 15:57:45 kernel OOM-kill 旧 proxy → 16:22 SCENE_CANCELLING → 17:14:25 CANCELLED（INFER 中断）→ 零 PUBLISH 产物 / 无第 8 run / 零重烧模型，**独立证实**；INFER 取消前已产出结果（slice-write/render_log/spray_model_results 15:27 起存在）由 C obs78 申报，容器本地 checkpoint 细节待 C/A 下轮核实。验收面按协调者口径转为「取消链证据+产物完整性核账」（不再等 SCENE_DONE）；TEST_REPORT_PENDING 维持，等 8180 收敛 SCENE_CANCELLED 登记后全批收口。
+- 本轮全部只读（docker logs + MySQL SELECT + NAS find/stat），未 kill/retry/restart、未写生产。探针 `tester_180x_cancel_verify*.py`（18:00-18:09）。
+- **下一步**：下轮核 8180 run 行是否收敛 SCENE_CANCELLED 或异常回 RUNNING；16D 线不变——A 叶 R1-2 续单（chip view_label 旧名，17:30 派 A）交付最终冻结 head + 单文件增量 OCR 后做 TESTER 增量面，B 叶 OCR 17:09 收口裁决待协调者，固定集成 SHA 联合验收仍待三叶接受。

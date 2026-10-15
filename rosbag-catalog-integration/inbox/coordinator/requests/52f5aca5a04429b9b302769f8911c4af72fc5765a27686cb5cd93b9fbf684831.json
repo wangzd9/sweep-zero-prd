@@ -1,0 +1,14 @@
+{
+  "schema": "coordinator-request/v1",
+  "request_id": "52f5aca5a04429b9b302769f8911c4af72fc5765a27686cb5cd93b9fbf684831",
+  "received_at": "2026-10-15T17:09:38+08:00",
+  "status": "HANDLED",
+  "message_id": "om_x100b623d3fcc3cb8c1c987922f43995",
+  "chat_id": "oc_b64dc5bf34ec1edcc8cce92ffd56604b",
+  "user_id": "ou_cb93c8e06b797e51a6f66a86f4c3fdaf",
+  "text": "甲",
+  "context": "回复协调者 2026-10-15 17:02 进度报告中 12S-F OCR 路由三选：甲=OCR 选择器与 ~/.opencodereview/config.json 的 sub2api 条目改指 hermes-xcoding/gpt-6.1-sol，新建 run 重提。用户单字选择即授权执行对应项（不改需求、不放宽门禁）。",
+  "handled_at": "2026-10-15T17:09:52+08:00",
+  "evidence": "/home/wang/work/doc/prd/rosbag-catalog-integration/reviews/TASK-12S-F/ocr-run-20261015-attempt1-rebased-xcoding/spec.json",
+  "evidence_sha256": "5cedfd62a24c0d6a65279d95596c793c6f459f45c462d2c6b05c24c8e935a4ca"
+}

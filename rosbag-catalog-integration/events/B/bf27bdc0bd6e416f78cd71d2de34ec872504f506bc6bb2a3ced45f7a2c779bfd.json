@@ -1,0 +1,18 @@
+{
+  "event_id": "B:b-poll-20261014-190016-fp-a2ed5155-t16c-hold-consumed-b-idle",
+  "kind": "business",
+  "task": "TASK-16C-B",
+  "attempt": "1",
+  "status": "IDLE",
+  "summary": "巡检 2026-10-14 19:00 +08:00（cron poll 6f7471d8747c，脚本指纹 a2ed5155，18:55:11 首见/18:57:53 复检，wake=new_or_unacknowledged_change，白天）：消费 pending——唯一变更源 inbox/coordinator/TASK-16C/merge-authorization-20261014.md 18:55 新增合入 HOLD 段（覆盖 18:22 授权口径中 PASS 后可直接合入的立即执行）：TESTER 16D 对固定集成 29bd1f4 联合验收 PASS 成立，但协调者 OCR run 66ca40d3 b01（bag_search_service.py）收口裁决 F1（medium/bug，CONFIRMED 防御性）：scene_original 与 self_built_original SQL 谓词缺 NVIDIA 排除，与 Python 标签侧单源优先级不一致；F1 属 A 叶文件、在 29bd1f4 集成范围内，未修不得合入。HOLD 解除条件：A 按 ocr-r1-rework-3 最小返修冻结（仅 bag_search_service.py，续 A 冻结 head 1489bc6）+ 协调者机械核验 + 增量 OCR 单文件零 CORRECTION 级 + TESTER A 增量面 PASS + 重建三叶固定集成候选并重新联合验收 PASS。对 B 影响：B 叶交付 e399daf（app/web/bags.py、app/templates/bags.html、test_task16cb_*）不含 bag_search_service.py（A 独占），B 侧零返修/零问题 ID 单；find inbox/2号 18:44 后零命中（唯一新增 receipts/TASK-11S-BATCH-1012/a-attempt-1.md 属 A 侧）；等待链从 TESTER 16D PASS 后协调者合入更新为 A F1 返修链收口 → HOLD 解除 → 重建集成候选 → TESTER 重新联合验收 PASS → 协调者按 18:22 授权合入+测试环境更新（不含生产），执行者仍为协调者，B 无动作。",
+  "evidence": "inbox/coordinator/TASK-16C/merge-authorization-20261014.md（18:55 HOLD 段，fingerprint a2ed5155 changed_sources 唯一项）；inbox/1叹/TASK-16C-A/ocr-r1-rework-3-dispatch-20261014.md（R1-3 返修单全文核对：仅改 A 独占文件 bag_search_service.py，与 B 独占文件 bags.py/bags.html 零交集）；find inbox/2号 -newermt '2026-10-14 18:44' -type f 零命中；git -C /home/wang/.local/state/rosbag-scene/wt-04a-t16cb log -1 = e399daf（HEAD 冻结不变）；ps 无 B 侧业务进程（仅无关 wechat wxocr 与容器栈 uvicorn 非本侧发起）",
+  "next": "IDLE_WAITING：B 叶已接受（18:10 leaf-acceptance-decision，e399daf）且开发面收口；等待链更新=A F1 返修冻结（ocr-r1-rework-3）→协调者机械核验+增量 OCR 单文件→TESTER A 增量面 PASS→重建三叶固定集成候选→TESTER 重新联合验收 PASS→HOLD 解除→协调者按 18:22 授权 merge --no-ff 入 main+推 github+本地 Compose 测试环境收敛（执行者为协调者，B 无动作）；无 B 侧返修/新派单不占开发槽，空闲只读巡检不扩需求、不碰生产",
+  "schema_version": 1,
+  "role": "B",
+  "recorded_at": "2026-10-14T19:03:54+08:00",
+  "occurred_at": null,
+  "time_source": {
+    "kind": "unknown",
+    "reason": "历史发生时间未核实；recorded_at 只表示补录时间"
+  }
+}

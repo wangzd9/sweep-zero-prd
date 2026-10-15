@@ -1,0 +1,123 @@
+[ocr] --background-file content is 2132 characters, exceeding the recommended 2000 (continuing but review quality might be impacted)
+{
+  "status": "complete",
+  "llm": {
+    "provider": "hermes-xcoding",
+    "model": "gpt-6.1-sol"
+  },
+  "message": "Review complete: 4 finding(s) across 1 selected item(s).",
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 4,
+    "total_tokens": 187057,
+    "input_tokens": 184746,
+    "output_tokens": 2311,
+    "cache_read_tokens": 123904,
+    "elapsed": "9m17s"
+  },
+  "tool_calls": {
+    "total": 16,
+    "by_tool": {
+      "code_comment": 3,
+      "code_search": 4,
+      "file_read": 9
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [
+    {
+      "path": "app/scanner/metadata.py",
+      "content": "Unsupported storage never receives `UNSUPPORTED_STORAGE`: `parse_metadata()` raises `ValueError` for every non-`sqlite3` identifier, and this handler immediately converts it to `BAD_METADATA`. For example, otherwise valid metadata with `storage_identifier: mcap` is persisted under the wrong reason code; the later storage check cannot be reached for that input. Distinguish this parse failure explicitly (e.g. with a dedicated exception) while preserving `validate_bag_input()`'s raising behavior.",
+      "existing_code": "    except Exception as exc:  # noqa: BLE001\n        return None, \"BAD_METADATA\", str(exc)[:512]",
+      "start_line": 72,
+      "end_line": 73,
+      "category": "bug",
+      "severity": "medium"
+    },
+    {
+      "path": "app/scanner/metadata.py",
+      "content": "Malformed DB3 path element types escape classification. Metadata with `storage_identifier: sqlite3`, `message_count: 1`, and `relative_file_paths: [null]` parses successfully, but `_check_parsed()` calls `Path(None)`, which raises `TypeError`, not `ValueError`. The runner consequently counts the bag as failed on every scan instead of reporting and persisting `BAD_METADATA`. Validate that path elements are strings before checking them, or handle the input-type failure here without changing the legacy validator's contract.",
+      "existing_code": "    try:\n        _check_parsed(parsed, entries)\n    except ValueError as exc:",
+      "start_line": 84,
+      "end_line": 86,
+      "category": "bug",
+      "severity": "medium"
+    },
+    {
+      "path": "app/scanner/metadata.py",
+      "content": "Do not infer the failure category from a substring of the full error message: it includes metadata-controlled filenames. For example, `relative_file_paths: ['../missing files.db3']` causes `_check_parsed()` to raise `metadata contains invalid DB3 paths: ../missing files.db3`, but this branch reports `MISSING_DB3` instead of `BAD_METADATA`. That incorrect reason is then persisted in the rejection evidence. Use distinct exception types/reason codes, or at least match the fixed error prefix rather than arbitrary message content.",
+      "suggestion_code": "        if str(exc).startswith(\"metadata references missing files: \"):\n            return None, \"MISSING_DB3\", str(exc)[:512]",
+      "existing_code": "        if \"missing files\" in str(exc):\n            return None, \"MISSING_DB3\", str(exc)[:512]",
+      "start_line": 87,
+      "end_line": 88,
+      "category": "bug",
+      "severity": "medium"
+    },
+    {
+      "path": "app/scanner/metadata.py",
+      "content": "Do not persist the raw YAML exception text as rejection detail. PyYAML syntax errors include a source-line excerpt; for example, malformed input `password: supersecret: value` places the password in `str(exc)`. The runner sends this detail to the backend, which stores it in rejection evidence and returns it in submission responses. Truncation to 512 characters does not redact that content. Use a sanitized error category and line/column coordinates without source excerpts (and avoid echoing arbitrary scalar values from conversion errors).",
+      "existing_code": "        return None, \"BAD_METADATA\", str(exc)[:512]",
+      "start_line": 73,
+      "end_line": 73,
+      "category": "security",
+      "severity": "medium"
+    }
+  ],
+  "groups": [
+    {
+      "label": "app/scanner/metadata.py",
+      "files": [
+        "app/scanner/metadata.py"
+      ]
+    }
+  ],
+  "session_id": "f7895dbf-6538-4406-a080-e53c4d36e3d8",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "f7895dbf-6538-4406-a080-e53c4d36e3d8",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "requested_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "resolved_base": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "resolved_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "exact_range": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3..96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "source_artifact_sha256": "13e276cbf67684cbeda2394708ade45e31c61d1fa9c3520cd4b9ff65e27fee7a"
+    },
+    "execution": {
+      "ocr_version": "v1.13.0",
+      "provider": "hermes-xcoding",
+      "model": "gpt-6.1-sol",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "6e602bddc4aa929845449a35ce61cf6d6bf972c527533aa2e4a3d0f5dc4ce7fa",
+      "runtime_config_sha256": "994606f9fae59088b21138c4a003932cad4b2721ca5293391612f2682d16163c"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "47f49a07af9e5569ef497a19ea679d1a5d715661754a4180461454beae6772af",
+          "path": "app/scanner/metadata.py",
+          "fingerprint": "b03f66621805f068a6401ce479a4a9577af46f47f2cc5465dc1bab88ee47b96c"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "47f49a07af9e5569ef497a19ea679d1a5d715661754a4180461454beae6772af",
+          "path": "app/scanner/metadata.py",
+          "fingerprint": "b03f66621805f068a6401ce479a4a9577af46f47f2cc5465dc1bab88ee47b96c"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 556530
+  }
+}

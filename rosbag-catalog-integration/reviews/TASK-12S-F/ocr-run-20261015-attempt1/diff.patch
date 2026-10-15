@@ -1,0 +1,1116 @@
+diff --git a/alembic/versions/20261014_01_ingest_rejected.py b/alembic/versions/20261014_01_ingest_rejected.py
+new file mode 100644
+index 0000000..9bbc2d9
+--- /dev/null
++++ b/alembic/versions/20261014_01_ingest_rejected.py
+@@ -0,0 +1,80 @@
++"""TASK-12S-F（REQ-21/AC-21）：无效输入持久拒绝——ingest_submission 拒绝证据列
++
++- ingest_submission.rejection_reason_code（String(32), nullable）：稳定机器原因码
++  （BAD_METADATA/MISSING_DB3/EMPTY_BAG/UNSUPPORTED_STORAGE）。status 枚举扩
++  INPUT_REJECTED 不产生 DDL（String(24) 列原值不变，应用层语义）。
++- ingest_submission.rejection_evidence_json（Text, nullable）：有界审计块
++  （校验轮次/错误详情/文件摘要/观测时间/受控路径/前后状态）。JSON 列无
++  server_default（MySQL 不允许 TEXT 字面量 DEFAULT，R2-01 口径）；默认语义=
++  NULL（历史行/未拒绝行），应用层写入口显式赋值。
++- ingest_submission.stable_reject_rounds（Integer, nullable）：同一无效快照经
++  不同扫描轮次确认计数；默认 NULL（未开始确认），resume 时应用层清零。
++
++新增索引 ix_ingest_submission_rejection_reason_code（model index=True 自动名）
++供「按原因码查询拒绝提交」的有界检索（AC-21 可查询）。
++
++⚠️ 逐对象 gate（与 20261009_02/20261013_01 同模式）：迁移链起点 20260911_01
++从空库 upgrade 时按**当前** model create_all(checkfirst=True)，新列已在空库上
++随 create_all 落库 → 无 gate 的 add_column 重放报 duplicate column。部署中的
++真实 DB 无此列 → gate 放行。
++
++down_revision = "20261013_01_scene_intake"（16A 已接受合入后的当前单头）。
++
++⚠️ downgrade 固有丢数据（与 20261009_02/20261013_01 口径一致）：drop 三列会丢失
++已登记拒绝证据（审计链），恢复只能重新走 resume/拒绝流程；backfill 不适用
++（全 NULL 语义）。
++"""
++
++import sqlalchemy as sa
++
++from alembic import op
++
++revision = "20261014_01_ingest_rejected"
++down_revision = "20261013_01_scene_intake"
++branch_labels = None
++depends_on = None
++
++
++def _submission_cols() -> set[str]:
++    return {c["name"] for c in sa.inspect(op.get_bind()).get_columns("ingest_submission")}
++
++
++def _submission_index(name: str) -> bool:
++    return name in {ix["name"] for ix in sa.inspect(op.get_bind()).get_indexes("ingest_submission")}
++
++
++def upgrade() -> None:
++    cols = _submission_cols()
++    if "rejection_reason_code" not in cols:
++        op.add_column(
++            "ingest_submission",
++            sa.Column("rejection_reason_code", sa.String(length=32), nullable=True),
++        )
++    if "rejection_evidence_json" not in cols:
++        op.add_column(
++            "ingest_submission",
++            sa.Column("rejection_evidence_json", sa.Text(), nullable=True),
++        )
++    if "stable_reject_rounds" not in cols:
++        op.add_column(
++            "ingest_submission",
++            sa.Column("stable_reject_rounds", sa.Integer(), nullable=True),
++        )
++    if not _submission_index("ix_ingest_submission_rejection_reason_code"):
++        op.create_index(
++            "ix_ingest_submission_rejection_reason_code",
++            "ingest_submission",
++            ["rejection_reason_code"],
++        )
++
++
++def downgrade() -> None:
++    if _submission_index("ix_ingest_submission_rejection_reason_code"):
++        op.drop_index("ix_ingest_submission_rejection_reason_code", table_name="ingest_submission")
++    cols = _submission_cols()
++    if "stable_reject_rounds" in cols:
++        op.drop_column("ingest_submission", "stable_reject_rounds")
++    if "rejection_evidence_json" in cols:
++        op.drop_column("ingest_submission", "rejection_evidence_json")
++    if "rejection_reason_code" in cols:
++        op.drop_column("ingest_submission", "rejection_reason_code")
+\ No newline at end of file
+diff --git a/app/api/ingest_submissions.py b/app/api/ingest_submissions.py
+index a586875..f86f6c3 100644
+--- a/app/api/ingest_submissions.py
++++ b/app/api/ingest_submissions.py
+@@ -79,6 +79,33 @@ class IngestSubmissionPatchRequest(BaseModel):
+         return out
+ 
+ 
++class IngestRejectInputRequest(BaseModel):
++    """POST /api/v1/ingest-submissions/reject-input 请求体（TASK-12S-F，内部上报）。
++
++    Scanner 稳定确认后仍无效的输入经此端点持久登记 INPUT_REJECTED。evidence 是
++    有界机器块（reason_code/detail/incoming_path/root_id/稳定证据），不含凭据。
++    """
++
++    model_config = ConfigDict(extra="forbid")
++
++    evidence: dict[str, object] = Field(default_factory=dict)
++
++
++class IngestResumeInputRequest(BaseModel):
++    """POST /api/v1/ingest-submissions/{id}/resume-input 请求体（TASK-12S-F，REQ-21）。
++
++    材料补齐后显式恢复：只允许 INPUT_REJECTED 且尚未绑定；row_version 必填
++    （乐观锁，旧 version 409）；operator 记录恢复操作者（审计）。幂等键走
++    既有权限口径（Idempotency-Key 头/body）。
++    """
++
++    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
++
++    row_version: int = Field(ge=1)
++    operator: str | None = Field(default=None, max_length=128)
++    idempotency_key: str | None = Field(default=None, max_length=255)
++
++
+ async def _raw_body(request: Request) -> bytes:
+     """async 依赖：读取原始请求体并 pre-parse 限额（DESIGN §8.1）。
+ 
+@@ -166,4 +193,34 @@ def get_submission(submission_id: str, db: Session = Depends(get_db)):
+     return ingest_service.get_submission(db, submission_id)
+ 
+ 
++@router.post("/api/v1/ingest-submissions/reject-input")
++def reject_input(request: Request, raw: bytes = Depends(_raw_body), db: Session = Depends(get_db)):
++    """TASK-12S-F：Scanner 无效输入上报 → 持久登记 INPUT_REJECTED。
++
++    内部报告端点（Scanner backend 经 Backend API 调用，携受控根证据）。
++    既有权限口径：与 scanner 其余后端上报端点一致（服务身份，不开放任意
++    路径读写——服务端按 root_id 受控 scan 根校验 incoming_path 归属）。
++    路由先于 /{submission_id} 注册，避免 "reject-input" 被当 submission_id。
++    """
++    body = _parse_model(IngestRejectInputRequest, raw)
++    return ingest_service.report_input_rejected(db, body.evidence)
++
++
++@router.post("/api/v1/ingest-submissions/{submission_id}/resume-input")
++def resume_input(
++    submission_id: str,
++    request: Request,
++    raw: bytes = Depends(_raw_body),
++    db: Session = Depends(get_db),
++):
++    """TASK-12S-F（REQ-21）：材料补齐后显式恢复 → 回 PENDING_INPUT 重走校验。
++
++    只允许 INPUT_REJECTED 且尚未绑定；旧 row_version/已绑定/非法状态 409。
++    200 只表示受理（回 PENDING），不代表输入已合法。
++    """
++    body = _parse_model(IngestResumeInputRequest, raw)
++    key = idempotency_key(request, body.model_dump())
++    return ingest_service.resume_input_submission(db, submission_id, body.row_version, body.operator, key)
++
++
+ __all__ = ["router"]
+diff --git a/app/models.py b/app/models.py
+index c204a62..1c91d40 100644
+--- a/app/models.py
++++ b/app/models.py
+@@ -740,6 +740,21 @@ class IngestSubmission(Base):
+     # 调度时实际产出的用途集合 JSON（恢复登记回显用：同一 bag 重启重放 MOVING/MOVED
+     # 标记时，response 的 self_built/scheduled_purposes 必须与首登一致，消费方按此对齐）。
+     bound_purposes_json: Mapped[str | None] = mapped_column(Text, nullable=True)
++    # TASK-12S-F（REQ-21/AC-21）：INPUT_REJECTED 持久证据。
++    # - status 枚举扩展：PENDING_INPUT / BOUND / SCHEDULED / INPUT_REJECTED。
++    #   INPUT_REJECTED=已确认无效输入被持久拒绝（尚未绑定的提交），终态直至显式
++    #   resume-input 回 PENDING_INPUT 重走完整校验；不进 pending_binding 对账
++    #   （对账只扫 PENDING_INPUT）、不产生 source/run/模型请求。
++    # - rejection_reason_code：稳定机器原因码（BAD_METADATA/MISSING_DB3/EMPTY_BAG/
++    #   UNSUPPORTED_STORAGE），重启后保留、可查询。
++    # - rejection_evidence_json：有界审计块（校验轮次/错误详情/文件摘要/观测时间/
++    #   受控路径/前后状态），JSON 列故 nullable 且无 server_default（R2-01 口径：
++    #   MySQL 不允许 TEXT 字面量 DEFAULT）。
++    # - stable_reject_rounds：同一无效快照经不同扫描轮次确认计数（判定口径：≥
++    #   scan_stability_rounds 才拒绝，一次校验异常不终止）；resume 清零重计。
++    rejection_reason_code: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
++    rejection_evidence_json: Mapped[str | None] = mapped_column(Text, nullable=True)
++    stable_reject_rounds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+     updated_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+     __table_args__ = (
+diff --git a/app/scanner/backend.py b/app/scanner/backend.py
+index 1d7acfb..64a3236 100644
+--- a/app/scanner/backend.py
++++ b/app/scanner/backend.py
+@@ -59,6 +59,22 @@ def report_input_unstable(source_id: str, directory: str) -> dict:
+     )
+ 
+ 
++def report_input_rejected(evidence: dict) -> dict:
++    """TASK-12S-F（REQ-21）：无效输入上报——稳定确认后仍空/坏 metadata 等。
++
++    evidence 含 root_id/scan_root/incoming_path/reason_code/detail 与稳定证据
++    （stable_rounds/file_count/total_bytes/mtime）。Backend 侧按 root+路径+
++    受控根推导找/建未绑定提交，持久登记 INPUT_REJECTED（有 submission 或无
++    submission 均有根+路径+观测身份的持久拒绝记录）。客户端自报不能冻结
++    别人的路径——服务端按 scan_root 受控根校验。
++    """
++    return _post(
++        "/api/v1/ingest-submissions/reject-input",
++        {"evidence": evidence},
++        timeout=60,
++    )
++
++
+ def update_scan_job(payload: dict) -> dict:
+     path = "/api/v1/scan-jobs/start" if "id" not in payload else "/api/v1/scan-jobs"
+     return _post(path, payload)
+diff --git a/app/scanner/metadata.py b/app/scanner/metadata.py
+index a2750de..57c2c26 100644
+--- a/app/scanner/metadata.py
++++ b/app/scanner/metadata.py
+@@ -50,6 +50,47 @@ def parse_metadata(text: str) -> dict:
+ 
+ def validate_bag_input(entries: list[dict], metadata_text: str) -> dict:
+     parsed = parse_metadata(metadata_text)
++    _check_parsed(parsed, entries)
++    return parsed
++
++
++def classify_bag_input(entries: list[dict], metadata_text: str) -> tuple[dict | None, str | None, str | None]:
++    """TASK-12S-F（REQ-21）：无效输入分类——稳定后先更新证据再分类校验。
++
++    返回 (parsed, None, None)=有效；(None, reason_code, detail)=无效。
++    reason_code 是稳定机器码（AC-21 可查询/可追溯）：
++    - BAD_METADATA：metadata 缺失/不可解析/无 rosbag2_bagfile_information/DB3 路径非法；
++    - UNSUPPORTED_STORAGE：storage_identifier 非 sqlite3；
++    - EMPTY_BAG：message_count=0 或零 DB3 声明（空包）；
++    - MISSING_DB3：metadata 引用的 DB3 文件缺失。
++    detail 是有界错误详情（不写凭据，截断至 512 字符），供拒绝证据留痕。
++    网络/存储不可达不在本函数口径——client 异常由 runner 计 failed（基础设施
++    故障），不判包损坏。
++    """
++    try:
++        parsed = parse_metadata(metadata_text)
++    except Exception as exc:  # noqa: BLE001
++        return None, "BAD_METADATA", str(exc)[:512]
++    storage = parsed.get("storage")
++    if storage != "sqlite3":
++        # parse_metadata 已拒绝非 sqlite3（raise ValueError）；此处是防御分支
++        # （若上游解析口径变化，分类仍归 UNSUPPORTED_STORAGE 不混入 BAD_METADATA）。
++        return None, "UNSUPPORTED_STORAGE", f"storage_identifier={storage!r}"[:512]
++    if parsed["message_count"] == 0 or not parsed["relative_file_paths"]:
++        return None, "EMPTY_BAG", (
++            f"message_count={parsed['message_count']}, "
++            f"relative_file_paths={len(parsed['relative_file_paths'])}"
++        )[:512]
++    try:
++        _check_parsed(parsed, entries)
++    except ValueError as exc:
++        if "missing files" in str(exc):
++            return None, "MISSING_DB3", str(exc)[:512]
++        return None, "BAD_METADATA", str(exc)[:512]
++    return parsed, None, None
++
++
++def _check_parsed(parsed: dict, entries: list[dict]) -> None:
+     relative_paths = parsed["relative_file_paths"]
+     if not relative_paths:
+         raise ValueError("metadata does not declare any DB3 files")
+@@ -60,7 +101,6 @@ def validate_bag_input(entries: list[dict], metadata_text: str) -> dict:
+     missing = [name for name in relative_paths if name not in entry_by_name]
+     if missing:
+         raise ValueError("metadata references missing files: " + ", ".join(missing))
+-    return parsed
+ 
+ 
+ def bag_stability_marker(entries: list[dict], previous: dict | None = None) -> dict:
+diff --git a/app/scanner/runner.py b/app/scanner/runner.py
+index a22f0df..a496481 100644
+--- a/app/scanner/runner.py
++++ b/app/scanner/runner.py
+@@ -10,7 +10,7 @@ from app.services.fingerprint import fingerprint_bag
+ 
+ from . import backend
+ from .clients import MountedNasClient, nas_client
+-from .metadata import EXCLUDED_NAMES, bag_stability_marker, validate_bag_input
++from .metadata import EXCLUDED_NAMES, bag_stability_marker, classify_bag_input
+ from .paths import ready_directory_for
+ from .state_store import read_scanner_state, write_scanner_state
+ 
+@@ -175,14 +175,56 @@ def _process_bag(
+     if isinstance(old, int):
+         old = {"mtime": old}
+     metadata = client.download_text(directory.rstrip("/") + "/metadata.yaml")
+-    validate_bag_input(entries, metadata)
+     marker = bag_stability_marker(entries, old)
+     current[directory] = marker
+     source_id = old.get("source_id") if isinstance(old, dict) else None
+     if marker.get("input_status") == "INPUT_UNSTABLE" and source_id:
+         backend.report_input_unstable(source_id, directory)
+     names = {entry["name"] for entry in entries}
+-    if not (".done" in names or marker["stable_rounds"] >= settings.scan_stability_rounds):
++    stable = ".done" in names or marker["stable_rounds"] >= settings.scan_stability_rounds
++    if not stable:
++        return
++    # TASK-12S-F（REQ-21/AC-21）：判定顺序=先更新上传稳定证据（marker 已含
++    # mtime/file_count/total_bytes/stable_rounds），再分类校验。无效输入不再
++    # raise 崩整轮，而是携带稳定证据上报 Backend 持久拒绝（INPUT_REJECTED），
++    # 原包留在 incoming 受控位置不修改不删除；相同拒绝快照重复扫描跳过
++    # 业务处理（抑制计数），不刷重复拒绝。
++    parsed, reason_code, detail = classify_bag_input(entries, metadata)
++    if parsed is None:
++        # 内容身份快照（mtime/file_count/total_bytes）：不含 stable_rounds
++        # （相同内容重复扫描时轮次持续递增，会破坏"相同拒绝快照跳过"口径）。
++        # 内容一变 bag_stability_marker 重置 stable_rounds=1 且 mtime/字节变，
++        # 快照必不等 → 重新上报（变化即重新计稳定，符合判定口径）。
++        snapshot = f"{marker['mtime']}:{marker['file_count']}:{marker['total_bytes']}"
++        if old.get("reject_snapshot") == snapshot and old.get("reject_reported"):
++            marker["reject_snapshot"] = snapshot
++            marker["reject_reason"] = reason_code
++            marker["reject_reported"] = True
++            stats["rejected_suppressed"] = stats.get("rejected_suppressed", 0) + 1
++            return
++        evidence = {
++            "reason_code": reason_code,
++            "detail": detail,
++            "incoming_path": directory,
++            "scan_root": ctx.scan_root,
++            "root_id": ctx.root_id,
++            "stable_rounds": marker["stable_rounds"],
++            "file_count": marker["file_count"],
++            "total_bytes": marker["total_bytes"],
++            "mtime": marker["mtime"],
++        }
++        try:
++            backend.report_input_rejected(evidence)
++        except Exception as exc:
++            # Backend 拒绝端点不可达=基础设施故障：计 failed、不持久化拒绝态、
++            # 不抑制下轮（无上报成功证据不能假称已登记，重启后继续尝试）。
++            stats["failed"] += 1
++            print(f"REJECT_REPORT_FAILED [{ctx.root_id}] {directory}: {exc}", file=sys.stderr)
++            return
++        marker["reject_snapshot"] = snapshot
++        marker["reject_reason"] = reason_code
++        marker["reject_reported"] = True
++        stats["rejected"] = stats.get("rejected", 0) + 1
+         return
+     fingerprint = compute_fast_fingerprint(directory, entries, metadata)
+     registered_fingerprint = old.get("registered_fingerprint")
+diff --git a/app/services/ingest_service.py b/app/services/ingest_service.py
+index 0e8932d..223b98f 100644
+--- a/app/services/ingest_service.py
++++ b/app/services/ingest_service.py
+@@ -829,9 +829,188 @@ def get_submission(db: Session, submission_id: str) -> dict:
+             for e in events
+         ],
+     }
++    # TASK-12S-F（REQ-21）：拒绝证据回显（未拒绝行=三键全 None，零行为变化）。
++    if submission.status == "INPUT_REJECTED":
++        base["rejection_reason_code"] = submission.rejection_reason_code
++        base["rejection_evidence"] = (
++            json.loads(submission.rejection_evidence_json) if submission.rejection_evidence_json else None
++        )
++        base["resume_hint"] = "POST /api/v1/ingest-submissions/{submission_id}/resume-input"
+     return base
+ 
+ 
++# ---------------------------------------------------------------------------
++# TASK-12S-F（REQ-21/AC-21）：无效输入持久拒绝 + 受控 resume
++# ---------------------------------------------------------------------------
++
++
++def _controlled_scan_roots(root_id: str | None) -> list[str]:
++    """受控 scan 根清单（按 root_id）：客户端自报不能冻结别人的路径。"""
++    if root_id == "scene":
++        return [r.rstrip("/") for r in (settings.scene_nas_scan_root,) if r]
++    if root_id in (None, "self_built"):
++        return [r.rstrip("/") for r in (settings.nas_scan_root,) if r]
++    return []
++
++
++def _submission_reject_block(submission: IngestSubmission, evidence: dict, before_status: str) -> dict:
++    """有界拒绝审计块：身份/原因码/校验轮次/证据摘要/时间/状态前后。不写凭据。"""
++    return {
++        "schema_version": "ingest-reject/v1",
++        "submission_id": submission.submission_id,
++        "profile_id": submission.profile_id,
++        "profile_version": submission.profile_version,
++        "relative_path": submission.relative_path,
++        "reason_code": evidence.get("reason_code"),
++        "detail": str(evidence.get("detail") or "")[:512],
++        "incoming_path": evidence.get("incoming_path"),
++        "root_id": evidence.get("root_id"),
++        "stable_rounds": evidence.get("stable_rounds"),
++        "file_count": evidence.get("file_count"),
++        "total_bytes": evidence.get("total_bytes"),
++        "observed_at": now().isoformat(),
++        "before_status": before_status,
++        "after_status": "INPUT_REJECTED",
++    }
++
++
++def _ensure_reject_submission(db: Session, profile_row: IngestProfile, entry_relative: str) -> IngestSubmission:
++    """拒绝留痕提交：按活动占位键（path_claim）定位该入口的唯一活动行。
++
++    - 命中 PENDING_INPUT 行（用户提交或系统兜底）→ 复用（保留原提交身份/幂等
++      键/资料）；
++    - 命中 INPUT_REJECTED 行（重复上报，如 journal 丢失后重放）→ 复用（幂等
++      再确认，不再推 row_version，避免使客户端已缓存的 resume 版本失效）；
++    - 无活动行（确认拒绝前没有 submission）→ 建系统拒绝提交：根+路径+观测
++      身份的持久拒绝记录，后续合法提交可按 path_claim 关联该证据，不静默丢失。
++    已绑定行绑定时已释放占位（path_claim_key=None），不会命中本查询。
++    """
++    claim = _path_claim_key(profile_row.profile_id, profile_row.version, entry_relative)
++    holder = db.scalar(
++        select(IngestSubmission)
++        .where(
++            IngestSubmission.profile_id == profile_row.profile_id,
++            IngestSubmission.profile_version == profile_row.version,
++            IngestSubmission.path_claim_key == claim,
++        )
++        .with_for_update()
++    )
++    if holder is not None:
++        return holder
++    submission = _ensure_system_submission(db, profile_row, entry_relative)
++    submission.source = "scanner-reject"
++    return submission
++
++
++def report_input_rejected(db: Session, evidence: dict) -> dict:
++    """Scanner 无效输入上报（内部报告端点，DTO/鉴权/幂等由本任务冻结）。
++
++    按 root+incoming_path 定位接收入口：
++    - 命中未绑定 PENDING_INPUT 提交 → 置 INPUT_REJECTED（持久拒绝，结束本次
++      自动接收尝试；保留提交 ID/幂等键/path claim/资料/拒绝原因/证据/时间）。
++    - 无提交（确认拒绝前没有 submission）→ 建系统拒绝提交（source=system-reject，
++      PENDING 口径的根+路径+观测身份持久记录），后续合法提交可按 path_claim
++      关联该证据（不静默丢失）。
++    已绑定（BOUND/SCHEDULED）提交不受本端点影响——只针对尚未绑定的无效输入。
++    不生成 source/run/模型请求；不是 SCENE_FAILED/NO_MATCH/NOT_APPLICABLE。
++    幂等：相同证据重复上报不推进行版本外的副作用（拒绝态可重复确认）。
++    """
++    root_id = evidence.get("root_id")
++    incoming_path = str(evidence.get("incoming_path") or "").rstrip("/")
++    if not incoming_path:
++        raise HTTPException(422, "evidence.incoming_path is required")
++    # 受控根校验：incoming_path 必须落在声明 root_id 的受控 scan 根下。
++    roots = _controlled_scan_roots(root_id)
++    if not roots or not any(
++        incoming_path == r or incoming_path.startswith(r + "/") for r in roots
++    ):
++        raise HTTPException(409, "incoming_path is outside the controlled scan root for root_id")
++    relative_to_scan = next(
++        (incoming_path[len(r) + 1 :] for r in roots if incoming_path.startswith(r + "/")), None
++    )
++    profile_row, entry_relative = (None, None)
++    if relative_to_scan:
++        matched = match_profile_for_incoming(
++            db, incoming_path, root_id=root_id, scan_root=roots[0]
++        )
++        if matched is not None:
++            profile_row, entry_relative = matched
++    entry_relative = entry_relative or relative_to_scan or incoming_path
++    # 极端兜底（入口完全不可定位）：不建表行会丢证据——按 root+路径建系统
++    # 拒绝提交（profile 用声明 root 的活动入口兜底，取不到则 409 显式失败）。
++    if profile_row is None:
++        rows = _active_profiles(db, root_id)
++        if not rows:
++            raise HTTPException(409, "no active ingest profile for root_id; cannot persist rejection")
++        profile_row = rows[0]
++    submission = _ensure_reject_submission(db, profile_row, entry_relative)
++    db.flush()
++    before_status = submission.status
++    if submission.status not in ("PENDING_INPUT",):
++        # 已绑定/已调度行不受拒绝端点影响（只针对尚未绑定的无效输入）。
++        db.rollback()
++        raise HTTPException(409, "SUBMISSION_BOUND: rejection only applies to unbound PENDING_INPUT")
++    rejection = _submission_reject_block(submission, evidence, before_status)
++    submission.status = "INPUT_REJECTED"
++    submission.rejection_reason_code = str(evidence.get("reason_code") or "BAD_METADATA")[:32]
++    submission.rejection_evidence_json = json.dumps(rejection, ensure_ascii=False)
++    # 稳定确认计数：同一无效快照经不同扫描轮次确认的累计（服务端权威口径）。
++    try:
++        rounds = int(evidence.get("stable_rounds") or 1)
++    except (TypeError, ValueError):
++        rounds = 1
++    submission.stable_reject_rounds = rounds
++    submission.row_version = submission.row_version + 1
++    submission.updated_at = now()
++    db.commit()
++    return {
++        "submission_id": submission.submission_id,
++        "status": "INPUT_REJECTED",
++        "rejection_reason_code": submission.rejection_reason_code,
++        "row_version": submission.row_version,
++    }
++
++
++def resume_input_submission(
++    db: Session, submission_id: str, row_version: int, operator: str | None, key: str | None
++) -> dict:
++    """POST resume-input（REQ-21）：材料补齐后显式恢复，重走完整校验链。
++
++    只允许 INPUT_REJECTED 且尚未绑定恢复；旧 version/已绑定/非法状态 409。
++    同一幂等重放回放首次响应（不重复推进代次、不绕过当前状态）。
++    恢复=回 PENDING_INPUT + 清本次稳定/拒绝抑制标记（保留拒绝历史在 evidence
++    审计块；stable_reject_rounds 清零重计），随后 Scanner 重新完整校验：仍坏
++    则再次 INPUT_REJECTED（可重复尝试、幂等），合法则走 E 绑定链。
++    200 只表示受理回 PENDING，不代表输入已合法。
++    """
++    operation = f"ingest-submission-resume:{submission_id}:v{row_version}"
++    payload = {"row_version": row_version, "operator": operator}
++    replay = idempotent_replay(db, operation, key, payload)
++    if replay is not None:
++        return replay
++    submission = db.scalar(
++        select(IngestSubmission).where(IngestSubmission.submission_id == submission_id).with_for_update()
++    )
++    if submission is None:
++        raise HTTPException(404, "submission not found")
++    if submission.status != "INPUT_REJECTED":
++        raise HTTPException(409, "SUBMISSION_NOT_REJECTED: only INPUT_REJECTED submissions can resume")
++    if row_version != submission.row_version:
++        raise HTTPException(409, "ROW_VERSION_CONFLICT: submission changed concurrently")
++    # 已绑定防线：INPUT_REJECTED 本就不绑定，防御性再核 source_id 为空。
++    if submission.source_id:
++        raise HTTPException(409, "SUBMISSION_BOUND: already bound, cannot resume")
++    # 保留拒绝历史（审计），清本次稳定/抑制标记，回 PENDING 重走完整校验。
++    submission.status = "PENDING_INPUT"
++    submission.stable_reject_rounds = None
++    submission.row_version = row_version + 1
++    submission.updated_at = now()
++    response = _submission_payload_response(submission)
++    store_idempotency(db, operation, key, payload, response)
++    db.commit()
++    return response
++
++
+ # ---------------------------------------------------------------------------
+ # 绑定与用途事件生产（Scanner 登记完成 / 手动登记，同事务）
+ # ---------------------------------------------------------------------------
+diff --git a/tests/test_ingest_input_rejected.py b/tests/test_ingest_input_rejected.py
+new file mode 100644
+index 0000000..5738a04
+--- /dev/null
++++ b/tests/test_ingest_input_rejected.py
+@@ -0,0 +1,375 @@
++"""TASK-12S-F（REQ-21/AC-21）：无效输入持久拒绝 + 逻辑隔离 + 受控 resume 机械用例。
++
++覆盖（SQLite 口径；真 MySQL 8.4.11 状态/迁移往返由 scripts 探针另行取证）：
++- 拒绝登记：Scanner 上报 → 未绑定 PENDING 提交置 INPUT_REJECTED（原因码/证据/
++  时间/受控路径持久保留，提交 ID/幂等键/path claim 不变）；
++- 无 submission 先发现：建系统拒绝提交（根+路径+观测身份持久记录，不静默丢失）；
++- 隔离断言：E 对账扫描（pending_binding.reconcile_pending_bindings）跳过拒绝行，
++  零事件零 run；不影响既有 AVAILABLE/DERIVED 记录；
++- resume 成功/失败两路：200 回 PENDING（清稳定计数、保留拒绝历史）；旧
++  row_version/非拒绝态/已绑定 409；
++- 幂等重复尝试：同幂等键重放首次响应不推 row_version；仍坏再次拒绝可重复；
++- 受控根防线：incoming_path 落在声明 root 受控 scan 根外 409。
++"""
++
++import dataclasses
++import uuid
++
++import pytest
++from fastapi.testclient import TestClient
++from sqlalchemy import create_engine, inspect, select, text
++
++import app.database as _db_mod
++import app.models as models  # noqa: F401  注册全部表
++from alembic.runtime.migration import MigrationContext
++from alembic.script import ScriptDirectory
++from app.config import settings as real_settings
++from app.services import ingest_service
++
++UNIQUE = uuid.uuid4().hex[:10]
++SCAN_ROOT = f"/srv/t12sf/{UNIQUE}/incoming"
++READY_ROOT = f"/srv/t12sf/{UNIQUE}/ready"
++
++
++@pytest.fixture()
++def client(monkeypatch, tmp_path):
++    # 自洽夹具（test_web 分页用例同款配方）：共享 SQLite 里其他套件断言
++    # "库中无 IngestSubmission 行"等全局状态——本套件经 TestClient 写入的行会
++    # 顺序污染。改用独立临时库重建 SessionLocal（app.database.get_db 读模块
++    # 全局，monkeypatch 即换库），种子 default 入口后走真实 API。
++    from sqlalchemy.orm import sessionmaker
++
++    import app.database as database_module
++    from app.services.ingest_service import seed_default_profile
++
++    isolated_url = f"sqlite:///{tmp_path / 't12sf.db'}"
++    engine = create_engine(isolated_url, connect_args={"check_same_thread": False}, pool_pre_ping=True)
++    database_module.Base.metadata.create_all(engine)
++    isolated_session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
++    monkeypatch.setattr(database_module, "SessionLocal", isolated_session)
++    with isolated_session() as db:
++        assert seed_default_profile(db) is not None
++        db.commit()
++
++    # 受控根校验按声明 root_id 查 settings：frozen dataclass 用 replace 生成
++    # 替换体（口径同 test_scene_intake_isolation.scene_settings）。本套件走
++    # self_built 口径，scene 根未配置（不启用双根扫描）。
++    new_settings = dataclasses.replace(
++        real_settings,
++        nas_scan_root=SCAN_ROOT,
++        nas_ready_root=READY_ROOT,
++        scene_nas_scan_root="",
++        scene_nas_ready_root="",
++        scene_slice_publish_root="",
++    )
++    monkeypatch.setattr(ingest_service, "settings", new_settings)
++    from app.main import app
++
++    with TestClient(app) as c:
++        yield c
++    engine.dispose()
++
++
++def _submit(client, rel_path, idem_key=None):
++    # 使用种子的 default 入口（incoming_prefix 空=接收根兜底，见
++    # test_ingest_config_api 口径：app 启动 DEMO_DATA 种子）。
++    body = {
++        "profile_id": "default",
++        "relative_path": rel_path,
++        "purposes": ["self_built"],
++    }
++    headers = {"Idempotency-Key": idem_key} if idem_key else {}
++    response = client.post("/api/v1/ingest-submissions", json=body, headers=headers)
++    assert response.status_code in (200, 201), response.text
++    return response.json()
++
++
++def _reject(client, evidence):
++    return client.post("/api/v1/ingest-submissions/reject-input", json={"evidence": evidence})
++
++
++def _evidence(rel_path, reason="EMPTY_BAG", detail="message_count=0, relative_file_paths=0", stable=2):
++    return {
++        "reason_code": reason,
++        "detail": detail,
++        "incoming_path": f"{SCAN_ROOT}/{rel_path}",
++        "root_id": "self_built",
++        "scan_root": SCAN_ROOT,
++        "stable_rounds": stable,
++        "file_count": 1,
++        "total_bytes": 12,
++        "mtime": 100,
++    }
++
++
++# ---------------------------------------------------------------------------
++# 拒绝登记
++# ---------------------------------------------------------------------------
++
++
++def test_reject_persisted_on_existing_pending_submission(client):
++    sub = _submit(client, "bag-1")
++    sid = sub["submission_id"]
++    response = _reject(client, _evidence("bag-1"))
++    assert response.status_code == 200, response.text
++    data = response.json()
++    assert data["submission_id"] == sid
++    assert data["status"] == "INPUT_REJECTED"
++    assert data["rejection_reason_code"] == "EMPTY_BAG"
++
++    got = client.get(f"/api/v1/ingest-submissions/{sid}").json()
++    assert got["status"] == "INPUT_REJECTED"
++    assert got["rejection_reason_code"] == "EMPTY_BAG"
++    evidence = got["rejection_evidence"]
++    assert evidence["schema_version"] == "ingest-reject/v1"
++    assert evidence["before_status"] == "PENDING_INPUT"
++    assert evidence["after_status"] == "INPUT_REJECTED"
++    assert evidence["incoming_path"] == f"{SCAN_ROOT}/bag-1"
++    assert evidence["observed_at"]
++    assert got["resume_hint"]
++    # 提交身份/占位保留（不静默丢弃）
++    assert got["relative_path"] == "bag-1"
++
++
++def test_reject_without_submission_creates_system_record(client):
++    # 无用户提交：Scanner 先发现无效输入 → 持久拒绝记录（根+路径+观测身份）
++    response = _reject(
++        client,
++        _evidence("bag-solo", reason="BAD_METADATA", detail="missing rosbag2_bagfile_information"),
++    )
++    assert response.status_code == 200, response.text
++    sid = response.json()["submission_id"]
++    got = client.get(f"/api/v1/ingest-submissions/{sid}").json()
++    assert got["status"] == "INPUT_REJECTED"
++    assert got["rejection_reason_code"] == "BAD_METADATA"
++    assert got["relative_path"] == "bag-solo"
++    assert got["rejection_evidence"]["incoming_path"] == f"{SCAN_ROOT}/bag-solo"
++
++
++def test_reject_outside_controlled_root_409(client):
++    bad = _evidence("bag-x")
++    bad["incoming_path"] = f"/elsewhere/{UNIQUE}/bag-x"
++    response = _reject(client, bad)
++    assert response.status_code == 409
++    assert "controlled scan root" in response.text
++
++
++def test_reject_missing_incoming_path_422(client):
++    response = _reject(client, {"reason_code": "EMPTY_BAG"})
++    assert response.status_code == 422
++
++
++# ---------------------------------------------------------------------------
++# 逻辑隔离：E 对账跳过、零事件、不影响既有记录
++# ---------------------------------------------------------------------------
++
++
++def test_pending_binding_reconcile_skips_rejected(client):
++    sub = _submit(client, "bag-iso")
++    sid = sub["submission_id"]
++    assert _reject(client, _evidence("bag-iso")).status_code == 200
++
++    db = _db_mod.SessionLocal()
++    try:
++        from app.services import pending_binding
++
++        result = pending_binding.reconcile_pending_bindings(db, limit=50)
++        row = db.scalar(select(models.IngestSubmission).where(models.IngestSubmission.submission_id == sid))
++        # 拒绝行不进对账：状态/原因码/证据不变，零事件零 run
++        assert row.status == "INPUT_REJECTED"
++        assert row.rejection_reason_code == "EMPTY_BAG"
++        assert row.source_id is None
++        events = db.scalars(
++            select(models.PurposeScheduleEvent).where(models.PurposeScheduleEvent.submission_id == sid)
++        ).all()
++        assert events == []
++        assert sid not in result["bound"]
++    finally:
++        db.close()
++
++
++def test_rejection_does_not_touch_existing_available_records(client):
++    sub = _submit(client, "bag-keep")
++    got_before = client.get(f"/api/v1/ingest-submissions/{sub['submission_id']}").json()
++    assert _reject(client, _evidence("bag-keep")).status_code == 200
++    # 既有行：拒绝登记不改动其他提交/不生成 source 行（无 bag 登记）
++    db = _db_mod.SessionLocal()
++    try:
++        row = db.scalar(
++            select(models.IngestSubmission).where(
++                models.IngestSubmission.submission_id == sub["submission_id"]
++            )
++        )
++        assert row.status == "INPUT_REJECTED"
++        assert row.source_id is None
++        assert got_before["row_version"] == row.row_version - 1  # 只推一次版本
++        bags = db.scalars(select(models.BagRecord).where(models.BagRecord.relative_path.like(f"%{UNIQUE}%"))).all()
++        assert bags == []
++    finally:
++        db.close()
++
++
++# ---------------------------------------------------------------------------
++# 受控 resume
++# ---------------------------------------------------------------------------
++
++
++def _resume(client, sid, row_version, key=None):
++    body = {"row_version": row_version, "operator": "t12sf-test"}
++    headers = {"Idempotency-Key": key} if key else {}
++    return client.post(f"/api/v1/ingest-submissions/{sid}/resume-input", json=body, headers=headers)
++
++
++def test_resume_success_back_to_pending_and_rejectable_again(client):
++    sub = _submit(client, "bag-r")
++    sid = sub["submission_id"]
++    assert _reject(client, _evidence("bag-r")).status_code == 200
++    rejected = client.get(f"/api/v1/ingest-submissions/{sid}").json()
++    assert rejected["status"] == "INPUT_REJECTED"
++
++    response = _resume(client, sid, rejected["row_version"])
++    assert response.status_code == 200, response.text
++    resumed = response.json()
++    assert resumed["status"] == "PENDING_INPUT"
++    assert resumed["row_version"] == rejected["row_version"] + 1
++
++    # 恢复后材料仍坏 → 再次拒绝（可重复尝试）
++    re_reject = _reject(
++        client,
++        _evidence("bag-r", reason="MISSING_DB3", detail="metadata references missing files: part.db3"),
++    )
++    assert re_reject.status_code == 200
++    again = client.get(f"/api/v1/ingest-submissions/{sid}").json()
++    assert again["status"] == "INPUT_REJECTED"
++    assert again["rejection_reason_code"] == "MISSING_DB3"
++    # 拒绝历史保留：本次审计块 before_status 记录 resume 后的 PENDING
++    assert again["rejection_evidence"]["before_status"] == "PENDING_INPUT"
++
++    # 恢复成功（材料补齐走绑定链的 API 侧口径）：resume 后是 PENDING，
++    # 可再被 E 对账/登记绑定消费
++    assert _resume(client, sid, again["row_version"]).status_code == 200
++
++
++def test_resume_wrong_row_version_409(client):
++    sub = _submit(client, "bag-v")
++    sid = sub["submission_id"]
++    assert _reject(client, _evidence("bag-v")).status_code == 200
++    rejected = client.get(f"/api/v1/ingest-submissions/{sid}").json()
++    response = _resume(client, sid, rejected["row_version"] - 1)
++    assert response.status_code == 409
++    assert "ROW_VERSION_CONFLICT" in response.text
++    # 状态未变
++    assert client.get(f"/api/v1/ingest-submissions/{sid}").json()["status"] == "INPUT_REJECTED"
++
++
++def test_resume_non_rejected_409(client):
++    sub = _submit(client, "bag-n")
++    response = _resume(client, sub["submission_id"], sub["row_version"])
++    assert response.status_code == 409
++    assert "SUBMISSION_NOT_REJECTED" in response.text
++
++
++def test_resume_missing_submission_404(client):
++    response = _resume(client, uuid.uuid4().hex, 1)
++    assert response.status_code == 404
++
++
++def test_resume_idempotent_replay_same_row_version(client):
++    sub = _submit(client, "bag-i")
++    sid = sub["submission_id"]
++    assert _reject(client, _evidence("bag-i")).status_code == 200
++    rejected = client.get(f"/api/v1/ingest-submissions/{sid}").json()
++    first = _resume(client, sid, rejected["row_version"], key=f"t12sf-resume-{UNIQUE}")
++    assert first.status_code == 200
++    replay = _resume(client, sid, rejected["row_version"], key=f"t12sf-resume-{UNIQUE}")
++    assert replay.status_code == 200
++    # 同幂等重放不重复推进代次
++    assert replay.json()["row_version"] == first.json()["row_version"]
++    got = client.get(f"/api/v1/ingest-submissions/{sid}").json()
++    assert got["row_version"] == rejected["row_version"] + 1
++    assert got["status"] == "PENDING_INPUT"
++
++
++def test_resume_bound_submission_409(client):
++    """已绑定行不可能是 INPUT_REJECTED（防御性语义）：构造 BOUND 行后 resume 409。"""
++    sub = _submit(client, "bag-b")
++    sid = sub["submission_id"]
++    db = _db_mod.SessionLocal()
++    try:
++        row = db.scalar(select(models.IngestSubmission).where(models.IngestSubmission.submission_id == sid))
++        row.status = "BOUND"
++        row.source_id = f"uid-bound-{UNIQUE}"
++        db.commit()
++    finally:
++        db.close()
++    response = _resume(client, sid, client.get(f"/api/v1/ingest-submissions/{sid}").json()["row_version"])
++    assert response.status_code == 409
++
++
++# ---------------------------------------------------------------------------
++# 迁移：upgrade 新列/索引、downgrade 还原（独立空库，非全链）
++# ---------------------------------------------------------------------------
++
++
++def _run_migration(tmp_path, name, rev_id, direction):
++    """在独立空库上执行指定 revision 的 upgrade/downgrade（模块级函数口径）。
++
++    旧库形态：create_all 生成当前 model 全量 DDL，再手工回退到目标 revision
++    的前置状态（upgrade 时 drop 新列新索引；downgrade 时保留新列）。
++    """
++    path = tmp_path / f"{name}.db"
++    engine = create_engine(f"sqlite:///{path}")
++    script = ScriptDirectory("alembic")
++    rev = script.get_revision(rev_id)
++    with engine.begin() as conn:
++        models.Base.metadata.create_all(conn)
++        conn.execute(
++            text(
++                "CREATE TABLE IF NOT EXISTS alembic_version "
++                "(version_num VARCHAR(32) NOT NULL, PRIMARY KEY (version_num))"
++            )
++        )
++        if direction == "upgrade":
++            # 回退到 down_revision 状态（模拟迁移前旧库）
++            conn.execute(text("DROP INDEX ix_ingest_submission_rejection_reason_code"))
++            conn.execute(text("ALTER TABLE ingest_submission DROP COLUMN stable_reject_rounds"))
++            conn.execute(text("ALTER TABLE ingest_submission DROP COLUMN rejection_evidence_json"))
++            conn.execute(text("ALTER TABLE ingest_submission DROP COLUMN rejection_reason_code"))
++            conn.execute(text(f"INSERT INTO alembic_version (version_num) VALUES ('{rev.down_revision}')"))
++        else:
++            conn.execute(text(f"INSERT INTO alembic_version (version_num) VALUES ('{rev.revision}')"))
++        # 绑定 op 代理后执行迁移函数（alembic CLI 同款机制：Operations.context
++        # 建立迁移上下文，其内 op.* 可用）
++        from alembic.operations import Operations
++
++        ctx = MigrationContext.configure(conn)
++        with Operations.context(ctx):
++            if direction == "upgrade":
++                rev.module.upgrade()
++            else:
++                rev.module.downgrade()
++            # alembic CLI 由 upgrade/downgrade 命令维护 alembic_version；
++            # 手工调用迁移函数后按 rev 记录落版本标记（同一事实来源）。
++            target = rev.revision if direction == "upgrade" else rev.down_revision
++            conn.execute(text("UPDATE alembic_version SET version_num=:v"), {"v": target})
++    return engine
++
++
++def test_migration_upgrade_adds_rejection_columns(tmp_path):
++    engine = _run_migration(tmp_path, "t12sf-up", "20261014_01_ingest_rejected", "upgrade")
++    cols = {c["name"] for c in inspect(engine).get_columns("ingest_submission")}
++    assert {"rejection_reason_code", "rejection_evidence_json", "stable_reject_rounds"} <= cols
++    idx = {i["name"] for i in inspect(engine).get_indexes("ingest_submission")}
++    assert "ix_ingest_submission_rejection_reason_code" in idx
++    with engine.connect() as conn:
++        assert conn.execute(text("SELECT version_num FROM alembic_version")).scalar() == "20261014_01_ingest_rejected"
++    engine.dispose()
++
++
++def test_migration_downgrade_drops_rejection_columns(tmp_path):
++    engine = _run_migration(tmp_path, "t12sf-down", "20261014_01_ingest_rejected", "downgrade")
++    cols = {c["name"] for c in inspect(engine).get_columns("ingest_submission")}
++    assert not ({"rejection_reason_code", "rejection_evidence_json", "stable_reject_rounds"} & cols)
++    idx = {i["name"] for i in inspect(engine).get_indexes("ingest_submission")}
++    assert "ix_ingest_submission_rejection_reason_code" not in idx
++    engine.dispose()
+\ No newline at end of file
+diff --git a/tests/test_scanner_stability.py b/tests/test_scanner_stability.py
+index 518c2ca..8942ad7 100644
+--- a/tests/test_scanner_stability.py
++++ b/tests/test_scanner_stability.py
+@@ -4,7 +4,7 @@ from types import SimpleNamespace
+ import pytest
+ 
+ import app.scanner as scanner
+-from app.scanner import clients, paths, runner
++from app.scanner import clients, metadata, paths, runner
+ 
+ METADATA = """rosbag2_bagfile_information:
+   version: 5
+@@ -21,8 +21,9 @@ METADATA = """rosbag2_bagfile_information:
+ 
+ 
+ class FakeNasClient:
+-    def __init__(self, bag_entries):
++    def __init__(self, bag_entries, metadata_text=None):
+         self.bag_entries = bag_entries
++        self.metadata_text = metadata_text or METADATA
+         self.incoming_exists = True
+         self.ready_exists = False
+         self.listed = []
+@@ -48,7 +49,7 @@ class FakeNasClient:
+             "/public/incoming/bag-a/metadata.yaml",
+             "/public/ready/bag-a/metadata.yaml",
+         }
+-        return METADATA
++        return self.metadata_text
+ 
+     def directory_exists(self, path):
+         if path == "/public/incoming/bag-a":
+@@ -259,6 +260,147 @@ def test_scanner_recovers_move_completed_before_backend_registration(monkeypatch
+     assert registrations == [("/public/ready/bag-a", "fingerprint-v1", None)]
+ 
+ 
++EMPTY_METADATA = """rosbag2_bagfile_information:
++  version: 5
++  storage_identifier: sqlite3
++  relative_file_paths: []
++  duration:
++    nanoseconds: 0
++  starting_time:
++    nanoseconds_since_epoch: 1
++  message_count: 0
++  topics_with_message_count: []
++"""
++
++
++def _empty_entries(db_size=10, db_mtime=100):
++    return [
++        {
++            "name": "metadata.yaml",
++            "path": "/public/incoming/bag-a/metadata.yaml",
++            "isdir": False,
++            "additional": {"size": len(EMPTY_METADATA), "time": {"mtime": db_mtime}},
++        }
++    ]
++
++
++def _configure_reject(monkeypatch, tmp_path, client, report=None, raise_on_report=False):
++    """拒绝路径配置：捕获 report_input_rejected 调用；register/move 不得被触碰。"""
++    _configure(monkeypatch, tmp_path, client)
++    reports = []
++    monkeypatch.setattr(
++        runner.backend,
++        "register_source",
++        lambda *_args, **_kw: pytest.fail("无效输入不得登记 source"),
++    )
++    monkeypatch.setattr(runner, "compute_fast_fingerprint", lambda *_args: pytest.fail("无效输入不得进入指纹链"))
++
++    def _report(evidence):
++        if raise_on_report:
++            raise RuntimeError("backend unreachable")
++        reports.append(evidence)
++        return {"submission_id": "sub-r", "status": "INPUT_REJECTED"}
++
++    monkeypatch.setattr(runner.backend, "report_input_rejected", report or _report)
++    return reports
++
++
++def test_empty_bag_rejected_after_stable_rounds_without_move_or_register(monkeypatch, tmp_path):
++    client = FakeNasClient(_empty_entries(), metadata_text=EMPTY_METADATA)
++    reports = _configure_reject(monkeypatch, tmp_path, client)
++
++    first = runner.scan_remote()
++    assert first.get("rejected") is None and reports == []  # 第 1 轮：未稳定不上报
++    state1 = json.loads((tmp_path / "scanner-state.json").read_text())["/public/incoming/bag-a"]
++    assert state1["stable_rounds"] == 1
++
++    second = runner.scan_remote()
++    assert second.get("rejected") == 1
++    assert client.incoming_exists is True  # 原包留在受控位置，不 move
++    assert client.ready_exists is False
++    evidence = reports[0]
++    assert evidence["reason_code"] == "EMPTY_BAG"
++    assert evidence["incoming_path"] == "/public/incoming/bag-a"
++    assert evidence["scan_root"] == "/public/incoming"
++    assert evidence["root_id"] == "self_built"
++    assert evidence["stable_rounds"] == 2
++    assert evidence["detail"]
++    state2 = json.loads((tmp_path / "scanner-state.json").read_text())["/public/incoming/bag-a"]
++    assert state2["reject_reported"] is True
++    assert state2["reject_reason"] == "EMPTY_BAG"
++    assert state2["reject_snapshot"]
++
++
++def test_same_reject_snapshot_is_suppressed_on_repeat_scan(monkeypatch, tmp_path):
++    client = FakeNasClient(_empty_entries(), metadata_text=EMPTY_METADATA)
++    reports = _configure_reject(monkeypatch, tmp_path, client)
++    runner.scan_remote()
++    assert runner.scan_remote().get("rejected") == 1
++    assert len(reports) == 1
++
++    suppressed = runner.scan_remote()
++    # 相同内容快照：跳过业务处理（抑制），不刷重复拒绝
++    assert suppressed.get("rejected") is None
++    assert suppressed.get("rejected_suppressed") == 1
++    assert len(reports) == 1
++    state = json.loads((tmp_path / "scanner-state.json").read_text())["/public/incoming/bag-a"]
++    # 抑制轮 journal 保留拒绝标记（重启后仍抑制）
++    assert state["reject_reported"] is True
++    assert state["reject_snapshot"]
++
++
++def test_reject_content_change_reports_again(monkeypatch, tmp_path):
++    client = FakeNasClient(_empty_entries(), metadata_text=EMPTY_METADATA)
++    reports = _configure_reject(monkeypatch, tmp_path, client)
++    runner.scan_remote()
++    assert runner.scan_remote().get("rejected") == 1
++    # 内容变化（mtime/字节变 → 稳定轮次重置 → 新快照）：重新计稳定后可再报
++    client.bag_entries = _empty_entries(db_mtime=200, db_size=10)
++    r3 = runner.scan_remote()
++    assert r3.get("rejected") is None and r3.get("rejected_suppressed") is None  # 重置后第 1 轮不报
++    r4 = runner.scan_remote()
++    assert r4.get("rejected") == 1
++    assert len(reports) == 2
++    assert reports[1]["mtime"] == 200
++
++
++def test_reject_report_failure_counts_failed_and_not_persisted(monkeypatch, tmp_path):
++    client = FakeNasClient(_empty_entries(), metadata_text=EMPTY_METADATA)
++    _configure_reject(monkeypatch, tmp_path, client, raise_on_report=True)
++    runner.scan_remote()
++    result = runner.scan_remote()
++    # Backend 不可达=基础设施故障：计 failed，不写拒绝标记（下轮继续尝试）
++    assert result["failed"] == 1
++    state = json.loads((tmp_path / "scanner-state.json").read_text())["/public/incoming/bag-a"]
++    assert state.get("reject_reported") is not True
++    assert state.get("reject_snapshot") is None
++
++
++def test_classify_bag_input_reason_codes():
++    entries = _empty_entries()
++    parsed, code, detail = metadata.classify_bag_input(entries, EMPTY_METADATA)
++    assert parsed is None and code == "EMPTY_BAG" and detail
++
++    parsed, code, detail = metadata.classify_bag_input(entries, "not: [yaml")
++    assert parsed is None and code == "BAD_METADATA" and detail
++
++    parsed, code, detail = metadata.classify_bag_input([], "missing: x")
++    assert parsed is None and code == "BAD_METADATA"
++    assert detail and "rosbag2_bagfile_information" in detail
++
++    parsed, code, detail = metadata.classify_bag_input(
++        [{"name": "metadata.yaml", "isdir": False}],
++        METADATA,
++    )
++    assert parsed is None and code == "MISSING_DB3"
++    assert detail and "part.db3" in detail
++
++    # 有效输入：classify 与 validate 口径一致
++    parsed, code, detail = metadata.classify_bag_input(_entries(), METADATA)
++    assert parsed is not None and code is None and detail is None
++    assert metadata.validate_bag_input(_entries(), METADATA) == parsed
++
++
+ def test_mounted_nas_move_is_atomic_and_paths_cannot_escape_root(monkeypatch, tmp_path):
+     nas_root = tmp_path / "nas"
+     incoming = nas_root / "incoming" / "bag-a"
+diff --git a/tests/test_scanner_structure.py b/tests/test_scanner_structure.py
+index 87a87cc..a80c43c 100644
+--- a/tests/test_scanner_structure.py
++++ b/tests/test_scanner_structure.py
+@@ -6,8 +6,10 @@ from app.services import catalog_ingest
+ 
+ def test_scanner_responsibilities_are_split_into_modules() -> None:
+     assert backend.register_source.__module__ == "app.scanner.backend"
++    assert backend.report_input_rejected.__module__ == "app.scanner.backend"
+     assert clients.MountedNasClient.__module__ == "app.scanner.clients"
+     assert metadata.validate_bag_input.__module__ == "app.scanner.metadata"
++    assert metadata.classify_bag_input.__module__ == "app.scanner.metadata"
+     assert paths.validate_nas_path.__module__ == "app.scanner.paths"
+     assert state_store.write_scanner_state.__module__ == "app.scanner.state_store"
+     assert catalog_ingest.upsert_bag.__module__ == "app.services.catalog_ingest"

@@ -1,0 +1,18 @@
+{
+  "event_id": "COORDINATOR:coord-4acf-stuck-cancelling-ruling-20261014T1840",
+  "kind": "business",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "RULING_ISSUED",
+  "summary": "大包 scene-4acf689f（16_02_03）SCENE_CANCELLING 滞留定性裁决：取消链三要素（16:22 观察/17:14:25 编排退出 INFER CANCELLED/确认 409×2）经 C obs78、TESTER 18:13 独立核实、A 18:04 只读核三方一致；18:34 协调者实测 run 行仍 CANCELLING、8767 active_runs 空、零 PUBLISH 产物。代码面（3c9c496）证实无收敛方：cancel 端点对 CANCELLING 态 409、finalization 不接手、无 reap 端点，滞留=确认写被过期租约守卫挡回的收口缺口。裁决：验收面闭合（TESTER 出 TEST_REPORT_PENDING 即全批收口），缺陷候选入 16R 盘点，不直改生产 DB/不重启服务/不重提 run；A 转 IDLE，C 停止逐轮申报。裁决落盘 inbox/coordinator/SPRAY-BATCH-1012-20261013/ruling-4acf-stuck-cancelling-1840.md；BATCH-STATUS TESTER 行与 TODO §8 任务行已同步。",
+  "evidence": "inbox/coordinator/SPRAY-BATCH-1012-20261013/ruling-4acf-stuck-cancelling-1840.md（18:40 落盘）；test-receipts/TASK-11S-BATCH-1012/attempt-1.md 18:13 段（容器日志原文三行）；events/C obs78 5a06b7f3…/17:55 段；18:34 ssh 8180 GET 实测 SCENE_CANCELLING/INFER RUNNING/lease 16:23:55 stale；3c9c496 scene_slice_service.py:565-601 + security.py:39 + scene_host_proxy.py:1048",
+  "next": "等 TESTER TEST_REPORT_PENDING 全批收口裁决；A 叶增量 OCR 66ca40d3 收口后逐条裁决（16C-A 接受面）；16R 盘点并入 CANCELLING 滞留缺陷候选；白天 20min 报告说明缺陷候选与用户决策点（是否修 reap）",
+  "schema_version": 1,
+  "role": "COORDINATOR",
+  "recorded_at": "2026-10-14T18:36:59+08:00",
+  "occurred_at": null,
+  "time_source": {
+    "kind": "unknown",
+    "reason": "历史发生时间未核实；recorded_at 只表示补录时间"
+  }
+}

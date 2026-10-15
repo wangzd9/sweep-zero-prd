@@ -1,0 +1,20 @@
+{
+  "event_id": "TESTER:t16d-joint-29bd1f4-pass-delivered-20261014-1858",
+  "kind": "business",
+  "task": "TASK-16D",
+  "attempt": "attempt-1",
+  "status": "DELIVERED",
+  "summary": "联合验收固定 SHA 29bd1f4 派单（17 时）四清单在含 seed+三叶（A 1489bc6 cleanup / B e399daf / C ce5921d）的固定集成候选上独立执行，TESTER 联合面 PASS：① A 清理增量——data_kind_case 死函数 grep=0、view_label 664 行=原始数据/全部、scene_result_query 未变、定向 pytest 74 passed+1 seed 固有 N+1 不计、浏览器 /bags?view=originals chip 渲染「视图：原始数据」(has_chip_view_label=true/has_old_view_label=false) 重载后同；② cursor 矩阵严格 MySQL 8.4.11 隔离库两查询入口——search_scene_bags 翻页 pages=4 无漏无重(len=11 uniq=11)、换 data_kind/view→422、同筛选续页 200 无重复、旧锚点 cursor 兼容 200、scene_code None/空串归一、lineage 父包翻页无漏无重(3 子包)、子包视角 parent 正确、非法 cursor→422 不 500，矩阵 20/20 PASS；③ 严格 MySQL C7/C5/C6 谓词面 21/21 PASS(确认 A 清理未改谓词语义)；④ 真实 headless Chrome Console 零异常(hookAlive=true) /bags?view=originals、/bags、/pipelines/scene-e46f28c2(血缘 ol.lineage 在位+SCENE_DONE+无 refresh meta/无 retry form/终态停刷新)。全程只读+自造夹具 T16DCURS(11 行)/T16DMYSQL(9 行)自清归零实证，不改 seed/其他叶树/业务实现、未运行 OCR、不批准合入(合入/OCR 门禁仍归协调者)。运行版本 header 实证 29bd1f49。",
+  "evidence": "test-receipts/TEST-TASK16D/attempt-1.md 联合验收固定 SHA 29bd1f4 段(四清单逐条)；wt-coord-intcheck-16c@29bd1f4 git log 干净；探针 t16d_joint_mysql_probe.py 21/21 rc=0、t16d_joint_cursor_probe.py 20/20 rc=0、t16d_joint_browser.py/browser2.py CDP Console errors=[]；purge verify left bags=0/deriv=0。",
+  "next": "交协调者裁决：TESTER 联合验收面 PASS 已就绪，合入批准+原 16C 整体联合验收门禁由协调者执行；任一失败项(本轮无)回原叶 owner。16D 联合段收口后回到原 11S 批次 4acf689f 取消链收敛面(SCENE_CANCELLED 终态登记)+全批 TEST_REPORT_PENDING。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "TESTER",
+  "recorded_at": "2026-10-14T18:41:03+08:00",
+  "occurred_at": "2026-10-14T18:41:03+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

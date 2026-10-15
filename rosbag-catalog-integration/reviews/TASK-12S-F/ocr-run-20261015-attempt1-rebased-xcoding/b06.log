@@ -1,0 +1,105 @@
+[ocr] --background-file content is 2132 characters, exceeding the recommended 2000 (continuing but review quality might be impacted)
+{
+  "status": "complete",
+  "llm": {
+    "provider": "hermes-xcoding",
+    "model": "gpt-6.1-sol"
+  },
+  "message": "Review complete: 2 finding(s) across 1 selected item(s).",
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 2,
+    "total_tokens": 203880,
+    "input_tokens": 202083,
+    "output_tokens": 1797,
+    "cache_read_tokens": 150784,
+    "elapsed": "6m23s"
+  },
+  "tool_calls": {
+    "total": 23,
+    "by_tool": {
+      "code_comment": 1,
+      "code_search": 8,
+      "file_find": 1,
+      "file_read": 13
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [
+    {
+      "path": "app/scanner/runner.py",
+      "content": "The suppression cache never observes an explicit resume. After a successful rejection, `resume_input_submission()` changes only the Backend row to `PENDING_INPUT`; it neither clears this journal nor changes the files. If the operator resumes an unchanged, still-invalid bag, every subsequent scan takes this return, leaving the submission pending indefinitely instead of rejecting it again. Tie suppression to the Backend submission generation (and invalidate/reset stability on resume), rather than relying solely on the file snapshot. Add an end-to-end reject → resume without file changes → scan regression test.",
+      "existing_code": "        if old.get(\"reject_snapshot\") == snapshot and old.get(\"reject_reported\"):\n            marker[\"reject_snapshot\"] = snapshot\n            marker[\"reject_reason\"] = reason_code\n            marker[\"reject_reported\"] = True\n            stats[\"rejected_suppressed\"] = stats.get(\"rejected_suppressed\", 0) + 1\n            return",
+      "start_line": 199,
+      "end_line": 204,
+      "category": "bug",
+      "severity": "high"
+    },
+    {
+      "path": "app/scanner/runner.py",
+      "content": "A previously rejected bag that becomes valid falls through to the existing move/register path without checking whether an explicit resume occurred. For example, adding the missing DB3 and waiting for stability moves the bag out of incoming while its submission is still `INPUT_REJECTED`. With ingest binding enabled, registration then ignores that rejected row and attempts to create a system submission with the same unique path claim, causing registration to fail after the move. Check the authoritative rejection/resume state before allowing a formerly rejected bag to move; corrected files alone must not bypass controlled recovery.",
+      "existing_code": "    parsed, reason_code, detail = classify_bag_input(entries, metadata)\n    if parsed is None:",
+      "start_line": 192,
+      "end_line": 193,
+      "category": "bug",
+      "severity": "high"
+    }
+  ],
+  "groups": [
+    {
+      "label": "app/scanner/runner.py",
+      "files": [
+        "app/scanner/runner.py"
+      ]
+    }
+  ],
+  "session_id": "3260cb59-d710-40bd-ae46-5ecaca9dc96b",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "3260cb59-d710-40bd-ae46-5ecaca9dc96b",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "requested_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "resolved_base": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "resolved_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "exact_range": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3..96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "source_artifact_sha256": "56c12b7b81a7016ee041bfeddbbbfd5946e75d337cf97318558f3953a915aaec"
+    },
+    "execution": {
+      "ocr_version": "v1.13.0",
+      "provider": "hermes-xcoding",
+      "model": "gpt-6.1-sol",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "997f89f8d235a66a06926b1f48d2d8a9c306d43983f5e630403ff9f9c5d5ee39",
+      "runtime_config_sha256": "994606f9fae59088b21138c4a003932cad4b2721ca5293391612f2682d16163c"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "be6ee242b10c07de3e8c025f3e0d76cfebdf1df7518ffcebc985e8e4b021fd27",
+          "path": "app/scanner/runner.py",
+          "fingerprint": "32f9ce692906ee5ff9a6c4bad0a45b6d584c4fc117cac9d2bd39d70dd55a8add"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "be6ee242b10c07de3e8c025f3e0d76cfebdf1df7518ffcebc985e8e4b021fd27",
+          "path": "app/scanner/runner.py",
+          "fingerprint": "32f9ce692906ee5ff9a6c4bad0a45b6d584c4fc117cac9d2bd39d70dd55a8add"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 383444
+  }
+}

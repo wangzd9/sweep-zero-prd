@@ -1,0 +1,20 @@
+{
+  "event_id": "C:c-t11s-obs80-consume-ruling-stuck-cancelling-20261014",
+  "kind": "business",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "1",
+  "status": "MONITOR_ONLY",
+  "occurrence": {
+    "kind": "now"
+  },
+  "summary": "C 消费协调者 18:40 裁决 ruling-4acf-stuck-cancelling-1840.md（BATCH-STATUS 已同步）：大包 16_02_03（scene-4acf689f）SCENE_CANCELLING 滞留定性=取消已实际发生、DB run 行滞留为过期租约守卫挡回确认写的收口缺口，缺陷候选入 16R 盘点；验收面按取消链三要素+零产物闭合，不再等 SCENE_DONE。C 的 obs 面执行裁决口径：4acf689f 从「下轮核收敛」改为「滞留已定性，仅监控 run 行是否被外部变更，不再逐轮重复申报」。本轮 obs79 实测（8180 run 行 SCENE_CANCELLING/lease 16:23:55 stale/INFER RUNNING 标记/8767 active_runs 空）与裁决 18:34 协调者实测一致，无冲突。16C-C 叶维持 14:24 ACCEPTED 冻结（head ce5921d），等待三叶齐+固定集成候选+TESTER 16D 联合验收+合入授权链，无 C 新派单/返修。",
+  "evidence": "裁决文件 inbox/coordinator/SPRAY-BATCH-1012-20261013/ruling-4acf-stuck-cancelling-1840.md（C 动作段）+BATCH-STATUS.md C 行 18:40 增补；obs79 事件 C:c-t16c-merge-auth-consumed-11s-obs79-20261014（18:34:56 处理机只读实测）",
+  "next": "C 进入监控等待：下轮起对 4acf689f run 行仅在外部变更（状态翻转/lease 续租/被 reap）时记录，不逐轮申报；16C-C 新派单/返修按协调者优先级回 c/task-16cc-pipeline-detail 分支。",
+  "schema_version": 1,
+  "role": "C",
+  "recorded_at": "2026-10-14T18:37:42+08:00",
+  "occurred_at": "2026-10-14T18:37:42+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

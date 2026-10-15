@@ -1,0 +1,20 @@
+{
+  "event_id": "A:a-task12se-attempt1-ack-running-20261014",
+  "kind": "business",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "ACK落盘开工：派单inbox/1号/TASK-12S-E/attempt-1-dispatch.md，base main 16a154f实测双核一致，新建分支a/task-12s-e-auto-bind @ wt-01-t12se，.venv软链，边界=ingest_service/source_service/必要schedule消费者与对应测试；下一步读契约材料与恢复证据后实现",
+  "evidence": "inbox/1号/TASK-12S-E/attempt-1-ack.md",
+  "next": "实现登记/绑定自动闭环与幂等（REQ-20/AC-20），自测后交付receipts/TASK-12S-E/attempt-1.md",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "A",
+  "recorded_at": "2026-10-14T20:30:51+08:00",
+  "occurred_at": "2026-10-14T20:30:51+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

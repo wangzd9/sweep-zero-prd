@@ -1,0 +1,20 @@
+{
+  "event_id": "COORDINATOR:t12sd1-attempt1-partial-delivery-accepted-20261014-2055",
+  "kind": "business",
+  "task": "TASK-12S-D1",
+  "attempt": "attempt-1",
+  "status": "REVIEW_ACCEPTED_PARTIAL",
+  "summary": "消费 C 20:42:59 REVIEW_PENDING 事件（D1 ACK 20:33→20:40 交付）：协调者机械核验通过——receipts/TASK-12S-D1/attempt-1.md+samples.yaml 逐包 bytes/DB3/topic 消息数/duration/SHA 与冻结 input-manifest.json 8 包逐项一致、批次 25,119,612,157 B 一致、4acf 取消终态与 ruling-1840 三方一致、零代码改动零生产写入；部分交付口径接受（阳性×4 受控test 已证/输入适用性×3/无效输入×1），五项 BLOCKED_MATERIAL 在案（真值区间/真实正常阴性/实车映射/质量阈值/跨DB3命中），D2 真实验收维持阻塞，材料补齐即重算对应用例；TESTER 可测试性复核随 D2 固定候选派单执行不单独催",
+  "evidence": "receipts/TASK-12S-D1/attempt-1.md; receipts/TASK-12S-D1/attempt-1-samples.md; inbox/3号/TASK-12S-D1/attempt-1-ack.md; inbox/coordinator/SPRAY-BATCH-1012-20261013/input-manifest.json（协调者独立解析比对）; TODO §11 D1 行",
+  "next": "C 开发槽释放（零代码清单面已收口）；D2 前置=E/F 接受+D1 材料补齐，任一材料到位协调者重算对应用例；A 12S-E 交付后核 diff+机械验证+串行 OCR",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "COORDINATOR",
+  "recorded_at": "2026-10-14T20:57:11+08:00",
+  "occurred_at": "2026-10-14T20:57:11+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

@@ -116,3 +116,26 @@ status: REVIEW_PENDING（冻结交付，**未合入**，待协调者审查/OCR �
   - 唯一失败 `test_bag_search_page_has_bounded_query_count_and_response_time` 为 **seed 固有失败**（N+1 bounded-query，与 R1 段 stash 基线 ff2a005 同口径），本 R1-2 仅改 chip 展示字符串不动 SQL，**零新增失败**，不计本账。
 - 后续门禁（按 R1-2 单口径，不代判）：协调者机械核验 → **单文件增量 OCR 一次**（覆盖 R1+R1-2 同文件小 diff，`scene_result_query.py` 未变不重跑，不逐 commit 重复烧 OCR）→ 零 CORRECTION 级 + TESTER 增量面 → A 叶接受。
 - 时间：发生（commit 落盘）2026-10-14 17:40 +08:00（`1489bc6` committer date 17:40:26 实测）；ruff+pytest 实测为本轮 commit 前执行；本段补录 17:43 +08:00。
+
+---
+
+## attempt-1 OCR 增量 R1-3 段：F1 谓词单源对齐 NVIDIA 排除（`ocr-r1-rework-3-dispatch-20261014.md`，协调者 2026-10-14 18:55）
+
+- 状态：**续 commit 已冻结交付，REVIEW_PENDING（A 叶新最终冻结 head）**（未合入；并入 attempt-1 同一冻结链，不新开 attempt；同 branch `a/task-16c-a-query-api`、同 worktree `wt-01-t16ca`，base 续 R1-2 已交付 `1489bc6b58a20a57650831969c53e6af39d57f75`）
+- 新 head: `8958291222dbad8fbf61e7802510ddf83ecbbce1`（续 `1489bc6`，committer date 2026-10-14 19:03:26 +08:00 实测）
+- 来源：A 叶增量 OCR run `66ca40d3` b01（`bag_search_service.py`）收口裁决 `inbox/coordinator/TASK-16C-A/ocr-r12-adjudication-20261014.md`。**仅 F1 须返修**（CONFIRMED 防御性 medium）；F2 驳回（隔离树盲区，`29bd1f4` 集成面 chip/tab 已一致）；F3 文档随 F1 同包修。只改一个文件 `app/services/bag_search_service.py`，零越界。
+- 变更（仅 1 文件，+18/−10）：
+  - **F1（谓词单源对齐，核心）**：`data_kind_pred` 两分支各补 `BagRecord.dataset_type != "nvidia_physicalai"`，镜像 Python `data_kind_context` 的 `elif dataset_type=="nvidia_physicalai"` 优先级与顶部 `# 分类优先级` 单源注释（1)子包→2)NVIDIA→3)场景→4)自建）：
+    - `scene_original`：`and_(ORIGINAL, ~_scene_slice_pred(), dataset_type != "nvidia_physicalai", _scene_basis_pred())`（原缺 NVIDIA 排除，nvidia+scene 用途原包会误命中 SQL 但标签侧仅渲染 nvidia_original，形成 C6 要消除的第二套真相形态）。
+    - `self_built_original`：`and_(ORIGINAL, ~_scene_slice_pred(), dataset_type != "nvidia_physicalai", or_(dataset_type=="self_built", ~_scene_basis_pred()))`（同对称缺口）。
+  - **F1 文档同步（零行为）**：`data_kind_pred` docstring 第 3/4 条补「且非 NVIDIA（单源优先级第 2 条 NVIDIA 先命中，与 data_kind_context 一致）」；顶部 `# 分类优先级` 注释第 3/4 条补「且非 NVIDIA」。
+  - **F3（文档，零行为）**：`_parse_time` docstring「MySQL DATETIME(0) 四舍五入落 23:59:59」改为如实口径——写入侧秒精度四舍五入、`…59.999999`（frac≥0.5）可能进位到次日 00:00:00（TESTER 严格 MySQL 8.4.11 探针 `CAST('…59.999999' AS DATETIME)`=次日 00:00:00 已证），全天窗口比较语义按字符串边界仍含当日 23:59:59（`'…23:59:59' <= '…23:59:59.999999'` 成立）。不改任何谓词/逻辑。
+  - **F2 附带（注释，零行为）**：`BagSearchState.view` 行内注释「all=全部/历史」→「all=全部」（陈旧文案随本次同步，无代码改动）。
+- 复跑证据（worktree `wt-01-t16ca`，venv=主仓 py3.10 软链，SQLite 本地栈，本轮 commit 前实测，commit 落盘 19:03 +08:00）：
+  - `ruff check app/services/bag_search_service.py` → **All checks passed**（exit 0）。
+  - `pytest tests/test_task16ca_query_api.py tests/test_task16c_ui_minimal.py tests/test_web.py -q` → **74 passed, 1 failed**，与派单期望「74 passed + 1 seed 固有 bounded-query」逐字一致。
+  - 唯一失败 `test_bag_search_page_has_bounded_query_count_and_response_time`（N+1 bounded-query 断言 11>8）为 **seed 固有失败**：`git stash` 本返修后在 base `1489bc6` 单跑同口径复现失败（`1 failed`），**本 R1-3 零新增失败**，不计本账。
+  - **F1 不变量自证**（内存 SQLite 最小探针，非仅单文件自洽）：构造 nvidia+ORIGINAL+有 scene_slice 用途+非子包（UID-N1）、nvidia+ORIGINAL+无 scene 用途（UID-N2）、self_built+ORIGINAL+双用途(scene+self_built)（UID-SB）三行 → 筛 `scene_original`/`self_built_original` 均**不命中** N1/N2、筛 `nvidia_original` 命中 N1/N2；双用途 UID-SB 两筛选仍都命中且各集合恰为 `[UID-SB]`（F1 只加 NVIDIA 排除、不改双用途行为）→ **7 断言全 PASS / ALL_OK**。
+- 未执行项：真 MySQL 8.4.11 STRICT 面（本改动仅布尔谓词加一 `!=` 与 docstring/注释，无 DDL/锁序变化）留协调者机械核验与 TESTER F1 增量面；TESTER 组合夹具（nvidia+scene 用途原包筛 scene_original 不返回 + 标签仅 nvidia_original 一致性）由 TESTER A 增量面独立验证，A 不代跑。
+- 后续门禁（按 R1-3 单口径，不代判）：协调者机械核验 → **增量 OCR 仅 `bag_search_service.py` 单文件**（head 变化使旧覆盖不自动续用；`scene_result_query.py` 由同 run b02 收口、未变不重跑）→ 零 CORRECTION 级 + **TESTER A 增量面** → A 叶接受；16C 合入维持 HOLD（`inbox/coordinator/TASK-16C/merge-authorization-20261014.md` 18:55 段）待本返修链收口齐后重建集成候选并重新联合验收。
+- 时间：发生（commit 落盘）2026-10-14 19:03 +08:00（`8958291` committer date 19:03:26 实测）；ruff+pytest+F1 探针实测为本轮 commit 前执行；本段补录 19:05 +08:00。

@@ -1,0 +1,18 @@
+{
+  "event_id": "TESTER:t16c-merge-16a154f-consumed-verified-20261014-2013",
+  "kind": "business",
+  "task": "TASK-16D",
+  "attempt": "attempt-1",
+  "status": "CONSUMED",
+  "summary": "消费协调者 20:05 TASK-16C 聚合接受+合入 main 决策（merge-decision-20261014.md），TESTER 侧独立复核：① git 实测 main HEAD=16a154f（merge --no-ff，parents 63bfcf8+44b6c07），44b6c07 为 main 祖先（merge-base --is-ancestor rc=0）；② 本地 Compose 测试环境页面实测 http 200，header=「运行版本 平台 16a154ff · 自建 81b1e83a · NVIDIA 95f4ff65 · mock」，与决策记录一致；③ docker ps 18 容器栈在位（backend/mysql healthy）。本决策依据的 TESTER 最终联合验收 PASS（44b6c07，19:56 事件在案）为本角色交付，合入执行与裁决归协调者，TESTER 不批准/不代跑合入。16D 任务面随聚合 DONE 收口。",
+  "evidence": "git rev-parse main=16a154fff6f23e20b15498d1285a783713859647（2026-10-14 20:11 实测）；merge-base --is-ancestor 44b6c07 main rc=0；curl http://127.0.0.1:8181/bags?view=originals http=200 header=16a154ff/81b1e83a/95f4ff65/mock；test-receipts/TEST-TASK16D/attempt-1.md 44b6c07 段（19:56 交付 PASS）。",
+  "next": "16D 收口完成，无新增验证项。后续仅在协调者再派新固定 SHA/新验收面时接续；wt-coord-intcheck-16c 与各 TESTER 验证树清理归协调者既有清理流程，TESTER 不擅动他角色资源。生产处理机部署未授权不执行。",
+  "schema_version": 1,
+  "role": "TESTER",
+  "recorded_at": "2026-10-14T20:12:39+08:00",
+  "occurred_at": null,
+  "time_source": {
+    "kind": "unknown",
+    "reason": "历史发生时间未核实；recorded_at 只表示补录时间"
+  }
+}

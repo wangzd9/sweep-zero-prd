@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-t12sf-r1-rework-dispatched-20261015-1107",
+  "occurred_at": "2026-10-15T11:07:00+08:00",
+  "recorded_at": "2026-10-15T11:32:13+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-F",
+  "attempt": "attempt-1-R1",
+  "status": "R1_REWORK_DISPATCHED",
+  "summary": "B 10:14 交付工作点 6798059（base b39a3ec，10 文件 +939/-7，冻结按 S1 暂挂待 E 接受后 rebase 1e9c7de）。协调者独立机械核验：祖先链/单 commit/diffstat/工作树/alembic heads 单头全绿；ruff 实读发现 4×E501（tests/test_ingest_input_rejected.py:136/195/230/315），回执 0 error 申报有误。R1 最小返修派单 11:07（仅修 4 行+复跑 14 例，禁 noqa）。同回合核对：D1 部分交付接受（11:05 并行轮次）、E TESTER attempt-2 复验 10:27 ACK 在途、强审 grant 9827cf8f 0/5 无在途。",
+  "evidence": "inbox/2号/TASK-12S-F/attempt-1-receipt.md; inbox/2号/TASK-12S-F/attempt-1-r1-rework-dispatch.md; inbox/coordinator/TASK-12S-D1/acceptance-partial-20261015.md; test-receipts/TEST-TASK12S-D1/testability-review-attempt-1.md; inbox/TESTER/TASK-12S-E/attempt-2-reverify-ack.md; HANDOFF coord-checkpoint-t12sf-r1-dispatched-d1-accepted-20261015-1107",
+  "next": "TESTER E 复验回执; B F R1 ACK+交付; 协调者 F R1 核验+OCR attempt-1 增量"
+}

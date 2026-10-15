@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-t12se-b39a3ec-frozen-ocr-617b9375-submitted-tester-dispatched-20261014-2344",
+  "occurred_at": "2026-10-14T23:49:28+08:00",
+  "recorded_at": "2026-10-14T23:49:28+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-1",
+  "status": "DELIVERED_FROZEN",
+  "summary": "A 23:33:56 冻结交付 head b39a3ec（base 16a154f，4 文件 +911/-19：pending_binding 新增 207 行/source_service 三档身份判定/scene_schedule_consumer 接入有界对账/12 机械用例）；协调者机械核验全绿（祖先链/树洁净/独立复跑 12 passed+154 passed+ruff clean）。双门禁起跑：OCR run 617b9375 23:41 经唯一入口 prepare→start SUBMITTED（3 批，service active）；TESTER 独立验证派单落盘（MySQL 隔离库重放/三档身份/冲突隔离/回归/零越界）。TODO 11 E 行与 HANDOFF 23:44 检查点已同步；强审 24h 授权在案 0 调用，E 收口后按 strong-review 判定。夜间静默只落盘不群报。",
+  "evidence": "reviews/TASK-12S-E/ocr-run-20261014/run/state.json; inbox/1号/TASK-12S-E/receipts/TASK-12S-E/attempt-1.md; inbox/TESTER/TASK-12S-E/attempt-1-independent-verify-dispatch.md; TODO.md 11; HANDOFF 23:44 段",
+  "next": "observer 续核 OCR 617b9375 收口（AWAITING_DECISION 后逐条裁决，零 CORRECTION 级才推进）+ TESTER 12S-E 回执 PASS；两者齐→E 接受→释放 12S-F 公共文件前置派 B；夜间静默维持"
+}

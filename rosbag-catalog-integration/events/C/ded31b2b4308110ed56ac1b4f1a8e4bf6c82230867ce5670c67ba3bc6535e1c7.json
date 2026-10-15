@@ -13,5 +13,5 @@
   "quiet_hours_note": "08:00 后白天口径：状态变化即时通报，本轮无变化不报进度",
   "source": "canonical events/C/",
   "lease_owner": "C-cron-poll-20261014-083853-t11s-obs64",
-  "lease_token": "e6cdaa06255f4cb38e1da5f3f0d23f67"
+  "lease_token": "[REDACTED_PRIVATE_VALUE]"
 }

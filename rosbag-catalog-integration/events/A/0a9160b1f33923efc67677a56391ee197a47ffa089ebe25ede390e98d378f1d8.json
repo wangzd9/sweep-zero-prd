@@ -1,0 +1,20 @@
+{
+  "event_id": "A:a-t16ca-ocr-r12-awaiting-decision-observed-20261014",
+  "kind": "business",
+  "task": "TASK-16C-A",
+  "attempt": "attempt-1",
+  "status": "IDLE",
+  "summary": "只读观测：A 叶最终冻结 head=1489bc6 的单文件增量 OCR run 66ca40d3（协调者 18:02 经唯一入口 SUBMITTED）18:45:18 +08:00 收口 AWAITING_DECISION、gate_decision=NOT_EVALUATED：b01 bag_search_service.py REVIEW_COMPLETE rc=0（2013.7s，3 findings）+ b02 scene_result_query.py REVIEW_COMPLETE rc=0（677.9s，0 findings，coverage 1/1 complete=true，manifest bd0db1d..1489bc6 精确）。3 findings 供协调者裁决（A 不代裁）：①medium·maintainability=谓词缺 NVIDIA 优先级排除（scene_original/self_built_original 未排除 dataset_type=nvidia_physicalai，与文件内 1)→4) 单源优先级口径不一致，建议补 ~_nvidia_pred()）②medium·maintainability=view_label(原始数据/全部) 与 bags.html tab(原始包/全部/历史) 不同步——B 叶 e399daf 冻结面在 A 叶 OCR 所审 seed 树上仍旧名，疑似跨叶范围伪报，待协调者以集成候选核 ③low·documentation=MySQL DATETIME(0) 四舍五入 docstring 边界声明疑似不准（23:59:59.999999 或进位到次日 00:00:00，与 16:42 合并裁决曾驳回的同类 docstring 条同面）。A 开发槽维持 IDLE：1489bc6 冻结树干净（wt-01-t16ca 仅 .venv untracked），等协调者裁决+TESTER 增量面（A-OCR-2 组合断言+view_label 页面断言）→A 叶接受；无 CORRECTION 级证据前不返修不重跑。",
+  "evidence": "reviews/TASK-16C-A/ocr-run-20261014-r12/state.json (18:45:18 AWAITING_DECISION, b01 3 findings/b02 0, NOT_EVALUATED); b01.log comments×3 (severity medium/medium/low); b02-diagnosis.json (coverage_complete=true, range bd0db1d..1489bc6); ps 4040042 已退出无 ocr 存活; 本轮 A 全程只读",
+  "next": "A 不认领 OCR 裁决/接受/返修门禁：等协调者对 3 findings 逐项裁决；若①②有 CONFIRMED 项回派 A 最小返修再领单开工；②按 B 叶冻结面+集成候选核很可能跨叶伪报由协调者驳回。BATCH-1012 滞留行面维持 18:40 裁决口径（A 不处置、不做生产写）。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "A",
+  "recorded_at": "2026-10-14T18:55:04+08:00",
+  "occurred_at": "2026-10-14T18:55:04+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

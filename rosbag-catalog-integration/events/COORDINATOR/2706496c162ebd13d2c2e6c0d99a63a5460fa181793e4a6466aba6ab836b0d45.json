@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-sr-grant-24h-r2-fullscope-20261014-2246",
+  "occurred_at": "2026-10-14T22:46:00+08:00",
+  "recorded_at": "2026-10-14T22:47:39+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-E",
+  "attempt": "sr-grant-24h",
+  "status": "OBSERVING",
+  "summary": "消费用户夜间强审授权『授权未来24小时审查权限』（om_x100b63cc9e4634a8ddb9167eb5ac2a5，原话+执行记录落盘 inbox/control/messages/strong-review-grant-20261014-night.md）。执行记录载明：22:20 首授误将范围限为 12S 三任务随即撤销，重授以 source_id 追加 -r2，范围按原文=全部当前项目任务。本回合 ledger 复核一致：有效 grant 9827cf8fd03f425f8abaf5f937e56ad2（task_scope 空=全任务，22:24:23 起、2026-10-15 22:24:23 到期，used_last_60_minutes 0/5、在途 0、本授权 calls 0），替换旧 32e3edfd/REVOKED 口径。当前无冻结审查目标：12S-E A 在途未交付（wt-01-t12se 未提交实现中：M source_service/scene_schedule_consumer + ?? pending_binding.py/test_task12se_auto_bind.py）、16C 已合入 main 16a154f 且前授权已清账 revoke、D1 部分交付=文档非代码面。故本轮不起跑强审（授权本身不是调用理由）；A 12S-E 交付冻结+机械核验+唯一 ocr_runtime 增量 OCR 后，若按 strong-review 判定 REVIEW_NOW 再按本授权限额（60min 全局 ≤5、在途串行）调用。静默期 21:00-08:00 不群报，final [SILENT]。",
+  "evidence": "inbox/control/messages/strong-review-grant-20261014-night.md（16 行含执行记录）; strong_review.py status grant_id=9827cf8fd03f425f8abaf5f937e56ad2 source_id=om_x100b63cc9e4634a8ddb9167eb5ac2a5-r2 task_scope=[] expires_at=2026-10-15T22:24:23+08:00 used_last_60_minutes=0; git status wt-01-t12se 22:25 实测",
+  "next": "5min observer 接续：A TASK-12S-E attempt-1 交付（receipts/TASK-12S-E/attempt-1.md）→机械核验 diff（base main 16a154f）+唯一 ocr_runtime 串行增量 OCR+TESTER 独立验证→按强审账本判 REVIEW_NOW/MERGE_INTO/NOT_REQUIRED（有效授权至 10-15 22:24，额度 0/5）；无新冻结目标不付费调用；夜间静默维持"
+}

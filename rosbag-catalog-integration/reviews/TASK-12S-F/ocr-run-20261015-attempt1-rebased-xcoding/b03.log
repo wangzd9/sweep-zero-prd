@@ -1,0 +1,84 @@
+[ocr] --background-file content is 2132 characters, exceeding the recommended 2000 (continuing but review quality might be impacted)
+{
+  "status": "complete",
+  "llm": {
+    "provider": "hermes-xcoding",
+    "model": "gpt-6.1-sol"
+  },
+  "message": "Review complete: 0 finding(s) across 1 selected item(s).",
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 0,
+    "total_tokens": 23525,
+    "input_tokens": 23339,
+    "output_tokens": 186,
+    "cache_read_tokens": 11904,
+    "elapsed": "33s"
+  },
+  "tool_calls": {
+    "total": 3,
+    "by_tool": {
+      "code_search": 1,
+      "file_read": 2
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [],
+  "groups": [
+    {
+      "label": "app/models.py",
+      "files": [
+        "app/models.py"
+      ]
+    }
+  ],
+  "session_id": "d9b12abd-7254-46bd-ac41-70cf96ac7079",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "d9b12abd-7254-46bd-ac41-70cf96ac7079",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "requested_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "resolved_base": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "resolved_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "exact_range": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3..96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "source_artifact_sha256": "5c5af44014c78a3156618a8ebda573e74492d438d3e39bfa3c46a3be7b0bd580"
+    },
+    "execution": {
+      "ocr_version": "v1.13.0",
+      "provider": "hermes-xcoding",
+      "model": "gpt-6.1-sol",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "6353fad2d2dfb45ef7ba7b97be5bc621e8d9c7a04bc1a15bf04300d2dccf35f3",
+      "runtime_config_sha256": "994606f9fae59088b21138c4a003932cad4b2721ca5293391612f2682d16163c"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "dab049ea4d34723ea65d318cee2d24dc6fff655ef688de10306e20d8bc1fd0cd",
+          "path": "app/models.py",
+          "fingerprint": "a100ae5c3ee81d24b598ec4e702ff08d917905cb388d2139910e6026ad35720e"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "dab049ea4d34723ea65d318cee2d24dc6fff655ef688de10306e20d8bc1fd0cd",
+          "path": "app/models.py",
+          "fingerprint": "a100ae5c3ee81d24b598ec4e702ff08d917905cb388d2139910e6026ad35720e"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 32504
+  }
+}

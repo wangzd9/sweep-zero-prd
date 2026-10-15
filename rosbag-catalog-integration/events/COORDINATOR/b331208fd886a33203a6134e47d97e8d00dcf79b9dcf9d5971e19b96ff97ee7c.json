@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-t12sf-r1-verified-ocr-started-20261015-1202",
+  "occurred_at": "2026-10-15T11:58:30+08:00",
+  "recorded_at": "2026-10-15T12:06:54+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-F",
+  "attempt": "attempt-1-R1",
+  "status": "OCR_SUBMITTED",
+  "summary": "B 11:12 交付 R1 head 8c8bf2f（相对 6798059 仅 tests/test_ingest_input_rejected.py +20/-4 折行，app 面冻结不变）。协调者独立机械核验：祖先链 6798059→8c8bf2f OK、单文件折行 diffstat 一致、ruff 10 文件 All checks passed、定向 14 passed rc=0、工作树干净→R1 核验通过。F 全量 app 交付 OCR 唯一入口 run ef462fc8（reviews/TASK-12S-F/ocr-run-20261015-attempt1）11:58:30 SUBMITTED、service active（MainPID 948740）：base b39a3ec→head 8c8bf2f，7 app 文件 2 批（b01=Backend 拒绝/resume 契约、b02=Scanner 面），3 测试默认排除、预览核零误选、retry_depth=0 新身份、prepare 零模型；起跑前 VLM load running=4/waiting=6 无 1012 大包。OCR 与 E 复验并行不互阻（F app diff 冻结且与 E 面文件不相交）。同回合已核用户 11:2x 决定 om_x100b62303dc9ecacdfc3f20e0bac528（D2 五材料暂不处理不催要、⑤不授权重跑）→D2 维持 BLOCKED_FROZEN（并行轮次已落 TODO）。",
+  "evidence": "reviews/TASK-12S-F/ocr-run-20261015-attempt1/{spec.json,state.json}; inbox/2号/TASK-12S-F/attempt-1-r1-receipt.md; wt-04a-t12sf git 8c8bf2f + ruff/pytest 实测; TODO 12S-F 行; HANDOFF coord-checkpoint-t12sf-r1-verified-ocr-started-20261015-1202",
+  "next": "协调者 F OCR run ef462fc8 收口逐批 findings 裁决; TESTER E attempt-2 复验回执; F 接受后 TESTER 真 MySQL/并发/迁移探针"
+}

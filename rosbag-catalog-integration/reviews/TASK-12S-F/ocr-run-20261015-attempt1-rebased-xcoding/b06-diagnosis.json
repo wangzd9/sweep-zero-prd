@@ -1,0 +1,67 @@
+{
+  "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/3260cb59-d710-40bd-ae46-5ecaca9dc96b.jsonl",
+  "session_ids": [
+    "3260cb59-d710-40bd-ae46-5ecaca9dc96b"
+  ],
+  "last_event": {
+    "type": "session_end",
+    "timestamp": "2026-10-15T09:29:06Z"
+  },
+  "terminal_state": "complete",
+  "manifest_schema": "ocr.run-manifest/v1",
+  "input": {
+    "mode": "range",
+    "requested_from": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+    "requested_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+    "resolved_base": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+    "resolved_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+    "exact_range": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3..96afc43206bfcf9276203a89e75c97d28c6204bf",
+    "source_artifact_sha256": "56c12b7b81a7016ee041bfeddbbbfd5946e75d337cf97318558f3953a915aaec"
+  },
+  "ocr_version": "v1.13.0",
+  "coverage_counts": {
+    "selected": 1,
+    "completed": 1,
+    "reused": 0,
+    "failed": 0,
+    "waived": 0
+  },
+  "coverage_complete": true,
+  "remaining_paths": [],
+  "gate_decision": "NOT_EVALUATED",
+  "parse_errors": [],
+  "manifest_failures": [],
+  "item_error_messages": {},
+  "llm_errors": [],
+  "repeated_tools": [
+    {
+      "file": "app/scanner/runner.py",
+      "tool": "file_read",
+      "arguments_sha256_prefix": "1bc81b7b4a7c560b",
+      "count": 2
+    },
+    {
+      "file": "app/scanner/runner.py",
+      "tool": "file_read",
+      "arguments_sha256_prefix": "e8352a78f326b234",
+      "count": 2
+    }
+  ],
+  "request_characters": {
+    "count": 12,
+    "max": 95325,
+    "max_frozen_first_two": 17404,
+    "note": "字符统计只用于观察增长，不是OCR本地token估计或模型上下文长度。"
+  },
+  "model_usage": {
+    "responses": 12,
+    "total_prompt_tokens": 202083,
+    "total_completion_tokens": 1797,
+    "max_prompt_tokens": 30758
+  },
+  "next_steps": [
+    "存在相同参数的重复工具调用；核对是否必要，不直接判模型无能力。",
+    "本session文件覆盖完整；仍须核对批次base/head、排除/跨文件覆盖、发现裁决及测试，不能自动PASS。"
+  ],
+  "batch_identity_matches": true
+}

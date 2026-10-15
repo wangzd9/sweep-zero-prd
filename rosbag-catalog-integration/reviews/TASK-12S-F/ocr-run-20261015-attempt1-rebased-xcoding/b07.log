@@ -1,0 +1,168 @@
+[ocr] --background-file content is 2132 characters, exceeding the recommended 2000 (continuing but review quality might be impacted)
+{
+  "status": "complete",
+  "llm": {
+    "provider": "hermes-xcoding",
+    "model": "gpt-6.1-sol"
+  },
+  "message": "Review complete: 5 finding(s) across 1 selected item(s).",
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 5,
+    "total_tokens": 360588,
+    "input_tokens": 354693,
+    "output_tokens": 5895,
+    "cache_read_tokens": 268160,
+    "elapsed": "15m54s"
+  },
+  "tool_calls": {
+    "total": 36,
+    "by_tool": {
+      "code_comment": 2,
+      "code_search": 9,
+      "file_find": 1,
+      "file_read": 24
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [
+    {
+      "path": "app/services/ingest_service.py",
+      "content": "Allow an already INPUT_REJECTED row to acknowledge a duplicate report without advancing row_version. `_ensure_reject_submission` returns that row, but this guard then returns 409. If the first response is lost, or the scanner journal is lost after the rejection commits, every retry fails: the scanner's HTTP client raises on 409, and `_process_bag` increments `failed` without saving `reject_reported`. Consequently, a successfully persisted rejection produces reporting failures indefinitely instead of an idempotent acknowledgment.",
+      "existing_code": "    if submission.status not in (\"PENDING_INPUT\",):\n        # 已绑定/已调度行不受拒绝端点影响（只针对尚未绑定的无效输入）。\n        db.rollback()\n        raise HTTPException(409, \"SUBMISSION_BOUND: rejection only applies to unbound PENDING_INPUT\")",
+      "start_line": 949,
+      "end_line": 952,
+      "category": "bug",
+      "severity": "medium"
+    },
+    {
+      "path": "app/services/ingest_service.py",
+      "content": "Resume needs to invalidate the scanner's rejection-suppression marker, not just the database counter. After a successful rejection report, the scanner persists `reject_snapshot` and `reject_reported` in its local journal. If resume is requested while the snapshot is unchanged and still invalid, `_process_bag` keeps suppressing the report; it never polls the submission status or row_version. This leaves the resumed submission indefinitely PENDING_INPUT rather than rejecting it again after validation. Add a scanner-visible resume generation or another mechanism that invalidates the matching journal marker.",
+      "existing_code": "    submission.status = \"PENDING_INPUT\"\n    submission.stable_reject_rounds = None\n    submission.row_version = row_version + 1",
+      "start_line": 1004,
+      "end_line": 1006,
+      "category": "bug",
+      "severity": "medium"
+    },
+    {
+      "path": "app/services/ingest_service.py",
+      "content": "Do not assign an unmatched physical path to an arbitrary active profile. For example, with only a profile whose incoming_prefix is `spray`, reporting `\u003cscan_root\u003e/bag-1` falls through here and claims relative path `bag-1` in that profile. That claim actually identifies `\u003cscan_root\u003e/spray/bag-1`, so an unrelated pending submission there is changed to INPUT_REJECTED. Return 409 for an unmatched entry, or persist unmatched evidence under an identity that cannot collide with profile-relative claims.",
+      "existing_code": "        profile_row = rows[0]",
+      "start_line": 945,
+      "end_line": 945,
+      "category": "bug",
+      "severity": "high"
+    },
+    {
+      "path": "app/services/ingest_service.py",
+      "content": "Normalize and validate the path before checking root containment. An incoming_path such as `\u003cscan_root\u003e/../outside/bag` passes this string-prefix check. Profile matching rejects its relative path, but the fallback then persists it anyway, so an out-of-root report succeeds instead of returning the required 409. Reject escaping paths before reaching the fallback.",
+      "existing_code": "    if not roots or not any(\n        incoming_path == r or incoming_path.startswith(r + \"/\") for r in roots\n    ):",
+      "start_line": 924,
+      "end_line": 926,
+      "category": "bug",
+      "severity": "medium"
+    },
+    {
+      "path": "app/services/ingest_service.py",
+      "content": "This introduces a non-PENDING state that still holds the unique path claim, but create_submission checks only PENDING_INPUT both before insertion and when recovering from IntegrityError. After a rejection, a POST for the same profile/version/path therefore misses both checks and returns an unhandled unique-constraint error (500). Include INPUT_REJECTED in creation's claim-conflict handling and return a controlled 409 directing the caller to resume, or implement the intended reuse flow without losing the evidence.",
+      "existing_code": "    submission.status = \"INPUT_REJECTED\"",
+      "start_line": 954,
+      "end_line": 954,
+      "category": "bug",
+      "severity": "medium"
+    }
+  ],
+  "groups": [
+    {
+      "label": "app/services/ingest_service.py",
+      "files": [
+        "app/services/ingest_service.py"
+      ]
+    }
+  ],
+  "warnings": [
+    {
+      "file": "app/services/ingest_service.py",
+      "message": "round 3: LLM completion error: error reading response body: read tcp [2408:820c:d09:57a0:e22e:522b:126e:a9f1]:43960-\u003e[2606:4700:3034::6815:ca7]:443: read: connection reset by peer",
+      "type": "review_round_failed"
+    }
+  ],
+  "session_id": "6b2bbaf1-2658-490e-9926-ed54eeac4a90",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "6b2bbaf1-2658-490e-9926-ed54eeac4a90",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "requested_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "resolved_base": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "resolved_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "exact_range": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3..96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "source_artifact_sha256": "c5d3b908fd039f933a2e57fc2edad01304eb4692f935acd6cae26e5fe430b933"
+    },
+    "execution": {
+      "ocr_version": "v1.13.0",
+      "provider": "hermes-xcoding",
+      "model": "gpt-6.1-sol",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "b6899f890b8a41875c420a19ce38b8eb1a4a75a5e85ab9dd03433dec0414c871",
+      "runtime_config_sha256": "994606f9fae59088b21138c4a003932cad4b2721ca5293391612f2682d16163c"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "a98ad152feca5d2ccdbc574676beb94501f2dcb123ef7c0cf8d756332070fd29",
+          "path": "app/services/ingest_service.py",
+          "fingerprint": "19bf49728575a0aba5128c1792de993e9b2139e9591e695ade43abed8198aa61"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "a98ad152feca5d2ccdbc574676beb94501f2dcb123ef7c0cf8d756332070fd29",
+          "path": "app/services/ingest_service.py",
+          "fingerprint": "19bf49728575a0aba5128c1792de993e9b2139e9591e695ade43abed8198aa61"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 954202
+  },
+  "retry_report": {
+    "schema_version": "ocr.llm-retry-report/v1",
+    "total_requests": 19,
+    "retried_requests": 0,
+    "total_retries": 0,
+    "recovered_requests": 0,
+    "failed_requests": 1,
+    "cancelled_requests": 0,
+    "requests": [
+      {
+        "logical_request_id": "c8bf2b3af87ede2b947e5489250ab3ae6dd4e3205461275c43f59003689c254f",
+        "provider": "hermes-xcoding",
+        "model": "gpt-6.1-sol",
+        "file_path": "app/services/ingest_service.py",
+        "task_type": "main_task",
+        "request_no": 16,
+        "outcome": "failed",
+        "attempts": [
+          {
+            "attempt": 1,
+            "outcome": "success",
+            "status_code": 200,
+            "request_id": "bd0a2cae-8e1e-4cf4-82b7-8d06c89e66ce",
+            "duration_to_headers_ms": 21750
+          }
+        ]
+      }
+    ]
+  }
+}

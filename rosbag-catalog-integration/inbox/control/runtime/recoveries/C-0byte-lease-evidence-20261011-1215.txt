@@ -1,1 +1,0 @@
-size=0 mtime=2026-10-11 12:00:10.925549682 +0800 file=/home/wang/work/doc/prd/rosbag-catalog-integration/inbox/control/runtime/leases/C.json

@@ -16,6 +16,7 @@
 | [水雾识别与生产自动化](rosbag-catalog-spray-pipeline/README.md) | 水雾接收、绑定、识别、切片、发布入库及生产收尾 | [任务定位](rosbag-catalog-spray-pipeline/TODO.md) |
 | [A100 双节点纳管](rosbag-catalog-a100-multi-node/README.md) | 自建/NVIDIA 路线的 A100 双节点资源与调度；场景非模型执行仍在处理机 | [唯一 TODO](rosbag-catalog-a100-multi-node/TODO.md) |
 | [NVIDIA 数据集清理](rosbag-catalog-nvidia-cleanup/README.md) | NVIDIA 数据集清理的独立契约、任务与验收 | [唯一 TODO](rosbag-catalog-nvidia-cleanup/TODO.md) |
+| [Hermes 本地／云端模型切换](hermes-model-routing/README.md) | 夜间空闲使用本地、流水线优先、预配置云端与人工覆盖；当前为方案 | [规则、验收与后续任务](hermes-model-routing/README.md#8-后续任务与交接) |
 
 场景基础、界面、水雾已按业务文档拆包；三包当前任务状态和五角色交互仍由[旧运行根](rosbag-catalog-integration/README.md)接续。上述三份任务定位页链接原件，不构成第二份可写 TODO。
 

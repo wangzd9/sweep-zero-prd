@@ -10,3 +10,7 @@
 ## 2026-10-14T11:25:19+08:00 v0.4界面恢复与OCR遗留派单
 
 用户恢复UI并要求旧OCR未修项入任务；15条逐项账和原7日志归档，A查询/API、B Bag三视图、C流水线详情三叶、TESTER16D准备、协调16R落单。未接受seed bd0db1d2a0fc293cb4562e2079e741739bacb0de 保留当前水雾代码，未合主仓/部署；角色ACK及真实开工另核，不伪造。入口 inbox/control/V04-UI-RESUME-20261014.md。
+
+## 2026-10-14T20:05+08:00 v0.4 界面闭环合入收口（TASK-16C/16D/16）
+
+TESTER 19:56 交付 44b6c07 最终联合验收 PASS（cursor 矩阵 20/20、严格 MySQL 8.4.11 21/21、真实 Chrome Console 零异常、版本核 44b6c076）→ 合入 HOLD 五条件全齐。协调者 20:05 按 18:22 用户授权执行：合入 main `16a154f`（--no-ff，seed bd0db1d2+三叶 A 8958291/B e399daf/C ce5921d，零冲突、与用户脏文件零重叠）+推 github（ls-remote 回读一致）+本地 Compose 测试环境收敛（up/test rc=0、mock 全链路 PUBLISHED、revision 对账零漂移、页面实测 platform=16a154ff）。生产处理机部署未执行（需用户当次授权）。16C/16D 任务面收口，父 TASK-16 聚合 DONE；12S-D 质量矩阵缺证与 16R 水雾债补审候选为独立后续。决策 inbox/coordinator/TASK-16C/merge-decision-20261014.md。

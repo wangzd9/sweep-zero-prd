@@ -1,0 +1,20 @@
+{
+  "event_id": "COORDINATOR:coord-t12se-a-ack-verified-12sd1-c-pending-20261014-2035",
+  "kind": "business",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-1",
+  "status": "ACKED_RUNNING",
+  "summary": "消费 A 20:30:51 ACK 事件（a-task12se-attempt1-ack-running）：12S-E ACK 核验通过——ack.md 落盘、base main 16a154f 本地可达、worktree wt-01-t12se@16a154f 分支 a/task-12s-e-auto-bind 干净（仅未跟踪 .venv）、边界声明与派单一致（独占 ingest_service/source_service/schedule 消费者）。12S-E 转 RUNNING 不催单。同波次 12S-D1：C 租约 20:30:25 claim（C-cron-wake-20261014-202852-d1）在途、3号目录仍零 ACK——20:23 派单后 12 分钟窗口内正常，判 ACK 待落盘不催单，下一轮核。B 槽 12S-F 维持 DEFERRED（前置=E 接受释放公共文件）。",
+  "evidence": "inbox/1号/TASK-12S-E/attempt-1-ack.md（20:30 落盘，11 行通读）；git -C wt-01-t12se log/status（HEAD=16a154f 干净）；leases/C.json claim 20:30:25 token ea808197；find inbox/3号/TASK-12S-D1 仅 dispatch 无 ack",
+  "next": "observer 续等 A 实现交付（receipts/TASK-12S-E/attempt-1.md）与 C 的 D1 ACK；E 交付冻结后核实际 diff+机械验证+串行 OCR；D1 ACK 后不催单",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "COORDINATOR",
+  "recorded_at": "2026-10-14T20:37:33+08:00",
+  "occurred_at": "2026-10-14T20:37:33+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

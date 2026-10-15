@@ -1,0 +1,12 @@
+{
+  "event_id": "A:a-task12se-attempt1-selftest-running-20261014",
+  "occurred_at": "2026-10-14T23:30:55+08:00",
+  "recorded_at": "2026-10-14T23:30:55+08:00",
+  "role": "A",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-1",
+  "status": "RUNNING",
+  "summary": "自测推进：pending_binding对账+source_service三档指纹+12新用例全绿；相关154项与全量1186通过(4失败为基线16a154f既有devflow/web失败,已worktree对基线复现)；ruff clean；待冻结commit+回执",
+  "evidence": "wt-01-t12se: tests/test_task12se_auto_bind.py 12 passed; ruff 4 files clean",
+  "next": "冻结commit+写回执交协调者"
+}

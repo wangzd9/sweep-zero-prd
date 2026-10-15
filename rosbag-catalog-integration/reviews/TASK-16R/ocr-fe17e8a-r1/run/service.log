@@ -1,0 +1,43 @@
+{
+  "state": "AWAITING_DECISION",
+  "updated_at": "2026-10-14T12:41:57.770374+00:00",
+  "pid": 4179221,
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/coordinator-ocr-bfe95d1095084e708a98703d8579ce11.service",
+  "run_id": "bfe95d1095084e708a98703d8579ce11",
+  "unit": "coordinator-ocr-bfe95d1095084e708a98703d8579ce11.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "scripts/scene_host_orchestrator.py",
+        "scripts/scene_host_proxy.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-14T12:20:26.023077+00:00",
+      "pid": 4179297,
+      "process_start_ticks": "38068797",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-coord-ocr-fe17e8a/4ece5bea-1d3a-4bb6-a0ef-0c8888103b19.jsonl",
+      "session_mtime": 1791981562.1808283,
+      "returncode": 0,
+      "ended_at": "2026-10-14T12:41:31.419029+00:00",
+      "duration_seconds": 1265.4
+    },
+    {
+      "id": "b02",
+      "files": [
+        "deploy/scene/catalog-scene.yaml"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-14T12:41:31.582641+00:00",
+      "pid": 10117,
+      "process_start_ticks": "38195353",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-coord-ocr-fe17e8a/196b3e22-ded5-49a5-b9a5-eb5a3f4a95cc.jsonl",
+      "session_mtime": 1791981702.4903855,
+      "returncode": 0,
+      "ended_at": "2026-10-14T12:41:57.747147+00:00",
+      "duration_seconds": 26.16
+    }
+  ],
+  "gate_decision": "NOT_EVALUATED",
+  "ended_at": "2026-10-14T12:41:57.770378+00:00"
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-t12se-ocr-verdict-corrected-rework-dispatched-20261015-0852",
+  "occurred_at": "2026-10-15T08:52+08:00",
+  "recorded_at": "2026-10-15T08:55:15+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-1",
+  "status": "REWORK",
+  "summary": "OCR retry1(3480a161) 08:59全批REVIEW_COMPLETE收口；08:36首发裁决零findings系误判（漏读b0*.log comments）撤销——实际11条findings(2 HIGH/4 MEDIUM/5 LOW)，6条CONFIRMED CORRECTION(E-R1~R8，含bound_ready_path重复拼接HIGH与tier-2 incoming检测恒空HIGH)；E接受登记撤销，TESTER PASS证据保留有效；attempt-2最小返修派A(base b39a3ec续commit)；12S-F补充S1发B(开发继续、冻结base后移至E attempt-2 head)；TODO/HANDOFF/development_log已同步",
+  "evidence": "reviews/TASK-12S-E/ocr-run-20261014-retry1/ocr-verdict.md; inbox/1号/TASK-12S-E/attempt-2-r1-rework-dispatch.md; inbox/2号/TASK-12S-F/attempt-1-supplement-s1.md; TODO §11 E/F行",
+  "next": "核A attempt-2 ACK(30min)/交付→机械核验→唯一入口attempt-2增量OCR→TESTER修复点复验→接受；B F开发继续等E head通知rebase"
+}

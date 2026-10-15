@@ -1,0 +1,155 @@
+[ocr] --background-file content is 3999 characters, exceeding the recommended 2000 (continuing but review quality might be impacted)
+{
+  "status": "failed",
+  "llm": {
+    "provider": "hermes-sub2api",
+    "model": "deepseek-v4.1-flash"
+  },
+  "message": "Review failed: 0 finding(s); 1 of 1 selected item(s) failed.",
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 0,
+    "total_tokens": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "elapsed": "25s"
+  },
+  "tool_calls": {
+    "total": 0,
+    "by_tool": {},
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": null,
+  "groups": [
+    {
+      "label": "alembic/versions/20261014_01_ingest_rejected.py",
+      "files": [
+        "alembic/versions/20261014_01_ingest_rejected.py"
+      ]
+    }
+  ],
+  "session_id": "96cd425c-df4a-4da1-ac80-ce59b9f35dd7",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "96cd425c-df4a-4da1-ac80-ce59b9f35dd7",
+    "operation": "review",
+    "terminal_state": "failed",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "requested_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "resolved_base": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "resolved_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "exact_range": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3..96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "source_artifact_sha256": "a9d15c0dc875905066b7f249e35177312631f5b953c3dad84da4a4aa6dfcc525"
+    },
+    "execution": {
+      "ocr_version": "v1.13.0",
+      "provider": "hermes-sub2api",
+      "model": "deepseek-v4.1-flash",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "260673ee2d252cfcb09dc9a2a7bfa609b4dd92240fe668efe5ccaa349559dd84",
+      "runtime_config_sha256": "77320f62b07f1f4d53cc2288b3a6cc02eef22a3e42b506da4a26323df77ffc37"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "cac5a983d3ec728db224fb9133479b0178847207a6ccbc157c8e788941d64c19",
+          "path": "alembic/versions/20261014_01_ingest_rejected.py",
+          "fingerprint": "f491b290cf872cb95ea7317ef153011d3c2fcfff9beed43deb46ab1fd174e7b2"
+        }
+      ],
+      "completed": [],
+      "reused": [],
+      "failed": [
+        {
+          "item_id": "cac5a983d3ec728db224fb9133479b0178847207a6ccbc157c8e788941d64c19",
+          "path": "alembic/versions/20261014_01_ingest_rejected.py",
+          "fingerprint": "f491b290cf872cb95ea7317ef153011d3c2fcfff9beed43deb46ab1fd174e7b2",
+          "classification": "provider",
+          "reason": "provider or subtask request failed"
+        }
+      ],
+      "waived": []
+    },
+    "elapsed_ms": 24689
+  },
+  "retry_report": {
+    "schema_version": "ocr.llm-retry-report/v1",
+    "total_requests": 2,
+    "retried_requests": 0,
+    "total_retries": 0,
+    "recovered_requests": 0,
+    "failed_requests": 2,
+    "cancelled_requests": 0,
+    "requests": [
+      {
+        "logical_request_id": "7910d9577bad55bad705f7ec721e667539a3ffe8645a927511a9c16a0ddd076a",
+        "provider": "hermes-sub2api",
+        "model": "deepseek-v4.1-flash",
+        "file_path": "alembic/versions/20261014_01_ingest_rejected.py",
+        "task_type": "plan_task",
+        "request_no": 1,
+        "outcome": "failed",
+        "attempts": [
+          {
+            "attempt": 1,
+            "outcome": "success",
+            "status_code": 200,
+            "request_id": "6dfc1b89-fa59-4a3d-81ab-aacf1cf3ffd7",
+            "duration_to_headers_ms": 14601
+          }
+        ]
+      },
+      {
+        "logical_request_id": "7e7a1d17cd7049b6f0831418100ac175f5c144dce66adf84c7650605aa3c24e1",
+        "provider": "hermes-sub2api",
+        "model": "deepseek-v4.1-flash",
+        "file_path": "alembic/versions/20261014_01_ingest_rejected.py",
+        "task_type": "main_task",
+        "request_no": 1,
+        "outcome": "failed",
+        "attempts": [
+          {
+            "attempt": 1,
+            "outcome": "success",
+            "status_code": 200,
+            "request_id": "acea15f8-4064-499c-8b00-7ca6c3759ea3",
+            "duration_to_headers_ms": 10007
+          }
+        ]
+      }
+    ]
+  }
+}
+{
+  "status": "failed",
+  "llm": {
+    "provider": "hermes-sub2api",
+    "model": "deepseek-v4.1-flash"
+  },
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 0,
+    "total_tokens": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "elapsed": "25s"
+  },
+  "tool_calls": {
+    "total": 0,
+    "by_tool": {},
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": null,
+  "session_id": "96cd425c-df4a-4da1-ac80-ce59b9f35dd7"
+}
+[ocr] Session: 96cd425c-df4a-4da1-ac80-ce59b9f35dd7 (retry with: --resume 96cd425c-df4a-4da1-ac80-ce59b9f35dd7)
+Error: review failed: all 1 file review(s) failed — check your LLM configuration and API key

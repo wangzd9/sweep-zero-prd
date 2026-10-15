@@ -1,0 +1,980 @@
+diff --git a/app/services/pending_binding.py b/app/services/pending_binding.py
+new file mode 100644
+index 0000000..81b9f43
+--- /dev/null
++++ b/app/services/pending_binding.py
+@@ -0,0 +1,220 @@
++"""接收/登记/绑定自动闭环（TASK-12S-E，REQ-20/AC-20；SPRAY-POST-V04 §1）。
++
++补「提交/登记时序空隙」的**既有后台有界对账**（不新建通用调度平台、不无限等待、
++不依赖模型执行槽释放）：orchestrator 每轮 /orchestrator/reconcile 时，把仍处
++PENDING_INPUT 的提交与已登记原包按**冻结 root/profile/version + 相对 ready 映射**
++对账，命中准确源即按该提交自身冻结身份出用途事件，由既有 outbox 消费端幂等
++（``create_scene_run`` 的 ``scene_identity_key`` 持久唯一键）保证单份运行 + 已接受
++结果复用：相同重放不分配新分析版本、不新增 attempt/outbox 消费副作用或模型调用。
++
++契约（SPRAY-POST-V04 §1 第 2 条）：后提交必须从冻结 root/profile/version +
++相对 ready 映射定位已登记源，**不能只按 basename/快指纹匹配**。本模块定位证据：
++- 提交 intake_snapshot 的 root_id/scan_root/ready_root/profile_id/profile_version
++  （接受时冻结，DESIGN §7.3.1）；
++- ready 物理路径 = ready_root + "/" + relative_path（与 Scanner ``ready_directory_for``
++  同一 incoming→ready 相对映射）；
++- 命中的 BagRecord 必须 relative_path 精确一致、root_id 与快照推导一致、
++  bag_role 非派生切片、source_status READY。
++
++为什么不直接复用 ``bind_ingest_for_registration``：该服务按 bag 查已绑定提交做恢复
++短路（``_find_bound_submission``），当同一原包已被旧提交绑定（生产 1012 批「旧重复
++链」先于「正式提交」的场景）时，新正式 PENDING 提交会被短路跳过、永不收敛。本模块
++按**本条 PENDING 提交自身的冻结身份**直接出事件；消费端 scene_identity_key 去重保证
++与旧绑定命中同一 run（复用不重建）。
++
++不满足任一项即跳过（仍待补，不制造成功绑定）：无源=缺材料、CONFIG_REQUIRED=等补
++配置、根/车辆/代次/profile 版本漂移=需用户显式处置（既有冲突规则，不猜车、不静默
++套配）。
++"""
++
++from __future__ import annotations
++
++import json
++import os
++
++from sqlalchemy import select
++from sqlalchemy.orm import Session
++
++from app.clock import now
++from app.config import settings
++from app.domain.scene_config import EffectiveConfig, IngestPurpose, ResolvedScene
++from app.models import BagRecord, IngestProfile, IngestSubmission
++from app.services.ingest_service import _apply_frozen_vehicle_binding, _emit_purpose_events
++from app.services.scene_intake import derive_root_id_for_ready
++
++
++def pending_binding_enabled() -> bool:
++    """自动对账开关：默认启用；显式 0/false 时保持旧行为（提交停在 PENDING 等人工）。"""
++    return os.getenv("PENDING_BINDING_RECONCILE", "1").strip().lower() in {"1", "true", "yes", "on"}
++
++
++def _rebuild_effective(sub: IngestSubmission, profile_id: str, profile_version: int) -> EffectiveConfig:
++    """从提交冻结快照重建 EffectiveConfig（与 bind 主路径同一口径，避免二次解析漂移）。"""
++    snapshot = json.loads(sub.effective_config_json)
++    return EffectiveConfig(
++        profile_id=profile_id,
++        profile_version=profile_version,
++        purposes=tuple(IngestPurpose(p) for p in snapshot["purposes"]),
++        scenes=tuple(
++            ResolvedScene(
++                scene_code=s["scene_code"], capability_version=s["capability_version"], parameters=s["parameters"]
++            )
++            for s in snapshot.get("scenes", [])
++        ),
++        config_hash=snapshot["config_hash"],
++    )
++
++
++def _same_entry_bound_generation(db: Session, sub: IngestSubmission) -> int | None:
++    """同一入口（profile + relative_path）最近一条已绑定提交（排除本条）冻结的代次。
++
++    仅比对**同入口**的既有绑定：不同入口（不同 relative_path）绑同一物理原包时，
++    代次可不同（各自显式重导入）；同入口代次不一致=该入口既有绑定被墓碑重登记
++    推进后旧代次行残留，属需显式处置的冲突，不能静默按新代次出事件。
++    """
++    row = db.scalar(
++        select(IngestSubmission.source_generation)
++        .where(
++            IngestSubmission.profile_id == sub.profile_id,
++            IngestSubmission.relative_path == sub.relative_path,
++            IngestSubmission.status.in_(["BOUND", "SCHEDULED"]),
++            IngestSubmission.submission_id != sub.submission_id,
++            IngestSubmission.source_generation.is_not(None),
++        )
++        .order_by(IngestSubmission.updated_at.desc())
++        .limit(1)
++    )
++    return row
++
++
++def reconcile_pending_bindings(db: Session, limit: int = 50) -> dict:
++    """把 PENDING_INPUT 提交与已登记原包对账绑定（幂等、有界、单条隔离）。
++
++    返回 {"checked": N, "bound": [submission_id...], "skipped": {reason: count},
++    "events_created": int}。逐条独立事务：单条故障只回滚本条并记原因，不拖垮整批，
++    下轮重试。提交成功即固化，重复对账不再选中（幂等无副作用）。"""
++    result = {"checked": 0, "bound": [], "skipped": {}, "events_created": 0}
++    if not pending_binding_enabled():
++        return result
++    submissions = list(
++        db.scalars(select(IngestSubmission).where(IngestSubmission.status == "PENDING_INPUT").limit(limit)).all()
++    )
++    for sub in submissions:
++        result["checked"] += 1
++        try:
++            outcome, events = _reconcile_one(db, sub)
++        except Exception as exc:  # 单条隔离：回滚本条，记原因继续
++            db.rollback()
++            reason = f"ERROR:{type(exc).__name__}"
++            result["skipped"][reason] = result["skipped"].get(reason, 0) + 1
++            continue
++        if outcome == "bound":
++            result["bound"].append(sub.submission_id)
++            result["events_created"] += events
++        else:
++            result["skipped"][outcome] = result["skipped"].get(outcome, 0) + 1
++    return result
++
++
++def _reconcile_one(db: Session, sub: IngestSubmission) -> tuple[str, int]:
++    """定位并绑定单条 PENDING 提交；返回 (outcome, 新增事件数)。
++
++    outcome ∈ {"bound", "NO_SNAPSHOT", "CONFIG_REQUIRED", "ROOT_MISMATCH",
++    "NO_SOURCE_YET", "SLICE_NOT_ORIGINAL", "SOURCE_NOT_READY", "PROFILE_DISABLED",
++    "GENERATION_DRIFT"}。车辆冲突等既有 409/ValueError 语义冒泡由上层按 ERROR:* 隔离
++    （不猜车、不静默套配）。
++    """
++    snapshot_raw = sub.intake_snapshot_json
++    if not snapshot_raw:
++        return "NO_SNAPSHOT", 0
++    try:
++        snapshot = json.loads(snapshot_raw)
++    except (TypeError, ValueError):
++        return "NO_SNAPSHOT", 0
++    ready_root = snapshot.get("ready_root")
++    if not ready_root or not sub.relative_path:
++        return "NO_SNAPSHOT", 0
++    # CONFIG_REQUIRED（接受时未解析）：停在待处理等用户补配置，不在对账里猜配置
++    # （与 bind 主路径同口径：补配置后经显式登记/绑定出事件）。
++    if sub.config_required or not sub.effective_config_json:
++        return "CONFIG_REQUIRED", 0
++    ready_root = str(ready_root).rstrip("/")
++    incoming_root = str(snapshot.get("scan_root") or "").rstrip("/")
++    profile_row = db.scalar(
++        select(IngestProfile).where(
++            IngestProfile.profile_id == sub.profile_id,
++            IngestProfile.version == sub.profile_version,
++        )
++    )
++    if profile_row is None or not profile_row.enabled:
++        return "PROFILE_DISABLED", 0
++    # 相对 ready 映射（契约2：冻结 root/profile/version + 相对 ready 映射，非 basename
++    # 匹配）。提交 relative_path 是**入口相对路径**（match_profile_for_incoming 已按
++    # profile.incoming_prefix 剥离前缀），故原包行 relative_path ∈ {相对段, prefix/相对段}。
++    # 用精确相对路径候选查原包行（storage/ready 根绝对段在测试与生产不一致，不做前缀假设）。
++    prefix = (profile_row.incoming_prefix or "").strip("/")
++    # 候选相对路径：优先 ready_root 的 storage 相对段（root 限定，杜绝跨根同包名误配：
++    # self_built 根 "ready/{bag}" 段 vs scene 提交短段 "{bag}"），回落短段兼容测试口径
++    # （fake 登记 path 不带 storage 前缀时 bag.relative_path 即短段）。
++    storage_root = settings.nas_storage_root.rstrip("/")
++    if ready_root == storage_root or ready_root.startswith(storage_root + "/"):
++        ready_rel_root = ready_root.removeprefix(storage_root).lstrip("/")
++    else:
++        # 防御：ready 根不在 storage 根下时（配置异常），物理段口径退化为相对路径候选
++        # 命中即视为同根（身份防线仍由 snapshot root_id 推导核对承载）。
++        ready_rel_root = None
++    candidates = [sub.relative_path]
++    if ready_rel_root:
++        candidates.append("/".join(part for part in (ready_rel_root, prefix, sub.relative_path) if part))
++    # 兜底：ready 根的 storage 相对段（ready 根恰为 storage 根或其下时与上式重复去重；
++    # 测试环境 fake ready 根不在 storage 下时，此式命中同包名另一根登记的相对行）
++    candidates.append(ready_root.lstrip("/") + "/" + sub.relative_path)
++    if prefix:
++        candidates.append(f"{prefix}/{sub.relative_path}")
++    bag = None
++    for cand in dict.fromkeys(candidates):
++        bag = db.scalar(select(BagRecord).where(BagRecord.relative_path == cand).limit(1))
++        if bag is not None:
++            break
++    # 身份防线：ready_root 必须落在受控根且推导身份与快照 root_id 一致（跨根不绑、不猜）。
++    snapshot_root = snapshot.get("root_id")
++    configured = derive_root_id_for_ready(ready_root)
++    if configured is not None and configured != snapshot_root:
++        return "ROOT_MISMATCH", 0
++    if snapshot_root == "scene" and settings.scene_nas_ready_root:
++        if derive_root_id_for_ready(ready_root) != "scene":
++            return "ROOT_MISMATCH", 0
++    if bag is None:
++        return "NO_SOURCE_YET", 0
++    # 身份防线（物理段）：命中的原包行必须落在本提交冻结 ready 根的物理相对段下。
++    # 相对段候选命中但物理段不符（同包名登记在**另一根**，如 self_built 根的
++    # ready/{bag} 行被 scene 提交短段候选捞中）→ ROOT_MISMATCH 不绑（AC-20.2 契约2：
++    # 同 root/profile/version + 相对 ready 映射定位，跨根不静默套配）。
++    if ready_rel_root and not (
++        bag.relative_path == ready_rel_root or bag.relative_path.startswith(ready_rel_root + "/")
++    ):
++        return "ROOT_MISMATCH", 0
++    if bag.bag_role == "SCENE_SLICE":
++        return "SLICE_NOT_ORIGINAL", 0  # 派生切片不是可绑定原包（AC-20.2）
++    if bag.source_status != "READY":
++        return "SOURCE_NOT_READY", 0
++    source_generation = bag.source_generation or 1
++    # 代次一致性：同一入口已有绑定提交且其代次与现存原包不一致 → 代次漂移，需显式
++    # 处置（既有冲突规则），不静默套配。
++    bound_gen = _same_entry_bound_generation(db, sub)
++    if bound_gen is not None and bound_gen != source_generation:
++        return "GENERATION_DRIFT", 0
++    # 按本条提交自身冻结身份出用途事件（消费端 scene_identity_key 去重保证与旧绑定
++    # 命中同一 run，复用不重建）；车辆冻结绑定同 bind 主路径（矛盾 409 由上层隔离）。
++    effective = _rebuild_effective(sub, profile_row.profile_id, profile_row.version)
++    _apply_frozen_vehicle_binding(db, sub, bag.bag_uid)
++    events = _emit_purpose_events(db, sub, effective, bag.bag_uid, source_generation, profile_row)
++    sub.status = "SCHEDULED" if events else "BOUND"
++    sub.source_id = bag.bag_uid
++    sub.source_generation = source_generation
++    sub.bound_incoming_path = f"{incoming_root}/{sub.relative_path}" if incoming_root else None
++    sub.bound_ready_path = f"{ready_root}/{bag.relative_path}"
++    sub.path_claim_key = None  # 绑定完成释放占位（路径可被后续提交复用）
++    sub.updated_at = now()
++    db.commit()
++    return "bound", len(events)
+\ No newline at end of file
+diff --git a/app/services/scene_schedule_consumer.py b/app/services/scene_schedule_consumer.py
+index 8119576..01f039b 100644
+--- a/app/services/scene_schedule_consumer.py
++++ b/app/services/scene_schedule_consumer.py
+@@ -382,9 +382,32 @@ def poll_and_consume_purpose_events(db: Session, limit: int = 50) -> dict:
+     由 POST /api/v1/orchestrator/purpose-events/consume 调用（orchestrator 通过
+     Backend API 触发，不直连业务库——AGENTS.md 写入边界）。03B outbox 表未合入时
+     poll 恒空，返回全零统计，无副作用。
++
++    TASK-12S-E（AC-20.1）：消费前执行既有后台有界对账
++    （pending_binding.reconcile_pending_bindings）——补「登记→提交」时序空隙与
++    登记后崩溃/commit 丢失窗口，把已登记原包上的 PENDING_INPUT 提交绑定出用途
++    事件，使任意提交/登记时序在本轮即可收敛进 outbox。对账自身幂等（绑定成功即
++    离开 PENDING；消费端 scene_identity_key 去重保证不重建 run/不烧模型，AC-20.2）。
++    零对账活动时返回体与旧口径逐键一致（不新增键），避免破坏既有契约断言。
+     """
++    from app.services import pending_binding
++
++    result = pending_binding.reconcile_pending_bindings(db, limit=limit)
+     events = _poll_events_with_marker(db, limit=limit)
+     if not events:
++        if result["checked"]:
++            # 对账有活动（绑定或跳过留痕）：显式回显 pending_reconciled 供
++            # orchestrator 日志观测提交收敛/隔离原因；零活动时保持全零旧口径。
++            return {
++                "consumed": 0,
++                "dropped": 0,
++                "pending": 0,
++                "created_runs": 0,
++                "reused_runs": 0,
++                "errors": [],
++                "affected_run_ids": [],
++                "pending_reconciled": result,
++            }
+         return {
+             "consumed": 0,
+             "dropped": 0,
+@@ -396,4 +419,7 @@ def poll_and_consume_purpose_events(db: Session, limit: int = 50) -> dict:
+         }
+     # stats 的 affected_run_ids 即本批实际创建/复用的 run（对账/观测用），
+     # 不另查全历史场景 run（OCR low：原 queue_name 采样含 DONE/FAILED/CANCELLED 历史 run，误导）
+-    return consume_purpose_events(db, events)
++    stats = consume_purpose_events(db, events)
++    if result["checked"]:
++        stats["pending_reconciled"] = result
++    return stats
+diff --git a/app/services/source_service.py b/app/services/source_service.py
+index 6ecb3ba..84d9e73 100644
+--- a/app/services/source_service.py
++++ b/app/services/source_service.py
+@@ -176,31 +176,70 @@ def register_source(db: Session, payload: dict, key: str | None) -> dict:
+         entries = client.list_dir(path)
+         metadata_text = client.download_text(path.rstrip("/") + "/metadata.yaml")
+         if fingerprint:
+-            existing_by_fingerprint = db.scalar(
+-                select(BagRecord).where(BagRecord.fast_fingerprint == str(fingerprint)).order_by(BagRecord.id)
+-            )
+-            # 专项 TASK-02（DESIGN §3.2/§4.1）：指纹命中派生子切片时不得归并——
+-            # 父子可共享指纹，故检查"任一" SCENE_SLICE 行而非仅 id 序第一行；
+-            # 子包走专用派生登记，原始 register 改写其路径/name 会破坏血缘身份。
+-            if (
+-                db.scalar(
+-                    select(BagRecord.id).where(
+-                        BagRecord.fast_fingerprint == str(fingerprint), BagRecord.bag_role == "SCENE_SLICE"
+-                    )
+-                )
+-                is not None
+-            ):
++            fp = str(fingerprint)
++            storage_root = settings.nas_storage_root.rstrip("/")
++            rel = path.removeprefix(storage_root).lstrip("/")
++            # TASK-12S-E（AC-20.2 契约2/3）：快指纹仅作候选索引，按**准确原包身份**
++            # 判定本登记的既有源，三档处理：
++            # 1) 同 relative_path 非切片行（精确身份）→ 恢复重登记，复用既有行
++            #    （父子同指纹时合法原包也必须放行——生产 1012 批首登恢复被旧
++            #    「任一切片同指纹即 409」误拒的根因）；
++            # 2) incoming 侧行（相对路径落在受控 scan 根下）→ incoming→ready 移动
++            #    恢复（既有 12S-C 语义：Scanner 重放 MOVING/MOVED 后按 ready 路径
++            #    携同指纹重登记，归并回既有 UID）；
++            # 3) 其他位置的 ready 原包行（sibling/parent/跨代次）→ 不得无条件
++            #    重绑（旧实现 id 序第一行会被改写路径/name 错绑），按 upsert 为本
++            #    相对路径建/复用自己的行。
++            # 无准确身份（1/2 均无）且存在同指纹切片 → TASK-02 409（子包走专用
++            # 派生登记，原始 register 不得改写其路径/name 破坏血缘身份）。
++            from app.services.scene_intake import derive_root_id_for_ready
++
++            all_fp_rows = list(db.scalars(select(BagRecord).where(BagRecord.fast_fingerprint == fp)).all())
++            exact_originals = [r for r in all_fp_rows if r.relative_path == rel and r.bag_role != "SCENE_SLICE"]
++            slice_share = any(r.bag_role == "SCENE_SLICE" for r in all_fp_rows)
++            if slice_share and not exact_originals:
+                 db.rollback()
+                 raise HTTPException(
+                     409,
+                     "fingerprint matches a derived scene slice; register source must not "
+                     "rebind the slice path (use the slice derivation registration instead)",
+                 )
+-            if existing_by_fingerprint is not None:
+-                storage_root = settings.nas_storage_root.rstrip("/")
+-                existing_by_fingerprint.relative_path = path.removeprefix(storage_root).lstrip("/")
+-                existing_by_fingerprint.name = path.rstrip("/").rsplit("/", 1)[-1]
++            incoming_roots = [r.rstrip("/") for r in (settings.nas_scan_root, settings.scene_nas_scan_root) if r]
++            incoming_side = [
++                r
++                for r in all_fp_rows
++                if r.bag_role != "SCENE_SLICE"
++                and r.relative_path != rel
++                and any(
++                    r.relative_path == root or r.relative_path.startswith(root + "/") for root in incoming_roots
++                )
++            ]
++            registered_under_ready = derive_root_id_for_ready(path) is not None
++            if len(exact_originals) == 1:
++                # 精确原包身份复核：复用既有行（upsert_bag 按 relative_path 命中同一行；
++                # 代次由下方 next_generation_for_register 按墓碑语义推进，同路径重登记
++                # 保留代次）。
++                exact_originals[0].name = path.rstrip("/").rsplit("/", 1)[-1]
+                 db.flush()
++            elif len(exact_originals) > 1:
++                db.rollback()
++                raise HTTPException(
++                    409,
++                    "AMBIGUOUS_SOURCE: multiple originals share fast_fingerprint and "
++                    f"relative_path ({rel!r}); re-register requires an unambiguous source identity",
++                )
++            elif len(incoming_side) == 1 and registered_under_ready:
++                # incoming→ready 移动恢复：归并回既有 UID，刷新 ready 相对路径/name。
++                incoming_side[0].relative_path = rel
++                incoming_side[0].name = path.rstrip("/").rsplit("/", 1)[-1]
++                db.flush()
++            elif len(incoming_side) > 1:
++                db.rollback()
++                raise HTTPException(
++                    409,
++                    "AMBIGUOUS_SOURCE: multiple incoming-side originals share fast_fingerprint "
++                    f"({fp!r}); move recovery requires an unambiguous source identity",
++                )
+         bag, created = upsert_bag(db, path, entries, metadata_text)
+         db.flush()
+         # 登记代次：墓碑重新登记推进到下一代，显式新导入只能经此流程产生
+diff --git a/tests/test_task12se_auto_bind.py b/tests/test_task12se_auto_bind.py
+new file mode 100644
+index 0000000..5982198
+--- /dev/null
++++ b/tests/test_task12se_auto_bind.py
+@@ -0,0 +1,607 @@
++"""TASK-12S-E attempt-1：接收/登记/绑定自动闭环（REQ-20 / AC-20.1、AC-20.2）。
++
++真实事故模型（/home/wang/work/doc/analysis/spray-batch-progress-20261014/REPORT.md）：
++三包正式提交（create_submission）在其源**已 READY/已登记**之后才建 → 停在
++PENDING_INPUT/source=NULL：create_submission 不主动绑定已存在 ready 源；Scanner 只
++重放 MOVING/MOVED（无待恢复记录）；重登记又被旧「指纹命中任一派生切片即 409」误拒
++（父子共享快指纹）→ 永不自愈。人工修复按精确原包 ready 路径重登记，正式消费回执
++created_runs=0/reused_runs=3（复用既有 run，不烧模型）。
++
++本测试验证固化为自动幂等的既有后台有界对账（pending_binding，经 orchestrator 每轮
++purpose-events/consume 入口触发，不新建常驻进程、不等模型执行槽）：
++- AC-20.1 时序收敛：先登记后提交/先提交后登记/登记后崩溃窗口，均自动绑定出用途事件并
++  复用既有 scene_identity_key run（不等 SCENE_EXEC_HOST 模型槽）；
++- AC-20.2 准确源与不重复：快指纹仅作候选索引（父子同指纹合法原包重登记放行；无准确
++  原包身份的路径/歧义源 409 可追溯）；同 root/profile/version + 相对 ready 映射定位
++  （跨根不绑）；重复对账/消费不新增 run/attempt/事件（scene_identity_key 去重）；
++  车辆/代次冲突按既有规则隔离不静默套配。
++- 回归：开关关闭对账不跑；零对账活动时 consume 返回体与旧口径逐键一致。
++
++机械用例（SQLite 隔离库、mock 执行模式）：模型调用以 SCENE_SLICE run 计数承载（桩），
++不烧真实模型；真实已接受结果复用单独取证。
++"""
++
++import json
++import uuid
++
++import pytest
++from fastapi.testclient import TestClient
++from sqlalchemy import func, select
++
++from app.database import Base, SessionLocal, engine
++from app.domain.scene_config import IngestPurpose, SceneSelection, SubmissionSelection
++from app.main import app
++from app.models import (
++    BagFile,
++    BagRecord,
++    BagTopic,
++    IngestProfile,
++    IngestSubmission,
++    PipelineRun,
++    PurposeScheduleEvent,
++    StepRun,
++    Vehicle,
++)
++from app.services import (
++    ingest_service,
++    pending_binding,
++    scene_intake,
++    scene_schedule_consumer,
++    source_service,
++)
++
++UNIQUE = uuid.uuid4().hex[:10]
++INCOMING_ROOT = "/test/incoming"
++SELF_READY = "/test/ready"
++SCENE_INCOMING_ROOT = "/test/scene/incoming"
++SCENE_READY = "/test/scene/ready"
++# 全文件唯一场景入口前缀：避开 bootstrap 种子 scene-spray(前缀 spray)/scene-isolated(空前缀)
++# 的入口匹配，保证 match_profile_for_incoming 只命中本文件自建 profile。
++PFX = f"t12se{UNIQUE[:8]}"
++
++METADATA = """rosbag2_bagfile_information:
++  version: 5
++  storage_identifier: sqlite3
++  relative_file_paths: [part.db3]
++  duration: {nanoseconds: 1}
++  starting_time: {nanoseconds_since_epoch: 1}
++  message_count: 1
++  topics_with_message_count: []
++"""
++
++
++def _bag_dir(tag="b"):
++    return f"t12se_{tag}_{UNIQUE}"[:20]
++
++
++class _Client:
++    def __init__(self, metadata=METADATA):
++        self._metadata = metadata
++
++    def login(self):
++        return None
++
++    def logout(self):
++        return None
++
++    def list_dir(self, _path):
++        return [{"name": "part.db3", "isdir": False, "additional": {"size": 4}}]
++
++    def download_text(self, _path):
++        return self._metadata
++
++
++@pytest.fixture()
++def db():
++    Base.metadata.create_all(engine)
++    with SessionLocal() as session:
++        yield session
++        session.rollback()
++        session.query(StepRun).delete(synchronize_session=False)
++        session.query(PurposeScheduleEvent).delete(synchronize_session=False)
++        session.query(IngestSubmission).delete(synchronize_session=False)
++        session.query(PipelineRun).delete(synchronize_session=False)
++        session.query(IngestProfile).filter(IngestProfile.profile_id.like(f"t12se-{UNIQUE}%")).delete(
++            synchronize_session=False
++        )
++        # 本文件所有源目录名以 t12se_{UNIQUE} 开头（含切片行/歧义行），按 name 清理
++        # （bag_uid 随机不可过滤）；files/topics 关联行无 DB 级 FK，先显式删避免残留。
++        bag_ids = [
++            r[0]
++            for r in session.execute(select(BagRecord.id).where(BagRecord.name.like(f"t12se_{UNIQUE}%"))).all()
++        ]
++        if bag_ids:
++            session.query(BagFile).filter(BagFile.bag_id.in_(bag_ids)).delete(synchronize_session=False)
++            session.query(BagTopic).filter(BagTopic.bag_id.in_(bag_ids)).delete(synchronize_session=False)
++            session.query(BagRecord).filter(BagRecord.id.in_(bag_ids)).delete(synchronize_session=False)
++        session.query(Vehicle).filter(Vehicle.vehicle_code.like(f"veh-{UNIQUE}%")).delete(synchronize_session=False)
++        session.commit()
++
++
++@pytest.fixture()
++def scene_settings(monkeypatch):
++    """配置场景三根 + 旧自建根，替换所有读写 settings 的服务模块（frozen dataclass replace）。"""
++    from dataclasses import replace
++
++    from app.config import settings as real_settings
++
++    new_settings = replace(
++        real_settings,
++        scene_nas_scan_root=SCENE_INCOMING_ROOT,
++        scene_nas_ready_root=SCENE_READY,
++        scene_slice_publish_root="/test/scene/slices",
++        scene_scanner_state_file=f"/tmp/scene-state-{UNIQUE}.json",
++        nas_scan_root=INCOMING_ROOT,
++        nas_ready_root=SELF_READY,
++        nas_storage_root="/test",
++        nas_local_root=f"/tmp/nas-{UNIQUE}",
++    )
++    for mod in (ingest_service, source_service, scene_intake, pending_binding):
++        monkeypatch.setattr(mod, "settings", new_settings)
++    return new_settings
++
++
++@pytest.fixture()
++def monkey_source(monkeypatch):
++    monkeypatch.setattr(
++        source_service,
++        "inspect_bag_directory",
++        lambda path: {"path": path, "name": path.rsplit("/", 1)[-1], "file_count": 1},
++    )
++    monkeypatch.setattr(source_service, "nas_client", lambda: _Client())
++    return monkeypatch
++
++
++def _add_scene_profile(db, profile_id, prefix=PFX, scenes=("slope",), purposes=("scene_slice",)):
++    row = IngestProfile(
++        profile_id=profile_id,
++        version=1,
++        display_name=profile_id,
++        incoming_prefix=prefix,
++        default_purposes_json=json.dumps(list(purposes)),
++        default_scenes_json=json.dumps(list(scenes)),
++        default_scene_parameters_json=json.dumps({}),
++        intake_root_id="scene",
++        enabled=True,
++    )
++    db.add(row)
++    db.commit()
++    return row
++
++
++def _scene_ready(bag, prefix=PFX):
++    return f"{SCENE_READY}/{prefix}/{bag}"
++
++
++def _scene_incoming(bag, prefix=PFX):
++    return f"{SCENE_INCOMING_ROOT}/{prefix}/{bag}"
++
++
++def _register(client, bag, root="scene", fingerprint=None, prefix=PFX):
++    """默认每包唯一快指纹（fingerprint=None 自动派生）：登记链路只有携带指纹才把源
++    置 READY（TASK-10 修复口径），且唯一指纹避免跨用例指纹串扰。"""
++    if fingerprint is None:
++        fingerprint = f"fp-{UNIQUE}-{bag}"
++    if root == "scene":
++        path = _scene_ready(bag, prefix)
++        incoming = _scene_incoming(bag, prefix)
++    else:
++        path = f"{SELF_READY}/{bag}"
++        incoming = f"{INCOMING_ROOT}/{bag}"
++    body = {"path": path, "incoming_path": incoming, "root_id": root}
++    if fingerprint is not None:
++        body["fast_fingerprint"] = fingerprint
++    return client.post("/api/v1/sources/register", json=body)
++
++
++def _create_submission(pid, bag, metadata=None, key=None):
++    """正式提交（create_submission 口径：入口相对路径=bag，前缀已剥离）→ 恒 PENDING_INPUT。"""
++    selection = SubmissionSelection(
++        purposes=[IngestPurpose("scene_slice")],
++        scenes=[SceneSelection(scene_code="slope")],
++        relative_path=bag,
++    )
++    with SessionLocal() as s:
++        response, status = ingest_service.create_submission(s, pid, bag, selection, key, metadata)
++    assert status == 201, response
++    return response
++
++
++def _consume(s):
++    return scene_schedule_consumer.poll_and_consume_purpose_events(s)
++
++
++def _scene_runs(s, source_id):
++    return list(s.scalars(select(PipelineRun).where(PipelineRun.source_id == source_id)).all())
++
++
++def _sub(s, sub_id):
++    return s.scalar(select(IngestSubmission).where(IngestSubmission.submission_id == sub_id))
++
++
++# ---------------------------------------------------------------------------
++# AC-20.1 时序收敛（主修复场景：源已 READY 后建的正式提交自动绑定，复用既有 run）
++# ---------------------------------------------------------------------------
++
++
++def test_register_then_formal_submit_reuses_existing_run(db, scene_settings, monkey_source, monkeypatch):
++    """主事故场景：先登记（系统兜底提交 SCHEDULED + consume 建 run）→ 源已 READY 后再建
++    正式提交（PENDING_INPUT）→ 对账绑定，消费复用既有 scene_identity_key run：
++    created_runs=0/reused_runs>=1，单份 run，attempt 不变（REPORT.md 人工修复口径自动化）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"t12se-{UNIQUE}-rt"
++    _add_scene_profile(db, pid)
++    bag = _bag_dir("rt")
++    with TestClient(app) as client:
++        first = _register(client, bag)
++    assert first.status_code == 200, first.text
++    source_id = first.json()["source_id"]
++    with SessionLocal() as s:
++        # 登记出系统兜底提交 SCHEDULED；consume 建唯一 run
++        sys_sub = s.scalar(select(IngestSubmission).where(IngestSubmission.source_id == source_id))
++        assert sys_sub is not None and sys_sub.status == "SCHEDULED", sys_sub.status
++        stats0 = _consume(s)
++        assert stats0["created_runs"] == 1 and stats0["pending"] == 0, stats0
++        runs = _scene_runs(s, source_id)
++        assert len(runs) == 1
++        run_id = runs[0].pipeline_run_id
++        attempt0 = runs[0].attempt
++    # 源已 READY 后建正式提交（create_submission 不绑定已存在源 → PENDING_INPUT）
++    formal = _create_submission(pid, bag)
++    with SessionLocal() as s:
++        assert _sub(s, formal["submission_id"]).status == "PENDING_INPUT"
++        stats = _consume(s)
++    with SessionLocal() as s:
++        sub = _sub(s, formal["submission_id"])
++        assert sub.status == "SCHEDULED" and sub.source_id == source_id and sub.source_generation == 1, sub.status
++        assert sub.bound_ready_path, "对账必须落 bound_ready_path（精确原包身份证据）"
++        # 复用既有 run：不新建、不烧模型（REPORT.md created_runs=0/reused 口径）
++        assert stats["created_runs"] == 0, stats
++        assert stats["reused_runs"] >= 1, stats
++        runs = _scene_runs(s, source_id)
++        assert len(runs) == 1 and runs[0].pipeline_run_id == run_id and runs[0].attempt == attempt0
++
++
++def test_formal_submit_before_register_binds_at_registration(db, scene_settings, monkey_source, monkeypatch):
++    """先提交（PENDING_INPUT，源未登记）→ 后登记：既有 bind 路径在登记事务内按 claim 命中
++    正式提交绑定（无系统兜底），consume 建唯一 run（既有行为回归，AC-20.1「先提交」）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"t12se-{UNIQUE}-sr"
++    _add_scene_profile(db, pid)
++    bag = _bag_dir("sr")
++    formal = _create_submission(pid, bag)
++    with TestClient(app) as client:
++        first = _register(client, bag)
++    assert first.status_code == 200, first.text
++    source_id = first.json()["source_id"]
++    with SessionLocal() as s:
++        sub = _sub(s, formal["submission_id"])
++        # 登记时 _find_pending_submission 命中正式提交 → 绑定（无 system-default 兜底）
++        assert sub.status == "SCHEDULED" and sub.source_id == source_id, sub.status
++        assert not s.scalar(
++            select(IngestSubmission.id).where(
++                IngestSubmission.source == "system-default", IngestSubmission.source_id == source_id
++            )
++        )
++        stats = _consume(s)
++        assert stats["created_runs"] == 1 and stats["pending"] == 0, stats
++        assert len(_scene_runs(s, source_id)) == 1
++
++
++def test_crash_commit_lost_reconciles_next_round(db, scene_settings, monkey_source, monkeypatch):
++    """登记 commit 丢失窗口：源已 READY 入行、提交仍 PENDING_INPUT（绑定 commit 未落）→
++    下一轮 consume 对账即收敛，不无限等待（AC-20.1「崩溃重启」）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"t12se-{UNIQUE}-cr"
++    _add_scene_profile(db, pid)
++    bag = _bag_dir("cr")
++    with TestClient(app) as client:
++        first = _register(client, bag)
++    assert first.status_code == 200, first.text
++    source_id = first.json()["source_id"]
++    # 登记出系统兜底提交 SCHEDULED（事件 PENDING，未消费）
++    with SessionLocal() as s:
++        sys_sub = s.scalar(select(IngestSubmission).where(IngestSubmission.source_id == source_id))
++        assert sys_sub is not None and sys_sub.status == "SCHEDULED"
++    # 模拟崩溃窗口：源 READY 已独立存在；同入口再建正式提交（claim 已被系统提交释放，
++    # 落 PENDING；其绑定 commit「丢失」= 保持 PENDING）
++    formal = _create_submission(pid, bag)
++    with SessionLocal() as s:
++        assert _sub(s, formal["submission_id"]).status == "PENDING_INPUT"
++    with SessionLocal() as s:
++        stats = _consume(s)  # 对账绑定正式提交 + 消费（系统事件已终态则仅正式事件建/复用 run）
++    with SessionLocal() as s:
++        sub = _sub(s, formal["submission_id"])
++        assert sub.status == "SCHEDULED" and sub.source_id == source_id
++        assert stats["created_runs"] in (0, 1), stats
++        runs = _scene_runs(s, source_id)
++        assert len(runs) == 1  # 同身份单份 run，不重复建
++
++
++def test_repeat_reconcile_idempotent(db, scene_settings, monkey_source, monkeypatch):
++    """重复对账/重复 consume：提交绑定后离开 PENDING，不再被选中；run/attempt/事件不增
++    （AC-20.2 幂等：相同重放不新增 attempt/outbox 副作用或模型调用）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"t12se-{UNIQUE}-rp"
++    _add_scene_profile(db, pid)
++    bag = _bag_dir("rp")
++    with TestClient(app) as client:
++        first = _register(client, bag)
++    assert first.status_code == 200, first.text
++    source_id = first.json()["source_id"]
++    formal = _create_submission(pid, bag)
++    with SessionLocal() as s:
++        stats1 = _consume(s)
++        assert stats1.get("reused_runs", 0) >= 1 or stats1.get("created_runs", 0) >= 1, stats1
++        sub = _sub(s, formal["submission_id"])
++        assert sub.status == "SCHEDULED"
++        runs = _scene_runs(s, source_id)
++        assert len(runs) == 1
++        run_id = runs[0].pipeline_run_id
++        attempt0 = runs[0].attempt
++        events_before = s.scalar(select(func.count(PurposeScheduleEvent.id))) or 0
++        stats2 = _consume(s)
++        runs2 = _scene_runs(s, source_id)
++        assert len(runs2) == 1 and runs2[0].pipeline_run_id == run_id and runs2[0].attempt == attempt0
++        assert stats2.get("created_runs", 0) == 0 and stats2.get("reused_runs", 0) == 0, stats2
++        assert not (stats2.get("pending_reconciled") or {}).get("bound"), "重复对账不得再绑定"
++        events_after = s.scalar(select(func.count(PurposeScheduleEvent.id))) or 0
++        assert events_after == events_before, (events_before, events_after)
++
++
++# ---------------------------------------------------------------------------
++# AC-20.2 准确源：快指纹仅作候选索引（生产 1012 误 409 修复 + TASK-02 防线保留）
++# ---------------------------------------------------------------------------
++
++
++def test_reregister_original_with_shared_child_fingerprint_allowed(db, scene_settings, monkey_source, monkeypatch):
++    """父子共享快指纹：合法原包携快指纹重登记必须放行（旧实现任一切片同指纹即 409，
++    生产 1012 批首登恢复被误拒的根因），且归并同一原包行（不新建、不改父路径）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"t12se-{UNIQUE}-pf"
++    _add_scene_profile(db, pid)
++    bag = _bag_dir("pf")
++    fp = f"fp-pf-{UNIQUE}"
++    with TestClient(app) as client:
++        first = _register(client, bag, fingerprint=fp)
++    assert first.status_code == 200, first.text
++    source_id = first.json()["source_id"]
++    with SessionLocal() as s:
++        orig = s.scalar(select(BagRecord).where(BagRecord.bag_uid == source_id))
++        assert orig.fast_fingerprint == fp
++        # 造共享同快指纹的派生切片（父子同指纹场景）
++        s.add(
++            BagRecord(
++                bag_uid="SLPF" + UNIQUE.upper(),
++                name=_bag_dir("pf_slice"),
++                relative_path=f"scene/slices/{_bag_dir('pf_slice')}",
++                bag_role="SCENE_SLICE",
++                fast_fingerprint=fp,
++                source_generation=1,
++                source_status="READY",
++            )
++        )
++        s.commit()
++    with TestClient(app) as client:
++        again = _register(client, bag, fingerprint=fp)  # 精确原包重登记
++    assert again.status_code == 200, again.text
++    with SessionLocal() as s:
++        assert again.json()["source_id"] == source_id  # 归并同一 UID
++        rows = list(s.scalars(select(BagRecord).where(BagRecord.bag_uid == source_id)).all())
++        assert len(rows) == 1
++
++
++def test_reregister_unknown_path_with_slice_fingerprint_still_409(db, scene_settings, monkey_source, monkeypatch):
++    """无准确原包身份的路径携同指纹切片快指纹登记：不得归并 → 409 可追溯（TASK-02 防线
++    保留，AC-20.2 契约3 负向）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"t12se-{UNIQUE}-ps"
++    _add_scene_profile(db, pid)
++    fp = f"fp-ps-{UNIQUE}"
++    # 先造一个切片行（携该指纹）——原包不存在
++    with SessionLocal() as s:
++        s.add(
++            BagRecord(
++                bag_uid="SLPS" + UNIQUE.upper(),
++                name=_bag_dir("ps_slice"),
++                relative_path=f"scene/slices/{_bag_dir('ps_slice')}",
++                bag_role="SCENE_SLICE",
++                fast_fingerprint=fp,
++                source_generation=1,
++                source_status="READY",
++            )
++        )
++        s.commit()
++    with TestClient(app) as client:
++        resp = _register(client, _bag_dir("ps_new"), fingerprint=fp)
++    assert resp.status_code == 409, resp.text
++    assert "fingerprint matches a derived scene slice" in resp.text
++
++
++def test_reregister_ambiguous_originals_409(db, scene_settings, monkey_source, monkeypatch):
++    """同一快指纹 + 同一 relative_path 存在多个原包行（数据歧义）→ 409 可追溯，不猜源
++    （AC-20.2 契约2：快指纹不能唯一确定源时不静默归并）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"t12se-{UNIQUE}-am"
++    _add_scene_profile(db, pid)
++    bag = _bag_dir("am")
++    fp = f"fp-am-{UNIQUE}"
++    with TestClient(app) as client:
++        first = _register(client, bag, fingerprint=fp)
++    assert first.status_code == 200, first.text
++    with SessionLocal() as s:
++        # 人工造第二行：同 relative_path + 同快指纹（模拟代次/数据歧义残留）
++        s.add(
++            BagRecord(
++                bag_uid="AMB" + UNIQUE.upper(),
++                name=_bag_dir("am"),
++                relative_path=f"scene/ready/{PFX}/{bag}",
++                bag_role="ORIGINAL",
++                fast_fingerprint=fp,
++                source_generation=1,
++                source_status="READY",
++            )
++        )
++        s.commit()
++    with TestClient(app) as client:
++        resp = _register(client, bag, fingerprint=fp)
++    assert resp.status_code == 409, resp.text
++    assert "AMBIGUOUS_SOURCE" in resp.text
++
++
++# ---------------------------------------------------------------------------
++# AC-20.2 身份防线：跨根不绑 / 车辆冲突隔离 / 代次漂移隔离
++# ---------------------------------------------------------------------------
++
++
++def test_reconcile_cross_root_not_bound(db, scene_settings, monkey_source, monkeypatch):
++    """跨根身份防线：scene 提交（快照 root=scene，ready_root=scene 根）只能绑定落在本冻结
++    ready 根物理相对段下的原包行；另一根/歧义位置的同包名行 → ROOT_MISMATCH 不绑、
++    不猜根，提交保持 PENDING，self_built 源零触碰（AC-20.2 契约2）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"t12se-{UNIQUE}-xr"
++    _add_scene_profile(db, pid)
++    bag = _bag_dir("xr")
++    # self_built 根登记（行落 ready/{bag}，READY）
++    with TestClient(app) as client:
++        resp = _register(client, bag, root="self_built")
++    assert resp.status_code == 200, resp.text
++    self_source_id = resp.json()["source_id"]
++    with SessionLocal() as s:
++        other = s.scalar(select(BagRecord).where(BagRecord.bag_uid == self_source_id))
++        assert other is not None and other.relative_path == f"ready/{bag}", other.relative_path
++        assert other.source_status == "READY"
++        # 造一行业务行落在 ready 根的 storage 绝对段（候选命中但不在冻结 ready 根物理
++        # 相对段 scene/ready/ 下）→ 触发物理段身份防线 ROOT_MISMATCH
++        s.add(
++            BagRecord(
++                bag_uid="XRA" + UNIQUE.upper(),
++                name=bag,
++                relative_path=f"test/scene/ready/{bag}",
++                bag_role="ORIGINAL",
++                source_generation=1,
++                source_status="READY",
++            )
++        )
++        s.commit()
++    formal = _create_submission(pid, bag)  # scene 提交（快照 root=scene）
++    with SessionLocal() as s:
++        stats = _consume(s)
++    with SessionLocal() as s:
++        sub = _sub(s, formal["submission_id"])
++        assert sub.status == "PENDING_INPUT", sub.status
++        assert (stats["pending_reconciled"]["skipped"]).get("ROOT_MISMATCH", 0) >= 1, stats
++        assert not stats["pending_reconciled"]["bound"]
++        # self_built 源未被 scene 事件触碰（self_built 登记自建 Phase0 run 是既有合法行为，
++        # 断言其无 SCENE_SLICE run）
++        assert [r for r in _scene_runs(s, self_source_id) if r.pipeline_type == "SCENE_SLICE"] == []
++
++
++def test_reconcile_vehicle_conflict_isolated(db, scene_settings, monkey_source, monkeypatch):
++    """车辆冲突：提交冻结车辆与原包现存 MATCHED 车辆矛盾 → 对账按既有 409 fail-closed
++    隔离该条（ERROR:* 计数），不猜车、不静默套配、不建 run（AC-20.2 契约4）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"t12se-{UNIQUE}-vc"
++    _add_scene_profile(db, pid)
++    bag = _bag_dir("vc")
++    with SessionLocal() as s:
++        veh_a = Vehicle(vehicle_code=f"veh-a-{UNIQUE}", display_name="A", rustdesk_id=f"rust-a-{UNIQUE}")
++        veh_b = Vehicle(vehicle_code=f"veh-b-{UNIQUE}", display_name="B", rustdesk_id=f"rust-b-{UNIQUE}")
++        s.add(veh_a)
++        s.add(veh_b)
++        s.commit()
++    metadata = {
++        "schema_version": "scene-input/v1",
++        "vehicle_code": f"veh-a-{UNIQUE}",
++        "collection_timezone": "Asia/Shanghai",
++        "batch_id": "b-" + UNIQUE,
++        "sensor_profile": "seyond-front-mid-approved-v1",
++    }
++    with TestClient(app) as client:
++        first = _register(client, bag)  # 系统兜底提交绑定（无 metadata → 零变化）
++    assert first.status_code == 200, first.text
++    source_id = first.json()["source_id"]
++    with SessionLocal() as s:
++        orig = s.scalar(select(BagRecord).where(BagRecord.bag_uid == source_id))
++        # 制造矛盾：原包 MATCHED 到 veh-b（≠ 正式提交冻结 veh-a）
++        orig.vehicle_id = veh_b.id
++        orig.vehicle_link_status = "MATCHED"
++        s.commit()
++    formal = _create_submission(pid, bag, metadata=metadata)
++    with SessionLocal() as s:
++        # 冲突隔离前置断言：consume 前系统兜底事件未消费 → 无 run（冲突隔离不烧模型）
++        assert _scene_runs(s, source_id) == []
++    with SessionLocal() as s:
++        stats = _consume(s)
++    with SessionLocal() as s:
++        sub = _sub(s, formal["submission_id"])
++        assert sub.status == "PENDING_INPUT", sub.status
++        assert any(k.startswith("ERROR") for k in stats["pending_reconciled"]["skipped"]), stats
++        assert not stats["pending_reconciled"]["bound"]
++
++
++def test_reconcile_generation_drift_isolated(db, scene_settings, monkey_source, monkeypatch):
++    """代次漂移：同一入口既有绑定提交代次与现存原包代次不一致（墓碑重登记推进代次后旧
++    代次行残留）→ 隔离不静默按新代次出事件。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    pid = f"t12se-{UNIQUE}-gd"
++    _add_scene_profile(db, pid)
++    bag = _bag_dir("gd")
++    with TestClient(app) as client:
++        first = _register(client, bag)
++    assert first.status_code == 200, first.text
++    source_id = first.json()["source_id"]
++    with SessionLocal() as s:
++        sys_sub = s.scalar(select(IngestSubmission).where(IngestSubmission.source_id == source_id))
++        assert sys_sub is not None and sys_sub.status == "SCHEDULED"
++        # 制造同入口代次漂移：既有绑定提交代次 2 ≠ 现存原包代次 1
++        sys_sub.source_generation = 2
++        s.commit()
++    formal = _create_submission(pid, bag)
++    with SessionLocal() as s:
++        stats = _consume(s)
++    with SessionLocal() as s:
++        sub = _sub(s, formal["submission_id"])
++        assert sub.status == "PENDING_INPUT", sub.status
++        assert stats["pending_reconciled"]["skipped"].get("GENERATION_DRIFT", 0) >= 1, stats
++
++
++# ---------------------------------------------------------------------------
++# 开关与零变化回归
++# ---------------------------------------------------------------------------
++
++
++def test_reconcile_disabled_env_keeps_legacy(db, scene_settings, monkey_source, monkeypatch):
++    """PENDING_BINDING_RECONCILE=0：对账不跑（checked=0），提交保持 PENDING（旧人工处置）。"""
++    monkeypatch.setenv("SCENE_INGEST_ENABLED", "1")
++    monkeypatch.setenv("PENDING_BINDING_RECONCILE", "0")
++    pid = f"t12se-{UNIQUE}-off"
++    _add_scene_profile(db, pid)
++    bag = _bag_dir("off")
++    with TestClient(app) as client:
++        first = _register(client, bag)
++    assert first.status_code == 200, first.text
++    formal = _create_submission(pid, bag)
++    with SessionLocal() as s:
++        stats = _consume(s)
++    with SessionLocal() as s:
++        sub = _sub(s, formal["submission_id"])
++        assert sub.status == "PENDING_INPUT", sub.status
++        assert "pending_reconciled" not in stats, f"开关关闭不得跑对账: {stats}"
++
++
++def test_consume_endpoint_no_pending_returns_legacy_shape(db, scene_settings, monkey_source, monkeypatch):
++    """无 PENDING 提交且零对账活动时 consume 返回体与旧口径逐键一致（不新增键）。"""
++    with TestClient(app) as client:
++        resp = client.post("/api/v1/orchestrator/purpose-events/consume", json={})
++    assert resp.status_code == 200
++    stats = resp.json()["stats"]
++    assert stats == {
++        "consumed": 0,
++        "dropped": 0,
++        "pending": 0,
++        "created_runs": 0,
++        "reused_runs": 0,
++        "errors": [],
++        "affected_run_ids": [],
++    }
+\ No newline at end of file

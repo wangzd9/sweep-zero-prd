@@ -1,0 +1,20 @@
+{
+  "event_id": "TESTER:t12se-attempt1-ack-running-20261014",
+  "kind": "business",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-1",
+  "status": "ACKED_RUNNING",
+  "summary": "消费协调者 23:44 独立验证派单（冻结 SHA b39a3ec，base 16a154f，worktree wt-01-t12se 只读）：开工独立验证。计划：① 专属 MySQL 8.4.11 隔离容器 tester-t12se-mysql（TESTER 自建，loopback 端口，收口自毁）+ alembic 单头/DLL 核；② 12 机械用例+154 回归集在 MySQL 方言下重放；③ 独立探针：scene_identity_key 持久唯一键 MySQL 1062、交错并发、重复提交/重复对账/重启复扫幂等、三档身份与冲突隔离面抽查、PENDING_BINDING_RECONCILE=0 旧口径逐键相等；④ 零越界核（b39a3ec 相对 16a154f 仅 4 文件）。不烧模型、不重放生产 1012 三包（复用 REPORT.md binding-repair 既有证据）。",
+  "evidence": "inbox/TESTER/TASK-12S-E/attempt-1-independent-verify-dispatch.md; inbox/1号/TASK-12S-E/receipts/attempt-1.md; git -C /home/wang/.local/state/rosbag-scene/wt-01-t12se rev-parse HEAD=b39a3ecc76da1f578d32f4e3c88a6ce989cf749d（23:47 实测，worktree 干净仅 .venv 未跟踪）",
+  "next": "MySQL 隔离库重放+独立探针→test-receipts/TASK-12S-E/attempt-1.md 交付 TEST_REPORT_PENDING",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "TESTER",
+  "recorded_at": "2026-10-14T23:58:49+08:00",
+  "occurred_at": "2026-10-14T23:58:49+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

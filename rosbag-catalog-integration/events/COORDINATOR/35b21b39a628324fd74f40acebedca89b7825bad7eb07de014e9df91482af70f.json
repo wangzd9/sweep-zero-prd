@@ -1,0 +1,12 @@
+{
+  "event_id": "coord-t12se-tester-pass-ocr-retry1-submitted-20261015-0105",
+  "occurred_at": "2026-10-15T01:04:54+08:00",
+  "recorded_at": "2026-10-15T01:04:54+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-1",
+  "status": "DELIVERED_FROZEN",
+  "summary": "E门禁TESTER面收口：TESTER 00:43独立验证PASS（真MySQL隔离库12+154 passed/8探针/零越界/自毁归零）。OCR初审run 617b9375 b01撞3900s硬截止失败（context canceled=截止症状，0 of 1 item failed，根因=1012 INFER争抢vllm槽），补审四条件核齐后经唯一入口提交retry1 run 3480a161（--reuse-run同身份identity校验通过，retry_depth 0→1唯一额度，3批）。E现仅差OCR retry1零CORRECTION级裁决。夜间静默只落盘。",
+  "evidence": "test-receipts/TASK-12S-E/attempt-1.md; reviews/TASK-12S-E/ocr-run-20261014/run/b01-diagnosis.json; reviews/TASK-12S-E/ocr-run-20261014-retry1/run/state.json; TODO 11 E行; HANDOFF 01:05检查点",
+  "next": "observer续核retry1全批AWAITING_DECISION后逐条裁决；零CORRECTION级且TESTER PASS已在→E接受→释放F公共文件前置派B"
+}

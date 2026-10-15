@@ -1,0 +1,738 @@
+diff --git a/HANDOFF.md b/HANDOFF.md
+index 3382b6d..b5910c0 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -1,3 +1,24 @@
++## 2026-10-15 小包真实全链验收暴露零消息topic证据缺口
++
++- 最终回执：cad585a已标准部署，本地同版本验证通过。首轮scene-5abba4017f2443a3b06c2b235021修复receipt后通过正式新租约恢复为attempt2 SUCCESS，不重复模型；历史失效租约/409保留。新隔离作业复用首轮12帧真实缓存，原样程序重新切包，scene-bd977a8fd6504b5ca7ed41fe3cee由既有调度自动首轮SCENE_DONE/SUCCESS、八步DONE；独立核验PASS，子包16Bc-58a7c196e948f765bb为AVAILABLE/current，3秒1590消息18topic。报告/home/wang/work/doc/analysis/spray-script-small-e2e-20261015/REPORT.md。原包SHA不变、上游DB3字节不变，生产健康/active_runs=[]，大包保持停止。
++- 修复OCR已提交但因CONFIG_CHANGED_DURING_REVIEW为BLOCKED，无有效审查结论，沿用用户不等待OCR授权；功能日志只stage为pending。生产源UID脚本挂载当前指向run-small-confirm，历史run-small作业与receipt备份/正式恢复证据保留。未扩大到新incoming自动启动或全量质量验收。
++
++- 用户要求用已验证小包复核全链路。原样上游deb8be8对615A4A7BF5FE4C51B864D01AEA小包完成12帧真实双pass识别并切出3秒实体Bag，容器exit0。正式run scene-5abba4017f2443a3b06c2b235021在complete-scene被409阻止：上游DB3保留18个topic定义，旧通用writer校验只返回12个有消息topic，发布记录漏掉零消息topic。
++- 仅在新增script_adapter切片接收边界把topics证据补齐为真实DB3的完整定义及消息计数，保持上游/源包/切片DB3不变、Backend完整性守卫不变。零消息topic夹具回归已在修复前真实失败，修复后调用/编排/接线/结果回报69项通过；本次尚待标准部署及已发布证据恢复，不提前宣称全链路PASS。
++
++## 2026-10-15 脚本正式登记参数还原纠正
++
++- 首次正式run scene-b169261e013f42b09a8f2630cf12真实SCENE_FAILED：提交非默认job_id后，旧显式API仅冻结摘要，proxy按默认参数重建无法还原，守卫在RESOLVING拒绝。该失败不消耗新模型，保留原记录，不伪造成功。
++- 本次仅补调用边界的默认源UID作业映射，正式API使用空参数，让现有默认重建摘要与提交冻结一致；不修改既有API/业务状态机/算法。新增默认参数回归；后续实际部署、新run及实测写外部报告，不能提前宣布成功。
++
++## 2026-10-15 原样水雾脚本调用适配（开发冻结前）
++
++- 用户要求将最新 ros2_slice 当独立程序调用，不修改识别/抽帧/分段等算法；已在处理机独立镜像原样调用上游 deb8be8，车辆 test、537秒/10.1GB双DB3样本。原先仅启动独立容器导致网页无记录，现增加正式流水线调用适配及物理切片接收，尚需实际发布/正式API登记，不能提前称网页已可见。
++- 接入契约 docs/scene-script-calling.md；新能力默认关闭且不改变原spray-v1默认，受控job_id与源代次/指纹/commit/单run认领绑定。物理切片复用上游产物并进入既有校验/发布/入库，不重复烧模型或重新切包。
++- 新调用边界及原编排/水雾接线29项通过。全仓1119通过、10跳过、4失败；四项已在未修改的生产基线3c9c496独立复现（三项devflow对worktree .git文件不兼容，一项既有Bag查询数量/性能契约失败），未篡改这些用例或混入用户修复。
++- 本地mock全链路PUBLISHED及DatasetFrame导入已通过；首次运行版本对账因期间新增包装脚本变为stale，冻结后必须再up/test，不能以首次结果宣布完成。运行及证据根 /home/wang/work/.local/ros2-slice-call-20261015；主仓用户改动保护，发布分支基于实际生产3c9c496，避免顺带上线未发布界面。
++- 本次尚未形成完成验收的稳定通用操作，不另建Skill；沿用现有部署/验证Skill，待真实调用闭环后更新。功能日志保持pending，OCR结果另记，不将后台在途或覆盖完成等同PASS。
++
+ ## 2026-10-13 OCR 固定入口与协调者 Skill 1.5.0（工作流修复）
+ 
+ - 用户要求将OCR固化为明确流程。唯一入口 `/home/wang/.codex/skills/complex-task-coordinator/scripts/ocr_runtime.py prepare → start → status`，独立systemd service跨回合运行，冻结实际base/head/全入选/解析规则/配置，持global+project双锁，固定参数、配置只读、失败停链、同run/身份重复拒绝；显式补审最多一次，仅复用完整且身份一致的成功批。
+@@ -1870,3 +1891,12 @@ cd /home/wang/work/rosbag-catalog
+ - 稳定装配/恢复已沉淀docs/scene-processing-operations.md及现有processing-machine-deployment Skill，quick_validate通过；标准两层发布后须重新叠场景overlay，SQLite本地写后复制，不改CIFS锁选项。功能日志F-041 pending，经validate/render，未自行批准或发布。
+ - TASK-16B/12S-A/B/C工程DONE，11S仅受控首包DONE；12S-D及聚合完整矩阵保持PARTIAL。真实采集车、真模型阴性、多DB3实采和批量规模仍缺，不冒称全面推广。旧协调/A/C poll继续暂停，不自动恢复；用户已有HANDOFF/devflow/OCR skill等改动保留，不纳入本提交。专项最新事实见/home/wang/work/doc/analysis/spray-production-release-20261013/REPORT.md。
+ - 当前业务提交已推github/main；本条与相关文档同一独立docs提交同步github/main。纯文档不再部署业务，也不重跑模型。
++
++## 2026-10-15 生产原样脚本调用核验与用户主动停止
++
++- 生产已部署107a34d，本地隔离栈同版本up/test通过、stale=false；本次默认参数映射30项定向测试通过，Ruff和diff检查通过。
++- 原失败scene-b169261e013f42b09a8f2630cf12保留。新run scene-efc4b70d23d147e784c2cd047488以空参数正式创建，进入SCENE_RUNNING；platform-claim.json确认源UID/代次/指纹/上游deb8be8/配置摘要与run一致，原脚本容器未重启或重复推理。
++- 预检在NAS按topic计数读大包缓慢；三个源文件与input-identity.json的SHA256重新核对一致后，仅将已验证本地副本只读挂到代理原源路径，代理按同run恢复并成功认领。部署外置配置及操作脚本保存在.local/ros2-slice-call-20261015；后续装配须保留源UID作业挂载与该只读副本挂载。
++- 用户随后将验收范围缩为生产脚本调用正常，要求停止大包。正式cancel后run已CANCELLED、租约释放，容器exited且OOMKilled=false，proxy active_runs=[]，监控器已退出；未删除数据/缓存/证据。wrapper收到停止后ROS shutdown报错并写FAILED/exit1，属于本次主动终止时的清理异常，保留原记录；不能当作算法自然完成或隐去此异常。
++- 停止前122有效帧、unknown=0；阶段均值46.365秒/帧（含原双pass/重试），候选抽帧3.333Hz，有效JPEG3.322Hz。完整大包切片/发布/入库未验收，不宣称端到端完成。证据与详细报告见doc/analysis/spray-script-call-verification-20261015/REPORT.md。
++- 固定OCR已对3c9c496..107a34d完成零模型prepare，但start被LEGACY_OCR_BUSY阻止，本次未取得OCR审查结论；沿用用户允许不等待OCR的授权。全仓四项既有基线失败仍在，发布分支未合main/未推送，避免混入用户改动。通用自动启动任意源包仍未实现，当前只支持受控登记作业。
+diff --git a/app/scene/spray/__init__.py b/app/scene/spray/__init__.py
+index 8bc74dd..d783634 100644
+--- a/app/scene/spray/__init__.py
++++ b/app/scene/spray/__init__.py
+@@ -5,5 +5,6 @@ import 本包即安装 ros2-spray-v1 适配器（对照 slope 包自注册口径
+ """
+ 
+ from app.scene.spray.adapter import SPRAY_ADAPTER_KEY, SprayAdapter, precheck_summary
++from app.scene.spray.script_adapter import SCRIPT_ADAPTER_KEY, SprayScriptAdapter
+ 
+-__all__ = ["SPRAY_ADAPTER_KEY", "SprayAdapter", "precheck_summary"]
+\ No newline at end of file
++__all__ = ["SPRAY_ADAPTER_KEY", "SprayAdapter", "precheck_summary", "SCRIPT_ADAPTER_KEY", "SprayScriptAdapter"]
+diff --git a/app/scene/spray/script_adapter.py b/app/scene/spray/script_adapter.py
+new file mode 100644
+index 0000000..5a62c7c
+--- /dev/null
++++ b/app/scene/spray/script_adapter.py
+@@ -0,0 +1,180 @@
++"""原样 ros2_slice 脚本作业与平台流水线的调用边界。
++
++脚本在独立运行环境执行；平台只认领固定来源的作业、观察终态、校验并接收
++已关闭的物理切片。不实现识别、抽帧、分段或切包算法。
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import re
++import shutil
++import time
++from dataclasses import replace
++from pathlib import Path
++
++import yaml
++
++from app.scene.adapter import register_adapter
++from app.scene.slope.bag_io import read_topics
++from app.scene.slope.writer import SliceWriterError, _validate_slice
++from app.scene.spray.adapter import SprayAdapter
++from app.scene.types import AnalysisOutput, EvidenceRef, SceneAdapterError, SceneOutcome, SceneSegment
++
++SCRIPT_ADAPTER_KEY = "ros2-spray-script-v1"
++UPSTREAM_COMMIT = "deb8be8515ffaa8b556e442332725e876dc2f2ca"
++
++
++def _read(path: Path):
++    return json.loads(path.read_text(encoding="utf-8"))
++
++
++def _save(path: Path, data):
++    tmp = path.with_suffix(".tmp")
++    tmp.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
++    tmp.replace(path)
++
++
++class SprayScriptAdapter(SprayAdapter):
++    """使用既有适用性检查，只消费受控脚本作业的真实结果。"""
++
++    def analyze(self, request):
++        # 既有显式运行入口只冻结能力摘要，执行端按默认参数还原。
++        # 默认按已验证的源UID查找受控作业，不要求提交方传递运行目录。
++        job_id = request.parameters.get("job_id") or request.source_id
++        if not re.fullmatch(r"[a-zA-Z0-9_-]{1,100}", job_id):
++            raise SceneAdapterError("SCRIPT_JOB_INVALID", "必须指定受控的脚本 job_id")
++        base = Path(os.environ.get("SCENE_SCRIPT_JOBS_ROOT", "/var/lib/scene-script-jobs"))
++        job = (base / job_id).resolve()
++        if not job.is_relative_to(base.resolve()) or not job.is_dir():
++            raise SceneAdapterError("SCRIPT_JOB_UNAVAILABLE", "脚本作业目录不存在或越界")
++        identity = _read(job / "job.json")
++        expected = {
++            "source_id": request.source_id,
++            "source_generation": request.source_generation,
++            "source_fingerprint": request.source_fingerprint,
++            "upstream_commit": UPSTREAM_COMMIT,
++        }
++        if any(identity.get(k) != v for k, v in expected.items()):
++            raise SceneAdapterError("SCRIPT_IDENTITY_MISMATCH", "脚本来源/代次/指纹/版本与正式任务不一致")
++        work = Path(request.work_dir)
++        work.mkdir(parents=True, exist_ok=True)
++        owner = {**expected, "run_id": work.parent.name, "config_hash": request.config_hash}
++        claim = job / "platform-claim.json"
++        try:
++            with claim.open("x", encoding="utf-8") as f:
++                json.dump(owner, f)
++        except FileExistsError:
++            if _read(claim) != owner:
++                raise SceneAdapterError("SCRIPT_JOB_ALREADY_CLAIMED", "此脚本作业已属于另一正式流水线") from None
++        deadline = time.monotonic() + float(os.environ.get("SCENE_SCRIPT_TIMEOUT_SECONDS", "86400"))
++        while True:
++            if request.cancellation.is_cancelled():
++                _save(job / "cancel-request.json", owner)
++                raise SceneAdapterError("CANCELLED", "正式任务取消，已通知脚本监控器停止作业")
++            status = _read(job / "status.json")
++            _save(work / "script-progress.json", status)
++            if status.get("source_commit") != UPSTREAM_COMMIT:
++                raise SceneAdapterError("SCRIPT_IDENTITY_MISMATCH", "实际执行脚本版本不一致")
++            if status.get("status") == "FAILED":
++                raise SceneAdapterError("SCRIPT_FAILED", str(status.get("error") or status.get("failures")))
++            if status.get("status") == "COMPLETED":
++                break
++            if time.monotonic() >= deadline:
++                _save(job / "cancel-request.json", owner)
++                raise SceneAdapterError("SCRIPT_TIMEOUT", "脚本未在受控执行时限内完成")
++            time.sleep(1)
++        # caller 只有在所有图片判定可解析、每个物理切片非空且时间范围一致时才完成。
++        if (
++            not status.get("valid_images")
++            or status.get("cached_results") != status["valid_images"]
++            or status.get("unknown_frames")
++        ):
++            raise SceneAdapterError("SCRIPT_RESULTS_INVALID", "缺少完整有效的逐帧识别证据")
++        rows = _read(job / "segments.json")
++        if status.get("segments") != len(rows):
++            raise SceneAdapterError("SCRIPT_RESULTS_INVALID", "片段数与脚本完成证据不一致")
++        segments = []
++        for row in rows:
++            if row.get("label") != "spray" or any(type(row.get(k)) is not int for k in ("start", "end")):
++                raise SceneAdapterError("SCRIPT_RESULTS_INVALID", "上游片段标签或整数秒边界非法")
++            if row["end"] <= row["start"]:
++                raise SceneAdapterError("SCRIPT_RESULTS_INVALID", "上游输出空片段")
++            # 上游自身以整数 epoch 秒定义物理切包的存储轴边界。只做精确单位转换，
++            # 不把秒级输出宣称为纳秒级识别精度。
++            segments.append(
++                SceneSegment(
++                    "spray", row["start"] * 10**9, row["end"] * 10**9, True, "bag_storage_ns", "ROS2_SLICE_SCRIPT_JOB"
++                )
++            )
++        _save(
++            work / "script-job.json",
++            {
++                "job_root": str(job),
++                "identity": owner,
++                "segments": rows,
++                "boundary_precision": "whole_epoch_seconds_from_upstream",
++            },
++        )
++        evidence = EvidenceRef(
++            "ROS2_SLICE_SCRIPT_JOB",
++            str(work / "script-job.json"),
++            hashlib.sha256((work / "script-job.json").read_bytes()).hexdigest(),
++            len(rows),
++        )
++        return AnalysisOutput(
++            SceneOutcome.SUCCESS if segments else SceneOutcome.NO_MATCH, segments=tuple(segments), evidence=(evidence,)
++        )
++
++
++def receive_script_slice(work_root: Path, staging_root: Path, segment: SceneSegment):
++    """把上游已关闭的切片复制为平台既定文件布局，再复用原完整性校验。"""
++    receipt = _read(work_root / "script-job.json")
++    rows = [
++        r
++        for r in receipt["segments"]
++        if r["start"] * 10**9 == segment.start_ns and r["end"] * 10**9 == segment.end_ns and r["label"] == segment.label
++    ]
++    if len(rows) != 1:
++        raise SliceWriterError("平台区间与脚本物理产物不唯一对应")
++    root = Path(receipt["job_root"]).resolve()
++    try:
++        rel = Path(rows[0]["slice_path_local"]).relative_to("/work/slices")
++    except (KeyError, ValueError) as exc:
++        raise SliceWriterError("脚本切片路径不在受控输出根") from exc
++    source = (root / "slices" / rel).resolve()
++    if not source.is_relative_to(root / "slices") or not source.is_dir():
++        raise SliceWriterError("脚本切片目录缺失或越界")
++    if any(p.is_symlink() for p in source.rglob("*")):
++        raise SliceWriterError("脚本切片含符号链接")
++    dbs = list(source.glob("*.db3"))
++    if len(dbs) != 1:
++        raise SliceWriterError("当前上游切片应为单 DB3，不能漏接文件")
++    target = staging_root / segment.slice_key.replace(":", "_")
++    if target.exists():
++        shutil.rmtree(target)
++    shutil.copytree(source, target)
++    name = dbs[0].name
++    if name != "rosbag2_0.db3":
++        (target / name).rename(target / "rosbag2_0.db3")
++    metadata_path = target / "metadata.yaml"
++    metadata = yaml.safe_load(metadata_path.read_text())
++    bag_info = metadata["rosbag2_bagfile_information"]
++    if bag_info["relative_file_paths"] != [name]:
++        raise SliceWriterError("脚本 metadata 与实际 DB3 不一致")
++    bag_info["relative_file_paths"] = ["rosbag2_0.db3"]
++    for item in bag_info.get("files", []):
++        key = "path" if "path" in item else "uri"
++        if item.get(key) != name:
++            raise SliceWriterError("脚本 metadata.files 含未知 DB3")
++        item[key] = "rosbag2_0.db3"
++    metadata_path.write_text(yaml.safe_dump(metadata, allow_unicode=True, sort_keys=False))
++    result = _validate_slice(target, segment, expected_topics=None, bounds=(segment.start_ns, segment.end_ns))
++    # 上游保留零消息topic定义；发布台账必须与真实DB3的完整topic集合一致。
++    # 只补齐接收证据，不改原始/切片DB3，也不放宽Backend完整性校验。
++    return replace(result, topics={topic.name: topic.message_count for topic in read_topics(target)})
++
++
++register_adapter(SCRIPT_ADAPTER_KEY, SprayScriptAdapter)
+diff --git a/changelog/REVIEW.md b/changelog/REVIEW.md
+index 388f020..490eb6d 100644
+--- a/changelog/REVIEW.md
++++ b/changelog/REVIEW.md
+@@ -124,6 +124,16 @@ Web 页面接入场景数据：切片默认展示在数据列表，流水线页
+ - **[F-041.3] 处理入口独立且保留原功能**：水雾数据使用独立接收和发布目录，避免触发自建数据集流程；既有自建和其他数据路线保持运行边界。
+ - **[F-041.4] 失败可核验并恢复**：任务保留步骤与模型缓存证据，切片在本地写完后校验复制到存储，降低网络文件系统写锁失败风险；受控重试可复用身份一致的识别结果。
+ 
++### [F-042] 水雾脚本产物接入正式流水线
++
++受控水雾作业直接调用原有场景脚本，平台接续任务跟踪、切片校验、发布和入库，减少算法重复实现带来的差异。
++
++功能点：
++
++- **[F-042.1] 原有识别和切片算法直接复用**：固定脚本版本执行识别与切片，平台接收真实产物，不重新实现算法或重复切包。
++- **[F-042.2] 任务和结果可追溯**：受控作业绑定原始包与正式流水线，子切片保留车辆和父包关系，可通过页面和接口查询。
++- **[F-042.3] 保留完整的数据证据**：切片校验与发布记录包含零消息的topic定义，避免合法脚本产物在入库确认阶段因记录遗漏被拒绝。
++
+ ## 已批准，等待发布
+ 
+ 暂无。
+diff --git a/changelog/pending/spray-upstream-script-calling.yaml b/changelog/pending/spray-upstream-script-calling.yaml
+new file mode 100644
+index 0000000..166ed94
+--- /dev/null
++++ b/changelog/pending/spray-upstream-script-calling.yaml
+@@ -0,0 +1,21 @@
++schema_version: 1
++id: spray-upstream-script-calling
++status: pending
++feature_key: spray-upstream-script-calling
++commits:
++- 98d0718
++- 107a34d
++- 524fe83
++- cad585a
++- 1c87028
++title: 水雾脚本产物接入正式流水线
++summary: 受控水雾作业直接调用原有场景脚本，平台接续任务跟踪、切片校验、发布和入库，减少算法重复实现带来的差异。
++changes:
++- title: 原有识别和切片算法直接复用
++  description: 固定脚本版本执行识别与切片，平台接收真实产物，不重新实现算法或重复切包。
++- title: 任务和结果可追溯
++  description: 受控作业绑定原始包与正式流水线，子切片保留车辆和父包关系，可通过页面和接口查询。
++- title: 保留完整的数据证据
++  description: 切片校验与发布记录包含零消息的topic定义，避免合法脚本产物在入库确认阶段因记录遗漏被拒绝。
++generated_at: '2026-10-15T17:46:02+08:00'
++review_id: F-042
+diff --git a/config/scene_capabilities.yaml b/config/scene_capabilities.yaml
+index 93ecc41..836d885 100644
+--- a/config/scene_capabilities.yaml
++++ b/config/scene_capabilities.yaml
+@@ -178,4 +178,34 @@ capabilities:
+         publish_target: true
+       - label: normal
+         scene_tag: 正常
+-        publish_target: false
+\ No newline at end of file
++        publish_target: false
++  # 受控脚本调用能力：显式指定 job_id；数值后缀的 spray-v1 仍为原默认。
++  - scene_code: spray
++    capability_version: spray-script-deb8be8-call
++    display_name: 水雾识别（原样脚本调用）
++    enabled: false
++    disabled_reason: 需部署固定上游脚本环境及受控作业后显式启用
++    adapter_key: ros2-spray-script-v1
++    adapter_revision: deb8be8515ffaa8b556e442332725e876dc2f2ca
++    required_inputs:
++      - topic: /iv_packets_front_mid
++        required: false
++      - topic: /iv_points_front_mid_transformed
++        required: false
++    preprocessing_key: upstream-ros2-slice-deb8be8
++    parameter_schema:
++      - name: job_id
++        type: str
++        default: ''
++        description: 受控处理机脚本作业标识；与正式流水线唯一绑定
++    defaults:
++      job_id: ''
++    model_profile: upstream-request-common-deb8be8
++    rules_revision: upstream-analysis-spray-deb8be8
++    output_labels:
++      - label: spray
++        scene_tag: 水雾
++        publish_target: true
++      - label: normal
++        scene_tag: 正常
++        publish_target: false
+diff --git a/docs/deployment-snapshot.md b/docs/deployment-snapshot.md
+index e0e42f0..d92ad7a 100644
+--- a/docs/deployment-snapshot.md
++++ b/docs/deployment-snapshot.md
+@@ -1,23 +1,23 @@
+ # 部署版本快照
+ 
+ > 本文件由 `scripts/generate_deployment_snapshot.py` 自动生成，**不要手工编辑**。
+-> 生成时间：2026-10-13T20:27:31+08:00
++> 生成时间：2026-10-15T16:47:23+08:00
+ > 处理机来源：`scripts/check_processing_machine.sh` 输出缓存（只读检查）
+ > 本地来源：`.local/deployed-git-revision`、`config/local-a100-real.env`、`alembic/versions/`
+ > 解析器来源：本次命令显式传入的已验证部署 receipt；未传入时标记未采样，不沿用旧记录。
+ 
+ | 项 | 当前值 |
+ |---|---|
+-| 处理机平台 revision | `3c9c496` |
++| 处理机平台 revision | `cad585a` |
+ | 处理机 Alembic 迁移 | `20261013_01_scene_intake (head)` |
+-| 本地栈平台 revision | `3c9c496` |
++| 本地栈平台 revision | `cad585a` |
+ | 本地 A100 自建脚本 | `81b1e83a85cb` |
+ | 本地 A100 NVIDIA 脚本 | `95f4ff65aa7f` |
+ | 处理机 Phase0 正式脚本提交 | `未采样` |
+ | 处理机 Phase0 解析器提交 | `未采样` |
+ | 处理机 Phase0 运行二进制 SHA256 | `未采样` |
+ | 代码 Alembic head（本地） | `20261013_01` |
+-| 工作区 HEAD | `3c9c496` |
++| 工作区 HEAD | `cad585a` |
+ 
+ **一致性口径**：生产部署后 `处理机平台 revision` 应等于该次 release/部署 commit；
+ `本地栈平台 revision` 必须 ≥ 处理机（本地收敛要求）。若处理机 revision 落后于
+diff --git a/docs/scene-script-calling.md b/docs/scene-script-calling.md
+new file mode 100644
+index 0000000..53bdf0c
+--- /dev/null
++++ b/docs/scene-script-calling.md
+@@ -0,0 +1,17 @@
++# 场景脚本调用与平台任务边界
++
++2026-10-15 用户明确要求直接调用 `ros2_slice`，复用上游场景算法。后续场景接入默认沿用这一边界：固定程序版本和运行环境，由调用包装层转换输入输出；平台承担任务、取消、校验、发布和入库。
++
++本次水雾上游版本 `deb8be8515ffaa8b556e442332725e876dc2f2ca`。程序源码和7参考图按 Git 快照原样封装，调用 `src.analysis_perform.analysis_perform(..., scene="spray", vehicle_id=..., output_base_path=...)`。不重写提示词、识别、抽帧、增量分段或切包，不将上游秒级片段边界宣称为纳秒级识别精度。所有中间文件在原包的本地独立副本中生成，NAS源包只读。
++
++`scripts/ros2_slice_call.py` 仅做副本校验、运行锁、函数调用计时、产物验证和状态记录。独立进程不等于平台任务；必须同时通过正式 `POST /api/v1/scene-analysis-runs` 登记真实流水线。
++
++受控能力 `spray-script-deb8be8-call` 默认关闭，发布时在 Backend/proxy 共用外置能力表中显式启用。默认以已登记的源UID定位作业。既有显式API只冻结摘要、代理按默认参数重建，因此本轮正式提交使用空参数；不传自定义 `job_id`。受控运维层的参数 `job_id` 指向 `SCENE_SCRIPT_JOBS_ROOT` 下的受控脚本作业目录；作业须有 `job.json`（源UID/代次/指纹、上游commit）、`status.json`、最终 `segments.json` 及已关闭的物理切片。新能力不改变默认 `spray-v1` 的选择。当前只支持显式登记的处理机作业，尚未接入自动扫描时启动任意场景脚本。
++
++平台适配器唯一认领作业，同一run重试可接续，其他run不得抢占同一结果。观察真实完成/失败；取消写 `cancel-request.json`，处理机监控器停止实际容器。容器崩溃/OOM由监控器转为明确失败，不能永远停在RUNNING。脚本完整有效后，平台接收其物理切片，仅在副本中适配DB3文件名及metadata路径，复用原切片校验、NAS staging原子发布和Backend登记，不再读取整个源包重复切片。
++
++上游可能保留消息数为零的topic定义；接收后的发布证据必须包含真实DB3的完整topic集合及计数（包括零），使Backend原有topic集合完整性校验成立。不能删topic定义、改写DB3或放宽校验来掩盖证据遗漏。
++
++作业 `frames.jsonl` 记录未命中缓存的真实最终单帧耗时（含必要第二pass与重试）。`metrics.json` 分别统计源PCD、按10帧跳过/每3帧选取的候选、通过500KiB过滤的有效图片；频次为 `(N-1)/(末帧时间-首帧时间)`，时间轴明确为上游文件名的传感器时间。缓存命中不计入新推理效率。
++
++当前537秒样本对应源 `91FFEEC14C6243C49A81C75AB5`，车辆 `test`。实际运行、容器身份、正式流水线和指标证据见仓库外 `doc/analysis/ros2-slice-direct-call-20261015/REPORT.md`。生产上线必须先完成调用边界测试与本地验证，再使用标准 `scripts/deploy_processing_machine.sh --apply --production`；发布后恢复场景overlay、核同一注册表与脚本作业挂载，并收敛本地环境。不能将独立容器启动冒充正式流水线已上线。
+diff --git a/scripts/ros2_slice_call.py b/scripts/ros2_slice_call.py
+new file mode 100644
+index 0000000..aa7ffbc
+--- /dev/null
++++ b/scripts/ros2_slice_call.py
+@@ -0,0 +1,200 @@
++"""调用原样 ros2_slice；仅做输入副本隔离、计时及输出验证。"""
++
++import argparse
++import hashlib
++import json
++import shutil
++import sqlite3
++import sys
++import time
++import traceback
++from datetime import datetime
++from pathlib import Path
++
++STATE_PATH = None
++
++
++def save(path, data):
++    temp = path.with_suffix(path.suffix + ".tmp")
++    temp.write_text(json.dumps(data, ensure_ascii=False, indent=2))
++    temp.replace(path)
++
++
++def digest(path):
++    with path.open("rb") as f:
++        return hashlib.file_digest(f, "sha256").hexdigest() if hasattr(hashlib, "file_digest") else chunk_digest(f)
++
++
++def chunk_digest(f):
++    h = hashlib.sha256()
++    for block in iter(lambda: f.read(4 * 1024 * 1024), b""):
++        h.update(block)
++    return h.hexdigest()
++
++
++def main():
++    global STATE_PATH
++    p = argparse.ArgumentParser()
++    p.add_argument("--source", type=Path, required=True)
++    p.add_argument("--work", type=Path, required=True)
++    p.add_argument("--vehicle", default="test")
++    p.add_argument("--prepare-only", action="store_true")
++    args = p.parse_args()
++    source, work = args.source.resolve(), args.work.resolve()
++    if source == work or source in work.parents or work in source.parents:
++        raise ValueError("源包与工作目录必须隔离")
++    work.mkdir(parents=True, exist_ok=True)
++    # OS 文件锁保证相同工作目录不会重复烧模型。
++    import fcntl
++
++    lock = (work / "call.lock").open("a")
++    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
++    STATE_PATH = work / "status.json"
++    import signal
++
++    signal.signal(signal.SIGTERM, lambda *_: sys.exit("调用进程收到停止信号"))
++    started = time.monotonic()
++    state = {
++        "status": "PREPARING",
++        "started_at": datetime.now().astimezone().isoformat(),
++        "source": str(source),
++        "vehicle": args.vehicle,
++        "source_commit": json.loads(Path("/opt/caller/source-manifest.json").read_text())["commit"],
++        "platform_modified": False,
++    }
++    save(work / "status.json", state)
++    sys.path.insert(0, "/opt/ros2_slice")
++    snapshot = json.loads(Path("/opt/caller/source-manifest.json").read_text())
++    for rel, expected in snapshot["files"].items():
++        if digest(Path("/opt/ros2_slice") / rel) != expected:
++            raise ValueError(f"上游源码快照校验失败：{rel}")
++    from request import request_spray
++    from src.analysis_perform import analysis_perform
++
++    source_files = sorted([source / "metadata.yaml", *source.glob("*.db3")])
++    if len(source_files) < 2 or not all(x.is_file() for x in source_files):
++        raise ValueError("输入必须包含 metadata.yaml 和 DB3")
++    bag = work / "input" / source.name
++    bag.mkdir(parents=True, exist_ok=True)
++    identity = {
++        "commit": state["source_commit"],
++        "vehicle": args.vehicle,
++        "files": {x.name: {"size": x.stat().st_size, "sha256": digest(x)} for x in source_files},
++    }
++    identity_path = work / "input-identity.json"
++    if identity_path.exists() and json.loads(identity_path.read_text()) != identity:
++        raise ValueError("工作目录输入或程序版本已变化，请使用新的独立目录")
++    for original in source_files:
++        target = bag / original.name
++        if target.exists():
++            if digest(target) != identity["files"][original.name]["sha256"]:
++                raise ValueError(f"本地副本校验失败：{target.name}")
++        else:
++            temp = target.with_suffix(target.suffix + ".partial")
++            shutil.copyfile(original, temp)
++            if digest(temp) != identity["files"][original.name]["sha256"]:
++                raise ValueError(f"复制校验失败：{target.name}")
++            temp.replace(target)
++    save(identity_path, identity)
++    if args.prepare_only:
++        state.update(status="PREPARED", elapsed_s=time.monotonic() - started)
++        save(work / "status.json", state)
++        return
++
++    frame_log = (work / "frames.jsonl").open("a", buffering=1)
++    call_started = {}
++    frame_count = 0
++    unknown_count = 0
++
++    # 只观察原函数调用/返回；不替换模型、缓存、分段或切片实现。
++    def profile(frame, event, value):
++        nonlocal frame_count, unknown_count
++        if frame.f_code is request_spray.judge_one.__code__:
++            if event == "call":
++                call_started[id(frame)] = time.monotonic()
++            elif event == "return":
++                elapsed = time.monotonic() - call_started.pop(id(frame), time.monotonic())
++                if isinstance(value, dict):
++                    frame_count += 1
++                    unknown_count += value.get("final") not in ("正常", "异常")
++                    frame_log.write(
++                        json.dumps(
++                            {
++                                "index": frame_count,
++                                "completed_at": datetime.now().astimezone().isoformat(),
++                                "elapsed_s": elapsed,
++                                **value,
++                            },
++                            ensure_ascii=False,
++                        )
++                        + "\n"
++                    )
++                    state.update(
++                        status="RUNNING",
++                        new_frames=frame_count,
++                        unknown_frames=unknown_count,
++                        last_frame_at=datetime.now().astimezone().isoformat(),
++                    )
++                    save(work / "status.json", state)
++
++    state.update(status="RUNNING")
++    save(work / "status.json", state)
++    sys.setprofile(profile)
++    try:
++        segments = analysis_perform(
++            str(bag), scene="spray", vehicle_id=args.vehicle, output_base_path=str(work / "slices")
++        )
++    finally:
++        sys.setprofile(None)
++        frame_log.close()
++    save(work / "segments.json", segments)
++    failures = []
++    for i, seg in enumerate(segments):
++        output = Path(seg.get("slice_path_local", ""))
++        dbs = list(output.glob("*.db3")) if output.is_dir() else []
++        if not dbs or not (output / "metadata.yaml").is_file():
++            failures.append(f"片段 {i} 没有完整物理输出")
++        for db in dbs:
++            conn = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
++            try:
++                check = conn.execute("PRAGMA quick_check").fetchone()[0]
++                n, lo, hi = conn.execute("SELECT COUNT(*),MIN(timestamp),MAX(timestamp) FROM messages").fetchone()
++                if check != "ok" or not n or lo < seg["start"] * 10**9 or hi > seg["end"] * 10**9:
++                    failures.append(f"片段 {i} DB3 完整性或时间范围异常")
++            finally:
++                conn.close()
++    pic = bag / f"point_pic_{bag.name}"
++    cache_path = pic.parent / (pic.name + "_cache.json")
++    results = json.loads(cache_path.read_text())["results"] if cache_path.exists() else []
++    jpg_count = len(list(pic.glob("*.jpg")))
++    if not jpg_count or len(results) != jpg_count or any(x.get("result") not in ("正常", "异常") for x in results):
++        failures.append("有效图片/逐帧结果不完整或包含未知判定")
++    state.update(
++        status="FAILED" if failures else "COMPLETED",
++        elapsed_s=time.monotonic() - started,
++        completed_at=datetime.now().astimezone().isoformat(),
++        failures=failures,
++        segments=len(segments),
++        valid_images=jpg_count,
++        cached_results=len(results),
++        new_frames=frame_count,
++        unknown_frames=unknown_count,
++        pcd_frames=len(list((bag / f"point_pdc_{bag.name}").glob("*.pcd"))),
++    )
++    save(work / "status.json", state)
++    if failures:
++        raise RuntimeError("；".join(failures))
++
++
++if __name__ == "__main__":
++    try:
++        main()
++    except BaseException:
++        if STATE_PATH is not None and STATE_PATH.exists():
++            status = json.loads(STATE_PATH.read_text())
++            status.update(
++                status="FAILED", error=str(sys.exc_info()[1]), stopped_at=datetime.now().astimezone().isoformat()
++            )
++            save(STATE_PATH, status)
++        traceback.print_exc()
++        raise
+diff --git a/scripts/scene_host_orchestrator.py b/scripts/scene_host_orchestrator.py
+index 7b130b1..523996e 100644
+--- a/scripts/scene_host_orchestrator.py
++++ b/scripts/scene_host_orchestrator.py
+@@ -55,6 +55,7 @@ from app.scene.adapter import build_manifest, dispatch
+ from app.scene.slope.bag_io import BagIoError, read_topics
+ from app.scene.slope.writer import SliceWriterError, slice_bag_to_staging
+ from app.scene.spray import SPRAY_ADAPTER_KEY
++from app.scene.spray.script_adapter import SCRIPT_ADAPTER_KEY, receive_script_slice
+ from app.scene.types import (
+     SceneManifest,
+     SceneOutcome,
+@@ -452,7 +453,11 @@ class SceneHostOrchestrator:
+         child_uids: dict[str, str] = {}
+         for seg in manifest.publishable_segments():
+             try:
+-                res = slice_bag_to_staging(Path(spec.source_path), local_root, seg, storage_offset_ns=offset_ns)
++                cap = self._registry.get(spec.scene_code, spec.capability_version)
++                if cap is not None and cap.adapter_key == SCRIPT_ADAPTER_KEY:
++                    res = receive_script_slice(spec.work_root, local_root, seg)
++                else:
++                    res = slice_bag_to_staging(Path(spec.source_path), local_root, seg, storage_offset_ns=offset_ns)
+             except (SliceWriterError, BagIoError, OSError) as exc:
+                 raise SceneExecError("WRITE_FAILED", str(exc), step="WRITE") from exc
+             target = staging_root / res.out_dir.name
+diff --git a/tests/test_spray_script_adapter.py b/tests/test_spray_script_adapter.py
+new file mode 100644
+index 0000000..a516c7a
+--- /dev/null
++++ b/tests/test_spray_script_adapter.py
+@@ -0,0 +1,116 @@
++"""验证脚本调用边界和真实 Bag 接收，不替代上游算法质量验收。"""
++
++import json
++from dataclasses import replace
++from pathlib import Path
++
++import pytest
++import yaml
++
++from app.scene.registry import CapabilityRegistry, get_registry
++from app.scene.slope.bag_io import BagMessage, BagTopic, read_messages, write_bag
++from app.scene.spray.script_adapter import UPSTREAM_COMMIT, SprayScriptAdapter, receive_script_slice
++from app.scene.types import Cancellation, SceneAdapterError, SceneRunRequest
++
++
++def setup_job(tmp_path, monkeypatch):
++    root = tmp_path / "jobs" / "probe"
++    root.mkdir(parents=True)
++    monkeypatch.setenv("SCENE_SCRIPT_JOBS_ROOT", str(root.parent))
++    identity = {
++        "source_id": "SRC1",
++        "source_generation": 1,
++        "source_fingerprint": "a" * 64,
++        "upstream_commit": UPSTREAM_COMMIT,
++    }
++    (root / "job.json").write_text(json.dumps(identity))
++    status = {
++        "status": "COMPLETED",
++        "source_commit": UPSTREAM_COMMIT,
++        "valid_images": 3,
++        "cached_results": 3,
++        "unknown_frames": 0,
++        "segments": 1,
++    }
++    (root / "status.json").write_text(json.dumps(status))
++    row = {"start": 10, "end": 25, "label": "spray", "slice_path_local": "/work/slices/test/spray/clip"}
++    (root / "segments.json").write_text(json.dumps([row]))
++    cap = get_registry().get("spray", "spray-script-deb8be8-call")
++    req = SceneRunRequest(
++        "SRC1", 1, "a" * 64, "/source", (), cap, {"job_id": "probe"}, "frozen", str(tmp_path / "scene-1" / "attempt-1")
++    )
++    return root, req
++
++
++def test_script_output_and_claim_are_bound_to_formal_run(tmp_path, monkeypatch):
++    root, request = setup_job(tmp_path, monkeypatch)
++    output = SprayScriptAdapter().analyze(request)
++    assert output.outcome.value == "SUCCESS"
++    assert output.segments[0].start_ns == 10_000_000_000
++    assert json.loads((root / "platform-claim.json").read_text())["run_id"] == "scene-1"
++    # 同 run 正常重试可复用；其他 run 不得抢领同一作业冒充新推理。
++    SprayScriptAdapter().analyze(replace(request, work_dir=str(tmp_path / "scene-1" / "attempt-2")))
++    with pytest.raises(SceneAdapterError, match="ALREADY_CLAIMED"):
++        SprayScriptAdapter().analyze(replace(request, work_dir=str(tmp_path / "scene-2" / "attempt-1")))
++
++
++def test_source_identity_mismatch_is_rejected(tmp_path, monkeypatch):
++    _, request = setup_job(tmp_path, monkeypatch)
++    with pytest.raises(SceneAdapterError, match="IDENTITY_MISMATCH"):
++        SprayScriptAdapter().analyze(replace(request, source_generation=2))
++
++
++def test_default_parameters_find_job_by_verified_source_uid(tmp_path, monkeypatch):
++    root, request = setup_job(tmp_path, monkeypatch)
++    root.rename(root.parent / request.source_id)
++    assert SprayScriptAdapter().analyze(replace(request, parameters={})).outcome.value == "SUCCESS"
++
++
++def test_unknown_results_are_never_published(tmp_path, monkeypatch):
++    root, request = setup_job(tmp_path, monkeypatch)
++    status = json.loads((root / "status.json").read_text())
++    status["unknown_frames"] = 1
++    (root / "status.json").write_text(json.dumps(status))
++    with pytest.raises(SceneAdapterError, match="RESULTS_INVALID"):
++        SprayScriptAdapter().analyze(request)
++
++
++def test_cancel_notifies_actual_job(tmp_path, monkeypatch):
++    root, request = setup_job(tmp_path, monkeypatch)
++    with pytest.raises(SceneAdapterError, match="CANCELLED"):
++        SprayScriptAdapter().analyze(replace(request, cancellation=Cancellation(True)))
++    assert (root / "cancel-request.json").is_file()
++
++
++def test_receive_closed_bag_preserves_bytes_and_source(tmp_path, monkeypatch):
++    root, request = setup_job(tmp_path, monkeypatch)
++    output = SprayScriptAdapter().analyze(request)
++    src = root / "slices/test/spray/clip"
++    write_bag(
++        src,
++        [BagTopic("/opaque", "custom/msg/Packet", 2), BagTopic("/empty", "custom/msg/Packet", 0)],
++        [
++            BagMessage("/opaque", "custom/msg/Packet", 10_000_000_000, b"first"),
++            BagMessage("/opaque", "custom/msg/Packet", 25_000_000_000, b"last"),
++        ],
++    )
++    (src / "rosbag2_0.db3").rename(src / "clip_0.db3")
++    meta = yaml.safe_load((src / "metadata.yaml").read_text())
++    meta["rosbag2_bagfile_information"]["relative_file_paths"] = ["clip_0.db3"]
++    meta["rosbag2_bagfile_information"]["files"][0]["uri"] = "clip_0.db3"
++    (src / "metadata.yaml").write_text(yaml.safe_dump(meta))
++    before = {p.name: p.read_bytes() for p in src.iterdir()}
++    result = receive_script_slice(Path(request.work_dir), tmp_path / "staging", output.segments[0])
++    assert result.message_count == 2
++    # 上游保留零消息topic定义，发布证据须完整映射到实际DB3表。
++    assert result.topics == {"/opaque": 2, "/empty": 0}
++    assert [m.data for m in read_messages(result.out_dir)] == [b"first", b"last"]
++    assert before == {p.name: p.read_bytes() for p in src.iterdir()}
++
++
++def test_existing_spray_default_is_preserved():
++    reg = get_registry()
++    script = reg.get("spray", "spray-script-deb8be8-call")
++    enabled = CapabilityRegistry(tuple(replace(c, enabled=True) if c.scene_code == "spray" else c for c in reg.all()))
++    assert script is not None
++    assert enabled.resolve("spray").capability_version == "spray-v1"

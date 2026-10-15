@@ -1,0 +1,45 @@
+{
+  "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/ec1ff350-fcd0-42b7-af57-f58452bb4867.jsonl",
+  "session_ids": [
+    "ec1ff350-fcd0-42b7-af57-f58452bb4867"
+  ],
+  "last_event": {
+    "type": "llm_request",
+    "timestamp": "2026-10-15T06:13:05Z"
+  },
+  "terminal_state": null,
+  "manifest_schema": null,
+  "input": {},
+  "ocr_version": null,
+  "coverage_counts": {
+    "selected": 0,
+    "completed": 0,
+    "reused": 0,
+    "failed": 0,
+    "waived": 0
+  },
+  "coverage_complete": false,
+  "remaining_paths": [],
+  "gate_decision": "NOT_EVALUATED",
+  "parse_errors": [],
+  "manifest_failures": [],
+  "item_error_messages": {},
+  "llm_errors": [],
+  "repeated_tools": [],
+  "request_characters": {
+    "count": 22,
+    "max": 100994,
+    "max_frozen_first_two": 27911,
+    "note": "字符统计只用于观察增长，不是OCR本地token估计或模型上下文长度。"
+  },
+  "model_usage": {
+    "responses": 21,
+    "total_prompt_tokens": 438962,
+    "total_completion_tokens": 40468,
+    "max_prompt_tokens": 33067
+  },
+  "next_steps": [
+    "没有完整session_end/manifest；先核对实际PID及start identity，不能判停止或通过。"
+  ],
+  "batch_identity_matches": false
+}

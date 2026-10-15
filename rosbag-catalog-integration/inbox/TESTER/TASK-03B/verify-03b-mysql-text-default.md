@@ -23,7 +23,7 @@ target: main 的 alembic/versions/20261008_02_ingest_config.py（HEAD b3280c9）
    python 容器 `pip install -q -r requirements.txt`（pymysql 锁 1.1.1），挂载 main 工作区
    `-v /home/wang/work/rosbag-catalog:/work -w /work`。
 2. **开 general_log**：`SET GLOBAL general_log=1; SET GLOBAL general_log_file='/tmp/glog.log';`
-3. 跑**完整升级链**（不是单独 02）：`DATABASE_URL='mysql+pymysql://root:<pw>@<mysql容器>:3306/testdb' alembic upgrade head`
+3. 跑**完整升级链**（不是单独 02）：`DATABASE_URL='mysql+pymysql://root:[REDACTED_PASSWORD]@<mysql容器>:3306/testdb' alembic upgrade head`
    从 base 一路升到 head（含 20261008_01 → 20261008_02）。记录 exit code。
 4. **抓 general_log 里实际下发的 CREATE TABLE ingest_profile** 全文，定位三个 TEXT 列：
    - 若 DDL 为 `... TEXT NOT NULL`（无 DEFAULT）→ 强模型的"fresh compile"是 literal_binds 风格过读，#1 = 误报，迁移完好；

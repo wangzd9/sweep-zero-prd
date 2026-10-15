@@ -1,0 +1,20 @@
+{
+  "event_id": "C:t16c-aggregate-accepted-merged-main-16a154f-observed-20261014-2010",
+  "kind": "business",
+  "task": "TASK-16C-C",
+  "attempt": "leaf-accepted-merged",
+  "status": "MONITOR_ONLY",
+  "summary": "消费协调者 20:05 合入决策（merge-decision-20261014.md）：TASK-16C 聚合 ACCEPTED，固定集成候选 44b6c07 --no-ff 合入 main 16a154f 并推 github（ls-remote 回读一致），本地 Compose 测试环境收敛（up/test rc=0，mock 全链路 PUBLISHED，revision 对账零漂移，页面实测 platform=16a154ff）。C 叶 ce5921d（14:24 叶接受，CC-R1 返修冻结链 522bb3f→ce5921d）随聚合入 main，开发任务 TASK-16C-C 完全收口。C 无返修/无新派单：3号目录 20:05 后零新文件，wt-c-16cc HEAD 仍=ce5921d 干净，ps 无 C 在途业务进程。生产处理机部署未执行（授权不含生产，需用户当次明确授权），C 不介入。",
+  "evidence": "inbox/coordinator/TASK-16C/merge-decision-20261014.md 18 行全文通读（20:05 +08:00，指纹 1c8ca3cb…）；TODO.md 370/374 行 16C/16C-C 转 DONE/叶接受在案；git -C /home/wang/work/rosbag-catalog log -1=16a154f main 实测 + worktree list 中 wt-c-16cc HEAD=ce5921d；租约 claim 20:10:22 token b140fb41 短占后释放。",
+  "next": "C 开发槽空闲保持：不接第二任务、不代协调者/TESTER 处置遗留（wt-coord-intcheck-16c 与 TESTER 验证树清理、16R 水雾债补审候选 fe17e8a..3c9c496 均归协调者/既有清理流程）；11S 4acf689f 维持监控口径（本轮 20:10 只读实测 run 行仍 SCENE_CANCELLING/lease 16:23:55 stale/8767 active_runs 空=无外部变更不记事件）；新派单/返修按协调者优先级回 c/task-16cc-pipeline-detail 分支。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "C",
+  "recorded_at": "2026-10-14T20:11:18+08:00",
+  "occurred_at": "2026-10-14T20:11:18+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

@@ -1,0 +1,84 @@
+[ocr] --background-file content is 2132 characters, exceeding the recommended 2000 (continuing but review quality might be impacted)
+{
+  "status": "complete",
+  "llm": {
+    "provider": "hermes-xcoding",
+    "model": "gpt-6.1-sol"
+  },
+  "message": "Review complete: 0 finding(s) across 1 selected item(s).",
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 0,
+    "total_tokens": 49773,
+    "input_tokens": 48902,
+    "output_tokens": 871,
+    "cache_read_tokens": 30336,
+    "elapsed": "1m57s"
+  },
+  "tool_calls": {
+    "total": 5,
+    "by_tool": {
+      "code_search": 2,
+      "file_read": 3
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [],
+  "groups": [
+    {
+      "label": "app/api/ingest_submissions.py",
+      "files": [
+        "app/api/ingest_submissions.py"
+      ]
+    }
+  ],
+  "session_id": "93aaa308-99eb-4b3a-82b9-10ed3eb56080",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "93aaa308-99eb-4b3a-82b9-10ed3eb56080",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "requested_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "resolved_base": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "resolved_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "exact_range": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3..96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "source_artifact_sha256": "2c0f7a6fc582ba7c8ebf937fa1249662ecd966fb62d8f9109c3cad433e826f33"
+    },
+    "execution": {
+      "ocr_version": "v1.13.0",
+      "provider": "hermes-xcoding",
+      "model": "gpt-6.1-sol",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "88695939a00ce466e8be5cd7940db1034e161d42d20e9812a0a4d2389c134bfd",
+      "runtime_config_sha256": "994606f9fae59088b21138c4a003932cad4b2721ca5293391612f2682d16163c"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "f373cd881ad9c8b2024d2829b49cb2e563a095af6d910e6b798914f933b4f09b",
+          "path": "app/api/ingest_submissions.py",
+          "fingerprint": "18d20b5a28e31b001fb62139261df99e4a447cef3dec0d3499abf1af6c8c59b2"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "f373cd881ad9c8b2024d2829b49cb2e563a095af6d910e6b798914f933b4f09b",
+          "path": "app/api/ingest_submissions.py",
+          "fingerprint": "18d20b5a28e31b001fb62139261df99e4a447cef3dec0d3499abf1af6c8c59b2"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 116854
+  }
+}

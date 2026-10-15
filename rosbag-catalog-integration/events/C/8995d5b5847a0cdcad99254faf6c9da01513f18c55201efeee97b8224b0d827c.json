@@ -1,0 +1,20 @@
+{
+  "event_id": "C:t12sd1-attempt1-ack-deliver-20261014",
+  "kind": "business",
+  "task": "TASK-12S-D1",
+  "attempt": "attempt-1",
+  "status": "REVIEW_PENDING",
+  "summary": "D1 资料与固定验收清单 ACK 20:33 后只读取证交付：1012 批 8 包逐包清单（阳性×4 已证含双写幂等回归/输入适用性×3/无效输入×1/跨DB3候选取消终态未证）+ 包外样本 yaml；缺真值区间/真实正常阴性/实车映射/质量阈值/跨DB3命中五项 BLOCKED_MATERIAL 在案，部分交付口径，不阻塞 12S-E/F；零代码改动零生产写入零模型调用",
+  "evidence": "receipts/TASK-12S-D1/attempt-1.md; receipts/TASK-12S-D1/attempt-1-samples.md; inbox/3号/TASK-12S-D1/attempt-1-ack.md",
+  "next": "等协调者机械核验与 TESTER 可测试性复核；任一材料（真值/阴性/实车/阈值/跨DB3包）补齐即重算对应用例",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "C",
+  "recorded_at": "2026-10-14T20:42:59+08:00",
+  "occurred_at": "2026-10-14T20:42:59+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

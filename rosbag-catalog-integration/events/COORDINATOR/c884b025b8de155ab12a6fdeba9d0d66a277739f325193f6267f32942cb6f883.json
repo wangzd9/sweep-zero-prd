@@ -1,0 +1,20 @@
+{
+  "event_id": "COORDINATOR:t16r-fe17e8a-backfill-ocr-closeout-20261014-2055",
+  "kind": "business",
+  "task": "TASK-16R",
+  "attempt": "ocr-fe17e8a-r1",
+  "status": "CLOSED",
+  "summary": "16R 水雾债 fe17e8a..3c9c496 弱 OCR 补审收口：run bfe95d1095084e708a98703d8579ce11 AWAITING_DECISION 20:41:57（b01 两脚本+b02 deploy 全链 rc=0、coverage_complete、零 findings，comments 空数组实测），协调者 20:55 独立核核心 diff 175 行契约抽查通过（回报重试持久落证幂等/_copy_closed_slice symlink 拒绝+sha256 双端校验/4xx 停写 5xx 待对账）→裁决 adjudication-20261014.md 落盘，补审门禁满足、16R 水雾债清账；该区间已在生产运行并随 main 16a154f 祖先链在案，不触发合入。同回合：强审 grant 32e3edfd（TASK-16C，范围内 0 次调用）按任务收口及时 revoke 执行（16C 20:05 已合入、无待审新产物），后续强审须用户新授权",
+  "evidence": "reviews/TASK-16R/ocr-fe17e8a-r1/run/state.json; run/b01.log; run/b02.log; run/b01-diagnosis.json; adjudication-20261014.md; strong_review.py status（revoke 前 calls_under_authorization=0）; TODO §8.5 16R 行",
+  "next": "无执行者动作；16R 盘点+补审全清账，遗留仅 4acf DB run 行滞留 SCENE_CANCELLING 缺陷候选（11S 批次收口面，生产写不擅自处置）",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "COORDINATOR",
+  "recorded_at": "2026-10-14T20:57:11+08:00",
+  "occurred_at": "2026-10-14T20:57:11+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

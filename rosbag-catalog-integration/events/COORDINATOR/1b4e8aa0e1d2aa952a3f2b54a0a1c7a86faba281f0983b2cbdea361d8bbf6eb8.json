@@ -1,0 +1,12 @@
+{
+  "event_id": "COORDINATOR:coord-16r-fe17e8a-ocr-submitted-20261014-2020",
+  "occurred_at": "2026-10-14T20:26:25+08:00",
+  "recorded_at": "2026-10-14T20:26:25+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-16R",
+  "attempt": "ocr-fe17e8a-r1",
+  "status": "OCR_SUBMITTED",
+  "summary": "16R waterfog debt re-review fe17e8a..3c9c496 started via single ocr_runtime entry after V04_CLOSEOUT: PREPARED (2 batches: 2 scripts py + deploy yaml; tests excluded), run bfe95d1095084e708a98703d8579ce11 SUBMITTED, service active MainPID 4179221, ocr.lock held. Isolated review worktree wt-coord-ocr-fe17e8a at 3c9c496.",
+  "evidence": "reviews/TASK-16R/ocr-fe17e8a-r1/ background.md batches.json run/spec.json run/state.json; ocr_runtime start/status SUBMITTED RUNNING 2020 +0800; reviews/TASK-16R/attempt-1-disposition.md",
+  "next": "observer 5min read-only tracking; after AWAITING_DECISION adjudicate each finding, real defects back to 16B owner, no scope expansion; non-blocking for section 11 dev"
+}

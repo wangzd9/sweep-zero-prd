@@ -1,0 +1,20 @@
+{
+  "event_id": "B:b-r1-gate-chain-update-consumed-20261015-1207",
+  "kind": "business",
+  "task": "TASK-12S-F",
+  "attempt": "attempt-1 R1",
+  "status": "REVIEW_PENDING",
+  "summary": "消费协调者 12:04 对 R1 返修派单的追加段（pending 指纹 a6bcbc9e 唯一变更源）：R1 机械核验已核（HEAD 8c8bf2f 单文件 tests/test_ingest_input_rejected.py +20/−4 折行、ruff 本任务 10 文件 All checks passed、定向 14 passed、祖先链/工作树干净）；门禁链更正为 OCR 范围=F 全量 app 交付 b39a3ec→8c8bf2f（7 app 文件，R1 增量=测试折行、tests 默认排除不另起 run）→ TESTER → 接受，OCR 与 E 复验并行互不阻塞，rebase 至 E head 不改 F 面内容、findings 可延续。协调者 F 全量 OCR run ef462fc8 已在途（ps 实测 12:05：ocr worker 948740/948816 11:58 起跑，--from b39a3ec --to 8c8bf2f，协调者门禁面，B 不介入不重跑）。B 侧零返修/零新派单/零问题 ID；R1 head 8c8bf2f 冻结洁净（wt-04a-t12sf 实测不变）；工作点暂挂口径不变，等 E attempt-2 冻结 head 通知后机械 rebase（冲突报协调者）。",
+  "evidence": "inbox/2号/TASK-12S-F/attempt-1-r1-rework-dispatch.md（12:04:43 协调者追加段全文核对）；snapshots/B.json fingerprint a6bcbc9e（11:59:01 poll，changed_sources 唯一项=该派单）；ps 12:05 实测协调者 OCR worker 948740/948816 在途（ocr review --from b39a3ec --to 8c8bf2f，--exclude app/scanner/backend.py,metadata.py,runner.py+3 tests=分批面，属协调者门禁唯一入口，B 只读不介入）；git -C /home/wang/.local/state/rosbag-scene/wt-04a-t12sf log -1 = 8c8bf2f（12:05 复核）；B 侧无 pytest/开发业务进程；role_runtime claim ok owner cron-b-poll-20261015-115900",
+  "next": "IDLE_WAITING：等协调者 F 全量 OCR（ef462fc8）裁决 → TESTER → 接受；收问题 ID 返修单或 E attempt-2 冻结 head 通知再启动；不占第二开发槽、不碰生产",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "B",
+  "recorded_at": "2026-10-15T12:11:03+08:00",
+  "occurred_at": "2026-10-15T12:11:03+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

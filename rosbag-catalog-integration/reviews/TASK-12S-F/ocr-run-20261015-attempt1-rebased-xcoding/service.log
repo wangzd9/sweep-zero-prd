@@ -1,0 +1,174 @@
+{
+  "state": "AWAITING_DECISION",
+  "updated_at": "2026-10-15T09:45:02.955914+00:00",
+  "pid": 1279303,
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/coordinator-ocr-dc0f5c03cfb44c9bbc68b1d83ffc9eef.service",
+  "process_start_ticks": "45559608",
+  "run_id": "dc0f5c03cfb44c9bbc68b1d83ffc9eef",
+  "unit": "coordinator-ocr-dc0f5c03cfb44c9bbc68b1d83ffc9eef.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "alembic/versions/20261014_01_ingest_rejected.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-15T09:08:54.307509+00:00",
+      "execution_route": {
+        "provider": "hermes-xcoding",
+        "model": "gpt-6.1-sol",
+        "endpoint": "https://x-coding.net/v1",
+        "hermes_provider": "custom:xcoding-cloud",
+        "reason": "人工指定云端",
+        "effort": "high"
+      },
+      "pid": 1279378,
+      "process_start_ticks": "45559646",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/90cade81-5c5e-4a86-a187-c0cc82ee3d05.jsonl",
+      "session_mtime": 1792055390.1372783,
+      "returncode": 0,
+      "ended_at": "2026-10-15T09:10:16.560077+00:00",
+      "duration_seconds": 82.48
+    },
+    {
+      "id": "b02",
+      "files": [
+        "app/api/ingest_submissions.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-15T09:10:16.719158+00:00",
+      "execution_route": {
+        "provider": "hermes-xcoding",
+        "model": "gpt-6.1-sol",
+        "endpoint": "https://x-coding.net/v1",
+        "hermes_provider": "custom:xcoding-cloud",
+        "reason": "人工指定云端",
+        "effort": "high"
+      },
+      "pid": 1281078,
+      "process_start_ticks": "45567931",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/93aaa308-99eb-4b3a-82b9-10ed3eb56080.jsonl",
+      "session_mtime": 1792055499.3272762,
+      "returncode": 0,
+      "ended_at": "2026-10-15T09:12:15.696214+00:00",
+      "duration_seconds": 118.77
+    },
+    {
+      "id": "b03",
+      "files": [
+        "app/models.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-15T09:12:15.854978+00:00",
+      "execution_route": {
+        "provider": "hermes-xcoding",
+        "model": "gpt-6.1-sol",
+        "endpoint": "https://x-coding.net/v1",
+        "hermes_provider": "custom:xcoding-cloud",
+        "reason": "人工指定云端",
+        "effort": "high"
+      },
+      "pid": 1283305,
+      "process_start_ticks": "45579845",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/d9b12abd-7254-46bd-ac41-70cf96ac7079.jsonl",
+      "session_mtime": 1792055561.632573,
+      "returncode": 0,
+      "ended_at": "2026-10-15T09:12:50.240063+00:00",
+      "duration_seconds": 34.18
+    },
+    {
+      "id": "b04",
+      "files": [
+        "app/scanner/backend.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-15T09:12:50.456371+00:00",
+      "execution_route": {
+        "provider": "hermes-xcoding",
+        "model": "gpt-6.1-sol",
+        "endpoint": "https://x-coding.net/v1",
+        "hermes_provider": "custom:xcoding-cloud",
+        "reason": "人工指定云端",
+        "effort": "high"
+      },
+      "pid": 1284022,
+      "process_start_ticks": "45583307",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/113e17c6-c9f7-432b-ac45-1ea17034667b.jsonl",
+      "session_mtime": 1792055594.8454456,
+      "returncode": 0,
+      "ended_at": "2026-10-15T09:13:24.889047+00:00",
+      "duration_seconds": 34.2
+    },
+    {
+      "id": "b05",
+      "files": [
+        "app/scanner/metadata.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-15T09:13:25.053224+00:00",
+      "execution_route": {
+        "provider": "hermes-xcoding",
+        "model": "gpt-6.1-sol",
+        "endpoint": "https://x-coding.net/v1",
+        "hermes_provider": "custom:xcoding-cloud",
+        "reason": "人工指定云端",
+        "effort": "high"
+      },
+      "pid": 1284866,
+      "process_start_ticks": "45586768",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/f7895dbf-6538-4406-a080-e53c4d36e3d8.jsonl",
+      "session_mtime": 1792056154.9916096,
+      "returncode": 0,
+      "ended_at": "2026-10-15T09:22:42.552412+00:00",
+      "duration_seconds": 557.26
+    },
+    {
+      "id": "b06",
+      "files": [
+        "app/scanner/runner.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-15T09:22:42.725356+00:00",
+      "execution_route": {
+        "provider": "hermes-xcoding",
+        "model": "gpt-6.1-sol",
+        "endpoint": "https://x-coding.net/v1",
+        "hermes_provider": "custom:xcoding-cloud",
+        "reason": "人工指定云端",
+        "effort": "high"
+      },
+      "pid": 1298840,
+      "process_start_ticks": "45642534",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/3260cb59-d710-40bd-ae46-5ecaca9dc96b.jsonl",
+      "session_mtime": 1792056536.6106286,
+      "returncode": 0,
+      "ended_at": "2026-10-15T09:29:07.163510+00:00",
+      "duration_seconds": 384.21
+    },
+    {
+      "id": "b07",
+      "files": [
+        "app/services/ingest_service.py"
+      ],
+      "state": "REVIEW_COMPLETE",
+      "started_at": "2026-10-15T09:29:07.324085+00:00",
+      "execution_route": {
+        "provider": "hermes-xcoding",
+        "model": "gpt-6.1-sol",
+        "endpoint": "https://x-coding.net/v1",
+        "hermes_provider": "custom:xcoding-cloud",
+        "reason": "人工指定云端",
+        "effort": "high"
+      },
+      "pid": 1309428,
+      "process_start_ticks": "45680991",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/6b2bbaf1-2658-490e-9926-ed54eeac4a90.jsonl",
+      "session_mtime": 1792056956.7260773,
+      "returncode": 0,
+      "ended_at": "2026-10-15T09:45:02.915006+00:00",
+      "duration_seconds": 955.38
+    }
+  ],
+  "gate_decision": "NOT_EVALUATED",
+  "ended_at": "2026-10-15T09:45:02.955918+00:00"
+}

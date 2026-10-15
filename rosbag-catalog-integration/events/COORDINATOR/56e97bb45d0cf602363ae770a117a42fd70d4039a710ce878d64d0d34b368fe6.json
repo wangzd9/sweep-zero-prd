@@ -1,0 +1,20 @@
+{
+  "kind": "business",
+  "event_id": "COORDINATOR:t16ca-ocr-r13-singlefile-submitted-20261014T1910",
+  "task": "TASK-16C-A",
+  "attempt": "ocr-run-20261014-r13 (f7899cfc)",
+  "status": "OCR_R13_SUBMITTED",
+  "summary": "A R1-3 F1 返修 head 8958291 经协调者机械核验全绿（祖先链/diff 逐行核 74 passed+1 seed 固有/独立 F1 不变量探针 8 断言 PASS）后，单文件增量 OCR run f7899cfc（ocr-run-20261014-r13，base 1489bc6→head 8958291，仅 app/services/bag_search_service.py 单批）19:10 经唯一入口 ocr_runtime prepare→start SUBMITTED（service coordinator-ocr-f7899cfc active, MainPID 4086650, gate NOT_EVALUATED）。scene_result_query.py 已由 66ca40d3 b02 收口 0 findings 且 R1-3 未变不重跑，tests 归 TESTER 16D。OCR 收口前 A 叶接受门禁维持关闭、16C 合入维持 HOLD。",
+  "evidence": "reviews/TASK-16C-A/ocr-run-20261014-r13/spec.json（base 1489bc6/head 8958291/selected 1 will_review bag_search_service.py）；ocr_runtime.py start --run r13 = SUBMITTED MainPID 4086650 active；reviews/TASK-16C-A/ocr-r13-background.md（协调者冻结 R1-3 变更口径）；机械核验事件 b300f244（19:08）",
+  "next": "5 分钟 observer 只读跟踪 r13 状态变化，收口（AWAITING_DECISION=全覆盖完成）后逐条裁决（零 CORRECTION 级）→ TESTER F1 增量面（真 MySQL 8.4.11 严格 nvidia+scene 用途原包筛 scene_original 不返回+标签仅 nvidia_original 一致）→ A 叶接受 → 重建固定集成候选（含 B e399daf+C ce5921d+新 A head 8958291）重新 16D 联合验收 → 解除合入 HOLD 后合入 main。当前不占模型回合等 OCR。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "COORDINATOR",
+  "recorded_at": "2026-10-14T19:10:58+08:00",
+  "occurred_at": "2026-10-14T19:10:58+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

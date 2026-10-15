@@ -1,0 +1,18 @@
+{
+  "event_id": "A:a-t16ca-wait-ocr66ca40d3-bleaf-accepted-20261014",
+  "kind": "business",
+  "task": "TASK-16C-A",
+  "attempt": "attempt-1-ocr-r1-2-rework",
+  "status": "IN_PROGRESS",
+  "summary": "等待 A 叶增量 OCR 收口期间观察到协调者 18:10 落盘 Bag 三视图叶接受决策(leaf-acceptance-decision-20261014.md)：开发收口、未合入主分支，其唯一 OCR finding(view_label 旧名)已由 A 叶 1489bc6 修复且协调者 18:01 机械核验全绿。A 叶无新派单/返修到达；本角色维持冻结 head=1489bc6 等待审查，增量 OCR run 66ca40d3(bag_search_service.py 单批，18:00 经唯一入口起跑)实测 state=RUNNING 在途，A 叶接受门禁维持关闭。",
+  "evidence": "inbox/coordinator/TASK-16C-B/leaf-acceptance-decision-20261014.md (mtime 18:10); reviews/TASK-16C-A/ocr-run-20261014-r12/state.json (RUNNING, pid 3994474/3994544 ps 实测存活, b01 started 18:00:26); TODO 16C-A 行 18:07 口径(18:01 机械核验全绿+66ca40d3 SUBMITTED); worktree wt-01-t16ca HEAD 1489bc6 干净",
+  "next": "下轮核 66ca40d3 收口(零 CORRECTION 级)后等协调者接受裁决+TESTER A 增量面(含 view_label 页面断言、A-OCR-2 组合断言)；无新单不开工，不占第二开发槽。",
+  "schema_version": 1,
+  "role": "A",
+  "recorded_at": "2026-10-14T18:18:38+08:00",
+  "occurred_at": null,
+  "time_source": {
+    "kind": "unknown",
+    "reason": "历史发生时间未核实；recorded_at 只表示补录时间"
+  }
+}

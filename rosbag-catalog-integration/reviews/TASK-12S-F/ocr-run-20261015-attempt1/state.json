@@ -1,0 +1,31 @@
+{
+  "state": "BLOCKED",
+  "updated_at": "2026-10-15T05:03:31.671013+00:00",
+  "pid": 948740,
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/coordinator-ocr-ef462fc88db84cac8df7c1d8250508a1.service",
+  "run_id": "ef462fc88db84cac8df7c1d8250508a1",
+  "unit": "coordinator-ocr-ef462fc88db84cac8df7c1d8250508a1.service",
+  "batches": [
+    {
+      "id": "b01",
+      "files": [
+        "app/services/ingest_service.py",
+        "app/api/ingest_submissions.py",
+        "app/models.py",
+        "alembic/versions/20261014_01_ingest_rejected.py"
+      ],
+      "state": "RUNNING",
+      "started_at": "2026-10-15T03:58:30.775602+00:00",
+      "pid": 948816,
+      "process_start_ticks": "43697272",
+      "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-04a-t12sf/948dea59-8ec1-4e4b-802c-7006bf6ab481.jsonl",
+      "session_mtime": 1792040594.850217,
+      "returncode": 1,
+      "ended_at": "2026-10-15T05:03:31.632115+00:00",
+      "duration_seconds": 3900.86
+    }
+  ],
+  "gate_decision": "NOT_EVALUATED",
+  "error": "HEAD_CHANGED: 必须使用固定交付worktree",
+  "ended_at": "2026-10-15T05:03:31.671022+00:00"
+}

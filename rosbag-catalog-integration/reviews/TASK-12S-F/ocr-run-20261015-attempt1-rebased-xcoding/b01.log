@@ -1,0 +1,85 @@
+[ocr] --background-file content is 2132 characters, exceeding the recommended 2000 (continuing but review quality might be impacted)
+{
+  "status": "complete",
+  "llm": {
+    "provider": "hermes-xcoding",
+    "model": "gpt-6.1-sol"
+  },
+  "message": "Review complete: 0 finding(s) across 1 selected item(s).",
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 0,
+    "total_tokens": 29728,
+    "input_tokens": 29244,
+    "output_tokens": 484,
+    "cache_read_tokens": 14464,
+    "elapsed": "1m22s"
+  },
+  "tool_calls": {
+    "total": 7,
+    "by_tool": {
+      "code_search": 1,
+      "file_find": 1,
+      "file_read": 5
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [],
+  "groups": [
+    {
+      "label": "alembic/versions/20261014_01_ingest_rejected.py",
+      "files": [
+        "alembic/versions/20261014_01_ingest_rejected.py"
+      ]
+    }
+  ],
+  "session_id": "90cade81-5c5e-4a86-a187-c0cc82ee3d05",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "90cade81-5c5e-4a86-a187-c0cc82ee3d05",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "requested_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "resolved_base": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "resolved_head": "96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "exact_range": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3..96afc43206bfcf9276203a89e75c97d28c6204bf",
+      "source_artifact_sha256": "a9d15c0dc875905066b7f249e35177312631f5b953c3dad84da4a4aa6dfcc525"
+    },
+    "execution": {
+      "ocr_version": "v1.13.0",
+      "provider": "hermes-xcoding",
+      "model": "gpt-6.1-sol",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "260673ee2d252cfcb09dc9a2a7bfa609b4dd92240fe668efe5ccaa349559dd84",
+      "runtime_config_sha256": "994606f9fae59088b21138c4a003932cad4b2721ca5293391612f2682d16163c"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "cac5a983d3ec728db224fb9133479b0178847207a6ccbc157c8e788941d64c19",
+          "path": "alembic/versions/20261014_01_ingest_rejected.py",
+          "fingerprint": "f491b290cf872cb95ea7317ef153011d3c2fcfff9beed43deb46ab1fd174e7b2"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "cac5a983d3ec728db224fb9133479b0178847207a6ccbc157c8e788941d64c19",
+          "path": "alembic/versions/20261014_01_ingest_rejected.py",
+          "fingerprint": "f491b290cf872cb95ea7317ef153011d3c2fcfff9beed43deb46ab1fd174e7b2"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 82295
+  }
+}

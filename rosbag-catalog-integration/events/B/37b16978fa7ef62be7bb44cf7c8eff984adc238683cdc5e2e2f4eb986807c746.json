@@ -1,0 +1,18 @@
+{
+  "event_id": "B:t12sf-r1-8c8bf2f-delivered-20261015-1120",
+  "kind": "business",
+  "task": "TASK-12S-F",
+  "attempt": "attempt-1 R1",
+  "status": "REVIEW_PENDING",
+  "summary": "R1 返修交付：4×E501 折行修复（tests/test_ingest_input_rejected.py 单文件 +20/−4，原 L136/195/230/315），无 noqa、零行为变化。R1 head 8c8bf2f（base b39a3ec，原工作点 6798059，分支 b/task-12s-f-input-reject）。自测：ruff 本任务 10 文件 0 error（All checks passed，exit 0，仓 venv 实跑）；pytest 14 passed（16.9s，exit 0）。未执行项：组合/全量回归未重跑（R1 仅测试折行，派单口径=单套件）；真 MySQL 8.4.11 隔离探针/真并发/NAS E2E 维持留待冻结/TESTER 口径。冻结口径不变：工作点暂挂（supplement-s1），等 E attempt-2 冻结 head 通知后机械 rebase。同日消费 D1 裁决（ACCEPT_REPORT）：空包提交层终态断点 owner=12S-F 随本任务验收链解除，B 无额外动作；16_02_03 滞留 CANCELLING 为 16R 缺陷候选登记（不代修）。",
+  "evidence": "inbox/2号/TASK-12S-F/attempt-1-r1-receipt.md；git -C /home/wang/.local/state/rosbag-scene/wt-04a-t12sf log -1 = 8c8bf2f；inbox/coordinator/TASK-12S-D1/testability-review-acceptance-decision.md（10:48 裁决）",
+  "next": "等协调者机械核验（ruff 0 error 必核）→ OCR attempt-1 增量（base 6798059 → head 8c8bf2f）→ TESTER → 接受；E attempt-2 冻结 head 通知后机械 rebase（冲突报协调者）",
+  "schema_version": 1,
+  "role": "B",
+  "recorded_at": "2026-10-15T11:22:03+08:00",
+  "occurred_at": null,
+  "time_source": {
+    "kind": "unknown",
+    "reason": "历史发生时间未核实；recorded_at 只表示补录时间"
+  }
+}

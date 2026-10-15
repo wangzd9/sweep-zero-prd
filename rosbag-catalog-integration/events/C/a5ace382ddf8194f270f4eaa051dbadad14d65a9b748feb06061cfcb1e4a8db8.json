@@ -1,0 +1,20 @@
+{
+  "event_id": "C:r13-a-ocr-adjudication-consumed-20261014-1920",
+  "kind": "business",
+  "task": "TASK-16C-A",
+  "attempt": "r13-incremental-closeout",
+  "status": "MONITOR_ONLY",
+  "occurrence": {
+    "kind": "now"
+  },
+  "summary": "消费协调者 TASK-16C-A R1-3 增量 OCR 收口裁决（ocr-r13-adjudication-20261014.md，19:14 +08:00，run f7899cfc）：A 叶 bag_search_service.py b01 零 findings 无 CORRECTION，R1-3 增量 OCR gate 满足，无 C 面影响（返修范围 A 独占文件，C 叶 ce5921d 14:24 已叶接受冻结链不变）。C 独立核实：wt-01-t16ca 存在 8958291（TASK-16C-A OCR 增量 R1-3 提交，rev-parse/log 实测）。A 叶剩余唯一门禁=TESTER F1 增量独立行为面（19:12 派单 f1-incremental-8958291-dispatch.md，严格 MySQL 8.4.11 方言 F1N1/F1N2/F1SB 三夹具）。合入 HOLD 维持：解除条件=TESTER PASS→A 叶接受→协调者重建固定集成候选（B e399daf + C ce5921d + A 8958291）→16D 重新联合验收→合入 main。C 开发槽空闲不接第二任务、不代 A/TESTER 处置、不提前合入；11S 4acf689f 按 18:40 裁决维持监控口径（本轮 19:19 只读实测 run 行仍 SCENE_CANCELLING/lease 16:23:55 stale/8767 active_runs 空，无外部变更不记录新事件）。",
+  "evidence": "inbox/coordinator/TASK-16C-A/ocr-r13-adjudication-20261014.md 全文通读（32 行，19:14 +08:00）；git -C /home/wang/.local/state/rosbag-scene/wt-01-t16ca log -1 8958291 实测=「TASK-16C-A OCR 增量 R1-3」提交在案；inbox/TESTER/TASK-16D/f1-incremental-8958291-dispatch.md（裁决证据段引用，19:12 派单）；处理机 19:19 只读 curl 8180 scene-4acf689f=SCENE_CANCELLING/lease_expires_at 16:23:55/error 空 + 8767 health active_runs=[]；租约 C-cron-poll-20261014-191852-r13-adjudication claim 19:20:05 token 1fe25951。",
+  "next": "等待 TESTER F1 增量独立行为面 PASS 与 A 叶接受（TESTER/A/协调者范围，不催单）；之后协调者重建固定集成候选含 C ce5921d，C 无需动作；合入/推送/测试环境更新归协调者按授权执行。C 仅在返修/新单时按协调者优先级回 c/task-16cc-pipeline-detail 分支；11S 4acf689f 仅外部变更时记录。",
+  "schema_version": 1,
+  "role": "C",
+  "recorded_at": "2026-10-14T19:20:45+08:00",
+  "occurred_at": "2026-10-14T19:20:45+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

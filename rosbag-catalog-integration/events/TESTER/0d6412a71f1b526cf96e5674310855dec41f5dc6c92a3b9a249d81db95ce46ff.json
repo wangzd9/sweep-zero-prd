@@ -1,0 +1,12 @@
+{
+  "event_id": "TESTER:t12se-attempt2-reverify-acked-20261015",
+  "occurred_at": "2026-10-15T10:28:35+08:00",
+  "recorded_at": "2026-10-15T10:28:35+08:00",
+  "role": "TESTER",
+  "task": "TASK-12S-E",
+  "attempt": "2",
+  "status": "IN_PROGRESS",
+  "summary": "ACK TASK-12S-E attempt-2 增量复验（协调者 10:1x 派单）：固定 head 1e9c7de（worktree wt-01-t12se 核对一致）、attempt-1 PASS(b39a3ec 五面)仍有效只补增量面、OCR a9bf637e 三批0 findings 在案。5 面=E-R7真实口径夹具/E-R1~R3字段断言/E-R8两路409/E-R4 ROOT_MISMATCH/回归抽查(pipeline_api E-R6统计key)。真 MySQL 8.4.11 隔离库用完即毁；VLM=0、不碰1012取消链与12S-F开发树。隔离库重建+跑测试中。",
+  "evidence": "inbox/TESTER/TASK-12S-E/attempt-2-reverify-ack.md",
+  "next": "建隔离MySQL→跑目标测试文件+pipeline_api→5面逐条取证→隔离资源归零→交付回执"
+}

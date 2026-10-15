@@ -1,0 +1,71 @@
+diff --git a/app/services/bag_search_service.py b/app/services/bag_search_service.py
+index da5736e..41bcd7b 100644
+--- a/app/services/bag_search_service.py
++++ b/app/services/bag_search_service.py
+@@ -42,8 +42,8 @@ DATA_KIND_LABELS = {
+ # 1) 子包：bag_role=SCENE_SLICE 或存在有效 derivation（两者任一即 scene_slice，
+ #    含合法无血缘历史切片，不照搬仅 derivation 的误修口径）；
+ # 2) NVIDIA 来源且非子包：nvidia_original；
+-# 3) ORIGINAL 且有 scene_slice 用途（场景根身份依据）：scene_original；
+-# 4) 其余 ORIGINAL：self_built_original（双用途原包同时返回 scene_original+self_built_original，
++# 3) ORIGINAL 且有 scene_slice 用途（场景根身份依据）且非 NVIDIA：scene_original；
++# 4) 其余 ORIGINAL 且非 NVIDIA：self_built_original（双用途原包同时返回 scene_original+self_built_original，
+ #    展示双标且两个筛选都可命中，UID 只一条）；
+ # 5) 未知历史（NOT_APPLICABLE 且非 NVIDIA）：不猜类型，空标签，模板按 bag_role 渲染"未分类"。
+ 
+@@ -67,10 +67,10 @@ def data_kind_pred(kind: str):
+     分类规则单源（DESIGN §7.3.3）：
+     - scene_slice：SCENE_SLICE 角色或有效 derivation；
+     - nvidia_original：NVIDIA 来源且非子包；
+-    - scene_original：ORIGINAL 且有 scene_slice 用途（场景根身份依据）且非子包（子包优先，
+-      与 data_kind_context 一致）；
+-    - self_built_original：ORIGINAL 且非子包，有 self_built 依据（dataset_type=self_built
+-      用途口径）或无任何场景依据（旧 self_built 记录）。
++    - scene_original：ORIGINAL 且有 scene_slice 用途（场景根身份依据）且非子包且非 NVIDIA
++      （子包优先、单源优先级第 2 条 NVIDIA 先命中，与 data_kind_context 一致）；
++    - self_built_original：ORIGINAL 且非子包且非 NVIDIA，有 self_built 依据
++      （dataset_type=self_built 用途口径）或无任何场景依据（旧 self_built 记录）。
+     双用途原包（同时有场景依据与 self_built 依据）在 scene_original 与 self_built_original
+     两个筛选都命中，UID 只一条。
+ 
+@@ -83,11 +83,17 @@ def data_kind_pred(kind: str):
+     if kind == "nvidia_original":
+         return and_(BagRecord.dataset_type == "nvidia_physicalai", ~_scene_slice_pred())
+     if kind == "scene_original":
+-        return and_(BagRecord.bag_role == "ORIGINAL", ~_scene_slice_pred(), _scene_basis_pred())
++        return and_(
++            BagRecord.bag_role == "ORIGINAL",
++            ~_scene_slice_pred(),
++            BagRecord.dataset_type != "nvidia_physicalai",
++            _scene_basis_pred(),
++        )
+     if kind == "self_built_original":
+         return and_(
+             BagRecord.bag_role == "ORIGINAL",
+             ~_scene_slice_pred(),
++            BagRecord.dataset_type != "nvidia_physicalai",
+             or_(
+                 BagRecord.dataset_type == "self_built",
+                 ~_scene_basis_pred(),
+@@ -105,8 +111,10 @@ def _parse_time(value: str | None, *, end: bool) -> datetime | None:
+ 
+     库内 ``started_at`` 由 ``app.clock.now()`` 以业务时区（settings.display_timezone）
+     写入 naive 秒精度。因此：
+-    - ``YYYY-MM-DD``：start→当日 00:00:00；end→当日 23:59:59.999999（全天截止，
+-      MySQL DATETIME(0) 四舍五入落 23:59:59，SQLite 同口径）；
++    - ``YYYY-MM-DD``：start→当日 00:00:00；end→当日 23:59:59.999999（全天截止）。
++      写入侧为秒精度四舍五入：``…23:59:59.999999``（frac≥0.5）可能进位到次日 00:00:00
++      （TESTER 严格 MySQL 8.4.11 探针 ``CAST('…59.999999' AS DATETIME)``=次日 00:00:00 已证）；
++      但全天窗口的比较语义按字符串边界仍含当日 23:59:59（``'…23:59:59' <= '…23:59:59.999999'`` 成立）；
+     - 带时间的 ISO 串：naive 按业务时区原值；aware（任何时区/偏移）统一换算到
+       业务时区后去 tzinfo，避免 aware vs naive 比较在 MySQL 下行为漂移/500；
+     - 非法字符串抛 ``InvalidBagSearchState``（Web 400 / API 422），不直入
+@@ -145,7 +153,7 @@ class BagSearchState:
+     end_at: datetime | None
+     scene_ids: tuple[int, ...]
+     scene_mode: str
+-    # 三视图（TASK-07A / PRD §6.1）：slices=当前可用切片（默认）、originals=原始包、all=全部/历史
++    # 三视图（TASK-07A / PRD §6.1）：slices=当前可用切片（默认）、originals=原始包、all=全部
+     view: str
+     purpose: str
+     scene_code: str

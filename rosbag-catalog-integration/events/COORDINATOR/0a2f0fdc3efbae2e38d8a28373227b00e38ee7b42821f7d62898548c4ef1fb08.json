@@ -1,0 +1,12 @@
+{
+  "event_id": "COORDINATOR:coord-spray-post-v04-first-wave-dispatch-20261014-2025",
+  "occurred_at": "2026-10-14T20:26:34+08:00",
+  "recorded_at": "2026-10-14T20:26:34+08:00",
+  "role": "COORDINATOR",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-1",
+  "status": "DISPATCHED",
+  "summary": "V04_CLOSEOUT satisfied -> section 11 first wave dispatched. 12S-E (auto binding/idempotency, REQ-20/AC-20) to A, base main 16a154f, exclusive ingest_service.py+source_service.py+scene_schedule_consumer.py+tests (api only if needed). 12S-D1 (real materials/acceptance list, REQ-22/AC-22) to C, parallel, no file conflict. 12S-F deferred (co-writes ingest/API, sequential after E release), 12S-D2 deferred (needs E/F fixed candidate + D1 materials).",
+  "evidence": "inbox/1号/TASK-12S-E/attempt-1-dispatch.md; inbox/3号/TASK-12S-D1/attempt-1-dispatch.md; TODO.md section 11 rows; SPRAY-POST-V04.md stage gate V04_CLOSEOUT",
+  "next": "A/C self ACK then start; observer tracks ACKs; after E acceptance recompute F; D1 materials fill recompute D2"
+}

@@ -1,0 +1,20 @@
+{
+  "event_id": "TESTER:t12se-attempt1-test-report-pass-20261015",
+  "kind": "business",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-1",
+  "status": "TEST_REPORT_PENDING",
+  "summary": "TASK-12S-E attempt-1 独立验证交付 PASS（冻结 b39a3ec，base 16a154f）。真 MySQL 8.4.11 隔离库（自建 rosbag-t12se-d3ced1d1-mysql，STRICT_TRANS_TABLES 实测，alembic fresh head 20261013_01_scene_intake 单头）：① 12 机械用例+154 回归口径全 PASS（整库重建后复跑同口径）；② TESTER 独立探针 8/8 PASS——scene_identity_key 真实 DDL 唯一键在位、重复身份插入 MySQL 1062 真拒、uq_ingest_submission_claim 载体核、8 线程 Barrier 交错 consume/reconcile runs=1 零泄漏、同身份 claim 409→释放→再建 created=0/reused=1 runs=1、车辆冲突单条 ERROR:* 隔离不影响同批、PENDING_BINDING_RECONCILE=0 零活动 API 返回体与旧口径逐键相等；③ 零越界核：b39a3ec 相对 16a154f 仅 4 文件 +911/−19，api/models/alembic/web/scripts/config diff 空；④ 夹具精确回读 0 残留，隔离容器+网络已自毁，worktree 只读零改动。未执行项如实申报：不重烧生产 1012 三包（复用 REPORT.md binding-repair 既有证据，派单边界）、无跨进程多实例压测（派单未要求）。",
+  "evidence": "test-receipts/TASK-12S-E/attempt-1.md; scratch/t12se_probe_v2_mysql.log（8/8 PASS 原文）; scratch/t12se_cleanup_verify.py 精确回读 0 残留; scratch/t12se_destroy.sh DESTROYED rosbag-t12se-d3ced1d1-mysql/net; git -C wt-01-t12se diff --stat 16a154f..b39a3ec（4 文件 +911/-19）; 154 passed rc=0（重建后 12.81s 复跑）",
+  "next": "交协调者裁决 E 接受门禁（TESTER 面已齐；另一面=OCR run 617b9375 零 CORRECTION 级裁决，在途）。失败项回派 A 最小返修（本轮无失败项）。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "TESTER",
+  "recorded_at": "2026-10-15T00:43:33+08:00",
+  "occurred_at": "2026-10-15T00:43:33+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

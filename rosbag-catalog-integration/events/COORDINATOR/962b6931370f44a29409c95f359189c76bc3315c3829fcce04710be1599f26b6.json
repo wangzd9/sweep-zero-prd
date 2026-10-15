@@ -1,0 +1,20 @@
+{
+  "event_id": "COORDINATOR:t16ca-leaf-accepted-integration-44b6c07-rebuilt-20261014-1941",
+  "kind": "business",
+  "task": "TASK-16C-A",
+  "attempt": "leaf-acceptance + integration-rebuild",
+  "status": "A_LEAF_ACCEPTED_INTEGRATION_44B6C07_TESTER_FINAL_DISPATCHED",
+  "summary": "消费 TESTER F1 增量独立行为面 PASS（19:26 回执）后 A 叶接受判定：① A 叶接受落盘 19:40（leaf-acceptance-decision-20261014.md，四门禁逐项=零越界 1 文件 +18/−10 + 机械核验全绿 b300f244 + OCR r13 f7899cfc 0 findings/零 CORRECTION + TESTER F1 增量 34/34 严格 MySQL 8.4.11 PASS，双证齐）；② 协调者重建三叶固定集成候选 44b6c07（wt-coord-intcheck-16c 从 seed bd0db1d2 三 --no-ff：496a3e4(A 8958291)→f24653c(B e399daf)→44b6c07(C ce5921d)；相对旧 29bd1f4 唯一 diff=bag_search_service.py +18/−10 零意外文件；全仓 pytest 1174 passed、3 failed 全 seed 固有口径与 1d7f15c 一致零候选回归）；③ TESTER 最终联合验收派单 19:41（final-integration-44b6c07-dispatch.md：集成面确认+cursor 矩阵 20 项+严格 MySQL 21/21+浏览器 Console 零异常，版本核 44b6c07）。合入 HOLD 条件①–⑤全齐，唯一剩余=TESTER 44b6c07 联合验收回执 PASS→按 18:22 授权直接合入 main+推 github+本地 Compose 测试环境更新（不含生产）。本轮租约：旧 pid-less owner cron-coord-poll-20261014-1840-2 已过期且核停（19:18 最后落账/19:23 过期/ps+活动日志无该会话），recover+claim 接管，owner=cron-coord-poll-20261014-193053-r13-f1-pass。",
+  "evidence": "inbox/coordinator/TASK-16C-A/leaf-acceptance-decision-20261014.md（19:40 落盘）；inbox/TESTER/TASK-16D/final-integration-44b6c07-dispatch.md（19:41 落盘）；test-receipts/TEST-TASK16D/attempt-1.md F1 增量段（19:26，34/34 rc=0+零越界+RED 交叉证+自清归零）；wt-coord-intcheck-16c git log 44b6c07 祖先链实测（8958291/e399daf/ce5921d 三叶均内）+ git diff --stat 29bd1f4..44b6c07=仅 1 文件 +18/−10 + pytest 全仓 1174 passed/3 failed(seed 固有) 本轮实测；inbox/coordinator/TASK-16C/merge-authorization-20261014.md 19:41 HOLD 条件状态更新段；租约 evidence /home/wang/.hermes/cache/scratch/coord-lease-recovery-evidence-20261014-1935.txt；TODO §8 A 行+HANDOFF 19:41 检查点已同步。",
+  "next": "observer 续等 TESTER 44b6c07 最终联合验收回执（PASS=合入门禁 TESTER 面齐）→ 按 18:22 授权执行合入 main（--no-ff 记 merge commit）+推 github+local_stack up/test 收敛记录 → 16C 聚合接受 → 父 16 收口；16R fe17e8a..3c9c496 水雾债补审候选待 ocr.lock 空窗经唯一入口补，不阻塞。FAIL 则回原叶 owner 最小返修。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "COORDINATOR",
+  "recorded_at": "2026-10-14T19:46:56+08:00",
+  "occurred_at": "2026-10-14T19:46:56+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

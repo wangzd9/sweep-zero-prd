@@ -1,0 +1,83 @@
+[ocr] --background-file content is 2912 characters, exceeding the recommended 2000 (continuing but review quality might be impacted)
+{
+  "status": "complete",
+  "llm": {
+    "provider": "vllm-local",
+    "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8"
+  },
+  "message": "Review complete: 0 finding(s) across 1 selected item(s).",
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 0,
+    "total_tokens": 44556,
+    "input_tokens": 40560,
+    "output_tokens": 3996,
+    "elapsed": "58s"
+  },
+  "tool_calls": {
+    "total": 5,
+    "by_tool": {
+      "code_search": 3,
+      "file_read": 2
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [],
+  "groups": [
+    {
+      "label": "app/services/scene_schedule_consumer.py",
+      "files": [
+        "app/services/scene_schedule_consumer.py"
+      ]
+    }
+  ],
+  "session_id": "34118240-9d45-40ec-8b59-88c958ae0bce",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "34118240-9d45-40ec-8b59-88c958ae0bce",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "b39a3ecc76da1f578d32f4e3c88a6ce989cf749d",
+      "requested_head": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "resolved_base": "b39a3ecc76da1f578d32f4e3c88a6ce989cf749d",
+      "resolved_head": "1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "exact_range": "b39a3ecc76da1f578d32f4e3c88a6ce989cf749d..1e9c7deff16b532ad7430c5b3639f2e55bb62ec3",
+      "source_artifact_sha256": "6c4e8922ce36d8b2703a52bf7ca61c7b1448e49019603a3de76f4336158dd27a"
+    },
+    "execution": {
+      "ocr_version": "v1.13.0",
+      "provider": "vllm-local",
+      "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "8ab6a9b53a7eb7beda8a5bf94d47439339659a1881857f16e636cb803797f4fb",
+      "runtime_config_sha256": "8edc2e1d8571fdf287cc13c33745cd126301e450999b13d052de01b19b6d17d2"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "398c53a8eebebeffcdc62b4a12fc5b2f59ecca2494dae7c5f57253614b5e942c",
+          "path": "app/services/scene_schedule_consumer.py",
+          "fingerprint": "0caa864ae25d37eaf255acd47d2f173b29f13ddd9045316ef66ca742f67f95d0"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "398c53a8eebebeffcdc62b4a12fc5b2f59ecca2494dae7c5f57253614b5e942c",
+          "path": "app/services/scene_schedule_consumer.py",
+          "fingerprint": "0caa864ae25d37eaf255acd47d2f173b29f13ddd9045316ef66ca742f67f95d0"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 58463
+  }
+}

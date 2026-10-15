@@ -1,5 +1,94 @@
 # 开发日志
 
+## 2026-10-15 17:35：12S-F 云端 OCR 初审协议失败裁决补账 + 用户选「甲」改走 xcoding 新 run（协调者）
+
+- **触发**：16:05/16:51/17:10 三轮脚本唤醒（pending 指纹 4fad1316…→b3311ace…→79f12cb0…），变更源=`task-notices/spray-batch-live.json` + `reviews/TASK-12S-F/ocr-run-20261015-attempt1-rebased-cloud/{background.md,ocr-verdict.md,state.json}` + `rebased-xcoding/{background.md,state.json}` + `sessions/COORDINATOR.md`。
+- **云端口径 run `77db648b` 初审失败裁决**（16:20:40 提交 / 16:21:07 终，duration 26.14s、rc=1）：`state=REVIEW_INCOMPLETE`、gate `NOT_EVALUATED`、`results=INSUFFICIENT_EVIDENCE`；b01 coverage `selected=1/completed=0/failed=1`、`coverage_complete=false`——**零 findings、零覆盖，既不构成通过也不构成对代码的否定**。**根因=端点协议缺陷**：sub2api 中转站（`https://sub.vankit.top/v1`）对 `stream:false` 的 `/v1/responses` 与 `/v1/chat/completions` 均回 `content-type: text/event-stream`，OCR Go 客户端按 `application/json` 解析报错（`expected destination type of 'string' or '[]byte' for responses with content-type 'text/event-stream'…`）。协调者独立端点复现：`sub.vankit.top` 两条协议均声明错、`x-coding.net/v1/responses` 正确（`application/json; charset=utf-8` + 标准 Response 体）、`sub.numenume.site` HTTP 502；旁证=用户 Codex fixture 走 `hermes-xcoding`/`gpt-6.1-sol` 一次 coverage 1/1 rc=0（15:46 那次超时属当时 `OCR_LLM_TIMEOUT` 未调）。**这是端点能力缺陷，不是模型能力问题、不是负载问题。**
+- **裁决**：不判通过、不写零 findings、F OCR 门禁维持关闭；本 run 不补审（换端点=换审查身份，须**新建 run** 而非 `--reuse-run`）；同期本地 vllm `running=4/waiting=13` 仍满载，本地重提仍有 3900s 单批硬截止风险（已两次）。裁决落 `reviews/TASK-12S-F/ocr-run-20261015-attempt1-rebased-cloud/ocr-verdict.md`（方案甲=改路由新建云端 run / 乙=等本地空窗 / 丙=维持门禁关闭）。
+- **用户 17:09 回复单字「甲」= 授权按方案甲执行**（沿用既有 OCR 门禁与全部授权边界，不改需求、不放宽门禁）→ 协调者 17:09:51 执行：① 复核本地 vllm 满载、sub2api 协议缺陷对本机无修复；② `ocr_model_route.py select` 复核 provider=`hermes-xcoding`/model=`gpt-6.1-sol`/effort=high/`reason=人工指定云端`（OCR 走独立 `ocr_profile=xcoding`，选择器与 OCR 原生 provider 条目 URL/protocol 一致性校验通过）；③ 经**唯一入口** `ocr_runtime.py prepare`（PREPARED、selected=7/batches=7/model_calls=0、零模型）→ `start`（SUBMITTED）新建 run `dc0f5c03cfb44c9bbc68b1d83ffc9eef`，unit `coordinator-ocr-dc0f5c03cfb44c9bbc68b1d83ffc9eef.service`（MainPID 1279303），`retry_depth=0` 新审查身份；④ 不改旧 run、不重启在途批次、不 `--reuse-run`。
+- **17:30 只读观测**：b01 `alembic/.../20261014_01_ingest_rejected.py` 82.48s、b02 `app/api/ingest_submissions.py` 118.77s、b03 `app/models.py` 34.18s、b04 `app/scanner/backend.py` 34.20s、b05 `app/scanner/metadata.py` 557.26s 全部 `REVIEW_COMPLETE` rc=0（逐批 coverage 1/1、`batch_identity_matches` 一致、`execution_route` 冻结 `hermes-xcoding`/`gpt-6.1-sol`/effort=high）；b06 `app/scanner/runner.py` `RUNNING`、b07 未起。**未收口不判通过、不写零 findings**——收口 `AWAITING_DECISION` 后执行 `ocr_runtime.py results --run RUN_DIR` 逐批实读 comments 数组后裁决。
+- **旧失败 run 保留原身份不重跑**：`ef462fc8`（本地 4 文件合批 3900s 硬截止，0/4）、`1fe96fde`（本地逐文件 3900s 硬截止，0/7）、`77db648b`（sub2api 协议，0/1）。
+- **当前结果**：12S-E ACCEPTED（12:28）未合入；12S-F 冻结 head `96afc43`、OCR 门禁关闭（云端协议失败已裁决 + xcoding 新 run 在途 5/7）；12S-D1 部分交付接受；D2 BLOCKED_FROZEN；12S 聚合 PARTIAL。强审 grant `9827cf8f` AUTHORIZED、滚动 60min 0/5、在途 0（10-15 22:24 到期），E+F 批次包 MERGE_INTO 待 F 收口后生成。
+- **本轮边界**：未改生产/迁移/算法、未重烧模型、未重提或重启在途批次、未扩需求；仅只读观测 + 协调者文档（TODO §11 F 行、HANDOFF 顶部检查点、本日志、事件）记账；租约为本回合 owner `cron-coord-poll-14ae4556629a-20261015-165135-f-ocr-xcoding-verify`（17:12:18 claim，长回合按 TTL renew，未持锁 sleep）。
+- 下一责任人：协调者（observer 续核 `dc0f5c03` 逐批收口 + `results` 逐批实读裁决）、TESTER（F 真 MySQL/并发/迁移探针待 OCR 裁决后派）、用户（E+F 合入授权口径）。
+- 证据：`reviews/TASK-12S-F/ocr-run-20261015-attempt1-rebased-cloud/{ocr-verdict.md,state.json,b01-diagnosis.json,background.md}`；`reviews/TASK-12S-F/ocr-run-20261015-attempt1-rebased-xcoding/{spec.json,state.json,b0*.log,b0*-diagnosis.json,background.md}`；`inbox/coordinator/requests/52f5aca5…831.json`（用户「甲」，HANDLED 17:09:52）；`ocr_runtime.py status`（RUNNING，b01-b05 完成/b06 在途）；`systemctl --user list-units coordinator-ocr-*`；`strong_review.py status`。
+
+## 2026-10-15 15:05：12S-F rebased OCR 初审失败裁决，不判通过不补审（协调者）
+
+- **消费 14:40 脚本唤醒**（pending 指纹 740f9d44，changed=`reviews/TASK-12S-F/ocr-run-20261015-attempt1-rebased/state.json`）→ **裁决 F OCR run `1fe96fde` HARD_DEADLINE 不判通过**。b01 `app/services/ingest_service.py`（+179 行单文件批）05:14:07Z 起、06:19:08Z 终 duration=3901.49s rc=1 撞外层单批 3900s 硬截止；`b01-diagnosis.json` coverage_complete=false、selected=0/completed=0、terminal_state=null、batch_identity_matches=false、21 responses/438962 prompt tokens；b02–b07 停链未跑，gate=NOT_EVALUATED。`ocr_runtime.py results` 同口径 INSUFFICIENT_EVIDENCE（b01 SESSION_TERMINAL_REQUIRED + b02–b07 STATE_BATCH_MISSING_OR_DUPLICATE）。unit `coordinator-ocr-1fe96fde…service` 已不存在、双锁（inbox/ocr.lock + global ocr.lock）fuser 无持有者。
+- **根因=远端 vllm capacity 排队**：本轮实测 `192.168.2.45:8002` num_requests_running=4 / waiting=10（reason=capacity），单批 3900s 硬截止窗内未完成；与前两次同根（`ef462fc8` b01 13:03 撞截止时 running=4/waiting=6；E 初审 `617b9375` 撞截止时 vllm 槽争抢）。
+- **裁决**：不判通过、不写零 findings、F OCR 门禁维持关闭；本轮不发起补审（补审四条件之端点空闲不满足，根因未消除必再撞截止）。补审路径留端点空窗（running=0/waiting=0）经唯一入口 `ocr_runtime.py prepare --reuse-run <本 run>` 同身份 retry_depth 0→1 唯一额度，再失败 RETRY_LIMIT 升级，不改 task 名/另建目录/改超时绕过。
+- **不阻塞独立线**：E 已接受（12:28）不受影响；TESTER F 面真 MySQL/并发/迁移探针按接受门禁顺序待 OCR 裁决后再派；E+F 强审批次包 MERGE_INTO 仍待 F 收口后生成。
+- 当前结果：12S-E ACCEPTED 未合入；12S-F 冻结 head `96afc43`、OCR 初审两次失败（ef462fc8 + 1fe96fde 均 0 覆盖）门禁维持关闭、待端点空窗唯一补审；12S-D1 部分交付接受收口；D2 BLOCKED_FROZEN；12S 聚合 PARTIAL。
+- 下一责任人：协调者（observer 续核 vllm 端点空窗后发起唯一补审）、TESTER（F 探针待 OCR 裁决）、用户（E+F 合入授权口径）。
+- 证据：reviews/TASK-12S-F/ocr-run-20261015-attempt1-rebased/{state.json(HARD_DEADLINE),b01-diagnosis.json(coverage_complete=false),ocr-verdict.md}；ocr_runtime.py results（INSUFFICIENT_EVIDENCE）；端点实测 running=4/waiting=10；role_runtime 租约恢复+claim（owner `cron-coord-poll-14ae4556629a-20261015-1458-f-ocr-harddeadline`）。
+
+
+## 2026-10-15 13:17：12S-E 接受 + B rebase F 至 E head + 前 F OCR b01 撞硬截止失败 + 逐文件重提（协调者）
+
+- **12S-E 已 ACCEPTED（12:28，并行协调者轮次正式登记 `inbox/coordinator/TASK-12S-E/acceptance-attempt2-20261015.md`）**：双证=OCR `a9bf637e` 三批逐批实读正文 0 findings（本回合 09:46 收口）+ TESTER attempt-2 增量复验 PASS（真 MySQL 8.4.11 隔离库 5 面；11:20 曾环境 BLOCKED，根因=mysql:8.4 镜像仅授 user@localhost 致 bridge 源 IP 1045，补授 user@% 后 raw+engine 双通，非代码问题）。E 未合入 main——合入随 12S 父批次强审后执行（E head `1e9c7de`=main `16a154f`+2 commit 可 FF；本回合核 main 34 ahead/0 behind origin、无 git lock、E 合并面 5 文件与脏 devflow 工具文件零交集）。
+- **B 据 S1 rebase F 至 E head（12:45，回执 `attempt-1-r1-rebase-receipt.md`）**：`git rebase --onto 1e9c7de b39a3ec` 零冲突（rebase 前实测 F/E 文件集零重叠）→ F 冻结 head `96afc43`（base `1e9c7de`）。协调者独立核 app+alembic 面相对旧 base `b39a3ec` **逐字节不变**（`git diff -- app alembic` sha `86897504adbc8548` 双方一致）。B 侧 rebase 后 ruff 10 文件 All checks passed、定向 14 passed、E 面回归抽查 55 passed。
+- **前 F OCR run `ef462fc8`（`b39a3ec→8c8bf2f`，4 文件合 b01）b01 失败**：13:03:31 撞 3900s 单批硬截止（rc=1、`context canceled`、coverage_complete=false、**0/4 文件完成**、36 次 LLM 往返停在 file_read、max_prompt 51064）。根因=起跑时 VLM 负载高（running=4/waiting=6）。**零 findings 产出、零覆盖=不产生"已通过"结论**，仅登记进程层失败（同类 E 初审 1012 槽争抢）。service 已 inactive、双 OCR 锁 free。
+- **新 F OCR run `1fe96fde`（`reviews/TASK-12S-F/ocr-run-20261015-attempt1-rebased`）13:14 SUBMITTED**：范围 `1e9c7de→96afc43`（B 实际冻结交付身份，非换参续跑旧批次——rebase 已改审查身份 base），**7 app 文件逐文件一批（7 批）**：吸取前 run 4 文件合批在负载下超 3900s 教训，采 E 已验证逐文件设计（E 3 文件 3 批全完成）；tests 排除、预览核零误选、retry_depth=0、prepare 零模型；跨文件不变量写入 background 供各批引用。**F 接受门禁=OCR `1fe96fde` 逐批 findings 裁决（须实读正文 comments，不只看 coverage，retry1 首发误裁教训）+ TESTER 真 MySQL/并发/迁移探针（B 留待项）。**
+- **D2**：用户 11:2x 决定 `om_x100b62303dc9ecacdfc3f20e0bac528`（五材料暂不处理不催要、⑤不授权重跑）→ D2 维持 BLOCKED_FROZEN（并行轮次已落 TODO，本回合核一致）。D1 部分交付接受收口（11:05）。
+- **强审账本核对**：grant `9827cf8f` AUTHORIZED（10-15 22:24 到期）滚动 60min 0/5 无在途；E 已接受、F 待 OCR+TESTER → E+F 批次包 MERGE_INTO（F 收口后按 pack 模板生成单包，不现在付费调用）。
+- 当前结果：12S-E ACCEPTED 未合入（合入随 12S 父批次强审）；12S-F 冻结 head `96afc43`、逐文件 OCR 在途（run `1fe96fde`）、待 findings 裁决+TESTER；12S-D1 部分交付接受收口；D2 BLOCKED_FROZEN；12S 聚合 PARTIAL。下一责任人：协调者（F OCR `1fe96fde` 收口逐批 findings 裁决）、TESTER（F 真 MySQL/并发/迁移探针，待 F OCR 裁决）、用户（E+F 合入前 12S 父批次强审/合入授权口径）。
+- 证据：inbox/coordinator/TASK-12S-E/acceptance-attempt2-20261015.md；test-receipts/TASK-12S-E/attempt-2-reverify.md；inbox/2号/TASK-12S-F/attempt-1-r1-rebase-receipt.md；wt-04a-t12sf git `96afc43`+diff sha 86897504；reviews/TASK-12S-F/ocr-run-20261015-attempt1/{state.json,b01-diagnosis.json}（失败留证）；reviews/TASK-12S-F/ocr-run-20261015-attempt1-rebased/{spec.json,state.json}；strong_review.py status（grant 9827cf8f）。
+
+
+## 2026-10-15 12:02：12S-F R1 核验通过 + F 全量 app OCR 唯一入口起跑；D2 维持 BLOCKED_FROZEN（协调者）
+
+- **12S-F R1 核验通过**（B 11:12 交付 head `8c8bf2f`，发生于 11:12；协调者 11:2x-11:5x 独立机械核验）：相对 `6798059` 仅 `tests/test_ingest_input_rejected.py` +20/−4 折行（app 面冻结不变）。核验=祖先链 `6798059→8c8bf2f` OK、单文件折行 diffstat 一致、ruff 10 文件 **All checks passed**（pyproject select E,F,I,UP 实读，4×E501 消除）、定向 `tests/test_ingest_input_rejected.py` **14 passed** rc=0、工作树干净（仅 .venv 软链）。回执"0 error"申报本轮纠正为真实。
+- **F 全量 app 交付 OCR 唯一入口起跑（11:58:30 +08 SUBMITTED）**：run `ef462fc8`（`reviews/TASK-12S-F/ocr-run-20261015-attempt1`，service active MainPID 948740）。base `b39a3ec`→head `8c8bf2f`，**7 app 文件 2 批**（b01=Backend 拒绝/resume 契约 models+api+ingest_service+迁移；b02=Scanner 面 runner+metadata+backend 上报），3 测试文件默认排除、逐批 preview 核零误选、retry_depth=0 新交付身份、prepare 零模型。起跑前 VLM load（11:5x）running=4/waiting=6，较 09:36 E 起跑略高但无 1012 大包争抢。F app diff 冻结且与 E 面（`pending_binding.py`/`source_service.py`/`scene_schedule_consumer.py`）文件不相交，OCR 与 E 复验并行、互不阻塞。
+- **D2 口径**：用户 11:2x 决定（`om_x100b62303dc9ecacdfc3f20e0bac528`）——五样材料全部暂不处理、不催要；⑤ 重跑 16_02_03 不授权、维持取消态 → **D2 维持 BLOCKED_FROZEN**（并行协调者轮次已落 TODO D2 行，本回合核对一致不重复处置）。12S 聚合仍 PARTIAL。
+- **当前结果**：12S-E REWORK 未接受（TESTER attempt-2 增量复验在途）；12S-F R1 已核验、全量 app OCR 在途（run `ef462fc8`），接受门禁=OCR findings 裁决+TESTER 真 MySQL/并发/迁移探针+E 接受后 rebase 冻结；12S-D1 部分交付接受收口（11:05）；D2 BLOCKED_FROZEN。
+- 下一责任人：协调者（F OCR run `ef462fc8` 收口逐批 findings 裁决）、TESTER（E attempt-2 复验回执在途）、B（F 待 OCR+TESTER）。
+- 证据：reviews/TASK-12S-F/ocr-run-20261015-attempt1/{spec.json,state.json}；inbox/2号/TASK-12S-F/attempt-1-r1-receipt.md；wt-04a-t12sf git `8c8bf2f` + ruff/pytest 实测；TODO §11 E/F/D1/D2 行；HANDOFF 12:02 检查点；events COORDINATOR `coord-t12sf-r1-verified-ocr-started-20261015-1202`。
+
+
+## 2026-10-15 11:07：12S-F 工作点交付核验发现 4×E501 回派 R1；D1 可测试性复核 11:05 并行轮次接受（协调者）
+
+- **12S-F B 10:14 交付工作点 `6798059`**（base `b39a3ec`，10 文件 +939/-7，自测 14+91 passed、全量 1204 passed/5 failed 归属核实均非本任务；冻结按 S1 暂挂，rebase 目标=E attempt-2 冻结 head `1e9c7de` 待 E 接受后通知）。协调者 10:45-10:47 独立机械核验：祖先链/单 commit/diffstat 与回执一致/工作树干净/`alembic heads` 单头 `20261014_01_ingest_rejected`。
+- **核验发现（回执申报有误）**：ruff（仓 pyproject.toml select=["E","F","I","UP"]，line-length=120，实读确认）本任务 10 文件 4×E501（`tests/test_ingest_input_rejected.py:136/195/230/315`，122/125/141/134>120）——回执"E501 非启用规则"表述与仓配置不符。**R1 最小返修已派**（`inbox/2号/TASK-12S-F/attempt-1-r1-rework-dispatch.md`，11:07：仅修 4 行超长+复跑定向 14 例，禁止 noqa 绕过；30min ACK/交付）。R1 后走 OCR attempt-1 增量（base `6798059`→R1 head）→TESTER→接受；与 E 复验并行不互阻。
+- **D1 收口（11:05 并行协调者轮次执行，本回合核对一致性无冲突）**：TESTER 10:10 可测试性复核回执（6 项只读取证：①阳性×4 PASS ②适用性×3 NOT_APPLICABLE ③空包 scanner PASS+提交层终态断点 owner=12S-F ④16_02_03 跨 DB3 不可测=16R 缺陷候选+D2 材料缺口 ⑤五项 BLOCKED_MATERIAL 维持 ⑥总量口径 PASS）→ **D1 部分交付接受**（`inbox/coordinator/TASK-12S-D1/acceptance-partial-20261015.md`）；零代码改动不走 OCR；D2 维持 BLOCKED。
+- **强审账本核对（10:5x）**：grant `9827cf8f` AUTHORIZED（2026-10-15 22:24 到期），滚动 60min 0/5、无在途；E+F 批次包仍按 MERGE_INTO 口径待 TESTER E 复验 PASS 后生成。
+- **E 面在途**：TESTER attempt-2 增量复验 10:27 ACK 开工（真 MySQL 8.4.11 隔离库 5 面，预期 1-2h）；E 接受门禁=该复验 PASS。
+- 当前结果：12S-E REWORK 未接受（复验在途）；12S-F 工作点 `6798059` R1 返修在途（B）；12S-D1 部分交付接受收口；D2 维持 BLOCKED。下一责任人：TESTER（E 复验回执）、B（F R1 ACK+交付）、协调者（F R1 核验+OCR 增量；E 接受后发 F rebase 通知）。
+- 证据：inbox/2号/TASK-12S-F/attempt-1-receipt.md；wt-04a-t12sf git（6798059 diff b39a3ec，ruff 4×E501 实测）；test-receipts/TEST-TASK12S-D1/testability-review-attempt-1.md；inbox/coordinator/TASK-12S-D1/acceptance-partial-20261015.md；strong_review.py status（grant 9827cf8f）。
+
+
+## 2026-10-15 10:26：12S-E attempt-2 增量OCR 0 findings 收口+TESTER 复验派单（协调者）
+
+- **OCR run a9bf637e 收口（发生于 2026-10-15 09:46:17 +08）**：三批 REVIEW_COMPLETE rc=0（b01 pending_binding 16 LLM 往返/b02 scene_schedule_consumer 5/b03 source_service 6；diagnosis 3/3 coverage_complete、身份一致）。逐批实读 b0*.log comments 数组=**0 findings**（retry1 首发"只核 diagnosis 漏读 log comments"误裁不复现）。协调者独立核 app 面 3 文件 E-R1~R8 逐点位在位、E-R6 统计 key 与旧口径兼容、无越界文件，**OCR 门禁满足**（裁决 reviews/TASK-12S-E/ocr-run-20261015-attempt2/ocr-verdict.md）。
+- **E 接受唯一剩余门禁=TESTER attempt-2 增量复验**（E-R7 真实口径夹具/E-R1~R3 字段断言/E-R8 两路豁免/E-R4 防御面/E-R6 回归抽查，真 MySQL 8.4.11 隔离库用完即毁，不重跑 attempt-1 已 PASS 全量）10:12 已派（inbox/TESTER/TASK-12S-E/attempt-2-reverify-dispatch.md）。
+- **并行输入**：TESTER D1 可测试性复核 10:00 ACK 开工（只读资料面，与 12S-F 零冲突，预期 1-2h）；B 12S-F 开发继续中（08:44 ACK，冻结 base 后移通知待发）。
+- **强审口径**：E 面风险与 F 共享 incoming/ready 路径口径不变量，判断=MERGE_INTO 12S-E+F 批次包（TESTER 复验 PASS 后按 pack 模板生成单包；有效授权 grant 9827cf8f 2026-10-15 22:24 到期、滚动 60min 0/5 已用、无在途）；无有效授权时提醒用户手动触发，不自动付费。
+- 当前结果：12S-E 仍 REWORK 未接受、未合入、未部署；12S-F 冻结 base 候选 1e9c7de（待 E 接受后正式通知 B rebase）。下一责任人：TESTER 两单收口；B 开发；A 等接受。
+- 证据：reviews/TASK-12S-E/ocr-run-20261015-attempt2/{state.json,b01-03.log,b01-03-diagnosis.json,ocr-verdict.md}；wt-01-t12se git 1e9c7de；TODO 第11节 E 行；inbox/TESTER/TASK-12S-E/attempt-2-reverify-dispatch.md；inbox/TESTER/TASK-12S-D1/attempt-1-ack.md。
+
+## 2026-10-15 上午：12S-E attempt-2 R1 交付冻结、机械核验全绿、OCR 增量审查起跑
+
+- **A attempt-2 R1 返修交付冻结（发生于 2026-10-15 09:30:35 +08，事件 `A:a-task12se-attempt2-r1-delivered-20261015`）**：commit `1e9c7de`（base `b39a3ec`，单 commit，分支 `a/task-12s-e-auto-bind`，wt-01-t12se），5 文件 +363/−31（3 app 服务 + 2 测试）。E-R1~E-R8 逐条修复：bound_ready_path 真实物理口径（`{storage_root}/{bag.relative_path}`）/bound_incoming_path 拼回 incoming_prefix/bound_purposes_json 与主路径同口径持久化/防御分支 fail-closed ROOT_MISMATCH/FIFO order_by/poll docstring 更正+全零 stats 双分支合并/tier-2 incoming 根归一 storage 相对形式/409 栅栏后移豁免移动恢复。自测（开发自报）：目标文件 42 passed（真 MySQL 8.4.11 探针库，自毁归零）、全量回归两核 38 既有失败 NEW=0/GONE=0、ruff clean、git diff --check rc=0。
+- **协调者机械核验（09:3x +08，租约 owner `cron-coord-poll-14ae4556629a-t12se-attempt2-20261015-0931`）**：独立核 worktree HEAD=1e9c7de、b39a3ec 祖先链、单 commit、diffstat 与回执一致、E-R1~R8 逐点位对照冻结 diff 全在位（含 E-R4 fail-closed 守卫位置在 bag 命中判定后/E-R8 豁免条件不含切片兄弟行）、目标文件 **42 passed 独立复跑 rc=0**（SQLite 口径；真 MySQL 口径留 TESTER attempt-2）、ruff 5 文件 All checks passed、`git diff --check` rc=0、alembic 单头 `20261013_01_scene_intake`、wt 仅 .venv untracked=冻结干净。**核验通过**。
+- **OCR 唯一入口 attempt-2 增量审查起跑（09:35:55 +08 SUBMITTED）**：run `a9bf637e`（`reviews/TASK-12S-E/ocr-run-20261015-attempt2`，unit `coordinator-ocr-a9bf637e…service`），范围 `b39a3ec..1e9c7de`，3 app 文件 3 批（tests 默认排除）、新交付身份（retry_depth=0，不消耗 retry1 补审额度）、背景文件引用更正版裁决 E-R 口径与 6 项不变量；prepare 零模型。起跑前 VLM load（09:36:14）：running=2/waiting=0/kv≈0.7%=无 1012 大包争抢（retry1 撞硬截止的根因不在位）。
+- 当前结果：12S-E 仍 REWORK，未接受未合入；门禁链=OCR findings 裁决→TESTER 修复点增量复验（E-R7 真实口径夹具/E-R1~R3 字段断言/E-R8 两路豁免，真 MySQL）→接受→12S-F 冻结 base（=`1e9c7de` 候选）通知 B rebase。12S-F B 开发继续中（08:44 ACK）不暂停。
+- 证据：inbox/1号/TASK-12S-E/receipts/attempt-2.md；wt-01-t12se git（1e9c7de diff b39a3ec）；reviews/TASK-12S-E/ocr-run-20261015-attempt2/spec.json+state.json；TODO §11 E 行；HANDOFF 09:3x 检查点。下一责任人：协调者（run `a9bf637e` 收口后逐批 log comments 解析裁决）、TESTER（复验派单待 OCR 面收口）、B（F 等 base 通知）。
+
+## 2026-10-15 早：12S-E OCR retry1 裁决更正——撤销错误接受、attempt-2 返修派单
+
+- **12S-E OCR retry1 收口与裁决更正**（retry1 run `3480a161` 全批 REVIEW_COMPLETE 发生于 2026-10-15 08:59 +08；首发裁决 08:36，更正版 08:52）：初审 run `617b9375` b01 于 00:46 撞外层 3900s 硬截止（根因=1012 大包 scene-4acf689f INFER 争抢 vllm 槽，非代码问题），补审四条件核齐后 01:04 经唯一入口 `--reuse-run` 提交 retry1（retry_depth 0→1 唯一额度）。**08:36 首发裁决"零 findings"系误判**——只核了 b0*-diagnosis.json 的 coverage 字段，漏读三批 b0*.log 的 comments：实际 11 条 findings（2 HIGH/4 MEDIUM/5 LOW）。协调者 08:52 逐条对照冻结代码 `b39a3ec` 核实后落更正版裁决（含首发原文保留）：**6 条 CONFIRMED CORRECTION（E-R1~R8）**，其中 2 HIGH=对账绑定行 `bound_ready_path` 重复拼接物理段（pending_binding.py:216）+ source_service tier-2 incoming 侧检测恒空致移动恢复在真实数据失效（:207-216，被异常口径夹具 `test_pipeline_api.py:177` 掩盖）；1 条 LOW REJECTED（ruff W292 指控依据错误：项目 select=E,F,I,UP 未启用 W 族，WT-01 实测 All checks passed）。
+- **E 接受登记撤销（08:36 所为，08:52 更正）**：TESTER attempt-1 独立验证 PASS（00:43 回执，冻结 `b39a3ec`，真 MySQL 8.4.11 隔离库 12+154 passed/8 探针/零越界/自毁归零）证据保留有效，但覆盖不到真实 storage 相对路径口径，不能替代 E-R1~R8 的代码缺陷处置。**TASK-12S-E 状态回退 REWORK**：attempt-2 最小返修派单 A（`inbox/1号/TASK-12S-E/attempt-2-r1-rework-dispatch.md`，base `b39a3ec` 续 commit，仅 E-R 点位+真实口径夹具+用例，不扩需求），门禁=机械核验→OCR 唯一入口 attempt-2 增量→TESTER 修复点增量复验→接受。
+- **12S-F 口径调整（补充 S1，08:52）**：08:38 原派单前提"E 已接受"失效；B 08:44 已 ACK 开工（wt-04a-t12sf@b/task-12s-f-input-reject），开发继续不暂停，但冻结 base 后移至 E attempt-2 冻结 head（A 交付后协调者通知 rebase），验收链在 E 收口接受后启动。`attempt-1-supplement-s1.md` 落盘。
+- **文档缺口补录（如实）**：01:05 夜间检查点当时只落了 sessions/COORDINATOR.md，HANDOFF.md 顶部检查点段漏写（08:56 补写并注明原始记录位置）；本日志此前也无 12S-E 交付冻结/TESTER PASS/retry1 提交条目（23:44–01:05 发生在静默期），本条一并补记。
+- 证据：reviews/TASK-12S-E/ocr-run-20261014-retry1/{state.json,b01.log,b02.log,b03.log,ocr-verdict.md(更正版含首发原文)}；test-receipts/TASK-12S-E/attempt-1.md；TODO §11 E/F 行；HANDOFF 08:56 检查点。下一责任人：A（attempt-2 返修，ACK 30min）、B（F 开发继续、交付前 rebase 到 E attempt-2 head）、TESTER（E 返修后修复点增量复验）、协调者（A 交付后机械核验+唯一入口增量 OCR）。
+
+## 2026-10-14 晚：16R 水雾债补审清账 + 12S-D1 部分交付接受 + 强审授权收口撤销
+
+- **16R 水雾债 fe17e8a..3c9c496 弱 OCR 补审收口**（发生 20:20–20:41，裁决 20:5x）：run `bfe95d1095084e708a98703d8579ce11` 经唯一入口 `ocr_runtime.py` 起跑，AWAITING_DECISION 20:41:57 落 state；b01（scene_host_orchestrator.py+scene_host_proxy.py，779443 tokens/21m5s）+b02（deploy/scene/catalog-scene.yaml，25s）全链 rc=0、coverage_complete（selected=completed=3、failed/waived=0）、**零 findings**（comments 空数组实测）。协调者独立核核心 diff 175 行契约抽查：回报重试 stop 信号先 `_block_finalization` 持久落证再返回（幂等不二次回报）、`_copy_closed_slice` 拒 symlink+逐文件 sha256 双端比对不一致即 STAGING_COPY_FAILED 可追溯失败态（无「只落本地不发布且 DONE」分支）、`_try_finalization` 仅确定 4xx（408/429 除外）停写、5xx/超时仍待对账——4 项背景契约全成立。裁决 `reviews/TASK-16R/ocr-fe17e8a-r1/adjudication-20261014.md`；该区间=3 个生产 commit（ad60e41/8e538bb/3c9c496）已在生产运行并随 main `16a154f` 祖先链在案，**不触发合入动作**，16R 水雾债清账、无在途 OCR。
+- **12S-D1 资料与固定验收清单部分交付接受**（C 交付 20:40，协调者机械核验 20:5x）：逐包清单+包外样本 yaml，零代码改动。协调者独立核：8 包 bytes/DB3 数/topic 消息数/duration/SHA 前缀与冻结 `input-manifest.json` 逐项一致、批次总量 25,119,612,157 B 一致、4acf 取消终态与 18:40 三方裁决一致。用例覆盖=阳性×4 已证（受控 test，含双写幂等回归）/输入适用性×3/无效输入×1；**五项 BLOCKED_MATERIAL 在案**：业务人工真值区间、输入有效真实正常阴性、真实车辆映射、质量接受阈值、跨 DB3 命中（16_02_03 唯一候选 17:14:25 取消终态、无已发布切片）。C 不编造准确率、不以 NOT_APPLICABLE 计真阴性，口径合规；D2 真实验收维持阻塞，材料补齐（上游/业务 owner）即重算对应用例，TESTER 可测试性复核随 D2 固定候选派单执行。
+- **强审授权收口撤销**（20:55 执行）：grant `32e3edfd`（TASK-16C，18:17 起 24h）范围内 **0 次调用**；16C 聚合 20:05 已接受合入 main `16a154f`、无待审新产物，按「授权任务结束及时 revoke」执行撤销；后续若需强审须用户新授权，历史授权不替代。
+- 证据：reviews/TASK-16R/ocr-fe17e8a-r1/{run/state.json,run/b01.log,run/b02.log,adjudication-20261014.md}；receipts/TASK-12S-D1/attempt-1{,-samples}.md；TODO §8.5 16R/D1 行、§11；HANDOFF 20:55 检查点。下一责任人：A（12S-E 实现→自测→交付）、上游/业务 owner（D1 五项材料）、协调者（E 交付后核 diff+机械验证+串行 OCR，材料补齐后重算 D2 用例）。
+
 ## 2026-10-14 v0.4 UI 恢复：A 叶 OCR 裁决收口返修 + 1012 大包进入取消流程
 
 - **A 叶（查询/API）OCR 面收口，R1 返修交付并核验**：初 run `7a72eed8` 15:14:47 外层硬截止（`scene_result_query.py` 未完成）→ 唯一入口补审 `0aba25ee` 16:24 收口 rc=0、2/2 全覆盖（`bd0db1d..ff2a005`，identity 匹配）。合并裁决（16:42，`inbox/coordinator/TASK-16C-A/ocr-merge-ruling-20261014.md`；16:35 中间 verdict 对 F2 的 REJECTED 因理由不成立被 17:30 补段覆盖留痕）：CONFIRMED 2 条 low——`data_kind_case()` 全仓零调用死函数（C6 单源口径残留）+ `scene_original` 谓词缺子包排除（derivation 子合法组合，防御性）；docstring 条驳回。A 交付 R1 返修 `4838ef8`（17:15:40，+3/−15 仅 `bag_search_service.py`），协调者 17:20 机械核验独立复跑全绿（74 passed + 1 seed 固有）。
@@ -281,3 +370,13 @@ TASK-16B/12S-A/B/C工程DONE，11S仅受控首包DONE；12S-D/12S更广真阴性
 ## 2026-10-14T13:53:01+08:00 规划：v0.4后的水雾生产收尾
 
 用户指定自动绑定/幂等、异常输入结束恢复、真实质量血缘批量验收三项；新增12S-E/F和原12S-D的D1/D2，REQ/AC-20～22及完整卡同步，全部DEFERRED_AFTER_V04。当前16与已接受水雾首包不变；只文档DESIGN_READY，无业务开发/派单唤醒/生产或模型操作。入口SPRAY-POST-V04.md；动态状态TODO §11。
+
+## 2026-10-14T20:05:00+08:00 v0.4最小界面闭环收口：16C合入main 16a154f（协调者里程碑）
+
+父TASK-16按原AC接受DONE：16A 6fb42c4 / 16B 3c9c496 / 16C三叶+seed已合入main `16a154f`。三叶接受（A查询/API 8958291 19:40 / B Bag三视图 e399daf 18:10 / C流水线详情 ce5921d 14:24），A叶经R1-3 F1返修链（NVIDIA排除谓词）+OCR f7899cfc 0 findings+TESTER F1增量34/34严格MySQL PASS收口。TESTER 16D最终联合验收44b6c07 PASS（cursor矩阵20/20/严格MySQL8.4.11 21/21/真实Chrome Console零异常/版本核）。按用户18:22授权「PASS后直接合入并更新测试环境」（不含生产）：--no-ff合入main 16a154f（含seed bd0db1d2）+推github（ls-remote回读一致）+本地Compose测试环境收敛（up rc=0 18容器Healthy、mock全链路e2e PUBLISHED、revision对账零漂移、页面实测platform=16a154ff三tab+chip在位）。**生产处理机部署未执行**（需用户当次授权）。16R 15条逐项裁决已交付（reviews/TASK-16R/attempt-1-disposition.md），水雾债fe17e8a..3c9c496记低优先补审候选。决策inbox/coordinator/TASK-16C/merge-decision-20261014.md；TODO §8 16C/16D行、父16聚合行转DONE。
+
+## 2026-10-14T20:20:00+08:00 V04_CLOSEOUT解除：16R水雾债补审起跑+§11首波派单（协调者）
+
+V04_CLOSEOUT阶段门满足（父16 DONE+owner安全点：A/B 20:0x后IDLE、C无在途开发）。两项控制动作：① 16R唯一从未被弱OCR全扫的生产增量fe17e8a..3c9c496（scene_host_orchestrator.py +70/−9、scene_host_proxy.py +24、deploy yaml +5，~108行）经唯一入口ocr_runtime prepare→start补审：2批（2 scripts py合并 + yaml单列；tests排除），run bfe95d1095084e708a98703d8579ce11 SUBMITTED，service active MainPID 4179221持ocr.lock，隔离review worktree wt-coord-ocr-fe17e8a@3c9c496；收口AWAITING_DECISION后逐条裁决，真实缺陷回16B域owner，不扩需求，不阻塞§11开发。② §11水雾生产收尾首波派单（SPRAY-POST-V04契约）：12S-E自动绑定/幂等（REQ-20/AC-20）→A，base main 16a154f，独占ingest_service.py+source_service.py+scene_schedule_consumer.py+tests（api仅确需接线时）；12S-D1真实资料/验收清单（REQ-22/AC-22）→C，并行无文件冲突；12S-F共写ingest/API顺序接E暂缓，12S-D2待E/F固定候选+D1资料。派单落盘inbox/1号/TASK-12S-E、inbox/3号/TASK-12S-D1，TODO §11三行更新。事件COORDINATOR 2条（16r-fe17e8a-ocr-submitted、spray-post-v04-first-wave-dispatch）。
+
+下一责任人：A/C自ACK后开工；observer跟踪ACK与16R OCR收口；E接受后重算F，D1资料补齐后重算D2；16R补审findings裁决后16R面彻底收口。生产部署/扩量仍待用户当次授权。

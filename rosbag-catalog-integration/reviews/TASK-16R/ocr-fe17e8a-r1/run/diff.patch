@@ -1,0 +1,518 @@
+diff --git a/deploy/scene/catalog-scene.yaml b/deploy/scene/catalog-scene.yaml
+index 11ed5c2..ff29a78 100644
+--- a/deploy/scene/catalog-scene.yaml
++++ b/deploy/scene/catalog-scene.yaml
+@@ -12,6 +12,11 @@ services:
+         source: ${SCENE_CAPABILITIES_HOST_FILE:?需配置受控能力注册表文件}
+         target: /app/config/scene_capabilities.yaml
+         read_only: true
++      # proxy回报的受控发布根需在Backend同路径只读可见，供文件证据核验。
++      - type: bind
++        source: ${SCENE_SLICE_PUBLISH_HOST_ROOT:?需配置切片宿主发布根}
++        target: /public/rosbag_scene_processing/slices
++        read_only: true
+   scanner:
+     environment:
+       SCENE_NAS_SCAN_ROOT: /public/rosbag_scene_processing/incoming
+diff --git a/scripts/scene_host_orchestrator.py b/scripts/scene_host_orchestrator.py
+index b2e753d..7b130b1 100644
+--- a/scripts/scene_host_orchestrator.py
++++ b/scripts/scene_host_orchestrator.py
+@@ -43,7 +43,7 @@ import os
+ import shutil
+ import threading
+ import time
+-from dataclasses import dataclass, field
++from dataclasses import dataclass, field, replace
+ from pathlib import Path
+ from typing import Protocol
+ 
+@@ -221,10 +221,15 @@ class SceneHostOrchestrator:
+ 
+         # ---- EXTRACT / INFER / SEGMENT（dispatch 复用 app.scene）----
+         manifest = prior.get("manifest") if prior else None
+-        if manifest is not None and prior is not None and prior.get("outcome") in (
+-            SceneOutcome.SUCCESS.value,
+-            SceneOutcome.NO_MATCH.value,
+-            SceneOutcome.NOT_APPLICABLE.value,
++        if (
++            manifest is not None
++            and prior is not None
++            and prior.get("outcome")
++            in (
++                SceneOutcome.SUCCESS.value,
++                SceneOutcome.NO_MATCH.value,
++                SceneOutcome.NOT_APPLICABLE.value,
++            )
+         ):
+             # 崩溃恢复：分析三步已 DONE（checkpoint 证据），复用已落盘 manifest，
+             # 不重复请求模型（幂等/缓存）。台账如实记三步 DONE。
+@@ -436,22 +441,55 @@ class SceneHostOrchestrator:
+     def _step_write(self, spec: SceneExecSpec, manifest: SceneManifest, offset_ns: int) -> tuple[list, dict[str, str]]:
+         if not manifest.publishable_segments():
+             return [], {}
+-        # 只有待发布切片写到NAS同盘暂存；解码、渲染和台账仍留处理机home。
+-        # home与NAS通常跨设备，不能从work_root直接rename到发布根。
++        # CIFS 上不能依赖 SQLite 写锁；本地写完并关闭数据库后，才复制完整切片。
++        # NAS 暂存仍与发布根同盘，保留最终发布的原子 rename 边界。
+         run_key = scene_publish_service.safe_path_segment(spec.run_id, field="run_id")
+         staging_root = spec.publish_root / ".staging" / run_key / f"attempt-{spec.attempt}"
+         staging_root.mkdir(parents=True, exist_ok=True)
++        local_root = spec.work_root / "slice-write"
++        local_root.mkdir(parents=True, exist_ok=True)
+         results = []
+         child_uids: dict[str, str] = {}
+         for seg in manifest.publishable_segments():
+             try:
+-                res = slice_bag_to_staging(Path(spec.source_path), staging_root, seg, storage_offset_ns=offset_ns)
+-            except SliceWriterError as exc:
++                res = slice_bag_to_staging(Path(spec.source_path), local_root, seg, storage_offset_ns=offset_ns)
++            except (SliceWriterError, BagIoError, OSError) as exc:
+                 raise SceneExecError("WRITE_FAILED", str(exc), step="WRITE") from exc
++            target = staging_root / res.out_dir.name
++            try:
++                self._copy_closed_slice(res.out_dir, target)
++            except OSError as exc:
++                raise SceneExecError("STAGING_COPY_FAILED", str(exc), step="WRITE") from exc
+             child_uids[seg.slice_key] = self._child_uid(spec, seg)
+-            results.append(res)
++            results.append(replace(res, out_dir=target))
+         return results, child_uids
+ 
++    @staticmethod
++    def _copy_closed_slice(source: Path, target: Path) -> None:
++        """只复制已关闭并校验的切片；逐文件摘要一致后才允许进入发布步骤。"""
++        if target.is_symlink():
++            raise OSError(f"暂存目录不能是符号链接：{target}")
++        if target.exists():
++            # 仅清理本 run/attempt 的暂存重试产物，绝不覆盖正式发布目录。
++            shutil.rmtree(target)
++        shutil.copytree(source, target)
++
++        def digests(root: Path) -> dict[str, str]:
++            result = {}
++            for path in root.rglob("*"):
++                if path.is_symlink():
++                    raise OSError(f"切片不允许符号链接：{path}")
++                if path.is_file():
++                    digest = hashlib.sha256()
++                    with path.open("rb") as stream:
++                        for chunk in iter(lambda: stream.read(4 * 1024 * 1024), b""):
++                            digest.update(chunk)
++                    result[str(path.relative_to(root))] = digest.hexdigest()
++            return result
++
++        if digests(source) != digests(target):
++            raise OSError(f"NAS 暂存复制摘要不一致，拒绝发布：{target}")
++
+     def _step_publish(
+         self, spec: SceneExecSpec, manifest: SceneManifest, write_results, child_uids: dict[str, str]
+     ) -> list:
+@@ -484,12 +522,8 @@ class SceneHostOrchestrator:
+             # NO_MATCH / NOT_APPLICABLE：只 complete（无文件义务），不 report
+             spec.reporter.complete_scene(manifest=manifest, child_bag_uids={}, publish_root="")
+             return
+-        spec.reporter.report_results(
+-            manifest=manifest, child_bag_uids=child_uids, publish_root=publish_root
+-        )
+-        spec.reporter.complete_scene(
+-            manifest=manifest, child_bag_uids=child_uids, publish_root=publish_root
+-        )
++        spec.reporter.report_results(manifest=manifest, child_bag_uids=child_uids, publish_root=publish_root)
++        spec.reporter.complete_scene(manifest=manifest, child_bag_uids=child_uids, publish_root=publish_root)
+ 
+     # ------------------------------------------------------------------
+     # 辅助
+@@ -601,6 +635,4 @@ class SceneHostOrchestrator:
+ 
+ 
+ if __name__ == "__main__":  # pragma: no cover - 手工冒烟入口（非部署路径）
+-    raise SystemExit(
+-        "scene_host_orchestrator 是库模块：由 scripts/scene_host_proxy.py 的常驻代理调用，不单独运行。"
+-    )
++    raise SystemExit("scene_host_orchestrator 是库模块：由 scripts/scene_host_proxy.py 的常驻代理调用，不单独运行。")
+diff --git a/scripts/scene_host_proxy.py b/scripts/scene_host_proxy.py
+index 73a2eec..5c43976 100644
+--- a/scripts/scene_host_proxy.py
++++ b/scripts/scene_host_proxy.py
+@@ -47,6 +47,7 @@ import signal
+ import sys
+ import threading
+ import time
++import urllib.error
+ from dataclasses import dataclass
+ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+ from pathlib import Path
+@@ -959,6 +960,12 @@ def _finish_failure(cfg: ProxyConfig, backend: Backend, run_id: str, attempt: in
+     _save_finalization(cfg, run_id, attempt, lease_token, stage="FINALIZING_FAILURE",
+                        work_root=spec.work_root if spec is not None else None,
+                        target="SCENE_FAILED", error=error, error_step=error_step)
++    if stop_cancel.is_set() and reason != "lease_terminal":
++        state = _read_json(state_path(cfg, run_id))
++        _block_finalization(cfg, state, f"失败收尾前已停写：{reason}")
++        _release_resource(cfg, resource_token)
++        ACTIVE.remove(run_id)
++        return
+     if spec is not None and not _report_steps(
+             backend, run_id=run_id, attempt=attempt, lease_token=lease_token,
+             work_root=spec.work_root, error_step=error_step, error_detail=error):
+@@ -1028,7 +1035,12 @@ def _try_finalization(cfg: ProxyConfig, backend: Backend, state: dict) -> bool:
+             try:
+                 backend.complete_scene(run_id, facts["complete_payload"], idem=facts["complete_idem"])
+             except Exception as exc:
+-                raise FinalizationBlocked(f"终态结果不能按原身份重放：{exc}") from exc
++                # 只有确定的请求/身份冲突才停写；超时、断连和服务故障仍待对账。
++                http_error = exc if isinstance(exc, urllib.error.HTTPError) else exc.__cause__
++                if (isinstance(http_error, urllib.error.HTTPError)
++                        and 400 <= http_error.code < 500 and http_error.code not in (408, 429)):
++                    raise FinalizationBlocked(f"终态结果不能按原身份重放：{exc}") from exc
++                raise
+         elif status != facts.get("target", "SCENE_FAILED"):
+             raise FinalizationBlocked(f"原运行已变更为其他终态：{status}")
+         clear_recovery_state(cfg, run_id)
+@@ -1090,10 +1102,16 @@ def _finalization_loop(cfg: ProxyConfig, backend: Backend, state: dict,
+                 return
+             except Exception as exc:
+                 print(f"scene finalization remains pending {run_id}: {exc}", flush=True)
+-            if stop.is_set() or time.monotonic() >= deadline:
++            if ((stop.is_set() and reason.get("value") != "lease_terminal")
++                    or time.monotonic() >= deadline):
+                 _block_finalization(cfg, state, f"收尾停止（{reason.get('value')}）或超出三个租约周期")
+                 return
+-            stop.wait(max(0.05, min(cfg.heartbeat_interval_seconds, 10.0)))
++            delay = max(0.05, min(cfg.heartbeat_interval_seconds, 10.0))
++            if stop.is_set():
++                # 终态清租约是正常信号，仍可幂等确认；避免已置位Event造成忙循环。
++                time.sleep(delay)
++            else:
++                stop.wait(delay)
+     finally:
+         stop.set()
+         _release_resource(cfg, state.get("resource_lease_token"))
+diff --git a/tests/test_scene_host_proxy_r5.py b/tests/test_scene_host_proxy_r5.py
+new file mode 100644
+index 0000000..cf0baeb
+--- /dev/null
++++ b/tests/test_scene_host_proxy_r5.py
+@@ -0,0 +1,181 @@
++"""R5 独立故障回归：终态重放通信恢复与失败首次收尾停写。"""
++
++from __future__ import annotations
++
++import io
++import json
++import sys
++import threading
++import time
++import urllib.error
++from dataclasses import replace
++from pathlib import Path
++from types import SimpleNamespace
++
++import pytest
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT / "scripts"))
++
++import scene_host_proxy as proxy  # noqa: E402
++import test_scene_host_proxy_r3 as prior  # noqa: E402
++
++recovery_case = prior.recovery_case
++write_checkpoint = prior.write_checkpoint
++
++
++def terminal_success(case):
++    case.cfg = replace(case.cfg, heartbeat_interval_seconds=0.01)
++    case.backend.run_status = "SCENE_DONE"
++    case.backend.lease_live = False
++    case.backend.steps = {name: "DONE" for name in proxy.STEPS}
++    idem = "terminal-original-complete"
++    case.backend.completed_idem.add(idem)
++    proxy._save_finalization(
++        case.cfg,
++        case.run_id,
++        1,
++        "token-r3",
++        stage="FINALIZING_SUCCESS",
++        work_root=case.work,
++        complete_payload={"manifest": {"outcome": "NO_MATCH"}},
++        complete_idem=idem,
++    )
++    return json.loads(proxy.state_path(case.cfg, case.run_id).read_text())
++
++
++def communication_error(kind):
++    if kind == "timeout":
++        return TimeoutError("终态已提交，幂等对账暂时超时")
++    if kind == "connection":
++        return ConnectionError("终态重放连接暂时断开")
++    error = RuntimeError("Backend API /complete-scene 返回 HTTP 503: unavailable")
++    error.__cause__ = urllib.error.HTTPError(
++        "http://backend/complete-scene", 503, "unavailable", {}, io.BytesIO(b"unavailable")
++    )
++    return error
++
++
++@pytest.mark.parametrize("kind", ["timeout", "connection", "http503"])
++@pytest.mark.parametrize("failures", [1, 3])
++@pytest.mark.parametrize("lease_terminal", [False, True])
++def test_terminal_replay_communication_recovers_within_window(
++    recovery_case, monkeypatch, kind, failures, lease_terminal
++):
++    case = recovery_case
++    state = terminal_success(case)
++    original_complete = case.backend.complete_scene
++    replays = []
++
++    def flaky_complete(*args, **kwargs):
++        replays.append(kwargs["idem"])
++        if len(replays) <= failures:
++            raise communication_error(kind)
++        return original_complete(*args, **kwargs)
++
++    monkeypatch.setattr(case.backend, "complete_scene", flaky_complete)
++    stop = threading.Event()
++    if lease_terminal:
++        stop.set()  # 已终态清租约不阻止原complete幂等身份对账。
++    proxy._finalization_loop(
++        case.cfg, case.backend, state, stop, {"value": "lease_terminal" if lease_terminal else "none"}
++    )
++    assert replays == [state["finalization"]["complete_idem"]] * (failures + 1)
++    assert not proxy.state_path(case.cfg, case.run_id).exists()
++    assert case.backend.run_status == "SCENE_DONE"
++    assert not [c for c in case.backend.calls if c[0] in {"step", "status"}]
++    assert case.backend.terminal_step_attempts == 0
++    assert case.model_calls == []
++    assert case.run_id not in proxy.ACTIVE
++
++
++@pytest.mark.parametrize("lease_terminal", [False, True])
++def test_terminal_replay_persistent_communication_eventually_blocks(recovery_case, monkeypatch, lease_terminal):
++    case = recovery_case
++    state = terminal_success(case)
++    replays = []
++    clock = {"now": 0.0}
++
++    def persistent_complete(*args, **kwargs):
++        replays.append(kwargs["idem"])
++        clock["now"] += 240  # 两次失败跨越原3*120秒窗口，不阻塞真实时间。
++        raise TimeoutError("持续通信故障")
++
++    monkeypatch.setattr(case.backend, "complete_scene", persistent_complete)
++    monkeypatch.setattr(
++        proxy, "time", SimpleNamespace(monotonic=lambda: clock["now"], time=time.time, sleep=lambda seconds: None)
++    )
++
++    class InstantStop:
++        def __init__(self):
++            self.stopped = lease_terminal
++
++        def is_set(self):
++            return self.stopped
++
++        def set(self):
++            self.stopped = True
++
++        def wait(self, seconds):
++            return self.stopped
++
++    proxy._finalization_loop(
++        case.cfg, case.backend, state, InstantStop(), {"value": "lease_terminal" if lease_terminal else "none"}
++    )
++    saved = json.loads(proxy.state_path(case.cfg, case.run_id).read_text())
++    assert saved["stage"] == "FINALIZATION_BLOCKED"
++    assert len(replays) == 2, "持续通信应耗尽既定窗口，不能首错永久阻塞或无限循环"
++    assert case.backend.calls == []
++    assert case.model_calls == []
++    assert case.run_id not in proxy.ACTIVE
++
++
++def test_terminal_replay_definite_409_blocks_once(recovery_case, monkeypatch):
++    case = recovery_case
++    state = terminal_success(case)
++    replays = []
++
++    def conflict(*args, **kwargs):
++        replays.append(kwargs["idem"])
++        cause = urllib.error.HTTPError(
++            "http://backend/complete-scene", 409, "Conflict", {}, io.BytesIO(b"CONFLICT None vs NO_MATCH")
++        )
++        raise RuntimeError("Backend API /complete-scene 返回 HTTP 409: CONFLICT None vs NO_MATCH") from cause
++
++    monkeypatch.setattr(case.backend, "complete_scene", conflict)
++    proxy._finalization_loop(case.cfg, case.backend, state, threading.Event(), {"value": "none"})
++    saved = json.loads(proxy.state_path(case.cfg, case.run_id).read_text())
++    assert saved["stage"] == "FINALIZATION_BLOCKED"
++    assert len(replays) == 1
++    assert case.backend.calls == []
++    assert case.model_calls == []
++    assert case.run_id not in proxy.ACTIVE
++
++
++@pytest.mark.parametrize("with_spec", [False, True])
++def test_actual_finish_failure_obeys_existing_lease_lost_stop(recovery_case, with_spec):
++    case = recovery_case
++    write_checkpoint(case, "FAILED")
++    stop = threading.Event()
++    stop.set()
++    proxy._finish_failure(
++        case.cfg,
++        case.backend,
++        case.run_id,
++        1,
++        "token-r3",
++        None,
++        case.spec if with_spec else None,
++        "LEASE_LOST: 原业务错误",
++        stop,
++        "lease_lost",
++        stage="EXECUTING",
++        error_step="PRECHECK" if with_spec else None,
++    )
++    assert case.backend.calls == [], "明确停写后首次失败收尾也不能写steps/status/complete"
++    saved = json.loads(proxy.state_path(case.cfg, case.run_id).read_text())
++    assert saved["stage"] == "FINALIZATION_BLOCKED"
++    assert "LEASE_LOST" in saved["finalization"]["error"]
++    assert case.backend.run_status == "SCENE_RUNNING"
++    assert case.model_calls == []
++    assert case.run_id not in proxy.ACTIVE
+diff --git a/tests/test_scene_local_write_nas_stage.py b/tests/test_scene_local_write_nas_stage.py
+new file mode 100644
+index 0000000..43a9c76
+--- /dev/null
++++ b/tests/test_scene_local_write_nas_stage.py
+@@ -0,0 +1,134 @@
++"""CIFS不支持SQLite写锁时，本地完成SQLite后校验复制至NAS再原子发布。"""
++
++import hashlib
++import json
++import shutil
++import sqlite3
++from dataclasses import replace
++from pathlib import Path
++
++import pytest
++
++from scripts.scene_host_orchestrator import SceneExecError, SceneHostOrchestrator
++from tests import test_scene_staging_filesystem as staging_fixtures
++from tests.test_scene_staging_filesystem import _source_hashes
++
++
++@pytest.fixture
++def filesystem_case(tmp_path):
++    yield from staging_fixtures.filesystem_case.__wrapped__(tmp_path)
++
++
++class RecordingReporter:
++    def __init__(self):
++        self.calls = []
++
++    def report_results(self, **payload):
++        self.calls.append(("results", payload))
++        return {}
++
++    def complete_scene(self, **payload):
++        self.calls.append(("complete", payload))
++        return {}
++
++
++def _cached_spec(filesystem_case):
++    spec, manifest, _ = filesystem_case
++    reporter = RecordingReporter()
++    spec = replace(spec, reporter=reporter)
++    (spec.work_root / "checkpoint.json").write_text(
++        json.dumps(
++            {
++                "identity": spec.identity,
++                "steps": {name: {"status": "DONE"} for name in ("EXTRACT", "INFER", "SEGMENT")},
++                "manifest": manifest.to_dict(),
++            }
++        )
++    )
++    return spec, reporter
++
++
++def _forbid_model(orchestrator, monkeypatch):
++    def unexpected(*args, **kwargs):
++        raise AssertionError("已缓存识别结果，禁止重新调用模型")
++
++    monkeypatch.setattr(orchestrator, "_step_analyze", unexpected)
++
++
++def test_local_sqlite_write_then_verified_copy_can_publish_on_different_filesystem(filesystem_case, monkeypatch):
++    spec, reporter = _cached_spec(filesystem_case)
++    before = _source_hashes(spec)
++    original_connect = sqlite3.connect
++    local_writes, copies = [], []
++
++    def cifs_connect(database, *args, **kwargs):
++        raw = str(database)
++        readonly = raw.startswith("file:") and "mode=ro" in raw
++        path = Path(raw.removeprefix("file:").split("?")[0])
++        if not readonly and path.is_relative_to(spec.publish_root):
++            raise sqlite3.OperationalError("database is locked: 模拟CIFS不支持SQLite写锁")
++        if not readonly and path.is_relative_to(spec.work_root):
++            local_writes.append(path)
++        return original_connect(database, *args, **kwargs)
++
++    original_copytree = shutil.copytree
++
++    def copy_and_record(src, dst, *args, **kwargs):
++        if Path(dst).is_relative_to(spec.publish_root):
++            source = Path(src)
++            hashes = {
++                str(p.relative_to(source)): hashlib.sha256(p.read_bytes()).hexdigest()
++                for p in source.rglob("*")
++                if p.is_file()
++            }
++            assert hashes
++            assert source.is_relative_to(spec.work_root)
++            assert not list(source.rglob("*-journal"))
++            copies.append((Path(dst), hashes))
++        return original_copytree(src, dst, *args, **kwargs)
++
++    monkeypatch.setattr(sqlite3, "connect", cifs_connect)
++    monkeypatch.setattr(shutil, "copytree", copy_and_record)
++    orchestrator = SceneHostOrchestrator()
++    _forbid_model(orchestrator, monkeypatch)
++    manifest, steps = orchestrator.run(spec)
++    assert manifest.outcome.value == "SUCCESS"
++    assert all(step.status == "DONE" for step in steps)
++    assert local_writes and copies
++    assert [name for name, _ in reporter.calls] == ["results", "complete"]
++    published = list((spec.publish_root / "test" / "slope").iterdir())
++    assert len(published) == 1
++    for staging, hashes in copies:
++        assert staging.is_relative_to(spec.publish_root / ".staging" / spec.run_id / f"attempt-{spec.attempt}")
++        for relative, digest in hashes.items():
++            assert hashlib.sha256((published[0] / relative).read_bytes()).hexdigest() == digest
++    assert _source_hashes(spec) == before
++
++
++@pytest.mark.parametrize("fault", ["copy_error", "corrupt_db3", "corrupt_metadata"])
++def test_copy_failure_or_corruption_cannot_publish_or_register(filesystem_case, monkeypatch, fault):
++    spec, reporter = _cached_spec(filesystem_case)
++    before = _source_hashes(spec)
++    original_copytree = shutil.copytree
++
++    def broken_copy(src, dst, *args, **kwargs):
++        if not Path(dst).is_relative_to(spec.publish_root):
++            return original_copytree(src, dst, *args, **kwargs)
++        if fault == "copy_error":
++            raise OSError("注入NAS复制失败")
++        result = original_copytree(src, dst, *args, **kwargs)
++        target = next(Path(dst).glob("*.db3")) if fault == "corrupt_db3" else Path(dst) / "metadata.yaml"
++        with target.open("ab") as stream:
++            stream.write(b"\nCOPY-CORRUPTED\n")
++        return result
++
++    monkeypatch.setattr(shutil, "copytree", broken_copy)
++    orchestrator = SceneHostOrchestrator()
++    _forbid_model(orchestrator, monkeypatch)
++    with pytest.raises(SceneExecError) as error:
++        orchestrator.run(spec)
++    assert error.value.step == "WRITE"
++    assert error.value.code == "STAGING_COPY_FAILED"
++    assert reporter.calls == []
++    assert not (spec.publish_root / "test" / "slope").exists()
++    assert _source_hashes(spec) == before

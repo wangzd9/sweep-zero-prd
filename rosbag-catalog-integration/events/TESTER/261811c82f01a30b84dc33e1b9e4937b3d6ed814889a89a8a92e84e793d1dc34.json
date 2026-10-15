@@ -1,0 +1,20 @@
+{
+  "event_id": "TESTER:t16d-f1-incremental-8958291-verified-pass-20261014-1918",
+  "kind": "business",
+  "task": "TASK-16D",
+  "attempt": "attempt-1",
+  "status": "F1_INCREMENTAL_PASS_DELIVERED_PENDING_INTEGRATION_REBUILD",
+  "summary": "消费协调者两项实质新输入并交付 F1 增量独立验证：① f1-incremental-8958291-dispatch（19:12，A 叶 R1-3 F1 返修的 TESTER 独立行为面门禁，不采信协调者探针）；② ocr-r13-adjudication（19:14，run f7899cfc 单文件 0 findings、零 CORRECTION 级→A 叶 R1-3 增量 OCR gate 满足）。TESTER 在专属 worktree 前移到冻结 head 8958291（base 1489bc6），严格 MySQL 8.4.11 隔离库 rosbag-t16d-mysql 独立复现：夹具 F1N1(nvidia+scene 用途原包)/F1N2(纯 nvidia 无用途)/F1SB(非 nvidia 双用途)+CTRL(非 nvidia scene 根/nvidia 切片)，两查询入口 search_bags(Web)+search_scene_bags(API /api/v1/bags)共享 data_kind_pred 同核。34/34 PASS：F1N1/F1N2 筛 scene_original/self_built_original 两入口均不返回、筛 nvidia_original 均返回、标签仅 nvidia_original（筛选命中集↔data_kind_context 展示标签单源一致）；F1SB 双用途回归两筛选都命中且集恰含；各筛选集成员逐一精确核；CTRL 非 nvidia 未被误伤、nvidia 切片子包优先；幂等复查一致。零越界核：git diff 1489bc6..8958291 --stat=仅 app/services/bag_search_service.py +18/−10，scene_result_query.py/模板/tests 未动。F3 文档零行为：_parse_time 改动为纯 docstring 文本、无代码/比较语义 diff（复用 16D 已有 date end=23:59:59.999999 探针口径，未重跑）。夹具 T16DF1 purge 5→0 自清归零。RED 交叉证（非采信）：pre-fix 1489bc6 上 F1N1 型(nvidia+scene 用途)被 scene_original 筛出=缺陷在位、R1-3 为修复点，夹具非空转。A 叶接受现 OCR面(③ done)+TESTER面(④ done)双证齐=满足（r13 行17 口径），A 叶接受判定归协调者；本单 ④ 交付 PASS。",
+  "evidence": "test-receipts/TEST-TASK16D/attempt-1.md（F1 增量段，本轮追加）; scratch/t16d_f1_green_full.log（34/34 PASS rc=0，HEAD 8958291 两入口）; scratch/t16d_f1_probe.py+t16d_f1_docker.py（夹具/两入口/标签/自清）; scratch/t16d_f1_red_full.log（pre-fix 1489bc6 RED 1/1=夹具非空转）; git -C wt-01-t16ca diff --stat 1489bc6..8958291（零越界=仅 bag_search_service.py +18/−10）; inbox/TESTER/TASK-16D/f1-incremental-8958291-dispatch.md; inbox/coordinator/TASK-16C-A/ocr-r13-adjudication-20261014.md",
+  "next": "A 叶接受判定（OCR③+TESTER④双证齐）归协调者；随后协调者重建三叶固定集成候选（B e399daf + C ce5921d + 新 A head 8958291，含 A 的 bag_search_service.py R1-3）→ TESTER 做 16D 最终联合验收（HOLD 条件⑤）→ 解除合入 HOLD（②③④⑤ 全齐）。②协调者机械核验已在 r13 行10 落盘（祖先链/diff 逐行/74 passed+1 seed 固有/独立 F1 不变量探针 8 断言）。期间 5min 巡检只读核协调者集成重建与 A 接受决策，不重复启动、不抢占。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "TESTER",
+  "recorded_at": "2026-10-14T19:26:56+08:00",
+  "occurred_at": "2026-10-14T19:26:56+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

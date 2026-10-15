@@ -1,0 +1,20 @@
+{
+  "event_id": "C:c-t16c-merge-auth-consumed-11s-obs79-20261014",
+  "kind": "business",
+  "task": "TASK-16C-C",
+  "attempt": "1",
+  "status": "LEAF_ACCEPTED_WAITING_INTEGRATION",
+  "occurrence": {
+    "kind": "now"
+  },
+  "summary": "C 本轮消费两项输入并只读核实：(1) 16C 合入持续授权（merge-authorization-20261014.md，用户 18:20 前后群内指令'PASS 后可直接合入并更新测试环境'）——执行主体为协调者（合入/推 github/本地 Compose 更新），C 叶 ce5921d 已 14:24 获叶接受决策，无 C 新派单/返修，C 无需动作，仅核实在案不影响本叶冻结链。(2) 11S 大包 4acf689f obs79 只读核实：8180 scene-analysis-runs 实测仍 SCENE_CANCELLING，lease_expires_at 停 16:23:55 stale，INFER RUNNING（steps: PRECHECK/EXTRACT DONE, INFER RUNNING, 余 QUEUED），proxy 容器 Up 3h 无新重启，8767 active_runs 空、health ok——与 obs78（17:55 落盘）同一在途状态无业务翻转；取消未确认 409 后的 status 收敛处置仍归协调者，C 不 kill/retry/不重烧模型。",
+  "evidence": "处理机 18:28-18:33 只读 ssh：curl 8180 /api/v1/scene-analysis-runs/scene-4acf689f9a6a473da1fa2f2efc70（status=SCENE_CANCELLING attempt=1 lease_expires_at=2026-10-14T16:23:55 steps INFER RUNNING/PRECHECK,EXTRACT DONE/余 QUEUED，error_message 空）；docker ps rosbag-scene-proxy Up 3 hours；curl 8767 health {status:ok, active_runs:[]}；/health/ready=ready production；load 1.50/1.43/1.20；C 本会话无写操作（仅文档记账）",
+  "next": "16C-C 叶维持 ACCEPTED 冻结等待：协调者三叶齐后生成含 seed 固定集成候选→TESTER 16D 联合验收→按合入授权自动合入；C 开发槽空闲待命，新派单/返修时按协调者优先级回本分支。11S 大包下轮续核 SCENE_CANCELLING→SCENE_CANCELLED 收敛或代理重提，status 仍滞留则申报协调者处置。",
+  "schema_version": 1,
+  "role": "C",
+  "recorded_at": "2026-10-14T18:34:56+08:00",
+  "occurred_at": "2026-10-14T18:34:56+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

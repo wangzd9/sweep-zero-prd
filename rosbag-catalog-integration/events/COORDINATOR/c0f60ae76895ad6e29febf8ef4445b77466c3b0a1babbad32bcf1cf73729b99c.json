@@ -1,0 +1,20 @@
+{
+  "kind": "business",
+  "event_id": "COORDINATOR:ocr-r12-b02-closed-run-fully-evaluated-20261014T1901",
+  "task": "TASK-16C-A",
+  "attempt": "ocr-run-20261014-r12 (66ca40d3)",
+  "status": "OCR_RUN_FULLY_EVALUATED_B02_PASS",
+  "summary": "A 查询/API 增量 OCR run 66ca40d3 第二场景结果查询文件(scene_result_query.py)于 18:45 收口 REVIEW_COMPLETE：rc=0、coverage 1/1、batch_identity_matches=true、terminal complete、0 findings。独立核 b02 范围 bd0db1d2..1489bc6 内 scene_result_query.py 已带 c03/C5/C7 修复(data_kind_case→data_kind_pred、采集时间 _parse_time 422、cursor 全字段归一校验、行内分类走 data_kind_context 单源)，b02 OCR 对最终态零问题、无返修无 CORRECTION。本 run 整体 gate 已全评估：b01(bag_search_service.py)=F1(medium/bug CONFIRMED 防御性)须最小返修 R1-3/F2 驳回/F3 文档并入 F1；b02=0 findings PASS。合入 HOLD 维持(29bd1f4 仍含 F1 未修)。",
+  "evidence": "reviews/TASK-16C-A/ocr-run-20261014-r12/b02.log(complete/comments 0/coverage 1/1/batch_identity_matches true/234428 tokens 11m17s)；b02-diagnosis.json(terminal complete/remaining_paths 空)；rosbag-catalog git diff bd0db1d2..1489bc6 -- app/services/scene_result_query.py(b02 范围已带 c03/C5/C7)；裁决 inbox/coordinator/TASK-16C-A/ocr-r12-adjudication-20261014.md(b02 面 18:45 收口 PASS 段+run 整体 gate 全评估段)；ocr_runtime.py status --run 66ca40d3=AWAITING_DECISION(b01/b02 均 REVIEW_COMPLETE,service dead rc=0)",
+  "next": "等 A R1-3 返修(仅 bag_search_service.py 两谓词 scene_original/self_built_original 补 dataset_type!=nvidia_physicalai + docstring/注释同步)冻结 → 协调者机械核验 → 单文件增量 OCR 零 CORRECTION → TESTER F1 增量面(nvidia+scene 用途原包筛选 scene_original 不返回/标签仅 nvidia_original 一致) → 重建集成候选重新联合验收后解除合入 HOLD。b02 已无阻塞项。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "COORDINATOR",
+  "recorded_at": "2026-10-14T19:05:10+08:00",
+  "occurred_at": "2026-10-14T19:05:10+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

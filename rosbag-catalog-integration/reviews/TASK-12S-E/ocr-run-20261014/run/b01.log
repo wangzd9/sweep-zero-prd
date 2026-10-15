@@ -1,0 +1,196 @@
+[ocr] --background-file content is 2485 characters, exceeding the recommended 2000 (continuing but review quality might be impacted)
+{
+  "status": "failed",
+  "llm": {
+    "provider": "vllm-local",
+    "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8"
+  },
+  "message": "Review failed (cancelled): 5 finding(s); 0 of 1 selected item(s) failed.",
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 5,
+    "total_tokens": 2030383,
+    "input_tokens": 1942364,
+    "output_tokens": 88019,
+    "elapsed": "1h5m1s"
+  },
+  "tool_calls": {
+    "total": 72,
+    "by_tool": {
+      "code_comment": 2,
+      "code_search": 35,
+      "file_find": 4,
+      "file_read": 31
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [
+    {
+      "path": "app/services/pending_binding.py",
+      "content": "Candidate order bug: the bare `sub.relative_path` is tried first and the loop breaks on the *first* matching BagRecord, but `BagRecord.relative_path` is storage-root-relative and not unique (app/models.py:68). A wrong-root row at the bare short path is therefore picked before the root-qualified candidate is ever tried, and the physical-segment check then returns ROOT_MISMATCH with the submission stuck in PENDING indefinitely (no path to the correct bag). In the `ready_rel_root = None` fallback branch the physical-segment check is skipped entirely, so this ordering can even *bind* a cross-root row. Try the root-qualified (most specific) candidates first and keep the bare short path only as a last-resort fallback (needed for the fake test roots).",
+      "suggestion_code": "    # 顺序=先具体后兜底：冻结根物理段候选优先，bare 短段仅作 fake/legacy 兜底，\n    # 避免另一根同包名短段行抢先命中导致 ROOT_MISMATCH 卡死（或物理段检查缺失时跨根错绑）。\n    candidates.sort(key=lambda c: (c != sub.relative_path, len(c)))\n    bag = None\n    for cand in dict.fromkeys(candidates):\n        bag = db.scalar(select(BagRecord).where(BagRecord.relative_path == cand).limit(1))\n        if bag is not None:\n            break",
+      "existing_code": "    bag = None\n    for cand in dict.fromkeys(candidates):\n        bag = db.scalar(select(BagRecord).where(BagRecord.relative_path == cand).limit(1))\n        if bag is not None:\n            break",
+      "start_line": 174,
+      "end_line": 178,
+      "category": "bug",
+      "severity": "medium"
+    },
+    {
+      "path": "app/services/pending_binding.py",
+      "content": "File does not end with a newline (diff: `\\ No newline at end of file`). Add a trailing newline to avoid spurious diff noise and tooling issues.",
+      "existing_code": "    sub.updated_at = now()\n    db.commit()\n    return \"bound\", len(events)",
+      "start_line": 218,
+      "end_line": 220,
+      "category": "style",
+      "severity": "low"
+    },
+    {
+      "path": "app/services/pending_binding.py",
+      "content": "Cross-module import of underscore-private `ingest_service` internals creates a hidden coupling: a future rename/signature change in `ingest_service` breaks this module at import time with no ownership signal. The intent (same-criterion parity with the bind path) is documented, but consider either exposing stable public wrappers in `ingest_service.__all__` or moving `_apply_frozen_vehicle_binding`/`_emit_purpose_events` into a shared helper both modules use.",
+      "existing_code": "from app.services.ingest_service import _apply_frozen_vehicle_binding, _emit_purpose_events",
+      "start_line": 42,
+      "end_line": 42,
+      "category": "maintainability",
+      "severity": "low"
+    },
+    {
+      "path": "app/services/pending_binding.py",
+      "content": "The physical-segment identity guard only evaluates the first candidate that matches; a stray same-named row at the bare `sub.relative_path` (e.g. a self-built `ready/{bag}` row under a scene submission) makes the loop break early and this check returns ROOT_MISMATCH — the root-qualified candidate that *would* pass the guard is never tried, so one wrong-root row permanently blocks convergence for that entry. The guard should disqualify the individual candidate and continue the search (returning ROOT_MISMATCH only when no candidate survives), which is also what the comment states the intent is.",
+      "existing_code": "    if ready_rel_root and not (\n        bag.relative_path == ready_rel_root or bag.relative_path.startswith(ready_rel_root + \"/\")\n    ):\n        return \"ROOT_MISMATCH\", 0",
+      "start_line": 193,
+      "end_line": 196,
+      "category": "bug",
+      "severity": "medium"
+    },
+    {
+      "path": "app/services/pending_binding.py",
+      "content": "Per-item outcomes are tallied in `result[\"skipped\"]` but the only diagnostic captured for failures is the exception *type* (`ERROR:{type(exc).__name__}`) — the message/traceback is discarded. Given the module docstring promises these counters are how the orchestrator observes isolation reasons (vehicle 409, PROFILE_DISABLED, NO_SOURCE_YET, etc.), add a `logger.warning` (with submission_id + reason + exc info on the error branch) so production root causes are recoverable without re-running reconciliation.",
+      "existing_code": "        except Exception as exc:  # 单条隔离：回滚本条，记原因继续\n            db.rollback()\n            reason = f\"ERROR:{type(exc).__name__}\"",
+      "start_line": 106,
+      "end_line": 108,
+      "category": "maintainability",
+      "severity": "low"
+    }
+  ],
+  "groups": [
+    {
+      "label": "app/services/pending_binding.py",
+      "files": [
+        "app/services/pending_binding.py"
+      ]
+    }
+  ],
+  "session_id": "32201c3a-fbde-4ab6-a55d-0a08721b50c9",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "32201c3a-fbde-4ab6-a55d-0a08721b50c9",
+    "operation": "review",
+    "terminal_state": "failed",
+    "repository": {
+      "identity_sha256": "8f83ba9f7b112b0f34c20b7f26d61d337f9320f60a889bcdc894b4858750e17a"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "16a154fff6f23e20b15498d1285a783713859647",
+      "requested_head": "b39a3ecc76da1f578d32f4e3c88a6ce989cf749d",
+      "resolved_base": "16a154fff6f23e20b15498d1285a783713859647",
+      "resolved_head": "b39a3ecc76da1f578d32f4e3c88a6ce989cf749d",
+      "exact_range": "16a154fff6f23e20b15498d1285a783713859647..b39a3ecc76da1f578d32f4e3c88a6ce989cf749d",
+      "source_artifact_sha256": "a58bf3e7d7df9c53a258fd76d13d97d038bf919be21525d61951ace2affdb98c"
+    },
+    "execution": {
+      "ocr_version": "v1.13.0",
+      "provider": "vllm-local",
+      "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8",
+      "configured_concurrency": 1,
+      "rule_config_sha256": "1c40b294f2d1b5ced79cea7b9925246bdce238265c13f01d7e9bec1adfd3ae37",
+      "runtime_config_sha256": "8edc2e1d8571fdf287cc13c33745cd126301e450999b13d052de01b19b6d17d2"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "b9a1585d6c9129070bc22ac1e6375f7ab2e63d0e4bbfc2e9970f0a5336563cb4",
+          "path": "app/services/pending_binding.py",
+          "fingerprint": "f8ea87f7a1f727e7a50b749897e324983781c1019c6d5af65394c7dd383ae372"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "b9a1585d6c9129070bc22ac1e6375f7ab2e63d0e4bbfc2e9970f0a5336563cb4",
+          "path": "app/services/pending_binding.py",
+          "fingerprint": "f8ea87f7a1f727e7a50b749897e324983781c1019c6d5af65394c7dd383ae372"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "run_failure": {
+      "classification": "cancelled",
+      "reason": "review was cancelled"
+    },
+    "elapsed_ms": 3900780
+  },
+  "retry_report": {
+    "schema_version": "ocr.llm-retry-report/v1",
+    "total_requests": 59,
+    "retried_requests": 0,
+    "total_retries": 0,
+    "recovered_requests": 0,
+    "failed_requests": 0,
+    "cancelled_requests": 1,
+    "requests": [
+      {
+        "logical_request_id": "528d1f8630642bc9a22f376134790a6d5ad8126ab0c21eb828bf4a93476f0bf7",
+        "provider": "vllm-local",
+        "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8",
+        "file_path": "app/services/pending_binding.py",
+        "task_type": "review_filter_task",
+        "request_no": 2,
+        "outcome": "cancelled",
+        "attempts": [
+          {
+            "attempt": 1,
+            "outcome": "error",
+            "error_class": "cancelled",
+            "failure_phase": "context",
+            "duration_to_headers_ms": 4636
+          }
+        ]
+      }
+    ]
+  }
+}
+{
+  "status": "failed",
+  "llm": {
+    "provider": "vllm-local",
+    "model": "/home/sysadmin/data/disk02/jc/models/qwen3.8-27b-fp8"
+  },
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 0,
+    "total_tokens": 2030383,
+    "input_tokens": 1942364,
+    "output_tokens": 88019,
+    "elapsed": "1h5m1s"
+  },
+  "tool_calls": {
+    "total": 72,
+    "by_tool": {
+      "code_comment": 2,
+      "code_search": 35,
+      "file_find": 4,
+      "file_read": 31
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": null,
+  "session_id": "32201c3a-fbde-4ab6-a55d-0a08721b50c9"
+}
+[ocr] Session: 32201c3a-fbde-4ab6-a55d-0a08721b50c9 (retry with: --resume 32201c3a-fbde-4ab6-a55d-0a08721b50c9)
+Error: review failed: context canceled

@@ -1,0 +1,74 @@
+{
+  "session_file": "/home/wang/.opencodereview/sessions/home-wang-.local-state-rosbag-scene-wt-01-t12se/32201c3a-fbde-4ab6-a55d-0a08721b50c9.jsonl",
+  "session_ids": [
+    "32201c3a-fbde-4ab6-a55d-0a08721b50c9"
+  ],
+  "last_event": {
+    "type": "session_end",
+    "timestamp": "2026-10-14T16:46:52Z"
+  },
+  "terminal_state": "failed",
+  "manifest_schema": "ocr.run-manifest/v1",
+  "input": {
+    "mode": "range",
+    "requested_from": "16a154fff6f23e20b15498d1285a783713859647",
+    "requested_head": "b39a3ecc76da1f578d32f4e3c88a6ce989cf749d",
+    "resolved_base": "16a154fff6f23e20b15498d1285a783713859647",
+    "resolved_head": "b39a3ecc76da1f578d32f4e3c88a6ce989cf749d",
+    "exact_range": "16a154fff6f23e20b15498d1285a783713859647..b39a3ecc76da1f578d32f4e3c88a6ce989cf749d",
+    "source_artifact_sha256": "a58bf3e7d7df9c53a258fd76d13d97d038bf919be21525d61951ace2affdb98c"
+  },
+  "ocr_version": "v1.13.0",
+  "coverage_counts": {
+    "selected": 1,
+    "completed": 1,
+    "reused": 0,
+    "failed": 0,
+    "waived": 0
+  },
+  "coverage_complete": false,
+  "remaining_paths": [],
+  "gate_decision": "NOT_EVALUATED",
+  "parse_errors": [],
+  "manifest_failures": [],
+  "item_error_messages": {},
+  "llm_errors": [
+    {
+      "task": "review_filter_task",
+      "error": "context canceled",
+      "count": 1
+    }
+  ],
+  "repeated_tools": [
+    {
+      "file": "app/services/pending_binding.py",
+      "tool": "file_read",
+      "arguments_sha256_prefix": "088643c8c560854a",
+      "count": 2
+    },
+    {
+      "file": "app/services/pending_binding.py",
+      "tool": "file_read",
+      "arguments_sha256_prefix": "c9179304cf48433e",
+      "count": 2
+    }
+  ],
+  "request_characters": {
+    "count": 59,
+    "max": 170514,
+    "max_frozen_first_two": 26412,
+    "note": "字符统计只用于观察增长，不是OCR本地token估计或模型上下文长度。"
+  },
+  "model_usage": {
+    "responses": 58,
+    "total_prompt_tokens": 1942364,
+    "total_completion_tokens": 88019,
+    "max_prompt_tokens": 65583
+  },
+  "next_steps": [
+    "context canceled可能由客户端压缩/退出触发；需额外进程或服务端证据才能归因。",
+    "存在相同参数的重复工具调用；核对是否必要，不直接判模型无能力。",
+    "文件覆盖不完整或终态不成功；零comments不能放行。"
+  ],
+  "batch_identity_matches": true
+}

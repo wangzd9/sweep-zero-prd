@@ -1,0 +1,20 @@
+{
+  "event_id": "TESTER:t11s-batch-1012-4acf-cancel-chain-independently-verified-20261014-1810",
+  "kind": "business",
+  "task": "TASK-11S-BATCH-1012",
+  "attempt": "attempt-1",
+  "status": "PREP",
+  "summary": "16_02_03 大包取消链独立核实（消费 C obs78 17:35 实测 + 协调者 17:55 取消确认登记 + A 叶 R1-2 续单观察）：处理机容器 ddcc7df81635（rosbag-scene-proxy 新代次，Up 2h）日志独立复得三点——08:22:22Z（=17:14 前 16:22:22 +08）cancellation observed SCENE_CANCELLING；09:14:25Z（=17:14:25 +08）attempt 1 CANCELLED「停写信号(cancel)后编排退出：[INFER] CANCELLED: decoder 阶段收到取消信号」；同刻 cancel confirm 两次 HTTP 409 task lease expired。DB 面 18:00 独立实测：run 行仍 SCENE_CANCELLING（heartbeat 停 16:21:55、lease_expires 16:23:55 stale、error 空）、八步 INFER RUNNING 未翻 FAILED（DB 与容器本地 checkpoint 口径不同，DB 未收敛 SCENE_CANCELLED 属协调者登记的滞留面）、8180 health active_runs=[]；NAS 面：.staging/scene-4acf689f…/attempt-1 目录 15:27 创建且内容空、slices/test/spray 顶层 6 目录无新 4acf 切片（17:35 与 18:00 两次实测一致）。结论：取消终态（CANCELLED @17:14:25、INFER 中断、零 PUBLISH 产物、无第 8 run、零重烧模型）独立证实；8180 状态滞留 SCENE_CANCELLING 收敛面与容器本地 checkpoint 细节待 C/A 下轮核实，非 TESTER 处置面。验收面按协调者口径转为取消链证据+产物完整性核账，TEST_REPORT_PENDING 维持（等收敛登记后全批收口）。16D 线新输入已核：A 叶 R1-2 续单（chip view_label 旧名，17:30 派 A）与 17:40 后 A 交付/整合事件归协调者面，A 叶接受门禁仍关闭（返修+单文件增量 OCR+TESTER 增量未完成），B 叶 OCR 17:09 收口裁决面待协调者，均不影响 TESTER 当前动作。",
+  "evidence": "tester_180x 探针（18:00-18:09 处理机只读）：docker logs --timestamps ddcc7df81635 三行取消证据原文；pipeline_run scene-4acf689f SCENE_CANCELLING hb 16:21:55 lease 16:23:55 error 空；step_run INFER RUNNING 余 QUEUED；scene 全集 7 run 无第 8；8767 health active_runs=[]；find .staging/scene-4acf689f/attempt-1 空（mtime 15:27）；slices/test/spray 6 目录（FFDEE943×4 双写现场+051768B1/615A4A7B）。前序 17:31-17:45 取消面事件 t11s…-1747 维持。",
+  "next": "下轮核实 8180 run 行是否收敛 SCENE_CANCELLED 或异常回 RUNNING（收敛后 TEST_REPORT 取消链一节落定、全批收口）；16D 线等 A 叶最终冻结 head 交付→单文件增量 OCR→TESTER 增量面（含 R1-2 chip 口径）与 B 叶 OCR 裁决，固定集成 SHA 联合验收不变。",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "TESTER",
+  "recorded_at": "2026-10-14T18:13:14+08:00",
+  "occurred_at": "2026-10-14T18:13:14+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

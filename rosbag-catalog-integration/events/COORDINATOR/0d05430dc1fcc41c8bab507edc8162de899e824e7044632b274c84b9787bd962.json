@@ -1,0 +1,20 @@
+{
+  "event_id": "COORDINATOR:coord-t12se-attempt2-verified-ocr-started-20261015-0931",
+  "kind": "business",
+  "task": "TASK-12S-E",
+  "attempt": "attempt-2",
+  "status": "REVIEW_PENDING",
+  "summary": "A attempt-2 R1 交付冻结（1e9c7de，base b39a3ec 单 commit，5 文件 +363/-31）协调者机械核验全绿：祖先链/diffstat 与回执一致、E-R1~R8 逐点位对照冻结 diff 全在位（E-R4 fail-closed 守卫/E-R8 豁免不含切片兄弟行/E-R1~R3 三字段真实物理口径）、目标文件 42 passed 独立复跑 rc=0（SQLite 口径）、ruff 5 文件绿、git diff --check rc=0、alembic 单头、wt 冻结干净。OCR 唯一入口 attempt-2 增量 run a9bf637e（reviews/TASK-12S-E/ocr-run-20261015-attempt2）09:35:55 SUBMITTED（3 app 文件 3 批、tests 排除、新交付身份 retry_depth=0、prepare 零模型；起跑前 VLM load running=2/waiting=0/kv≈0.7% 无 1012 争抢）。12S-E 维持 REWORK 未接受。",
+  "evidence": "wt-01-t12se git（1e9c7de diff b39a3ec + 42 passed 复跑）; inbox/1号/TASK-12S-E/receipts/attempt-2.md; reviews/TASK-12S-E/ocr-run-20261015-attempt2/{spec.json,state.json}; HANDOFF coord-checkpoint-t12se-attempt2-ocr-started-20261015-0931; TODO §11 E 行; DEVELOPMENT-LOG 2026-10-15 上午段",
+  "next": "下轮 observer 续核 run a9bf637e（逐批 log comments 解析裁决，不只看 diagnosis coverage）→findings 处置→TESTER 修复点增量复验派单（E-R7 真实口径夹具/E-R1~R3 字段断言/E-R8 两路豁免，真 MySQL）→接受→12S-F 冻结 base 通知 B（候选 1e9c7de）",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "COORDINATOR",
+  "recorded_at": "2026-10-15T09:38:16+08:00",
+  "occurred_at": "2026-10-15T09:38:16+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}

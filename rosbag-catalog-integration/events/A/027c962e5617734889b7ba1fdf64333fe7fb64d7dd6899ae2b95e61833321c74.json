@@ -1,0 +1,18 @@
+{
+  "event_id": "A:a-t16ca-ocr-r13-f1-rework-delivered-20261014",
+  "kind": "business",
+  "task": "TASK-16C-A",
+  "attempt": "attempt-1",
+  "status": "REVIEW_PENDING",
+  "summary": "A 领单 R1-3 最小返修（协调者 18:55 派单，来源 run 66ca40d3 b01 收口裁决 F1 CONFIRMED 防御性）已冻结交付：续 A 最终冻结链 base 1489bc6→新 head 8958291（同 branch a/task-16c-a-query-api、同 worktree wt-01-t16ca）。仅改 1 文件 app/services/bag_search_service.py（+18/−10）：F1 scene_original/self_built_original 两谓词各补 dataset_type != \"nvidia_physicalai\" 镜像 data_kind_context 单源优先级 + docstring/顶部注释同步「且非 NVIDIA」；F3 _parse_time docstring 秒精度进位口径（次日 00:00:00，比较语义仍含当日 23:59:59）；F2 附带 view 注释 all=全部。零越界，未动 scene_result_query.py/模板/tests。",
+  "evidence": "receipts/TASK-16C-A/attempt-1.md R1-3 段（commit 8958291 19:03:26 +08:00）；inbox/1号/TASK-16C-A/ocr-r1-rework-3-ack-20261014.md；自测：ruff All checks passed(exit 0)；pytest 74 passed+1 seed 固有 bounded-query(11>8，stash 回 1489bc6 单跑同口径复现失败=零新增)；F1 不变量内存 SQLite 探针 7 断言 ALL_OK（nvidia 原包不命中 scene/self_built_original、命中 nvidia_original、双用途 UID-SB 两筛选仍各命中一条）。",
+  "next": "等协调者机械核验→增量 OCR 仅 bag_search_service.py 单文件(head 变化旧覆盖不续用，scene_result_query.py 未变不重跑)→零 CORRECTION 级+TESTER A 增量面(F1 组合夹具)→A 叶接受；16C 合入维持 HOLD 待本返修链收口齐后重建集成候选重新联合验收。A 不认领 OCR 裁决/接受/返修门禁，开发槽转 IDLE。",
+  "schema_version": 1,
+  "role": "A",
+  "recorded_at": "2026-10-14T19:05:44+08:00",
+  "occurred_at": null,
+  "time_source": {
+    "kind": "unknown",
+    "reason": "历史发生时间未核实；recorded_at 只表示补录时间"
+  }
+}

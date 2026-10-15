@@ -1,0 +1,20 @@
+{
+  "event_id": "B:b-deliver-20261015-101900-task12sf",
+  "kind": "business",
+  "task": "TASK-12S-F",
+  "attempt": "1",
+  "status": "DEVELOPED_PENDING_BASE_SHIFT",
+  "summary": "开发完成自测全绿：commit 6798059 (base b39a3ec, 10 files +939/-7)。无效输入持久拒绝 INPUT_REJECTED + 受控 resume 全链路实现：scanner classify 三分量(4原因码)+稳定证据先落再分类+拒绝快照抑制+上报失败计failed不持久化；backend report_input_rejected；ingest_service report/resume(乐观锁 row_version, 幂等再确认不推代次, 系统拒绝行兜底留痕)+受控根校验409；API 两路由；迁移 20261014_01_ingest_rejected(三列nullable+String(32)索引+逐对象gate, 单头)。测试：新套件14例全绿(含自洽独立库夹具不污染共享库, 迁移upgrade/downgrade独立空库实证)、组合回归91 passed、全量1204 passed(5失败均非本任务: 3×devflow worktree环境项/test_web base同失败pre-existing顺序依赖/test_scene_slice反置顺序绿)。ruff 0 error。交付冻结暂挂按 supplement-s1: 等E attempt-2冻结head通知后机械rebase; 真MySQL 8.4.11隔离探针与with_for_update真并发互斥留待冻结/TESTER阶段取证, 未提前声称已验证。",
+  "evidence": "commit 6798059e0b4f70a4fc83ade6aff361583f0f8635 base b39a3ec branch b/task-12s-f-input-reject worktree /home/wang/.local/state/rosbag-scene/wt-04a-t12sf; 回执 inbox/2号/TASK-12S-F/attempt-1-receipt.md; 测试 14 passed(新套件)/91 passed(组合)/1204 passed(全量, 5失败非本任务); ruff 0 error",
+  "next": "等协调者通知 E attempt-2 冻结 head 后 rebase 交付; 冻结时补真MySQL隔离探针",
+  "occurrence": {
+    "kind": "now"
+  },
+  "schema_version": 1,
+  "role": "B",
+  "recorded_at": "2026-10-15T10:24:03+08:00",
+  "occurred_at": "2026-10-15T10:24:03+08:00",
+  "time_source": {
+    "kind": "script_now"
+  }
+}
